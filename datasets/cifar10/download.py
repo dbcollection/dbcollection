@@ -16,19 +16,17 @@ def main():
     """
     Main function
     """
-   
-   # get save path
-   store_data_path = get_save_path()
 
-   # define files to download
-   url = {'https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz'}
+    # get save path
+    store_data_path = get_save_path()
 
+    # define files to download
+    url = {'https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz'}
 
-
-   url1 = 'https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz'
-dataset = 'cifar10'
-save_path = '/home/mf/tmp/data/' + dataset + '/'
-fname_save = 'cifar-10-matlab.tar.gz'
+    url1 = 'https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz'
+    dataset = 'cifar10'
+    save_path = '/home/mf/tmp/data/' + dataset + '/'
+    fname_save = 'cifar-10-matlab.tar.gz'
 
 #---------------------------------------------------------
 # Main function call 
