@@ -22,6 +22,29 @@ def create_dir(dir_name, verbose=False):
     os.makedirs(dir_name)
 
 
+def download_single_file_progressbar(url, file_save_name):
+    """
+    Download a file (display a progress bar).
+    """
+    print('Downloading {} to: {}'.format(url, file_save_name))
+    r = requests.get(url, stream=True)
+    with open(file_save_name, 'wb') as f:
+        total_length = int(r.headers.get('content-length'))
+        for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1):
+            if chunk:
+                f.write(chunk)
+                f.flush()
+
+
+def download_single_file_nodisplay(url, file_save_name):
+    """
+    Download a file (no display text).
+    """
+    with urllib.request.urlopen(url) as response, open(file_save_name, 'wb') as out_file:
+        data = response.read() # a `bytes` object
+        out_file.write(data)
+
+
 def download_file(url, dir_name, fname_save, verbose=False):
     """
     Download a single file to disk.
@@ -35,18 +58,11 @@ def download_file(url, dir_name, fname_save, verbose=False):
 
     # download the file
     if verbose:
-        print('Downloading {} to: {}'.format(url, file_save_name))
-        r = requests.get(url, stream=True)
-        with open(file_save_name, 'wb') as f:
-            total_length = int(r.headers.get('content-length'))
-            for chunk in progress.bar(r.iter_content(chunk_size=1024), expected_size=(total_length/1024) + 1):
-                if chunk:
-                    f.write(chunk)
-                    f.flush()
+        download_single_file_progressbar(url, file_save_name)
     else:
-        with urllib.request.urlopen(url) as response, open(file_save_name, 'wb') as out_file:
-          data = response.read() # a `bytes` object
-          out_file.write(data)
+        download_single_file_nodisplay(url, file_save_name)
+
+    return True
 
 
 def get_file_extension(fname):
@@ -75,6 +91,13 @@ def extract_file_tar(fname, path):
     tar.close()
 
 
+def raise_exception(str):
+    """
+    Raise an exception.
+    """
+    raise Exception(str)
+
+
 def extract_file(path, fname, verbose=False):
     """
     Extract a file to disk.
@@ -92,11 +115,14 @@ def extract_file(path, fname, verbose=False):
     elif extension == 'tar' or extension == 'gz':
         extract_file_tar(file_name, path)
     else:
-        raise Exception('Undefined extension: {}'.format(extension))
+        raise_exception('Undefined extension: {}'.format(extension))
+
+    return True
 
 def remove_file(fname):
     """
-    Check if the path exists.
+    Check if the path exists and remove the file.
     """
     if os.path.exists(fname):
         os.remove(fname)
+
