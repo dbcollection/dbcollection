@@ -45,12 +45,28 @@ def download_single_file_nodisplay(url, file_save_name):
         out_file.write(data)
 
 
+def url_get_filename(url, dir_save):
+    """
+    Extract filename from the url string
+    """
+    # split url string
+    url_fname = url.split('/')[-1]
+
+    # save file
+    if dir_save[-1] == '/':
+        file_save_name = dir_save + url_fname
+    else:
+        file_save_name = dir_save + '/' + url_fname
+
+    return file_save_name
+
+
 def download_file(url, dir_name, fname_save, verbose=False):
     """
     Download a single file to disk.
     """
     # save file
-    file_save_name = dir_name+fname_save
+    file_save_name = url_get_filename(url, dir_name)
 
     # check if the path exists
     if not os.path.exists(dir_name):
@@ -63,6 +79,7 @@ def download_file(url, dir_name, fname_save, verbose=False):
         download_single_file_nodisplay(url, file_save_name)
 
     return True
+
 
 
 def get_file_extension(fname):
@@ -98,6 +115,23 @@ def raise_exception(str):
     raise Exception(str)
 
 
+def get_extractor_method(ext):
+    """
+    Returns a method based on the input extension. Raises
+    an exception if the method is not defined.
+    """
+    methods = {
+        "zip":extract_file_zip,
+        "tar":extract_file_tar,
+        "gz":extract_file_tar
+    }
+
+    if ext in methods.keys():
+        return methods[ext]
+    else:
+        raise_exception('Undefined file extension: ' + ext)
+
+
 def extract_file(path, fname, verbose=False):
     """
     Extract a file to disk.
@@ -110,14 +144,12 @@ def extract_file(path, fname, verbose=False):
     # check filename extension
     extension = get_file_extension(fname)
 
-    if extension == 'zip':
-        extract_file_zip(file_name, path)
-    elif extension == 'tar' or extension == 'gz':
-        extract_file_tar(file_name, path)
-    else:
-        raise_exception('Undefined extension: {}'.format(extension))
+    # get extraction method
+    extractor = get_extractor_method(extension)
 
-    return True
+    # extract file
+    extractor(fname, path)
+
 
 def remove_file(fname):
     """
@@ -126,3 +158,23 @@ def remove_file(fname):
     if os.path.exists(fname):
         os.remove(fname)
 
+
+def download_extract_all(urls, dir_save, clean_cache,verbose):
+    """
+    Download + extract all url files to disk.
+    If clean_cache is true, it removes the download files.
+    """
+     # download + extract data and remove temporary files
+    for url in urls:
+        # get download save filename
+        fname_save = url_get_filename(url, dir_save)
+
+        # download file
+        download_file(url, dir_save, fname_save, verbose)
+
+        # extract file
+        extract_file(dir_save, fname_save, verbose)
+
+        # remove downloaded file (if triggered by the user)
+        if clean_cache:
+            remove_file(fname_save)
