@@ -9,24 +9,26 @@
 Cifar10 data download script.
 """
 
-DATASET_NAME = 'cifar10'
+from .. import utils, data
 
 
-def main():
+def main(verbose=False, clean_cache=False):
     """
-    Main function
+    Download and extract cifar10's files. 
     """
 
-    # get save path
-    store_data_path = get_save_path()
+    dataset = {
+        "name": "cifar10",
+        "url":['https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz']
+    }
+    
+    # get path to store data
+    cache_manager = data.CacheManager()
+    dir_save = cache_manager.get_cache_path(dataset["name"])
 
-    # define files to download
-    url = {'https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz'}
+    # download + extract data and remove temporary files
+    utils.download_all(dataset['url'], dir_save, clean_cache, verbose)
 
-    url1 = 'https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz'
-    dataset = 'cifar10'
-    save_path = '/home/mf/tmp/data/' + dataset + '/'
-    fname_save = 'cifar-10-matlab.tar.gz'
 
 #---------------------------------------------------------
 # Main function call 
