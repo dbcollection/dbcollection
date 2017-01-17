@@ -46,4 +46,4 @@ def main(verbose=False, clean_cache=False):
 #---------------------------------------------------------
 
 if __name__ == "__main__":
-    main()
+    main(True)
