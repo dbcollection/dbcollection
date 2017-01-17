@@ -162,9 +162,9 @@ class CacheManager(unittest.TestCase):
 
 
     @patch('data.CacheManager.read_data_cache')
-    def test_get_dataset_storage_paths(self, mock_read):
+    def test_get_valid_dataset_storage_paths(self, mock_read):
         """
-        Test get the cache/data paths for a dataset.
+        Test get the cache/data paths for a existing dataset.
         """
         # dataset name
         sample_data = self.sample_cache_data
@@ -183,6 +183,31 @@ class CacheManager(unittest.TestCase):
         # check if the paths are the same
         self.assertEqual(res[sample_field_cache], sample_path_cache, 'Paths should be equal')
         self.assertEqual(res[sample_field_data], sample_path_data, 'Paths should be equal')
+
+
+    @patch('data.CacheManager.read_data_cache')
+    def test_get_invalid_dataset_storage_paths(self, mock_read):
+        """
+        Test get the cache/data paths for an invalid dataset.
+        """
+        # dataset name
+        sample_data = self.sample_cache_data
+        sample_name = 'dataset'
+        sample_field_cache = "cache_path"
+        sample_field_data = "data_path"
+        sample_path_cache = os.path.join(self.cache_manager.default_cache_path, sample_name, 'cache')
+        sample_path_data = os.path.join(self.cache_manager.default_data_path, sample_name, 'data')
+
+        # set custom return value for the mocked functions
+        mock_read.return_value = self.sample_cache_data
+
+        # get path
+        res = self.cache_manager.get_dataset_storage_paths(sample_name)
+
+        # check if the paths are the same
+        self.assertEqual(res[sample_field_cache], sample_path_cache, 'Paths should be equal')
+        self.assertEqual(res[sample_field_data], sample_path_data, 'Paths should be equal')
+
 
 
 #----------------
