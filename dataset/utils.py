@@ -134,7 +134,7 @@ def get_extractor_method(ext):
 
 def extract_file(path, fname, verbose=False):
     """
-    Extract a file to disk.
+    Extract a compressed file to disk.
     """
     file_name = path + fname
 
