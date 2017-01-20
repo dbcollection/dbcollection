@@ -30,11 +30,148 @@
 
 ## Coding Style
 
-This repo follows the PEP8 style convention for all code.
+This repo tries to follow the PEP8 style convention as close as possible.
 
 ### Dataset loader class
 
 - :get('field_name', id_ini, id_end) - retrieve the 'i'th' data from the field 'field_name' into a table
-- :obj(id_ini, id_end) - retrieve the data of all fields of an object: It works as calling :get() for each field individually and grouping them into a table. 
-- :size('field_name') - returns the size of the elements of a field_name 
-- :list() - lists all fields in order that compose an object element. 
+- :obj(id_ini, id_end) - retrieve the data of all fields of an object: It works as calling :get() for each field individually and grouping them into a table.
+- :size('field_name') - returns the size of the elements of a field_name
+- :list() - lists all fields in order that compose an object element.
+
+### Dataset Loader API
+
+- **.get('field_name', id_ini, [id_end]) ** - retrieve the 'i'th' data from the field 'field_name' into a table
+	options:
+		- field_name: field name identifier [Type=String]
+		- id_ini: starting id (if -1 then returns all data entries) [Type=Integer]
+		- id_end: ending id (if empty it returns only the initial id) [Type=Integer]
+- **.obj(id_ini, id_end)** - retrieve the data of all fields of an object: It works as calling :get() for each field individually and grouping them into a list.
+	options:
+		- id_ini: starting id (if -1 then returns all data entries) [Type=Integer]
+		- id_end:  ending id (if empty it returns only the initial id) [Type=Integer]
+- **.size('field_name') ** - returns the size of the elements of a field_name.
+	options:
+		- field_name: field name identifier [Type=String]
+- **.list()** - lists all fields in order that compose an object element.
+	options:
+		(none)
+
+
+### dbcollection (dataset managing) API
+
+- **.load()** - returns a loader class with the necessary functions to manage the selected dataset.
+	options:
+		- name: name of the dataset [Type=String]
+		- data_path: path to store the data (if the data doesn't exist and the download flag is equal True) [Type=String, (default=data_path_default)]
+		- cache_path: path to store the cache metadata (if the cache file doesn't exist and the download flag is equal True) [Type=String, (default=cache_path_default)]
+		- save_name: save the metadata file with a new name (usefull to create custom versions of the original) [Type=Boolean]
+		- task: specify a specific task to load [Type=String, (default='default')]
+		- download: [Type=Boolean, (default=True)]
+		- verbose: [Type=Boolean, (default=True)]
+		- make_list: organizes the data w.r.t. to other fields. The data must be organized in a dictionary with the following format: {"new_field_name":"field_name"}  [Type=Dictionary]
+
+	```
+	Example 1:
+		# Load the metadata Loader for the cifar10 dataset
+		- .load(name='cifar10', data_path='~/tmp/dir', cache_path='~/tmp/cache',task='classification')
+	```
+
+	```
+	Example 2:
+		# Load the metadata loader for the cifar10 dataset, split the train set into 75% train, 25% val data points and save it with a new task name.
+		- .load(name='cifar10', spit={"train": 0.75, "val":0.25}, save_name='cifar10_75_25') # **recitify this format latter**
+
+		# Load the metadata loader for the custom cifar10 dataset (split).
+		- .load(name='cifar10', task='cifar10_75_25')
+	```
+
+	```
+	Example 3:
+		# Load the metadata loader for the cifar10 dataset and organize the data w.r.t. the class name.
+		- .load(name='cifar10', make_list={"class_list":'classes', "filename_list":"fname"})
+	```
+
+- **.delete()** - deletes the data of a dataset.
+	options:
+		- name: name of the dataset to delete the data from disk [Type=String]
+		- data: flag indicating if the data folder is to be deleted from disk [Type=Boolean, (default=False)]
+		- cache: flag indicating if the metadata cache file is to be deleted from disk [Type=Boolean, (default=True)]
+
+	```
+	Example 1:
+		# Remove the cifar10 data and metadata from disk
+		- .delete(name='cifar10', data=True, cache=True)
+	```
+
+- **.set()/config()** - Manually setup the configurations of the cache file dbcollection.json
+	options:
+		- name: name of the dataset (Type=String)
+		- fields: specifies which fields and values to update the dbcollection cache file (Type=Dictionary)
+		- default_paths: updates the default cache/data paths (Type=Dictionary)
+	```
+	Example 1:
+		# update the paths for the Pascal VOC 2007 dataset
+		- .set(name='pASCAL voc 2007', fields={"data_path":"~/tmp/dir/data","cache_path":"~/tmp/dir/data"})
+	```
+
+	```
+	Example 2:
+		# update the default paths of the metadata cache file
+		- .set(default_paths={"cache_path_default":"~/newcachedir/","data_path_default":"~/newdatadir/"})
+	```
+- **.download()** - Download the data for one (or several) listed dataset(s).
+	options:
+		- name: name(s) of the dataset (Type=List)
+		- path: path(s) to store the data (Type=List)
+
+	```
+	Example 1:
+		# Download the data for the Cifar10 dataset
+		- .download(name=["cifar10"], path=["~/data"]) # it will create a folder named '{image_processing}/cifar10' in '~/data'
+	```
+
+	```
+	Example 2:
+		# Download the data for the Cifar10/Cifar100/MNIST datasets into three different folders
+		- .download(name=["cifar10", "cifar100", "mnist"], path=["~/folder1/data", "~/folder2/data", "~/folder3/data"])
+	```
+
+- **.reset(cache=True, name='Dataset')** - resets the data of the dbcollection.json cache file for a specific dataset (it deletes the cache files for this dataset as well, if any).
+	options:
+		- cache: force the cache file of the preprocessed data to be deleted for the particular dataset (type=Boolean)
+		- data: force the dataset's data files to be deleted for the particular dataset (type=Boolean)
+		- name: name of the dataset to reset the cache (Type=String)
+
+	```
+	Example 1:
+		# Reset (delete) the cache for the cifar10 dataset
+		- .download(name=["cifar10"], path=["~/data"]) # it will create a folder named '{image_processing}/cifar10' in '~/data'
+	```
+
+- **.list()/:query()** - list all available datasets for download/preprocess. (tenho que pensar melhor sobre este)
+	options:
+		- info:  (Type=List)
+		- search: (Type=Dictionary)
+
+	```
+	Example 1:
+		# Do some queries to the dbcollection.json file about it's stored data.
+		- .query(info=[{"name":"Pascal VOC 2007"}]) # returns all information about pascal voc 2007 dataset
+		- .query(search={"categories":['image processing'], "tasks":["classification", "detection"]}) # returns all datasets belonging to that category + tasks
+	```
+
+- **.add()** - adds a custom dataset to the list.
+	options:
+		- name: dataset name [Type=String]
+		- data_path: data's folder path on disk [Type=String]
+		- cache_path: cache's metadata storage path [Type=String]
+		- category: name of the category [Type=String]
+		- task: name of the task [Type=String]
+
+	```
+	Example 1:
+		# add a custom dataset to the list of available datasets.
+		- .add(name="custom_dataset", data_path="~/tmp/dir", cache_path="~/tmp/dir", category="custom", task="default")
+	```
+
