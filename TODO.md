@@ -70,6 +70,8 @@ This repo tries to follow the PEP8 style convention as close as possible.
 		- download: [Type=Boolean, (default=True)]
 		- verbose: [Type=Boolean, (default=True)]
 		- make_list: organizes the data w.r.t. to other fields. The data must be organized in a dictionary with the following format: {"new_field_name":"field_name"}  [Type=Dictionary]
+		- select: selects indexes from 'field_name' equal to the selected value(s) (removes objects ids without those 'field_name''s values) [Type=Dictionary]
+		- filter: removes indexes from 'field_name' equal to the selected value(s) (removes objects ids with those 'field_name''s values) [Type=Dictionary]
 
 	```
 	Example 1:
@@ -90,6 +92,18 @@ This repo tries to follow the PEP8 style convention as close as possible.
 	Example 3:
 		# Load the metadata loader for the cifar10 dataset and organize the data w.r.t. the class name.
 		- .load(name='cifar10', make_list={"class_list":'classes', "filename_list":"fname"})
+	```
+
+	```
+	Example 4:
+		# Select data from only two categories from the cifar10 dataset
+		- .load(name='cifar10', select={"class":['cat', 'dog']})
+	```
+
+	```
+	Example 5:
+		# Filter/remove data of all animals classes from cifar10.
+		- .load(name='cifar10', filter={"class":['bird', 'cat', 'deer', 'dog', 'frog', 'horse']})
 	```
 
 - **.delete()** - deletes the data of a dataset.
