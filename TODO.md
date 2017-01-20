@@ -189,3 +189,6 @@ This repo tries to follow the PEP8 style convention as close as possible.
 		- .add(name="custom_dataset", data_path="~/tmp/dir", cache_path="~/tmp/dir", category="custom", task="default")
 	```
 
+### IPython notebooks
+
+- fazer uns quantos notebooks como tutoriais para mostrar como funciona a API.
