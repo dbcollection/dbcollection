@@ -10,6 +10,7 @@
 utils.py unit testing.
 """
 
+
 # import utils.py
 import os
 import sys
@@ -18,7 +19,12 @@ import urllib
 import requests
 import tarfile
 import zipfile
+import json
 from clint.textui import progress
+if sys.version_info[0] == 2:
+    import cPickle as pickle
+else:
+    import pickle
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 lib_path = os.path.abspath(os.path.join(dir_path,'..','..','..','dataset'))
@@ -27,7 +33,7 @@ import utils
 
 import unittest
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import patch, mock_open
 
 
 #-----------------------
@@ -69,6 +75,25 @@ class UtilsTest(unittest.TestCase):
 
         # Check if res is True
         self.assertTrue(res_notext, 'Download single file should return True')
+
+
+    @patch('utils.get_hash_value')
+    def test_check_file_integrity_md5(self, mock_get):
+        """
+        Test checking a file's integrity using md5 checksum.
+        """
+        # some dummy data
+        sample_file_name = 'dir/myfile'
+        sample_md5sum = 'sample_sum'
+
+        # mock function output
+        mock_get.return_value = sample_md5sum
+
+        # compute function
+        utils.check_file_integrity_md5(sample_file_name, sample_md5sum)
+
+        # it should not raise an exception
+        self.assertTrue(True)
 
 
     def test_get_file_extension(self):
@@ -172,9 +197,10 @@ class UtilsTest(unittest.TestCase):
         """
         # url samples
         url_samples = ['url1/fname.tar', 'url2/fname.tar', 'url3/fname.zip']
+        sample_md5sum = [] #'testsum'
 
         # process download+extract all files
-        utils.download_extract_all(url_samples, 'any dir', True, True)
+        utils.download_extract_all(url_samples, sample_md5sum, 'any dir', True, True)
 
         # check if the mocked functions were called properly
         self.assertFalse(mock_url.url_get_filename.called, "Failed to mock utils.url_get_filename().")
@@ -182,6 +208,64 @@ class UtilsTest(unittest.TestCase):
         self.assertFalse(mock_extract.extract_file.called, "Failed to mock utils.extract_file().")
         self.assertFalse(mock_remove.remove_file.called, "Failed to mock utils.remove_file().")
 
+
+    @patch('scipy.io.loadmat')
+    def test_load_matlab_file(self, mock_loadmat):
+        """
+        Test loading a matlab file to memory.
+        """
+        # dummy file name
+        sample_file_name = "dir/myfile.mat"
+        sample_data = [1,2,3,4,5,6,'str']
+
+        # mock function output
+        mock_loadmat.return_value = sample_data
+
+        # load dummy file
+        res_data = utils.load_matlab(sample_file_name)
+
+        # check if the sample data is the same as the returned from the load of the dummy file
+        self.assertEqual(res_data, sample_data, 'Data lists should be equal')
+
+
+    @patch('builtins.open', mock_open(read_data='1'))
+    @patch('json.load')
+    def test_load_json(self, mock_json):
+        """
+        Test loading a json file.
+        """
+        # dummy file name
+        sample_file_name = "dir/myfile.json"
+        sample_data = [1,2,3,4,5,6,'str']
+
+        # mock function output
+        mock_json.return_value = sample_data
+
+        # load dummy file
+        res_data = utils.load_json(sample_file_name)
+
+        # check if the sample data is the same as the returned from the load of the dummy file
+        self.assertEqual(res_data, sample_data, 'Data lists should be equal')
+
+
+    @patch('builtins.open', mock_open(read_data='1'))
+    @patch('pickle.load')
+    def test_load_pickel(self, mock_pickle):
+        """
+        Test loading a pickle file.
+        """
+        # some dummy file name
+        sample_file_name = 'dir/myfile'
+        sample_data = 'test1'
+
+        # mock function output
+        mock_pickle.return_value = sample_data
+
+        # load dummy file
+        res_data = utils.load_pickle(sample_file_name)
+
+        # check if the returned data matches the dummy data
+        self.assertEqual(res_data, sample_data, 'Data vars should be equal')
 
 #----------------
 # Run Test Suite

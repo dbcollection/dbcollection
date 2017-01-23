@@ -40,6 +40,13 @@ class StorageHDF5:
         self.storage = h5py.File(name, mode, libver=version)
 
 
+    def close(self):
+        """
+        Close the file.
+        """
+        self.storage.close()
+
+
     def is_group(self, name):
         """
         Check if the group name exists.

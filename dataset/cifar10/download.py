@@ -5,6 +5,7 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+
 """
 Cifar10 data download script.
 
@@ -29,7 +30,9 @@ def main(verbose=False, clean_cache=False):
 
     dataset_info = {
         "name": "cifar10",
-        "url":['https://www.cs.toronto.edu/~kriz/cifar-10-matlab.tar.gz']
+        "url":[
+            ['https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz', "c58f30108f718f92721af3b95e74349a"]
+        ]
     }
 
     # get path to store data
@@ -38,7 +41,7 @@ def main(verbose=False, clean_cache=False):
     dir_save = data_paths["data_path"]
 
     # download + extract data and remove temporary files
-    utils.download_extract_all(dataset_info['url'], dir_save, clean_cache, verbose)
+    utils.download_extract_all(dataset_info['url'][0], dataset_info['url'][1], dir_save, clean_cache, verbose)
 
 
 #---------------------------------------------------------
@@ -46,4 +49,4 @@ def main(verbose=False, clean_cache=False):
 #---------------------------------------------------------
 
 if __name__ == "__main__":
-    main(True)
+    main(True, False)
