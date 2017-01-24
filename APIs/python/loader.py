@@ -12,7 +12,7 @@ Dataset loader class.
 
 
 class Loader:
-    """ Dataset loading class """
+    """ HDF5 data loading class """
 
     def __init__(self, name):
         """
