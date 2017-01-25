@@ -229,15 +229,21 @@ def load_matlab(fname):
     """
     Load a matlab file to memory.
     """
-    return scipy.io.loadmat(fname)
+    try:
+        return scipy.io.loadmat(fname)
+    except IOError:
+        raise
 
 
 def load_json(fname):
     """
     Loads a json file to memory.
     """
-    with open(fname) as data_file:
-        return json.load(data_file)
+    try:
+        with open(fname) as data_file:
+            return json.load(data_file)
+    except IOError:
+        raise
 
 
 def load_pickle(fname):
