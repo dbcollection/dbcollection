@@ -3,21 +3,34 @@ Dataset loader class.
 """
 
 
-class Loader:
+import storage
+
+
+class ManagerHDF5:
     """ HDF5 data loading class """
 
-    def __init__(self, name):
+
+    def __init__(self, handler_file, group_name):
+        """Initialize class.
+
+        Parameters
+        ----------
+        cache_path : str
+            Path to the metadata cache file on disk.
+
+        Returns
+        -------
+            None
         """
-        Initialize class.
-        """
+        self.data = handler_file.storage[group_name]
 
 
     def get(self, field_name, id):
         """
         Retrieve the 'i'th' data from the field 'field_name' into a list.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
             - field_name: field name identifier [Type=String]
 		    - id: index number of the field. If it is a list, returns the data for all the value indexes of that list [Type=long/List]
         Returns:
@@ -25,6 +38,7 @@ class Loader:
             returns a list filled with data.
         """
         pass
+        # >>> fiquei aqui <<<<
 
 
 
@@ -69,15 +83,47 @@ class Loader:
 
 
 
-class DataLoader:
+class Loader:
     """ Dataset loader """
 
-    def __init__(self, name):
-        """
-        Initialize class.
-        """
-        self.data = Loader(name)
-        self.train = self.data['train']
-        self.val = self.data['val']
-        self.test = self.data['test']
+    
+    def __init__(self, name, category, task, data_path, cache_path):
+        """Initialize class.
 
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        category : str
+            Category of the dataset (e.g. image processing, natural language processing)
+        task : str
+            Name of the task.
+        data_path : str
+            Path to the dataset's data on disk.
+        cache_path : str
+            Path to the metadata cache file on disk.
+
+        Returns
+        -------
+            None
+        """
+        # store info
+        self.name = name
+        self.category = category
+        self.task = task
+        self.data_path = data_path
+        self.cache_path = cache_path
+
+        # load the cache file 
+        self.file = storage.StorageHDF5()
+
+        # make links for all groups (train/val/test) for easier access
+        self.add_group_links()
+
+
+    def add_group_links(self):
+        """
+        Adds links for the groups for easier access to data.
+        """
+        for name in self.file.storage.keys():
+            setattr(self, name, ManagerHDF5(self.file, name))
