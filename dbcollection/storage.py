@@ -17,19 +17,23 @@ class StorageHDF5:
         self.mode = mode
 
         # open a file (read or write mode)
-        self.open_file(filename, mode)
+        self.storage = self.open_file(filename, mode)
 
         # create train, val and test groups (most used groups)
-        self.add_group('train')
-        self.add_group('val')
-        self.add_group('test')
+        if mode in ['w', 'w+']:
+            self.add_group('train')
+            self.add_group('val')
+            self.add_group('test')
 
 
     def open_file(self, name, mode, version='latest'):
         """
         Open a hdf5 file.
         """
-        self.storage = h5py.File(name, mode, libver=version)
+        try:
+            return h5py.File(name, mode, libver=version)
+        except IOError:
+            raise
 
 
     def close(self):
@@ -53,8 +57,11 @@ class StorageHDF5:
         """
         Create a group in the hdf5 file.
         """
-        grp = self.storage.create_group(name)
-        setattr(self, name, grp)
+        try:
+            grp = self.storage.create_group(name)
+            setattr(self, name, grp)
+        except ValueError:
+            pass
 
 
     def delete_group(self, name):
