@@ -1,34 +1,76 @@
-#!/usr/bin/env python
-# Copyright (C) 2017, Farrajota @ https://github.com/farrajota
-# All rights reserved.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
-
 """
 dbcollection managing functions.
 """
 
 
-def load(name, data_path, cache_path, save_name, task, download, verbose, make_list, select, filter):
-    """
+from .cache import CacheManager
+from .loader import Loader
+import dataset
+
+
+def load(name, data_path, save_name, task='default', download=True, verbose=True, organize_list, select, filter):
+    """loads dataset metadata file.
+
     Returns a loader class with the necessary functions to manage the selected dataset.
 
-    Parameters:
-    -----------
-        - name: name of the dataset [Type=String]
-		- data_path: path to store the data (if the data doesn't exist and the download flag is equal True) [Type=String, (default=data_path_default)]
-		- cache_path: path to store the cache metadata (if the cache file doesn't exist and the download flag is equal True) [Type=String, (default=cache_path_default)]
-		- save_name: save the metadata file with a new name (usefull to create custom versions of the original) [Type=Boolean]
-		- task: specify a specific task to load [Type=String, (default='default')]
-		- download: [Type=Boolean, (default=True)]
-		- verbose: [Type=Boolean, (default=True)]
-		- make_list: organizes the data w.r.t. to other fields. The data must be organized in a dictionary with the following format: {"new_field_name":"field_name"}  [Type=Dictionary]
-		- select: selects indexes from 'field_name' equal to the selected value(s) (removes objects ids without those 'field_name''s values) [Type=Dictionary]
-		- filter: removes indexes from 'field_name' equal to the selected value(s) (removes objects ids with those 'field_name''s values) [Type=Dictionary]
+    Parameters
+    ----------
+    name : str
+        Name of the dataset.
+    data_path : str
+        Path to store the data (if the data doesn't exist and the download flag is equal True).
+    save_name : bool
+        Save the metadata file with a new name.
+        (usefull to create custom versions of the original).
+    task : str
+        Specify a specific task to load.
+	download : bool
+        Downloads data from the host to disk (if true).
+	verbose : bool
+        Displays text information (if true).
+	organize_list : dict
+        Organizes the data w.r.t. to other fields. The data must be organized in a 
+        dictionary with the following format: {"new_field_name":"field_name"} 
+	select : dict
+        Selects indexes from 'field_name' equal to the selected value(s) 
+        (removes objects ids without those 'field_name''s values)
+	filter : dict
+        Removes indexes from 'field_name' equal to the selected value(s) 
+        (removes objects ids with those 'field_name''s values)
+
+    Returns
+    -------
+    Loader
+       Returns a loader class.
     """
-    pass
+
+    # check if there's an entry in the cache file for the dataset
+    cache_manager = CacheManager()
+
+    # check if dataset exists
+    if not cache_manager.exists(self, name, task):
+        # get cache save path
+        cache_save_path = cache_manager.default_cache_path
+
+        # download/preprocess dataset
+        cache_info = dataset.process(name, data_path, cache_save_path, download, verbose)
+
+        # update dbcollection.json file with the new data
+        cache_manager.update(name, data_path, cache_info)
+
+    # get cache path
+    cache_path = cache_manager.get_cache_path(name, task)
+
+    # Create a loader
+    dataset_loader = Loader(cache_path)
+
+    # organize data into a list w.r.t. some field_name
+    # do select/filter processing here
+    # save dataset_loader with a different task name (use save_name)
+
+    # return Loader
+    return dataset_loader
+
 
 
 def add(name, data_path, cache_path, category, task):
