@@ -29,13 +29,13 @@ def load(name, data_path, save_name, task='default', download=True, verbose=True
 	verbose : bool
         Displays text information (if true).
 	organize_list : dict
-        Organizes the data w.r.t. to other fields. The data must be organized in a 
-        dictionary with the following format: {"new_field_name":"field_name"} 
+        Organizes the data w.r.t. to other fields. The data must be organized in a
+        dictionary with the following format: {"new_field_name":"field_name"}
 	select : dict
-        Selects indexes from 'field_name' equal to the selected value(s) 
+        Selects indexes from 'field_name' equal to the selected value(s)
         (removes objects ids without those 'field_name''s values)
 	filter : dict
-        Removes indexes from 'field_name' equal to the selected value(s) 
+        Removes indexes from 'field_name' equal to the selected value(s)
         (removes objects ids with those 'field_name''s values)
 
     Returns
@@ -74,82 +74,129 @@ def load(name, data_path, save_name, task='default', download=True, verbose=True
 
 
 def add(name, data_path, cache_path, category, task):
-    """
+    """Add dataset to list.
+
     Adds a custom dataset to the list.
 
-    Parameters:
-    -----------
-        - name: dataset name [Type=String]
-		- data_path: data's folder path on disk [Type=String]
-		- cache_path: cache's metadata storage path [Type=String]
-		- category: name of the category [Type=String]
-		- task: name of the task [Type=String]
+    Parameters
+    ----------
+    name : str
+        Dataset name to add to the list.
+	data_path : str
+        Folder path of the dataset's data on disk.
+	cache_path : str
+        Cache's metadata storage path.
+	category : str
+        Name of the category (refactor this idea an save in a custom category).
+	task : str
+        Name of the new task.
+
+    Returns
+    -------
+        None
     """
     pass
 
 
 def delete(name, data=False, cache=True):
-    """
+    """Delete data.
+
     Deletes the data of a dataset.
 
-    Parameters:
-    -----------
-        - name: name of the dataset to delete the data from disk [Type=String]
-		- data: flag indicating if the data folder is to be deleted from disk [Type=Boolean, (default=False)]
-		- cache: flag indicating if the metadata cache file is to be deleted from disk [Type=Boolean, (default=True)]
+    Parameters
+    ----------
+    name : str
+        Name of the dataset to delete the data from disk.
+	data : bool
+        Flag indicating if the data folder is to be deleted from disk.
+	cache : str
+        Flag indicating if the metadata cache file is to be deleted from disk.
+
+    Returns
+    -------
+        None
     """
     pass
 
 
 def config(name, fields, default_paths):
-    """
+    """config cache file.
+
     Manually setup the configurations of the cache file dbcollection.json.
 
-    Parameters:
-    -----------
-        - name: name of the dataset (Type=String)
-		- fields: specifies which fields and values to update the dbcollection cache file (Type=Dictionary)
-		- default_paths: updates the default cache/data paths (Type=Dictionary)
+    Parameters
+    ----------
+    name : str
+        Name of the dataset.
+	fields : dict
+        Specifies which fields and values to update the dbcollection cache file.
+	default_paths : dict
+        Updates the default cache/data paths.
 
+    Returns
+    -------
+        None
     """
     pass
 
 
 def download(name, path):
-    """
+    """Download dataset.
+
     Download the data for one (or several) listed dataset(s).
 
-    Parameters:
-    -----------
-        - cache: force the cache file of the preprocessed data to be deleted for the particular dataset (type=Boolean)
-		- data: force the dataset's data files to be deleted for the particular dataset (type=Boolean)
-		- name: name of the dataset to reset the cache (Type=String)
+    Parameters
+    ----------
+    name : str
+        Name of the dataset to reset the cache.
+    cache : bool
+        Force the cache file of the preprocessed data to be deleted for the particular dataset.
+	data : bool
+        Force the dataset's data files to be deleted for the particular dataset.
+
+    Returns
+    -------
+        None
     """
     pass
 
 
 def reset(cache, data, name):
-    """
-    Resets the data of the dbcollection.json cache file for a specific dataset (it deletes the cache files for this dataset as well, if any).
+    """Reset cache file.
 
-    Parameters:
-    -----------
-        - cache: force the cache file of the preprocessed data to be deleted for the particular dataset (type=Boolean)
-		- data: force the dataset's data files to be deleted for the particular dataset (type=Boolean)
-		- name: name of the dataset to reset the cache (Type=String)
+    Resets the data of the dbcollection.json cache file for a specific dataset
+    (it deletes the cache files for this dataset as well, if any).
+
+    Parameters
+    ----------
+	name : str
+        Name of the dataset to reset the cache.
+    cache : bool
+        Force the cache file of the preprocessed data to be deleted for the particular dataset.
+	data : bool
+        Force the dataset's data files to be deleted for the particular dataset.
+
+    Returns
+    -------
+        None
     """
     pass
 
 
 
 def query(info, search):
-    """
+    """Query the cache file.
+
     list all available datasets for download/preprocess. (tenho que pensar melhor sobre este)
 
     Parameters:
     -----------
-        - info:  (Type=List)
-		- search: (Type=Dictionary)
+    info : list
+	search : dict
+
+    Returns
+    -------
+        None
     """
     pass
 
