@@ -2,16 +2,20 @@
 dbcollection managing functions.
 """
 
-
+from __future__ import print_function
 from .cache import CacheManager
-from .loader import Loader
+from .loader import DataLoader
 import dataset
+
+
+# check if there's an entry in the cache file for the dataset
+cache_manager = CacheManager()
 
 
 def load(name, data_path, save_name, task='default', download=True, verbose=True, organize_list, select, filter):
     """loads dataset metadata file.
 
-    Returns a loader class with the necessary functions to manage the selected dataset.
+    Returns a loader with the necessary functions to manage the selected dataset.
 
     Parameters
     ----------
@@ -40,12 +44,9 @@ def load(name, data_path, save_name, task='default', download=True, verbose=True
 
     Returns
     -------
-    Loader
+    DataLoader
        Returns a loader class.
     """
-
-    # check if there's an entry in the cache file for the dataset
-    cache_manager = CacheManager()
 
     # check if dataset exists
     if not cache_manager.exists(self, name, task):
@@ -200,5 +201,21 @@ def query(info, search):
     """
     pass
 
+
+
+def list():
+    """List cache data.
+
+    Prints the contents of the dbcollection.json cache file
+
+    Parameters
+    ----------
+        None 
+
+    Returns
+    -------
+        None
+    """
+    print(cache_manager.data)
 
 

@@ -18,7 +18,7 @@ class CacheManager:
         # setup cache paths
         self.setup_paths()
 
-        # create cache file to disk (if it does not exist)
+        # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
             self.create_cache_file_disk(self.cache_fname)
 
