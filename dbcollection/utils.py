@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# Copyright (C) 2017, Farrajota @ https://github.com/farrajota
-# All rights reserved.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
-
 """
 Utility functions for data download/extraction/loading
 """
@@ -21,7 +13,6 @@ import os
 import hashlib
 import scipy.io
 import json
-import h5py
 import sys
 if sys.version_info[0] == 2:
     import cPickle as pickle

@@ -1,11 +1,3 @@
-#!/usr/bin/env python
-# Copyright (C) 2017, Farrajota @ https://github.com/farrajota
-# All rights reserved.
-#
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
-
-
 """
 Cifar10 download/process functions.
 """
@@ -18,7 +10,7 @@ import numpy as np
 dir_path = os.path.dirname(os.path.realpath(__file__))
 lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
 sys.path.append(lib_path)
-from dataset import utils, storage
+from dbcollection import utils, storage
 
 
 class Cifar10:
@@ -124,7 +116,7 @@ class Cifar10:
         }
 
 
-    def metadata_process(self):
+    def classification_metadata_process(self):
         """
         Process metadata and store it in a hdf5 file.
         """
@@ -133,7 +125,8 @@ class Cifar10:
         data = self.load_data()
 
         # create/open hdf5 file with subgroups for train/val/test
-        fileh5 = storage.StorageHDF5(os.path.join(self.data_path, 'classification.h5'), 'w')
+        file_name = os.path.join(self.data_path, 'classification.h5')
+        fileh5 = storage.StorageHDF5(file_name, 'w')
 
         # write data to the metadata file
         fileh5.add_data('train', 'data', data["class_names"])
@@ -148,3 +141,22 @@ class Cifar10:
 
         # close file
         fileh5.close()
+
+        # return information of the task + cache file
+        return {"classification":file_name}
+
+
+    def process(self):
+        """
+        Process metadata for all tasks
+        """
+        info_classification = self.classification_metadata_process()
+
+        info_default = {"default":info_classification["classification"]}
+
+        # concatenate all cache info into a single dictionary
+        info_output = {}
+        info_output.update(info_classification)
+        info_output.update(info_default)
+
+        return info_output
