@@ -199,9 +199,9 @@ class CacheManager:
         return cache_path
 
 
-    def update(self, name, data_path, cache_info):
+    def update(self, name, category, data_path, cache_info):
         """
-        Update the cache file with new/updated data for a dataset. 
+        Update the cache file with new/updated data for a dataset.
         """
         # build info dictionary
         new_dict = {
@@ -211,4 +211,4 @@ class CacheManager:
         }
 
         # update data with the new info
-        self.data['dataset'][name] = info
+        self.data['dataset'][category][name] = info

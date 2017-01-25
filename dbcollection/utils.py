@@ -75,13 +75,8 @@ def url_get_filename(url, dir_save):
     # split url string
     url_fname = url.split('/')[-1]
 
-    # save file
-    if dir_save[-1] == '/':
-        file_save_name = dir_save + url_fname
-    else:
-        file_save_name = dir_save + '/' + url_fname
-
-    return file_save_name
+    # join strings and return them
+    return os.path.join(dir_save, url_fname)
 
 
 def download_file(url, dir_name, fname_save, verbose=False):
@@ -167,9 +162,9 @@ def get_extractor_method(ext):
         "gz":extract_file_tar
     }
 
-    if ext in methods.keys():
+    try:
         return methods[ext]
-    else:
+    except KeyError:
         raise_exception('Undefined file extension: ' + ext)
 
 

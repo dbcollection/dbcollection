@@ -210,7 +210,7 @@ def list():
 
     Parameters
     ----------
-        None 
+        None
 
     Returns
     -------
