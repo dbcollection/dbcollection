@@ -1,40 +1,41 @@
 """
-data.py unit testing.
+dbcollection/cache.py unit testing.
 """
 
 # import data.py
 import os
 import sys
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dataset'))
-sys.path.append(lib_path)
-import data
-
 import unittest
 from unittest import mock
 from unittest.mock import patch, mock_open
+
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection'))
+sys.path.append(lib_path)
+import cache
 
 
 #-----------------------
 # Unit Test definitions
 #-----------------------
 
-class CacheManager(unittest.TestCase):
+class CacheManagerTest(unittest.TestCase):
     """
     Test class.
     """
 
-    @patch('data.CacheManager.create_cache_file_disk')
+    @patch('cache.CacheManager.create_cache_file_disk')
     def setUp(self, mock_file):
         """
         Initialize class.
         """
         # create class
-        self.cache_manager = data.CacheManager()
+        self.cache_manager = cache.CacheManager()
 
         # check if the object is of the same type
-        self.assertIsInstance(self.cache_manager, data.CacheManager, 'Object is not of the same class')
+        self.assertIsInstance(self.cache_manager, cache.CacheManager, 'Object is not of the same class')
 
         # create a sample cache data dictionary
         self.sample_cache_data = {
@@ -43,12 +44,14 @@ class CacheManager(unittest.TestCase):
                 "default_data_path": "tmp/dir/",
             },
             "dataset":{
-                "cifar10":{
-                    "cache_path":"tmp/dir/",
-                    "data_path":"tmp/dir/",
-                    "task":{
-                        "default":"file1.h5",
-                        "classific":"file2.h5"
+                "image_processing":{
+                    "cifar10":{
+                        "cache_path":"tmp/dir/",
+                        "data_path":"tmp/dir/",
+                        "task":{
+                            "default":"file1.h5",
+                            "classific":"file2.h5"
+                        }
                     }
                 }
             }
@@ -153,7 +156,7 @@ class CacheManager(unittest.TestCase):
         self.assertEqual(res, sample_path, 'Paths should be the same')
 
 
-    @patch('data.CacheManager.read_data_cache')
+    @patch('cache.CacheManager.read_data_cache')
     def test_get_valid_dataset_storage_paths(self, mock_read):
         """
         Test get the cache/data paths for a existing dataset.
@@ -177,7 +180,7 @@ class CacheManager(unittest.TestCase):
         self.assertEqual(res[sample_field_data], sample_path_data, 'Paths should be equal')
 
 
-    @patch('data.CacheManager.read_data_cache')
+    @patch('cache.CacheManager.read_data_cache')
     def test_get_invalid_dataset_storage_paths(self, mock_read):
         """
         Test get the cache/data paths for an invalid dataset.

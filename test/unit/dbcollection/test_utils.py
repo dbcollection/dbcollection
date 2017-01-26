@@ -1,5 +1,5 @@
 """
-utils.py unit testing.
+dbcollection/utils.py unit testing.
 """
 
 
@@ -18,14 +18,16 @@ if sys.version_info[0] == 2:
 else:
     import pickle
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path,'..','..','..','dataset'))
-sys.path.append(lib_path)
-import utils
 
 import unittest
 from unittest import mock
 from unittest.mock import patch, mock_open
+
+dir_path = os.path.dirname(os.path.realpath(__file__))
+lib_path = os.path.abspath(os.path.join(dir_path,'..','..','..','dbcollection'))
+sys.path.append(lib_path)
+import utils
+
 
 
 #-----------------------
