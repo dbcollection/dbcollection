@@ -2,18 +2,17 @@ __all__ = ['image_processing']
 
 import os
 from . import *
+#import .image_processing
+#from .image_processing import *
 
 
 #---------------------------------------------------------
-# Lists
+# Lists - store ALL lists here
 #---------------------------------------------------------
-
-
-# store ALL lists here
 
 image_processing_list = {
-    "cifar10": image_processing.cifar.cifar10,
-    "cifar100": image_processing.cifar.cifar100,
+    "cifar10": image_processing.cifar.cifar10.Cifar10,
+    #"cifar100": image_processing.cifar.cifar100.Cifar100,
 }
 
 # *** MAIN list ***
@@ -29,14 +28,14 @@ dataset_list = {
 
 def fetch_dataset_constructor(name):
     """
-    Fetches a dataset constructor class. 
+    Fetches a dataset constructor class.
     """
     for category in dataset_list.keys():
-        for dname in category.keys():
+        for dname in dataset_list[category].keys():
             if dname == name:
-                return category.name, name
-    
-    raise 
+                return category, dataset_list[category][name]
+
+    raise Exception('Undefined dataset name: '+str(name))
 
 
 def process(name, data_path, cache_path, download, verbose):
@@ -45,15 +44,21 @@ def process(name, data_path, cache_path, download, verbose):
     """
 
     # fetch dataset constructor
-    constructor = fetch_dataset_constructor(name)
-    dataset_loader = constructor(data_path, cache_path, verbose, clean_cache)
+    category, constructor = fetch_dataset_constructor(name)
 
-    # check if data already exists in disk
-    if not os.path.exists(dir_name):
-        # download data
+    # setup data+cache path names
+    data_path_ = os.path.join(data_path, name)
+    cache_path_ = os.path.join(cache_path, category, name)
+
+    # setup dataset constructor
+    dataset_loader = constructor(data_path_, cache_path_, verbose)
+
+    # download data if it doesn't exists on disk
+    if not os.path.exists(data_path_):
         dataset_loader.download()
 
     # process metadata
     cache_info = dataset_loader.process()
 
-    return cache_info
+    # return some info to update the cache file
+    return cache_info, category

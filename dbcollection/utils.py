@@ -191,12 +191,16 @@ def extract_file(path, fname, verbose=False):
 # Download + extract to disk
 #---------------------------------------------------------
 
-def download_extract_all(urls, md5sum, dir_save, clean_cache,verbose):
+def download_extract_all(urls, md5sum, dir_save, clean_cache=False,verbose=True):
     """
     Download + extract all url files to disk.
     If clean_cache is true, it removes the download files.
     """
-     # download + extract data and remove temporary files
+    # Check if urls is a str
+    if isinstance(urls, str):
+        urls = [urls]
+    
+    # download + extract data and remove temporary files
     for url in urls:
         # get download save filename
         fname_save = url_get_filename(url, dir_save)

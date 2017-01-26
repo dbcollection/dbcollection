@@ -4,15 +4,15 @@ dbcollection managing functions.
 
 from __future__ import print_function
 from .cache import CacheManager
-from .loader import DataLoader
-import dataset
+from .loader import DatasetLoader
+from . import dataset
 
 
 # check if there's an entry in the cache file for the dataset
 cache_manager = CacheManager()
 
 
-def load(name, data_path, save_name, task='default', download=True, verbose=True, organize_list, select, filter):
+def load(name, data_path=None, save_name=None, task='default', download=True, verbose=True, organize_list=None, select=None, filter=None):
     """loads dataset metadata file.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -44,26 +44,29 @@ def load(name, data_path, save_name, task='default', download=True, verbose=True
 
     Returns
     -------
-    DataLoader
+    DatasetLoader
        Returns a loader class.
     """
 
-    # check if dataset exists
-    if not cache_manager.exists(self, name, task):
-        # get cache save path
+    # check if dataset exists in the cache file
+    if not cache_manager.exists(name, task):
+        # get cache default save path
         cache_save_path = cache_manager.default_cache_path
 
         # download/preprocess dataset
-        cache_info = dataset.process(name, data_path, cache_save_path, download, verbose)
+        cache_info, dataset_category = dataset.process(name, data_path, cache_save_path, download, verbose)
 
         # update dbcollection.json file with the new data
-        cache_manager.update(name, data_path, cache_info)
+        cache_manager.update(name, dataset_category, data_path, cache_info)
 
     # get cache path
     cache_path = cache_manager.get_cache_path(name, task)
 
+    # get dataset storage path
+    dset_paths = cache_manager.get_dataset_storage_paths(name)
+
     # Create a loader
-    dataset_loader = Loader(cache_path)
+    dataset_loader = DatasetLoader(name, dataset_category, task, dset_paths['data_path'], cache_path)
 
     # organize data into a list w.r.t. some field_name
     # do select/filter processing here

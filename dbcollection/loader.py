@@ -3,7 +3,7 @@ Dataset loader class.
 """
 
 
-import storage
+from .storage import StorageHDF5
 
 
 class ManagerHDF5:
@@ -88,7 +88,7 @@ class ManagerHDF5:
                 ids = self.data['object_id'][idx]
 
                 # fetch data for each element of the list
-                output.append = [self.data[field_name][ids[i]] in i,field_name in enumerate(fields)]
+                output.append = [self.data[field_name][ids[i]] in i, field_name in enumerate(fields)]
 
             # output data
             if len(id_) == 1:
@@ -127,7 +127,7 @@ class ManagerHDF5:
 
 
 
-class Loader:
+class DatasetLoader:
     """ Dataset loader """
 
 
@@ -159,7 +159,7 @@ class Loader:
         self.cache_path = cache_path
 
         # load the cache file
-        self.file = storage.StorageHDF5()
+        self.file = StorageHDF5(cache_path, 'r')
 
         # make links for all groups (train/val/test) for easier access
         self.add_group_links()

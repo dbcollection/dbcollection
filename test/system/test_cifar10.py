@@ -14,9 +14,9 @@ import dbcollection
 
 
 # list cache file contents
-dbcollection.list()
+dbcollection.manager.list()
 
 # get a loader to the dataset
 dl_path = '/home/mf/tmp/download_data'
-loader = dbcollection.load(name='cifar10',data_path=dl_path, verbose=True)
+loader = dbcollection.manager.load(name='cifar10',data_path=dl_path, verbose=True)
 

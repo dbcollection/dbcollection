@@ -8,8 +8,9 @@ import sys
 import numpy as np
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
+lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', '..'))
 sys.path.append(lib_path)
+
 from dbcollection import utils, storage
 
 
@@ -32,14 +33,13 @@ class Cifar10:
     ]
 
 
-    def __init__(self, data_path, cache_path, verbose=True, clean_cache=False):
+    def __init__(self, data_path, cache_path, verbose=True):
         """
         Initialize class.
         """
         self.cache_manager = cache_path
         self.data_path = data_path
         self.verbose = verbose
-        self.clean_cache = clean_cache
 
 
     def download(self):
@@ -48,7 +48,7 @@ class Cifar10:
         """
 
         # download + extract data and remove temporary files
-        utils.download_extract_all(self.url, self.md5_checksum, self.data_path, self.clean_cache, self.verbose)
+        utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
 
 
     def get_object_list(self, data, labels):
@@ -68,14 +68,14 @@ class Cifar10:
         """
 
         # load classes name file
-        class_names = utils.load_pickle(os.path.join(self.data_path, self.data_files[0]))
+        class_names = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[0]))
 
         # load train data files
-        train_batch1 = utils.load_pickle(os.path.join(self.data_path, self.data_files[1]))
-        train_batch2 = utils.load_pickle(os.path.join(self.data_path, self.data_files[2]))
-        train_batch3 = utils.load_pickle(os.path.join(self.data_path, self.data_files[3]))
-        train_batch4 = utils.load_pickle(os.path.join(self.data_path, self.data_files[4]))
-        train_batch5 = utils.load_pickle(os.path.join(self.data_path, self.data_files[5]))
+        train_batch1 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[1]))
+        train_batch2 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[2]))
+        train_batch3 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[3]))
+        train_batch4 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[4]))
+        train_batch5 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[5]))
 
         # concatenate data
         train_data = np.concatenate((

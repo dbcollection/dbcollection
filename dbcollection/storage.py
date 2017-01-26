@@ -12,6 +12,13 @@ class StorageHDF5:
     def __init__(self, filename, mode):
         """
         Initialize class.
+
+        Parameters
+        ----------
+        filename : str
+            File name + path for the target metadata file.
+        mode : str
+            File opem mode: r, r+, w , w+, x, a
         """
         self.fname = filename
         self.mode = mode
@@ -59,9 +66,10 @@ class StorageHDF5:
         """
         try:
             grp = self.storage.create_group(name)
-            setattr(self, name, grp)
-        except ValueError:
+        except ValueError: #group already exists
             pass
+        else:
+            setattr(self, name, grp)
 
 
     def delete_group(self, name):

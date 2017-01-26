@@ -27,8 +27,7 @@ class CacheManager:
 
 
     def setup_paths(self):
-        """
-        Setup the cache/data directories for storing the cache file.
+        """Setup the cache/data directories for storing the cache file.
 
         This returns two paths for the default cache directory for storing the cache data,
         and the filepath for the dbcollection.json file where the metadata for all datasets
@@ -40,7 +39,7 @@ class CacheManager:
         self.cache_path = os.path.expanduser("~")
 
         # cache file path
-        self.cache_fname = os.path.join(self.cache_path, 'dbcollection.json')
+        self.cache_fname = os.path.join(self.cache_path, '.dbcollection.json')
 
         # default paths
         self.default_cache_path = os.path.join(self.cache_path, 'dbcollection')
@@ -136,10 +135,10 @@ class CacheManager:
         Check if a dataset exists for loading.
         """
         # check if the dataset exists in the cache file
-        if name in self.data['dataset'].keys():
-            return True
-        else:
-            return False
+        for category in self.data['dataset'].keys():
+            if name in self.data['dataset'][category].keys():
+                return True
+        return False
 
 
     def exists_task(self, name, task):
@@ -204,11 +203,11 @@ class CacheManager:
         Update the cache file with new/updated data for a dataset.
         """
         # build info dictionary
-        new_dict = {
+        new_info_dict = {
             "data_path": data_path,
             "cache_path": os.path.join(self.default_cache_path, name),
             "cache_files": cache_info
         }
 
         # update data with the new info
-        self.data['dataset'][category][name] = info
+        self.data['dataset'][category][name] = new_info_dict

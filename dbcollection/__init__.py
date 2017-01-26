@@ -1,3 +1,3 @@
-__all__ = ['data','loader', 'manager', 'storage', 'utils']
+__all__ = ['cache', 'loader', 'manager', 'storage', 'utils']
 
 from . import *
