@@ -78,7 +78,10 @@ def url_get_filename(url, dir_save):
     Extract filename from the url string
     """
     # split url string
-    url_fname = url.split('/')[-1]
+    if sys.platform == 'win32':
+        url_fname = url.rsplit('\\', 1)[1]
+    else:
+        url_fname = url.rsplit('/', 1)[1]
 
     # join strings and return them
     return os.path.join(dir_save, url_fname)
