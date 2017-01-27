@@ -10,6 +10,7 @@ import requests
 import tarfile
 import zipfile
 import os
+import errno
 import hashlib
 import scipy.io
 import json
@@ -38,8 +39,11 @@ def remove_file(fname):
     """
     Check if the path exists and remove the file.
     """
-    if os.path.exists(fname):
+    try:
         os.remove(fname)
+    except OSError as err:
+        if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
+            raise
 
 
 #---------------------------------------------------------
@@ -180,7 +184,7 @@ def extract_file(path, fname, verbose=False):
     file_name = path + fname
 
     if verbose:
-        print('Extracting file to disk: {}'.format(file_name))
+        print('Extracting file to disk: ' + file_name)
 
     # check filename extension
     extension = get_file_extension(fname)
@@ -208,7 +212,7 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False,verbose=True)
     # download + extract data and remove temporary files
     for i, url in enumerate(urls):
         if verbose:
-            print('Download url '+str(i+1)+'/'+str(len(urls)))
+            print('Download url ' + str(i+1) + '/' + str(len(urls)))
 
         # get download save filename
         fname_save = url_get_filename(url, dir_save)
