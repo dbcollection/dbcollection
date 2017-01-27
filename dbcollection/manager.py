@@ -50,17 +50,21 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
     """
 
     # check if dataset exists in the cache file
-    if not cache_manager.exists(name, task):
+    if cache_manager.exists(name, task):
+        dataset_category = cache_manager.get_category(name)
+    else:
         # get cache default save path
-        cache_save_path = cache_manager.default_cache_path
+        cache_save_path = cache_manager.default_cache_dir
 
-        # download/preprocess dataset
-        cache_info, dataset_category = dataset.process(name, data_path, cache_save_path, download, verbose)
+        # download dataset
+        if download:
+            dataset.download(name, data_path, verbose)
+
+        # preprocess dataset
+        cache_info, dataset_category = dataset.process(name, data_path, cache_save_path, verbose)
 
         # update dbcollection.json file with the new data
         cache_manager.update(name, dataset_category, dataset.data_path, dataset.cache_path, dataset.cache_info)
-    else:
-        dataset_category = cache_manager.get_category(name)
 
     # get cache path
     cache_path = cache_manager.get_cache_path(name, task)
@@ -105,8 +109,8 @@ def add(name, data_path, cache_path, category, task):
     pass
 
 
-def delete(name, data=False, cache=True):
-    """Delete data.
+def delete(name):
+    """Delete a dataset from disk (cache+data).
 
     Deletes the data+metadata of a dataset on disk (cache file included).
 
@@ -114,22 +118,18 @@ def delete(name, data=False, cache=True):
     ----------
     name : str
         Name of the dataset to delete the data from disk.
-	data : bool
-        Flag indicating if the data folder is to be deleted from disk.
-	cache : str
-        Flag indicating if the metadata cache file is to be deleted from disk.
 
     Returns
     -------
         None
     """
     # check if dataset exists in the cache file
-    #if not cache_manager.exists_dataset(name):
-        # get data path
-        # get metadata dir path
-        # remove files from disk
-        # remove entry from cache_manager
-    
+    if cache_manager.exists_dataset(name):
+        cache_manager.delete_dataset(name, True)
+    else:
+        print('Dataset ' + name + ' does not exist.')
+        #raise Exception('Dataset ' + name + ' does not exist.')
+
 
 def config(name, fields, default_paths):
     """config cache file.
@@ -152,7 +152,7 @@ def config(name, fields, default_paths):
     pass
 
 
-def download(name, path):
+def download(name, data_path, verbose=True):
     """Download dataset.
 
     Download the data for one (or several) listed dataset(s).
@@ -170,11 +170,16 @@ def download(name, path):
     -------
         None
     """
-    pass
+    # get cache default save path
+    cache_save_path = cache_manager.default_cache_dir
+
+    # download/preprocess dataset
+    dataset.download(name, data_path, cache_save_path, verbose)
 
 
-def reset(cache, data, name):
-    """Delete all metadata cache files from disk/list.
+
+def reset(name):
+    """Delete all metadata cache files and dir from disk/list.
 
     Resets the data of the dbcollection.json cache file for a specific dataset
     (it deletes the cache files for this dataset as well, if any).
@@ -183,17 +188,17 @@ def reset(cache, data, name):
     ----------
 	name : str
         Name of the dataset to reset the cache.
-    cache : bool
-        Force the cache file of the preprocessed data to be deleted for the particular dataset.
-	data : bool
-        Force the dataset's data files to be deleted for the particular dataset.
 
     Returns
     -------
         None
     """
-    pass
-
+     # check if dataset exists in the cache file
+    if cache_manager.exists_dataset(name):
+        cache_manager.delete_dataset(name, False)
+    else:
+        print('Dataset ' + name + ' does not exist.')
+        #raise Exception('Dataset ' + name + ' does not exist.')
 
 
 def query(info, search):
@@ -229,10 +234,8 @@ def list(verbose=False):
     -------
         None
     """
-    if verbose:
-        data_ = cache_manager.data
-    else:
-        data_ = cache_manager.data
+    data_ = cache_manager.data
+    if not verbose:
         cat_dataset_dict = {}
         for category in cache_manager.data['dataset'].keys():
             cat_dataset_dict[category] = {}
