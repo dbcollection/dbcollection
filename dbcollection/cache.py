@@ -156,7 +156,7 @@ class CacheManager:
 
     def add_data(self, category, name, new_info):
         """
-        Adds/appends a new category/dataset to the data file.
+        Adds/appends a new category/dataset to the cache file.
         """
         # check if category already exists
         if category in self.data['dataset'].keys():
