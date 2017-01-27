@@ -131,7 +131,7 @@ def delete(name):
         #raise Exception('Dataset ' + name + ' does not exist.')
 
 
-def config(name, fields, default_paths):
+def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None):
     """config cache file.
 
     Manually setup the configurations of the cache file dbcollection.json.
@@ -149,7 +149,22 @@ def config(name, fields, default_paths):
     -------
         None
     """
-    pass
+    # change default cache path
+    if not cache_dir_default is None:
+        cache_manager.default_cache_dir = cache_dir_default
+
+    # change default data path
+    if not data_dir_default is None:
+        cache_manager.default_data_dir = data_dir_default
+
+    # change paths of a dataset
+    if not name is None:
+        if isinstance(fields, dict):
+            if cache_manager.exists_dataset(name):
+                for field, val in enumerate(fields):
+                    cache_manager.change_field(name, field, val)
+            else:
+                print('Dataset ' + name + ' does not exist.')
 
 
 def download(name, data_path, verbose=True):
@@ -201,22 +216,47 @@ def reset(name):
         #raise Exception('Dataset ' + name + ' does not exist.')
 
 
-def query(info, search):
+def query(pattern):
     """Query the cache file.
 
     list all available datasets for download/preprocess. (tenho que pensar melhor sobre este)
 
     Parameters:
     -----------
-    info : list
-	search : dict
+	pattern : str
+        Field name used to search for a matching pattern in cache data.
 
     Returns
     -------
         None
     """
-    pass
+    # init list
+    query_list = []
 
+    # check info / dataset lists first
+    if pattern in cache_manager.data:
+        query_list.append(cache_manager.data[pattern].keys())
+
+    # match default paths
+    if pattern in cache_manager.data['info']:
+        query_list.append(cache_manager.data['info'][pattern])
+
+    # match datasets/tasks
+    if pattern in cache_manager.data['dataset']:
+        query_list.append(cache_manager.data['info'][pattern].keys())
+
+    query_list = []
+    for category in cache_manager.data['dataset']:
+        if pattern in cache_manager.data['dataset'][category]:
+            query_list.append(cache_manager.data['dataset'][category][pattern])
+        for name in cache_manager.data['dataset'][category]:
+            if pattern in cache_manager.data['dataset'][category][name]:
+                query_list.append(cache_manager.data['dataset'][category][name][pattern])
+            if pattern in cache_manager.data['dataset'][category][name]['cache_files']:
+                query_list.append(cache_manager.data['dataset'][category][name]['cache_files'][pattern])
+
+    # output list
+    return query_list
 
 
 def list(verbose=False):

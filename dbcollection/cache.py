@@ -138,9 +138,18 @@ class CacheManager:
         """
         Get data from a field of a dataset.
         """
-        category = self.get_category(name)
         try:
-            return self.data['dataset'][category][name][field]
+            return self.data['dataset'][self.get_category(name)][name][field]
+        except KeyError:
+            raise
+
+
+    def change_field(self, name, field, val):
+        """
+        Change the data of a field of a dataset.
+        """
+        try:
+            self.data['dataset'][self.get_category(name)][name][field] = val
         except KeyError:
             raise
 
