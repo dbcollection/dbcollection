@@ -58,7 +58,7 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
         cache_info, dataset_category = dataset.process(name, data_path, cache_save_path, download, verbose)
 
         # update dbcollection.json file with the new data
-        cache_manager.update(name, dataset_category, data_path, cache_info)
+        cache_manager.update(name, dataset_category, dataset.data_path, dataset.cache_path, dataset.cache_info)
     else:
         dataset_category = cache_manager.get_category(name)
 
@@ -108,7 +108,7 @@ def add(name, data_path, cache_path, category, task):
 def delete(name, data=False, cache=True):
     """Delete data.
 
-    Deletes the data of a dataset.
+    Deletes the data+metadata of a dataset on disk (cache file included).
 
     Parameters
     ----------
@@ -123,8 +123,13 @@ def delete(name, data=False, cache=True):
     -------
         None
     """
-    pass
-
+    # check if dataset exists in the cache file
+    #if not cache_manager.exists_dataset(name):
+        # get data path
+        # get metadata dir path
+        # remove files from disk
+        # remove entry from cache_manager
+    
 
 def config(name, fields, default_paths):
     """config cache file.
@@ -169,7 +174,7 @@ def download(name, path):
 
 
 def reset(cache, data, name):
-    """Reset cache file.
+    """Delete all metadata cache files from disk/list.
 
     Resets the data of the dbcollection.json cache file for a specific dataset
     (it deletes the cache files for this dataset as well, if any).
@@ -209,19 +214,32 @@ def query(info, search):
 
 
 
-def list():
+def list(verbose=False):
     """List cache data.
 
     Prints the contents of the dbcollection.json cache file
 
     Parameters
     ----------
-        None
+    verbose : bool
+        If true, prints the full cache file to the screen.
+        Else, prints only the categories + dataset names.
 
     Returns
     -------
         None
     """
-    print(json.dumps(cache_manager.data, sort_keys=True, indent=4))
+    if verbose:
+        data_ = cache_manager.data
+    else:
+        data_ = cache_manager.data
+        cat_dataset_dict = {}
+        for category in cache_manager.data['dataset'].keys():
+            cat_dataset_dict[category] = {}
+            for name in cache_manager.data['dataset'][category].keys():
+                cat_dataset_dict[category][name] = cache_manager.data['dataset'][category][name]['cache_files']['default']
+        data_['dataset'] = cat_dataset_dict
+
+    print(json.dumps(data_, sort_keys=True, indent=4))
 
 

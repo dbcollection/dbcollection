@@ -37,7 +37,7 @@ class Cifar10:
         """
         Initialize class.
         """
-        self.cache_manager = cache_path
+        self.cache_path = cache_path
         self.data_path = data_path
         self.verbose = verbose
 
@@ -129,7 +129,7 @@ class Cifar10:
         data = self.load_data()
 
         # create/open hdf5 file with subgroups for train/val/test
-        file_name = os.path.join(self.cache_manager, 'classification.h5')
+        file_name = os.path.join(self.cache_path, 'classification.h5')
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
         # write data to the metadata file
