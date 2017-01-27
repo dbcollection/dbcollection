@@ -38,9 +38,9 @@ def fetch_dataset_constructor(name):
     raise Exception('Undefined dataset name: '+str(name))
 
 
-def process(name, data_path, cache_path, download, verbose):
+def setup_dataset_constructor(name, data_path, cache_path, verbose=True):
     """
-    Download/process data of a dataset.
+    Config the dataset consturctor class.
     """
     # fetch dataset constructor
     category, constructor = fetch_dataset_constructor(name)
@@ -52,14 +52,34 @@ def process(name, data_path, cache_path, download, verbose):
     # setup dataset constructor
     dataset_loader = constructor(data_path_, cache_path_, verbose)
 
+    return dataset_loader, data_path_, cache_path_, category
+
+
+def download(name, data_path, cache_path, verbose=True):
+    """
+    Donwload data of a dataset.
+    """
+    # get dataset constructor
+    dataset_loader, data_path, cache_path, category = setup_dataset_constructor(name, data_path, cache_path, verbose)
+
     # check if the directories exist already
-    if not os.path.exists(data_path_):
-        os.makedirs(data_path_)
-    if not os.path.exists(cache_path_):
-        os.makedirs(cache_path_)
+    if not os.path.exists(data_path):
+        os.makedirs(data_path)
 
     # download data
     dataset_loader.download()
+
+
+def process(name, data_path, cache_path, verbose):
+    """
+    Download/process data of a dataset.
+    """
+    # get dataset constructor
+    dataset_loader, data_path, cache_path, category = setup_dataset_constructor(name, data_path, cache_path, verbose)
+
+    # check if the directories exist already
+    if not os.path.exists(cache_path):
+        os.makedirs(cache_path)
 
     # process metadata
     cache_info = dataset_loader.process()
