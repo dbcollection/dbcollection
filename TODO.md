@@ -192,3 +192,16 @@ This repo tries to follow the PEP8 style convention as close as possible.
 ### IPython notebooks
 
 - fazer uns quantos notebooks como tutoriais para mostrar como funciona a API.
+
+### Notes
+
+- Images are in the format of CxHxW, being C=color, H=height, and W=width.
+
+### Tests coverage
+
+unit tests (so far):
+- utils: test_utils (13/22)
+- storage: test_storage (2/10)
+- manager: test_manager (0/8)
+- loader: test_loader (0/7)
+- cache: test_cache (8/17)

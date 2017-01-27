@@ -46,7 +46,6 @@ class Cifar10:
         """
         Download and extract files to disk.
         """
-
         # download + extract data and remove temporary files
         utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
 
@@ -55,10 +54,11 @@ class Cifar10:
         """
         Groups the data + labels info in a 'list' of indexes.
         """
+        #object_id = np.ndarray((data.shape[0], 2), dtype=np.uint16)
         object_id = np.ndarray((data.shape[0], 2), dtype=int)
-        for i in range(data.len):
+        for i in range(data.shape[0]):
             object_id[i][0] = i
-            object_id[i][1] = labels[i][0]
+            object_id[i][1] = labels[i]
         return object_id
 
 
@@ -66,16 +66,18 @@ class Cifar10:
         """
         Load the data from the files.
         """
+        # merge the path with the extracted folder name
+        data_path_ = os.path.join(self.data_path, 'cifar-10-batches-py')
 
         # load classes name file
-        class_names = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[0]))
+        class_names = utils.load_pickle(os.path.join(data_path_, self.data_files[0]))
 
         # load train data files
-        train_batch1 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[1]))
-        train_batch2 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[2]))
-        train_batch3 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[3]))
-        train_batch4 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[4]))
-        train_batch5 = utils.load_pickle(os.path.join(self.data_path, 'cifar-10-batches-py', self.data_files[5]))
+        train_batch1 = utils.load_pickle(os.path.join(data_path_, self.data_files[1]))
+        train_batch2 = utils.load_pickle(os.path.join(data_path_, self.data_files[2]))
+        train_batch3 = utils.load_pickle(os.path.join(data_path_, self.data_files[3]))
+        train_batch4 = utils.load_pickle(os.path.join(data_path_, self.data_files[4]))
+        train_batch5 = utils.load_pickle(os.path.join(data_path_, self.data_files[5]))
 
         # concatenate data
         train_data = np.concatenate((
@@ -95,18 +97,20 @@ class Cifar10:
             axis=0)
 
         train_data = train_data.reshape((50000, 3, 32, 32))
+        train_data = np.transpose(train_data, (0,2,3,1)) # NxHxWxC
         train_object_list = self.get_object_list(train_data, train_labels)
 
         # load test data file
-        test_batch = utils.load_pickle(os.path.join(self.data_path, self.data_files[6]))
+        test_batch = utils.load_pickle(os.path.join(data_path_, self.data_files[6]))
 
         test_data = test_batch['data'].reshape(10000, 3, 32, 32)
+        test_data = np.transpose(test_data, (0,2,3,1)) # NxHxWxC
         test_labels = test_batch['labels']
         test_object_list = self.get_object_list(test_data, test_labels)
 
         #return a dictionary
         return {
-            "class_names": class_names,
+            "class_names": class_names['label_names'],
             "train_data": train_data,
             "train_labels": train_labels,
             "train_object_id_list": train_object_list,
@@ -125,19 +129,19 @@ class Cifar10:
         data = self.load_data()
 
         # create/open hdf5 file with subgroups for train/val/test
-        file_name = os.path.join(self.data_path, 'classification.h5')
+        file_name = os.path.join(self.cache_manager, 'classification.h5')
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
         # write data to the metadata file
-        fileh5.add_data('train', 'data', data["class_names"])
-        fileh5.add_data('train', 'class_name', data["train_data"])
-        fileh5.add_data('train', 'class_id', data["train_labels"])
-        fileh5.add_data('train', 'object_id', data["train_object_id_list"])
+        fileh5.add_data('train', 'class_name', utils.convert_str_ascii(data["class_names"]), np.uint8)
+        fileh5.add_data('train', 'data', data["train_data"], np.uint8)
+        #fileh5.add_data('train', 'class_id', data["train_labels"], np.uint8)
+        fileh5.add_data('train', 'object_id', data["train_object_id_list"], np.uint16)
 
-        fileh5.add_data('test', 'data', data["class_names"])
-        fileh5.add_data('test', 'class_name', data["test_data"])
-        fileh5.add_data('test', 'class_id', data["test_labels"])
-        fileh5.add_data('test', 'object_id', data["test_object_id_list"])
+        fileh5.add_data('test', 'class_name', utils.convert_str_ascii(data["class_names"]), np.uint8)
+        fileh5.add_data('test', 'data', data["test_data"], np.uint8)
+        #fileh5.add_data('test', 'class_id', data["test_labels"], np.uint8)
+        fileh5.add_data('test', 'object_id', data["test_object_id_list"], np.uint16)
 
         # close file
         fileh5.close()

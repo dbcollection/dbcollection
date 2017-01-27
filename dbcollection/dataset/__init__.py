@@ -42,20 +42,24 @@ def process(name, data_path, cache_path, download, verbose):
     """
     Download/process data of a dataset.
     """
-
     # fetch dataset constructor
     category, constructor = fetch_dataset_constructor(name)
 
-    # setup data+cache path names
+    # merge paths with the name+category
     data_path_ = os.path.join(data_path, name)
     cache_path_ = os.path.join(cache_path, category, name)
 
     # setup dataset constructor
     dataset_loader = constructor(data_path_, cache_path_, verbose)
 
-    # download data if it doesn't exists on disk
+    # check if the directories exist already
     if not os.path.exists(data_path_):
-        dataset_loader.download()
+        os.makedirs(data_path_)
+    if not os.path.exists(cache_path_):
+        os.makedirs(cache_path_)
+
+    # download data
+    dataset_loader.download()
 
     # process metadata
     cache_info = dataset_loader.process()

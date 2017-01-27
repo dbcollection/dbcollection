@@ -14,6 +14,7 @@ import hashlib
 import scipy.io
 import json
 import sys
+import numpy as np
 if sys.version_info[0] == 2:
     import cPickle as pickle
 else:
@@ -85,6 +86,10 @@ def download_file(url, dir_name, fname_save, verbose=False):
     """
     # save file
     file_save_name = fname_save
+
+    # check if the filename already exists
+    if os.path.exists(file_save_name):
+        return True
 
     # check if the path exists
     if not os.path.exists(dir_name):
@@ -199,9 +204,12 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False,verbose=True)
     # Check if urls is a str
     if isinstance(urls, str):
         urls = [urls]
-    
+
     # download + extract data and remove temporary files
-    for url in urls:
+    for i, url in enumerate(urls):
+        if verbose:
+            print('Download url '+str(i+1)+'/'+str(len(urls)))
+
         # get download save filename
         fname_save = url_get_filename(url, dir_save)
 
@@ -253,7 +261,7 @@ def load_pickle(fname):
     fo = open(fname, 'rb')
 
     # convert to dictionary
-    data = pickle.load(fo)
+    data = pickle.load(fo, encoding='latin1')
 
     # close file
     fo.close()
@@ -261,5 +269,54 @@ def load_pickle(fname):
     # return dictionary
     return data
 
+
+#---------------------------------------------------------
+# String manipulation
+#---------------------------------------------------------
+
+def str_to_ascii(s):
+    """
+    Convert string to ascii list
+    """
+    return np.array([ord(c) for c in s], dtype=np.uint8)
+
+
+def ascii_to_str(a):
+    """
+    Convert ascii list to a string
+    """
+    return "".join([chr(item) for item in a])
+
+
+def convert_str_ascii(inp_str):
+    """
+    Convert a list of strings into a numpy array (uint8)
+    """
+    # check if list
+    if isinstance(inp_str, list):
+        # get max size of the list strings
+        max_size = max([len(a) for a in inp_str])
+
+        # allocate array
+        ascii_array = np.zeros([len(inp_str), max_size+1], dtype=np.uint8)
+
+        # iteratively copy data to the array
+        for i, val in enumerate(inp_str):
+            ascii_array[i, :len(val)] = str_to_ascii(val)
+
+        return ascii_array
+    else:
+        return str_to_ascii(inp_str)
+
+
+def convert_ascii_str(np_array):
+    """
+    Convert a numpy array to a string (or a list of strings)
+    """
+    list_str = np_array.tolist()
+    if np_array.ndim == 1:
+        return ascii_to_str(list_str)
+    else:
+        return [ascii_to_str(list(filter(lambda x: x > 0, str_))) for str_ in list_str]
 
 

@@ -115,10 +115,7 @@ class CacheManager:
         Check if the dataset name exists in the available dictionary keys.
         """
         try:
-            if name in self.data['dataset'].keys():
-                return True
-            else:
-                return False
+            return name in self.data['dataset'].keys()
         except KeyError:
             return False
 
@@ -127,27 +124,50 @@ class CacheManager:
         """
         Get data from a field of a dataset.
         """
-        return self.data['dataset'][name][field]
+        category = self.get_category(name)
+        try:
+            return self.data['dataset'][category][name][field]
+        except KeyError:
+            raise
 
+
+    def add_data(self, category, name, new_info):
+        """
+        Adds/appends a new category/dataset to the data file.
+        """
+        # check if category already exists
+        if category in self.data['dataset'].keys():
+            # check if the dataset already exists
+            if name in self.data['dataset'][category].keys():
+                # update the old info with the new data
+                old_info = self.data['dataset'][category][name]
+                cache_files = old_info['cached_files']
+                cache_files.update(new_info['cached_files'])
+                new_info['cached_files'] = cache_files
+        else:
+            self.data['dataset'][category] = {}
+
+        # add the new info to the dictionary
+        self.data['dataset'][category][name] = new_info
+
+
+    def get_category(self, name):
+        """
+        Returns the dataset category name of a dataset.
+        """
+        for category in self.data['dataset'].keys():
+            if name in self.data['dataset'][category].keys():
+                return category
+        return None
 
     def exists_dataset(self, name):
         """
         Check if a dataset exists for loading.
         """
         # check if the dataset exists in the cache file
-        for category in self.data['dataset'].keys():
-            if name in self.data['dataset'][category].keys():
-                return True
-        return False
-
-
-    def exists_task(self, name, task):
-        """
-        Description
-        """
-        if task in self.data['dataset'][name]['task'].keys():
-            return True
-        else:
+        try:
+            return name in self.data['dataset'][self.get_category(name)]
+        except KeyError:
             return False
 
 
@@ -155,10 +175,9 @@ class CacheManager:
         """
         Check if a dataset+task exists in the cache file.
         """
-        # check if dataset name exists in the cache data
-        if self.exists_dataset(name):
-            return self.exists_task(name, task)
-        else:
+        try:
+            return task in self.data['dataset'][self.get_category(name)][name]['cache_files']
+        except KeyError:
             return False
 
 
@@ -182,7 +201,10 @@ class CacheManager:
         """
         Fetches the cache data of a dataset.
         """
-        return self.data['dataset'][name]
+        try:
+            return self.data['dataset'][self.get_category(name)][name]
+        except KeyError:
+            raise Exception('Dataset '+str(name)+' does not exist in the cache file.')
 
 
     def get_cache_path(self, name, task):
@@ -193,7 +215,7 @@ class CacheManager:
         cache_data = self.get_dataset_data(name)
 
         # fetch the path of the metadata file for this task
-        cache_path = cache_data['task'][task]
+        cache_path = cache_data['cache_files'][task]
 
         return cache_path
 
@@ -210,4 +232,8 @@ class CacheManager:
         }
 
         # update data with the new info
-        self.data['dataset'][category][name] = new_info_dict
+        self.add_data(category, name, new_info_dict)
+
+        # write to file
+        self.write_data_cache(self.data)
+

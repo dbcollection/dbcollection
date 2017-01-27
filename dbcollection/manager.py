@@ -3,6 +3,7 @@ dbcollection managing functions.
 """
 
 from __future__ import print_function
+import json
 from .cache import CacheManager
 from .loader import DatasetLoader
 from . import dataset
@@ -58,6 +59,8 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
 
         # update dbcollection.json file with the new data
         cache_manager.update(name, dataset_category, data_path, cache_info)
+    else:
+        dataset_category = cache_manager.get_category(name)
 
     # get cache path
     cache_path = cache_manager.get_cache_path(name, task)
@@ -219,6 +222,6 @@ def list():
     -------
         None
     """
-    print(cache_manager.data)
+    print(json.dumps(cache_manager.data, sort_keys=True, indent=4))
 
 

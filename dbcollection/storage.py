@@ -104,7 +104,7 @@ class StorageHDF5:
             return False
 
 
-    def add_data(self, group, field_name, data):
+    def add_data(self, group, field_name, data, dtype=None):
         """
         Add data to a hdf5 file.
         """
@@ -112,6 +112,9 @@ class StorageHDF5:
         field_str = self.parse_str(group, field_name)
 
         # add data to the file
+        if not dtype is None:
+            data = data.astype(dtype)
+
         self.storage.create_dataset(field_str, data=data)
 
 

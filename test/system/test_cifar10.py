@@ -20,3 +20,9 @@ dbcollection.manager.list()
 dl_path = '/home/mf/tmp/download_data'
 loader = dbcollection.manager.load(name='cifar10',data_path=dl_path, verbose=True)
 
+# print data from the loader
+print('Dataset: '+loader.name)
+print('Category: '+loader.category)
+print('Task: '+loader.task)
+print('Data path: '+loader.data_path)
+print('Metadata cache path: '+loader.cache_path)
