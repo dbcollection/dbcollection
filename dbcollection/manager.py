@@ -3,6 +3,7 @@ dbcollection managing functions.
 """
 
 from __future__ import print_function
+import sys
 import json
 from .cache import CacheManager
 from .loader import DatasetLoader
@@ -84,7 +85,7 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
 
 
 
-def add(name, data_path, cache_path, category, task):
+def add(name, data_dir, cache_file_path, task='default'):
     """Add dataset to list.
 
     Adds a custom dataset to the list.
@@ -93,12 +94,10 @@ def add(name, data_path, cache_path, category, task):
     ----------
     name : str
         Dataset name to add to the list.
-	data_path : str
+	data_dir : str
         Folder path of the dataset's data on disk.
-	cache_path : str
-        Cache's metadata storage path.
-	category : str
-        Name of the category (refactor this idea an save in a custom category).
+	cache_file_path : str
+        Cache's metadata file path.
 	task : str
         Name of the new task.
 
@@ -106,7 +105,14 @@ def add(name, data_path, cache_path, category, task):
     -------
         None
     """
-    pass
+    # split dir and filename from path
+    if sys.platform == 'win32':
+        cache_dir = cache_file_path.rsplit('\\', 1)[0]
+    else:
+        cache_dir = cache_file_path.rsplit('/', 1)[0]
+
+    # add dataset info to the dataset
+    cache_manager.update(name, 'custom', data_dir, cache_dir, {task:cache_file_path})
 
 
 def delete(name):
@@ -178,8 +184,8 @@ def download(name, data_path, verbose=True):
         Name of the dataset to reset the cache.
     cache : bool
         Force the cache file of the preprocessed data to be deleted for the particular dataset.
-	data : bool
-        Force the dataset's data files to be deleted for the particular dataset.
+	data_path : str
+        Data path to store the dataset's data.
 
     Returns
     -------
@@ -245,7 +251,6 @@ def query(pattern):
     if pattern in cache_manager.data['dataset']:
         query_list.append(cache_manager.data['info'][pattern].keys())
 
-    query_list = []
     for category in cache_manager.data['dataset']:
         if pattern in cache_manager.data['dataset'][category]:
             query_list.append(cache_manager.data['dataset'][category][pattern])
