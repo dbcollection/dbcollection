@@ -4,6 +4,7 @@ Class to manage the dbcollection.json cache file.
 
 
 import os
+import errno
 import json
 
 
@@ -36,14 +37,14 @@ class CacheManager:
         This paths were designed to work on windows, linx, mac, etc.
         """
          # cache directory path (should work for all platforms)
-        self.cache_path = os.path.expanduser("~")
+        self.cache_dir = os.path.expanduser("~")
 
         # cache file path
-        self.cache_fname = os.path.join(self.cache_path, '.dbcollection.json')
+        self.cache_fname = os.path.join(self.cache_dir, '.dbcollection.json')
 
         # default paths
-        self.default_cache_path = os.path.join(self.cache_path, 'dbcollection')
-        self.default_data_path = self.default_cache_path
+        self.default_cache_dir = os.path.join(self.cache_dir, 'dbcollection')
+        self.default_data_dir = self.default_cache_dir
 
 
     def read_data_cache_file(self):
@@ -88,8 +89,8 @@ class CacheManager:
         """
         return {
             "info": {
-                "default_cache_path": self.default_cache_path,
-		        "default_data_path": self.default_data_path
+                "default_cache_dir": self.default_cache_dir,
+		        "default_data_dir": self.default_data_dir
             },
             "dataset": {}
         }
@@ -102,12 +103,25 @@ class CacheManager:
         self.write_data_cache(self.empty_data(), fname)
 
 
-    def delete_cache_file_disk(self, fname):
+    def delete_dataset_cache(self, name):
         """
-        Deletes the cache file from disk.
+        Delete the cache data from disk of a dataset.
         """
-        if os.path.exists(fname):
-            os.remove(fname)
+        # get cache dir path
+        cache_dir_path = self.data['dataset'][self.get_category(name)][name]['cache_dir']
+
+        # remove cache dir
+        try:
+            os.remove(cache_dir_path)
+        except OSError as err:
+            if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
+                raise
+
+        # remove entry from the data
+        self.data['dataset'][self.get_category(name)].pop(name)
+
+        # write updated data to file
+        self.write_data_cache(self.data)
 
 
     def check_dataset_name(self, name):
@@ -151,6 +165,24 @@ class CacheManager:
         self.data['dataset'][category][name] = new_info
 
 
+    def delete_dataset(self, name, delete_data=False):
+        """
+        Delete a dataset from disk/cache.
+        """
+        dset_paths = self.get_dataset_storage_paths(name)
+
+        # remove cache directory
+        self.delete_dataset_cache(name)
+
+        # delete data from disk
+        if delete_data is True:
+            try:
+                os.remove(dset_paths['data_dir'])
+            except OSError as err:
+                if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
+                    raise
+
+
     def get_category(self, name):
         """
         Returns the dataset category name of a dataset.
@@ -159,6 +191,7 @@ class CacheManager:
             if name in self.data['dataset'][category].keys():
                 return category
         return None
+
 
     def exists_dataset(self, name):
         """
@@ -187,13 +220,13 @@ class CacheManager:
         """
         if self.exists_dataset(name):
             return {
-                "cache_path": self.get_data_from_field(name, "cache_path"),
-                "data_path": self.get_data_from_field(name, "data_path")
+                "cache_dir": self.get_data_from_field(name, "cache_dir"),
+                "data_dir": self.get_data_from_field(name, "data_dir")
             }
         else:
             return {
-                "cache_path": os.path.join(self.default_cache_path, name, 'cache'),
-                "data_path": os.path.join(self.default_data_path, name, 'data')
+                "cache_dir": os.path.join(self.default_cache_dir, name, 'cache'),
+                "data_dir": os.path.join(self.default_data_dir, name, 'data')
             }
 
 
@@ -220,14 +253,14 @@ class CacheManager:
         return cache_path
 
 
-    def update(self, name, category, data_path, cache_path, cache_info):
+    def update(self, name, category, data_dir, cache_dir, cache_info):
         """
         Update the cache file with new/updated data for a dataset.
         """
         # build info dictionary
         new_info_dict = {
-            "data_path": data_path,
-            "cache_path": cache_path,
+            "data_dir": data_dir,
+            "cache_dir": cache_dir,
             "cache_files": cache_info
         }
 
