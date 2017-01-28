@@ -205,3 +205,19 @@ unit tests (so far):
 - manager: test_manager (0/8)
 - loader: test_loader (0/7)
 - cache: test_cache (8/17)
+
+### Requirements to go live
+
+- Manager API:
+	- selecionar campos
+	- filtrar campos
+	- organizar campos
+	- data balancing (train/test/val)
+- Fazer loader API
+- setup.py do pacote
+- testes em windows
+- testes com python 2.7
+- LuaAPI + MatlabAPI
+- unit tests
+- system tests
+- readme + docs + notebooks
