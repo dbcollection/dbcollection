@@ -142,7 +142,7 @@ class DatasetLoader:
     """ Dataset loader """
 
 
-    def __init__(self, name, category, task, data_path, cache_path):
+    def __init__(self, name, category, task, data_dir, cache_path):
         """Initialize class.
 
         Parameters
@@ -153,10 +153,10 @@ class DatasetLoader:
             Category of the dataset (e.g. image processing, natural language processing)
         task : str
             Name of the task.
-        data_path : str
-            Path to the dataset's data on disk.
+        data_dir : str
+            Path of the dataset's data directory on disk.
         cache_path : str
-            Path to the metadata cache file on disk.
+            Path of the metadata cache file stored on disk.
 
         Returns
         -------
@@ -166,11 +166,11 @@ class DatasetLoader:
         self.name = name
         self.category = category
         self.task = task
-        self.data_path = data_path
+        self.data_dir = data_dir
         self.cache_path = cache_path
 
         # load the cache file
-        self.file = StorageHDF5(cache_path, 'r')
+        self.file = StorageHDF5(self.cache_path, 'r')
 
         # make links for all groups (train/val/test) for easier access
         self.add_group_links()
