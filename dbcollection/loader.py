@@ -4,26 +4,30 @@ Dataset loader class.
 
 
 from .storage import StorageHDF5
+from .utils import convert_ascii_str
 
 
 class ManagerHDF5:
     """ HDF5 data loading class """
 
 
-    def __init__(self, handler_file, group_name):
+    def __init__(self, data_handler):
         """Initialize class.
 
         Parameters
         ----------
-        cache_path : str
-            Path to the metadata cache file on disk.
+        data_handler : dict (hdf5)
+            A handler for hdf5 'dictionary'.
 
         Returns
         -------
             None
         """
+        self.data = data_handler
+
+        # fetch list of field names that compose the object list.
         try:
-            self.data = handler_file.storage[group_name]
+            self.object_fields = convert_ascii_str(self.data['object_fields'])
         except KeyError:
             raise
 
@@ -52,10 +56,11 @@ class ManagerHDF5:
             raise
 
 
-    def object_id(self, id, is_value=False):
+    def object(self, id, is_value=False):
         """Get list of ids/values of an object.
 
-        Retrieve the data of all fields of an object: It works as calling :get() for each field individually and grouping them into a list.
+        Retrieve the data of all fields of an object: It works as calling :get() for
+        each field individually and grouping them into a list.
 
         Parameters
         ----------
@@ -77,9 +82,11 @@ class ManagerHDF5:
             # convert id to a list (in case it is a number)
             if not isinstance(id, list):
                 id_ = [id]
+            else:
+                id_ = id
 
             # fetch the field names composing 'object_id'
-            fields = self.data['object_fields']
+            fields = self.object_fields
 
             # iterate over all ids and build an output list
             output = []
@@ -88,7 +95,11 @@ class ManagerHDF5:
                 ids = self.data['object_id'][idx]
 
                 # fetch data for each element of the list
-                output.append = [self.data[field_name][ids[i]] in i, field_name in enumerate(fields)]
+                #output.append = [self.data[field_name][ids[i]] for i, field_name in enumerate(fields)]
+                data = []
+                for i, field_name in enumerate(fields):
+                    data.append(self.data[field_name][ids[i]])
+                output.append(data)
 
             # output data
             if len(id_) == 1:
@@ -114,9 +125,9 @@ class ManagerHDF5:
             (if empty it returns the size of the object list).
         """
         try:
-            return self.data[field_name].len()
+            return self.data[field_name].shape[0]
         except KeyError:
-            return self.data['object_id'].len()
+            return self.data['object_id'].shape[0]
 
 
     def list(self):
@@ -170,4 +181,4 @@ class DatasetLoader:
         Adds links for the groups for easier access to data.
         """
         for name in self.file.storage.keys():
-            setattr(self, name, ManagerHDF5(self.file, name))
+            setattr(self, name, ManagerHDF5(self.file.storage[name]))
