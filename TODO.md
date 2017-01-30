@@ -213,11 +213,13 @@ unit tests (so far):
 	- filtrar campos
 	- organizar campos
 	- data balancing (train/test/val)
-- Fazer loader API
-- setup.py do pacote
-- testes em windows
-- testes com python 2.7
-- LuaAPI + MatlabAPI
-- unit tests
+- Fazer loader API (Done)
+- unit tests (a fazer)
+- testes do cifar10 (mostrar imagens random)
+- LuaAPI (TODO)
 - system tests
+- setup.py do pacote
+- testes com python 2.7
+- testes em windows
+- MatlabAPI
 - readme + docs + notebooks
