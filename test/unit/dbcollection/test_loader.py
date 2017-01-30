@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+
 """
 dbcollection/loader.py unit testing.
 """
@@ -13,7 +16,7 @@ from unittest.mock import patch, mock_open
 dir_path = os.path.dirname(os.path.realpath(__file__))
 lib_path = os.path.abspath(os.path.join(dir_path,'..','..','..'))
 sys.path.append(lib_path)
-from dbcollection import loader, utils
+from dbcollection import utils, loader
 
 
 #-----------------------
@@ -247,7 +250,7 @@ class ManagerHDF5Test(unittest.TestCase):
 
 
 
-class LoaderTest(unittest.TestCase):
+class DatasetLoaderTest(unittest.TestCase):
     """
     Test class.
     """
@@ -256,17 +259,43 @@ class LoaderTest(unittest.TestCase):
         """
         Initialize class.
         """
-        #self.widget = Widget('widget')
+        # sample data
+        sample_name = 'cifar10'
+        sample_category = 'image_processing'
+        sample_task = 'classification'
+        sample_data_dir = '/dir1/data'
+        sample_cache_file_path = 'dir1/metadata.h5',
 
+        class MockClasses():
+            storage = {sample_name: True}
+            def __init__(self, name=None, mode=None):
+                self.ok = True
+
+        # mock functions
+        loader.StorageHDF5 = MockClasses()
+        loader.ManagerHDF5 = MockClasses()
+
+        # create a loader object
+      #  self.loader = loader.DatasetLoader(
+      #      name = sample_name, 
+      #      category = sample_category, 
+      #      task = sample_task,
+      #      data_dir = sample_data_dir,
+      #      cache_path = sample_cache_file_path,
+      #  )
+
+        # check if the loader object was properly loaded
+       # self.assertEqual(self.loader.name, sample_name ,'Values should be the same')
+       # self.assertEqual(self.loader.category, sample_category ,'Values should be the same')
+       # self.assertEqual(self.loader.task, sample_task ,'Values should be the same')
+       # self.assertEqual(self.loader.data_dir, sample_data_dir ,'Values should be the same')
+       # self.assertEqual(self.loader.cache_path, sample_cache_file_path ,'Values should be the same')
+
+
+    
     def test_one(self):
         """
         Test one.
-        """
-        pass
-
-    def test_two(self):
-        """
-        Test two.
         """
         pass
 

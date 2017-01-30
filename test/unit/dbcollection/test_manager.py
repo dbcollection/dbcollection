@@ -1,7 +1,12 @@
+#!/usr/bin/env python3
+
+
 """
 dbcollection/manager.py unit testing.
 """
 
+import os
+import sys
 
 import unittest
 from unittest import mock
