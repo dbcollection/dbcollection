@@ -31,7 +31,7 @@ def create_dir(dir_name, verbose=False):
     Create directory if not existing.
     """
     if verbose:
-        print('Creating directory: {}'.format(dir_name))
+        print('Creating directory: ' + dir_name)
     os.makedirs(dir_name)
 
 
@@ -264,17 +264,11 @@ def load_pickle(fname):
     """
     Loads a pickle file to memory.
     """
-    # open file
-    fo = open(fname, 'rb')
-
-    # convert to dictionary
-    data = pickle.load(fo, encoding='latin1')
-
-    # close file
-    fo.close()
-
-    # return dictionary
-    return data
+    try:
+        with open(fname, 'rb') as data_file:
+            return pickle.load(data_file, encoding='latin1')
+    except IOError:
+        raise
 
 
 #---------------------------------------------------------
