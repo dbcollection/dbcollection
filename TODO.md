@@ -202,7 +202,7 @@ This repo tries to follow the PEP8 style convention as close as possible.
 unit tests (so far):
 - utils: test_utils (13/22)
 - storage: test_storage (2/10)
-- manager: test_manager (0/8)
+- manager: test_manager (7/8)
 - loader: test_loader (0/7)
 - cache: test_cache (8/17)
 

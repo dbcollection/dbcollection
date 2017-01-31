@@ -10,10 +10,6 @@ from .loader import DatasetLoader
 from . import dataset
 
 
-# check if there's an entry in the cache file for the dataset
-cache_manager = CacheManager()
-
-
 def load(name, data_path=None, save_name=None, task='default', download=True, verbose=True, organize_list=None, select=None, filter=None):
     """loads dataset metadata file.
 
@@ -50,6 +46,9 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
        Returns a loader class.
     """
 
+    # Load a cache manager object
+    cache_manager = CacheManager()
+
     # check if dataset exists in the cache file
     if cache_manager.exists(name, task):
         dataset_category = cache_manager.get_category(name)
@@ -74,7 +73,7 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
     dset_paths = cache_manager.get_dataset_storage_paths(name)
 
     # Create a loader
-    dataset_loader = DatasetLoader(name, dataset_category, task, dset_paths['data_path'], cache_path)
+    dataset_loader = DatasetLoader(name, dataset_category, task, dset_paths['data_dir'], cache_path)
 
     # organize data into a list w.r.t. some field_name
     # do select/filter processing here
@@ -105,6 +104,9 @@ def add(name, data_dir, cache_file_path, task='default'):
     -------
         None
     """
+    # Load a cache manager object
+    cache_manager = CacheManager()
+
     # split dir and filename from path
     if sys.platform == 'win32':
         cache_dir = cache_file_path.rsplit('\\', 1)[0]
@@ -129,9 +131,38 @@ def delete(name):
     -------
         None
     """
+    # Load a cache manager object
+    cache_manager = CacheManager()
+
     # check if dataset exists in the cache file
     if cache_manager.exists_dataset(name):
         cache_manager.delete_dataset(name, True)
+    else:
+        print('Dataset ' + name + ' does not exist.')
+        #raise Exception('Dataset ' + name + ' does not exist.')
+
+
+def reset(name):
+    """Delete all metadata cache files and dir from disk/list.
+
+    Resets the data of the dbcollection.json cache file for a specific dataset
+    (it deletes the cache files for this dataset as well, if any).
+
+    Parameters
+    ----------
+	name : str
+        Name of the dataset to reset the cache.
+
+    Returns
+    -------
+        None
+    """
+    # Load a cache manager object
+    cache_manager = CacheManager()
+
+     # check if dataset exists in the cache file
+    if cache_manager.exists_dataset(name):
+        cache_manager.delete_dataset(name, False)
     else:
         print('Dataset ' + name + ' does not exist.')
         #raise Exception('Dataset ' + name + ' does not exist.')
@@ -148,13 +179,18 @@ def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None
         Name of the dataset.
 	fields : dict
         Specifies which fields and values to update the dbcollection cache file.
-	default_paths : dict
-        Updates the default cache/data paths.
+    cache_dir_default : str
+        New path to the metadata cache files root directory.
+    data_dir_default : str
+        New path to the dataset's data storage root directory.
 
     Returns
     -------
         None
     """
+    # Load a cache manager object
+    cache_manager = CacheManager()
+
     # change default cache path
     if not cache_dir_default is None:
         cache_manager.default_cache_dir = cache_dir_default
@@ -167,10 +203,11 @@ def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None
     if not name is None:
         if isinstance(fields, dict):
             if cache_manager.exists_dataset(name):
-                for field, val in enumerate(fields):
-                    cache_manager.change_field(name, field, val)
+                for field_name in fields.keys():
+                    cache_manager.change_field(name, field_name, fields[field_name])
             else:
                 print('Dataset ' + name + ' does not exist.')
+                #raise Exception('Dataset ' + name + ' does not exist.')
 
 
 def download(name, data_path, verbose=True):
@@ -191,35 +228,14 @@ def download(name, data_path, verbose=True):
     -------
         None
     """
+    # Load a cache manager object
+    cache_manager = CacheManager()
+
     # get cache default save path
-    cache_save_path = cache_manager.default_cache_dir
+    cache_save_dir = cache_manager.default_cache_dir
 
     # download/preprocess dataset
-    dataset.download(name, data_path, cache_save_path, verbose)
-
-
-
-def reset(name):
-    """Delete all metadata cache files and dir from disk/list.
-
-    Resets the data of the dbcollection.json cache file for a specific dataset
-    (it deletes the cache files for this dataset as well, if any).
-
-    Parameters
-    ----------
-	name : str
-        Name of the dataset to reset the cache.
-
-    Returns
-    -------
-        None
-    """
-     # check if dataset exists in the cache file
-    if cache_manager.exists_dataset(name):
-        cache_manager.delete_dataset(name, False)
-    else:
-        print('Dataset ' + name + ' does not exist.')
-        #raise Exception('Dataset ' + name + ' does not exist.')
+    dataset.download(name, data_path, cache_save_dir, verbose)
 
 
 def query(pattern):
@@ -238,6 +254,9 @@ def query(pattern):
     """
     # init list
     query_list = []
+
+    # Load a cache manager object
+    cache_manager = CacheManager()
 
     # check info / dataset lists first
     if pattern in cache_manager.data:
@@ -261,7 +280,10 @@ def query(pattern):
                 query_list.append(cache_manager.data['dataset'][category][name]['cache_files'][pattern])
 
     # output list
-    return query_list
+    if len(query_list) == 1:
+        return query_list[0]
+    else:
+        return query_list
 
 
 def list(verbose=False):
@@ -279,6 +301,9 @@ def list(verbose=False):
     -------
         None
     """
+    # Load a cache manager object
+    cache_manager = CacheManager()
+
     data_ = cache_manager.data
     if not verbose:
         cat_dataset_dict = {}
