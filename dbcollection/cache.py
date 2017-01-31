@@ -35,6 +35,18 @@ class CacheManager:
         is stored.
 
         This paths were designed to work on windows, linx, mac, etc.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
          # cache directory path (should work for all platforms)
         self.cache_dir = os.path.expanduser("~")
@@ -49,12 +61,25 @@ class CacheManager:
 
     def read_data_cache_file(self):
         """
-        Read cache file to memory.
+        Read the cache file data to memory.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+        dict
+            Cache's data structure.
+
+        Raises
+        ------
+        IOError
+            If the file cannot be opened.
         """
         try:
             with open(self.cache_fname, 'r') as json_data:
-                data = json.load(json_data)
-            return data
+                return json.load(json_data)
         except IOError:
             raise
 
@@ -62,10 +87,22 @@ class CacheManager:
     def read_data_cache(self):
         """
         Load data from the dbcollection cache file.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+        dict
+            Cache's data structure.
+
+        Raises
+        ------
+            None
         """
         # check if file exists
         if os.path.exists(self.cache_fname):
-            # open file + load data
             return self.read_data_cache_file()
         else:
             return self.empty_data()
@@ -74,6 +111,22 @@ class CacheManager:
     def write_data_cache(self, data, fname=None):
         """
         Write data to the dbcollection cache file.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        fname : str
+            File path+name to store the cache data.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+        IOError
+            If the file cannot be opened.
         """
         filename = fname or self.cache_fname
         try:
@@ -85,7 +138,20 @@ class CacheManager:
 
     def empty_data(self):
         """
-        Returns an empty template of the cache data structure
+        Returns an empty template of the cache data structure.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+        dict
+            Dummy data structure.
+
+        Raises
+        ------
+            None
         """
         return {
             "info": {
@@ -103,22 +169,86 @@ class CacheManager:
         self.write_data_cache(self.empty_data(), fname)
 
 
-    def delete_dataset_cache(self, name):
+    def os_remove(self, fname):
         """
-        Delete the cache data from disk of a dataset.
-        """
-        # get cache dir path
-        cache_dir_path = self.data['dataset'][self.get_category(name)][name]['cache_dir']
+        Remove a file/directory from disk.
 
-        # remove cache dir
+        Parameters
+        ----------
+        fname : str
+            File name+path on disk.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+        OSError
+            If the file does not exist.
+        """
         try:
-            os.remove(cache_dir_path)
+            os.remove(fname)
         except OSError as err:
             if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
                 raise
 
+
+    def delete_entry(self, category, name):
+        """
+        Delete a dataset entry from a category dictionary.
+
+        Parameters
+        ----------
+        category : str
+            Category's name.
+        namefname : str
+            Dataset's name.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+        KeyError
+            If the category or the dataset name don't exist.
+        """
+        try:
+            self.data['dataset'][category].pop(name)
+        except KeyError:
+            raise
+
+
+    def delete_dataset_cache(self, name):
+        """
+        Delete the cache data from disk of a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        # category name
+        category = self.get_category(name)
+
+        # get cache dir path
+        cache_dir_path = self.get_data_from_field(name, 'cache_dir')
+        #cache_dir_path = self.data['dataset'][category][name]['cache_dir']
+
+        # remove cache dir
+        self.os_remove(cache_dir_path)
+
         # remove entry from the data
-        self.data['dataset'][self.get_category(name)].pop(name)
+        self.delete_entry(category, name)
 
         # write updated data to file
         self.write_data_cache(self.data)
@@ -127,9 +257,25 @@ class CacheManager:
     def check_dataset_name(self, name):
         """
         Check if the dataset name exists in the available dictionary keys.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        bool
+            If the dataset exists, returns True.
+            Else return False.
+
+        Raises
+        ------
+        KeyError
+            If the dataset name doesn't exist.
         """
         try:
-            return name in self.data['dataset'].keys()
+            return name in self.data['dataset'][self.get_category(name)].keys()
         except KeyError:
             return False
 
@@ -137,6 +283,23 @@ class CacheManager:
     def get_data_from_field(self, name, field):
         """
         Get data from a field of a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        field : str
+            Field name identifier.
+
+        Returns
+        -------
+        dict
+            Cache's data structure.
+
+        Raises
+        ------
+        KeyError
+            If the dataset name doesn't exist.
         """
         try:
             return self.data['dataset'][self.get_category(name)][name][field]
@@ -147,6 +310,25 @@ class CacheManager:
     def change_field(self, name, field, val):
         """
         Change the data of a field of a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        field : str
+            Field name identifier.
+        val : <any>
+            New value.
+
+        Returns
+        -------
+        dict
+            Cache's data structure.
+
+        Raises
+        ------
+        KeyError
+            If the dataset/field name doesn't exist.
         """
         try:
             self.data['dataset'][self.get_category(name)][name][field] = val
@@ -157,6 +339,23 @@ class CacheManager:
     def add_data(self, category, name, new_info):
         """
         Adds/appends a new category/dataset to the cache file.
+
+        Parameters
+        ----------
+        category : str
+            Name of the category.
+        name : str
+            Name of the dataset.
+        new_info : dict
+            New data.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         # check if category already exists
         if category in self.data['dataset'].keys():
@@ -177,6 +376,21 @@ class CacheManager:
     def delete_dataset(self, name, delete_data=False):
         """
         Delete a dataset from disk/cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        delete_data : bool
+            Flag indicating if the data's directory has to be deleted (or skip it).
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         dset_paths = self.get_dataset_storage_paths(name)
 
@@ -185,16 +399,26 @@ class CacheManager:
 
         # delete data from disk
         if delete_data is True:
-            try:
-                os.remove(dset_paths['data_dir'])
-            except OSError as err:
-                if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
-                    raise
+            self.os_remove(dset_paths['data_dir'])
 
 
     def get_category(self, name):
         """
         Returns the dataset category name of a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        str
+            Returns the category name if found, else returns None.
+
+        Raises
+        ------
+            None
         """
         for category in self.data['dataset'].keys():
             if name in self.data['dataset'][category].keys():
@@ -205,6 +429,21 @@ class CacheManager:
     def exists_dataset(self, name):
         """
         Check if a dataset exists for loading.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        bool
+            Return true if the category exists, else return False.
+
+        Raises
+        ------
+        KeyError
+            If the category name does not exist in the dictionary.
         """
         # check if the dataset exists in the cache file
         try:
@@ -216,6 +455,23 @@ class CacheManager:
     def exists(self, name, task):
         """
         Check if a dataset+task exists in the cache file.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        bool
+            Return true if the task exists, else return False.
+
+        Raises
+        ------
+        KeyError
+            If the task does not exist in the dictionary.
         """
         try:
             return task in self.data['dataset'][self.get_category(name)][name]['cache_files']
@@ -226,6 +482,20 @@ class CacheManager:
     def get_dataset_storage_paths(self, name):
         """
         Get dataset save/load path.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        dict
+            Dataset's data+cache paths.
+
+        Raises
+        ------
+            None
         """
         if self.exists_dataset(name):
             return {
@@ -242,6 +512,21 @@ class CacheManager:
     def get_dataset_data(self, name):
         """
         Fetches the cache data of a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        dict
+            Cache data structure of a particular dataset.
+
+        Raises
+        ------
+        KeyError
+            If the dataset name does not exist in the dictionary.
         """
         try:
             return self.data['dataset'][self.get_category(name)][name]
@@ -252,6 +537,22 @@ class CacheManager:
     def get_cache_path(self, name, task):
         """
         Return the cache path of a specific task.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        str
+            Cache name+path of a specific task.
+
+        Raises
+        ------
+            None
         """
         # fetch cache data of the dataset
         cache_data = self.get_dataset_data(name)
@@ -265,6 +566,27 @@ class CacheManager:
     def update(self, name, category, data_dir, cache_dir, cache_info):
         """
         Update the cache file with new/updated data for a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        category : str
+            Name of the category.
+        data_dir : str
+            Dataset directory on disk where all data is stored.
+        cache_dir : str
+            Cache's directory on disk where the metadata files are store.
+        cache_info : dict
+            New task + path information.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         # build info dictionary
         new_info_dict = {
