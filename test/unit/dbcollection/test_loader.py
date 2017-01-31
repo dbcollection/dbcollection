@@ -255,9 +255,11 @@ class DatasetLoaderTest(unittest.TestCase):
     Test class.
     """
 
-    def setUp(self):
+    @patch('__main__.loader.StorageHDF5.open_file')
+    @patch('__main__.loader.DatasetLoader.add_group_links')
+    def setUp(self, mock_add, mock_open):
         """
-        Initialize class.
+        Test the class __init__().
         """
         # sample data
         sample_name = 'cifar10'
@@ -265,39 +267,45 @@ class DatasetLoaderTest(unittest.TestCase):
         sample_task = 'classification'
         sample_data_dir = '/dir1/data'
         sample_cache_file_path = 'dir1/metadata.h5',
+        self.grp_name = 'test'
+        sample_storage_data = {self.grp_name:{}}
 
-        class MockClasses():
-            storage = {sample_name: True}
-            def __init__(self, name=None, mode=None):
-                self.ok = True
+        # mock function return value
+        mock_open.return_value = sample_storage_data
 
-        # mock functions
-        loader.StorageHDF5 = MockClasses()
-        loader.ManagerHDF5 = MockClasses()
+        # create class
+        self.dataset_loader = loader.DatasetLoader(sample_name, sample_category, sample_task, \
+                                             sample_data_dir, sample_cache_file_path)
 
-        # create a loader object
-      #  self.loader = loader.DatasetLoader(
-      #      name = sample_name, 
-      #      category = sample_category, 
-      #      task = sample_task,
-      #      data_dir = sample_data_dir,
-      #      cache_path = sample_cache_file_path,
-      #  )
+        # check if the mocked function was called with the right parameters
+        mock_open.assert_called_with(sample_cache_file_path, 'r')
 
-        # check if the loader object was properly loaded
-       # self.assertEqual(self.loader.name, sample_name ,'Values should be the same')
-       # self.assertEqual(self.loader.category, sample_category ,'Values should be the same')
-       # self.assertEqual(self.loader.task, sample_task ,'Values should be the same')
-       # self.assertEqual(self.loader.data_dir, sample_data_dir ,'Values should be the same')
-       # self.assertEqual(self.loader.cache_path, sample_cache_file_path ,'Values should be the same')
+        # check if the loader's internal variables have been passed correctly
+        self.assertEqual(self.dataset_loader.name, sample_name, 'Names should be the same')
+        self.assertEqual(self.dataset_loader.category, sample_category, 'Categories should be the same')
+        self.assertEqual(self.dataset_loader.task, sample_task, 'Tasks should be the same')
+        self.assertEqual(self.dataset_loader.data_dir, sample_data_dir, 'Data dirs should be the same')
+        self.assertEqual(self.dataset_loader.cache_path, sample_cache_file_path, 'Cache paths should be the same')
+        self.assertEqual(self.dataset_loader.file.storage, sample_storage_data, 'Storage data should be the same')
 
 
-    
-    def test_one(self):
+    @patch('__main__.loader.ManagerHDF5')
+    def test_add_group_link(self, mock_manager):
         """
-        Test one.
+        Test selecting groups of a hdf5 file.
         """
-        pass
+        # sample data
+        sample_data = True
+        sample_group_name = self.grp_name
+
+        # mock class return value
+        mock_manager.return_value = sample_data
+
+        # add group to the loader
+        self.dataset_loader.add_group_links()
+
+        # check if the group name was successfully added
+        self.assertTrue(self.dataset_loader.test, 'Should have returned True')
 
 
 #----------------

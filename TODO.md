@@ -203,7 +203,7 @@ unit tests (so far):
 - utils: test_utils (13/22)
 - storage: test_storage (2/10)
 - manager: test_manager (7/8)
-- loader: test_loader (0/7)
+- loader: test_loader (16/16)
 - cache: test_cache (8/17)
 
 ### Requirements to go live
