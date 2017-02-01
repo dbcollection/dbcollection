@@ -75,7 +75,7 @@ class CacheManagerTest(unittest.TestCase):
 
     @patch('builtins.open', mock_open(read_data='1'))
     @patch('json.load')
-    def test_read_data_cache_file(self, mock_json):
+    def test_read_data_cache_file__return_valid_data(self, mock_json):
         """
         Test loading data from the json file.
         """
@@ -96,44 +96,67 @@ class CacheManagerTest(unittest.TestCase):
         self.assertDictEqual(res, json_sample, 'Dictionaries should be equal')
 
 
-    @patch('__main__.cache.CacheManager.read_data_cache_file')
-    @patch('__main__.os.path.exists', return_value=True)
-    def test_read_data_cache_file_existing(self, mock_path, mock_file):
-        """
-        Test loading data function.
-        """
-        # mock json.load return value
-        mock_file.return_value = True
-
-        # try load data
-        res = self.cache_manager.read_data_cache()
-
-        # check if values match
-        self.assertTrue(res, 'Should have returned True')
-
-
     @patch('__main__.cache.CacheManager.empty_data')
-    @patch('__main__.os.path.exists', return_value=False)
-    def test_read_data_cache_non_existing(self, mock_path, mock_empty):
+    @patch('__main__.cache.CacheManager.read_data_cache_file')
+    @patch('__main__.os.path.exists')
+    def test_read_data_cache_file__valid_existing_file(self, mock_path, mock_file, mock_empty_data):
         """
         Test loading data function.
         """
         # sample data
-        sample_data = [0, 1, 2]
+        sample_data = {'data':'val'}
+        sample_empty_data = {'data1':'val1'}
+        sample_is_file = True
 
-        # mock json.load return value
-        mock_empty.return_value = sample_data
+        # mock functions return value
+        mock_path.return_value = sample_is_file
+        mock_file.return_value = sample_data
+        mock_empty_data.return_value = sample_empty_data
 
         # try load data
         res = self.cache_manager.read_data_cache()
 
         # check if values match
-        self.assertEqual(res, sample_data, 'Data should be equal')
+        self.assertEqual(res, sample_data, 'Dictionaries should be equal')
+
+        # check if mocked functions were correctly called
+        self.assertTrue(mock_path.called, 'Function should have been called')
+        self.assertTrue(mock_file.called, 'Function should have been called')
+        self.assertFalse(mock_empty_data.called, 'Function should have not been called')
+
+
+    @patch('__main__.cache.CacheManager.empty_data')
+    @patch('__main__.cache.CacheManager.read_data_cache_file')
+    @patch('__main__.os.path.exists')
+    def test_read_data_cache_file__non_existing_file(self, mock_path, mock_file, mock_empty_data):
+        """
+        Test loading data function.
+        """
+        # sample data
+        sample_data = {'data':'val'}
+        sample_empty_data = {'data1':'val1'}
+        sample_is_file = False
+
+        # mock functions return value
+        mock_path.return_value = sample_is_file
+        mock_file.return_value = sample_data
+        mock_empty_data.return_value = sample_empty_data
+
+        # try load data
+        res = self.cache_manager.read_data_cache()
+
+        # check if values match
+        self.assertEqual(res, sample_empty_data, 'Dictionaries should be equal')
+
+        # check if mocked functions were correctly called
+        self.assertTrue(mock_path.called, 'Function should have been called')
+        self.assertFalse(mock_file.called, 'Function should have been called')
+        self.assertTrue(mock_empty_data.called, 'Function should have not been called')
 
 
     @patch('builtins.open', mock_open(read_data='1'))
     @patch('json.dump')
-    def test_write_data_cache(self, mock_json):
+    def test_write_data_cache__valid_open_file(self, mock_json):
         """
         Test write the dbcollection file.
         """
@@ -153,7 +176,7 @@ class CacheManagerTest(unittest.TestCase):
 
     @patch('__main__.cache.CacheManager.write_data_cache')
     @patch('__main__.cache.CacheManager.empty_data')
-    def test_create_cache_file_disk(self, mock_empty, mock_write):
+    def test_create_cache_file_disk__dont_raise_exception(self, mock_empty, mock_write):
         """
         Test initializing the cache with empty data.
         """
@@ -175,7 +198,7 @@ class CacheManagerTest(unittest.TestCase):
 
 
     @patch('os.remove', return_value=True)
-    def test_os_remove(self, mock_os_remove):
+    def test_os_remove__fake_remove_file(self, mock_os_remove):
         """
         Test removing a file from disk.
         """
@@ -192,64 +215,85 @@ class CacheManagerTest(unittest.TestCase):
         mock_os_remove.assert_called_with(sample_file_name)
 
 
-    @patch('__main__.cache.CacheManager.get_category')
+    def test_delete_entry__valid_dataset(self):
+        """
+        Test removing a dataset entry from the cache.
+        """
+        # sample data
+        sample_name = 'cifar10'
+        sample_data_copy = copy.deepcopy(self.cache_manager.data)
+
+        # remove the dataset
+        self.cache_manager.delete_entry(sample_name)
+
+        # check if the cache's data dictionary is different
+        self.assertNotEqual(self.cache_manager.data, sample_data_copy, \
+                            'Dictionaries should be different')
+
+        # recover the default data dictionary
+        self.cache_manager.data = sample_data_copy
+
+
     @patch('__main__.cache.CacheManager.get_data_from_field')
     @patch('__main__.cache.CacheManager.os_remove')
     @patch('__main__.cache.CacheManager.delete_entry')
     @patch('__main__.cache.CacheManager.write_data_cache')
-    def test_delete_dataset_cache(self, mock_write, mock_delete, mock_remove, mock_get_data, mock_category):
+    def test_delete_dataset_cache__fake_remove_cachedir_from_disk(self, mock_write, mock_delete, mock_remove, mock_get_data):
         """
         Test deleting the cache data of a dataset.
         """
         # sample data
         sample_name = 'cifar10'
-        sample_category = 'image_processing'
         sample_cache_dir_path = '/tmp/cache/dir'
 
         # mock function return value
-        mock_category.return_value = sample_category
         mock_get_data.return_value = sample_cache_dir_path
 
         # delete the cache file for 'sample_name'
         self.cache_manager.delete_dataset_cache(sample_name)
 
         # check if the mocked function were called
-        self.assertTrue(mock_category.called, 'Function should have been called')
         self.assertTrue(mock_get_data.called, 'Function should have been called')
         self.assertTrue(mock_remove.called, 'Function should have been called')
         self.assertTrue(mock_delete.called, 'Function should have been called')
         self.assertTrue(mock_write.called, 'Function should have been called')
 
         # check if the functions were called with the correct parameters
-        mock_category.assert_called_with(sample_name)
         mock_get_data.assert_called_with(sample_name, 'cache_dir')
         mock_remove.assert_called_with(sample_cache_dir_path)
-        mock_delete.assert_called_with(sample_category, sample_name)
+        mock_delete.assert_called_with(sample_name)
         mock_write.assert_called_with(self.cache_manager.data)
 
 
-    def test_check_dataset_name(self):
+    def test_check_dataset_name__exists(self):
         """
         Test if a name string exists in the caches's dictionary.
         """
         # sample data
-        sample_name1 = "cifar10"
-        sample_name2 = "cifar1000"
+        sample_name = "cifar10"
 
         # check if name1 exists in the dictionary
-        res1 = self.cache_manager.check_dataset_name(sample_name1)
+        res = self.cache_manager.check_dataset_name(sample_name)
 
         # check if it was a successful query
-        self.assertTrue(res1, 'Should have given True')
+        self.assertTrue(res, 'Should have given True')
+
+    
+    def test_check_dataset_name__dont_exist(self):
+        """
+        Test if a name string exists in the caches's dictionary.
+        """
+        # sample data
+        sample_name = "cifar1000"
 
          # check if name1 exists in the dictionary
-        res2 = self.cache_manager.check_dataset_name(sample_name2)
+        res = self.cache_manager.check_dataset_name(sample_name)
 
         # check if it was a successful query
-        self.assertFalse(res2, 'Should have given false')
+        self.assertFalse(res, 'Should have given false')
 
 
-    def test_get_data_from_field(self):
+    def test_get_data_from_field__is_valid_field(self):
         """
         Test getting a field from cache data storage.
         """
@@ -265,9 +309,22 @@ class CacheManagerTest(unittest.TestCase):
         self.assertEqual(res, sample_path, 'Paths should be the same')
 
 
-    def test_change_field(self):
+    def test_get_data_from_field__is_invalid_field(self):
         """
-        Test chaning the data of a field.
+        Test getting a field from cache data storage.
+        """
+        # sample data dictionary
+        sample_name = 'cifar10'
+        sample_field = "cache_dir1"
+
+        # get data from field (should raise an exception)
+        with self.assertRaises(KeyError):
+            res = self.cache_manager.get_data_from_field(sample_name, sample_field)
+
+
+    def test_change_field__valid_field(self):
+        """
+        Test changing the data of a field.
         """
         # sample data
         sample_name = 'cifar10'
@@ -288,17 +345,31 @@ class CacheManagerTest(unittest.TestCase):
         # reset data value
         self.cache_manager.data = data_copy
 
+    
+    def test_change_field__invalid_dataset(self):
+        """
+        Test changing the data of a field.
+        """
+        # sample data
+        sample_name = 'cifar1000'
+        sample_field = 'cache_dir'
+        sample_val = 'val'
+
+        # change data of field (should raise an exception)
+        with self.assertRaises(KeyError):
+            self.cache_manager.change_field(sample_name, sample_field, sample_val)
+
 
     @patch('__main__.cache.CacheManager.get_dataset_data')
-    def test_add_data(self, mock_get_data):
+    def test_add_data__valid_dataset(self, mock_get_data):
         """
         Test adding/appending data of a new dataset/category
         """
         # sample data
         sample_name = 'cifar10'
-        sample_old_info = {'cached_files': {'data':'val'}}
-        sample_new_info = {'cached_files': {'data2':'val2'}}
-        reference_result = {'cached_files': {'data':'val', 'data2':'val2'}}
+        sample_old_info = {'task': {'data':'val'}}
+        sample_new_info = {'task': {'data2':'val2'}}
+        reference_result = {'task': {'data':'val', 'data2':'val2'}}
 
         # mock function return value
         mock_get_data.return_value = sample_old_info
@@ -316,10 +387,34 @@ class CacheManagerTest(unittest.TestCase):
         self.assertEqual(sample_old_info, reference_result, 'Dictionaries should be equal')
 
 
+    @patch('__main__.cache.CacheManager.get_dataset_data')
+    def test_add_data__invalid_dataset(self, mock_get_data):
+        """
+        Test adding/appending data of a new dataset/category
+        """
+        # sample data
+        sample_name = 'cifar1000'
+        sample_old_info = {'task': {'data':'val'}}
+        sample_new_info = {'task': {'data2':'val2'}}
+
+        # mock function return value
+        mock_get_data.side_effect = KeyError()
+
+        # append data to the old data (should raise an exception)
+        with self.assertRaises(KeyError):
+            self.cache_manager.add_data(sample_name, sample_new_info)
+
+        # check if mocked function was called
+        self.assertTrue(mock_get_data.called, 'Function should have been called')
+
+        # check if the function was called with the correct parameters
+        mock_get_data.assert_called_with(sample_name)
+
+
     @patch('__main__.cache.CacheManager.get_dataset_storage_paths')
     @patch('__main__.cache.CacheManager.delete_dataset_cache')
     @patch('__main__.cache.CacheManager.os_remove')
-    def test_delete_dataset_cache(self, mock_os, mock_delete, mock_paths):
+    def test_delete_dataset_cache__valid_dataset__keep_data_dir(self, mock_os, mock_delete, mock_paths):
         """
         Test deleting a dataset from disk/cache
         """
@@ -347,7 +442,7 @@ class CacheManagerTest(unittest.TestCase):
     @patch('__main__.cache.CacheManager.get_dataset_storage_paths')
     @patch('__main__.cache.CacheManager.delete_dataset_cache')
     @patch('__main__.cache.CacheManager.os_remove')
-    def test_delete_dataset_data(self, mock_os, mock_delete, mock_paths):
+    def test_delete_dataset_data__valid_dataset__delete_data_dir(self, mock_os, mock_delete, mock_paths):
         """
         Test deleting a dataset from disk/cache
         """
@@ -373,7 +468,7 @@ class CacheManagerTest(unittest.TestCase):
         mock_os.assert_called_with(sample_dst_paths['data_dir'])
 
 
-    def test_get_category_exists(self):
+    def test_get_category__valid_dataset(self):
         """
         Test getting the category name of a dataset.
         """
@@ -388,7 +483,7 @@ class CacheManagerTest(unittest.TestCase):
         self.assertEqual(res, reference_category, 'Category names should be equal')
 
 
-    def test_get_category_not_exists(self):
+    def test_get_category__invalid_dataset(self):
         """
         Test getting a category name of a dataset that does not exist.
         """
@@ -403,7 +498,7 @@ class CacheManagerTest(unittest.TestCase):
         self.assertEqual(res, reference_category, 'Category names should be equal')
 
 
-    def test_exists_dataset_valid_name(self):
+    def test_exists_dataset__valid_dataset(self):
         """
         Test checking if a dataset+task exists.
         """
@@ -416,7 +511,7 @@ class CacheManagerTest(unittest.TestCase):
         # validate output result
         self.assertTrue(res, 'Should be True')
 
-    def test_exists_dataset_invalid_name(self):
+    def test_exists_dataset__invalid_dataset(self):
         """
         Test checking if a dataset+task exists.
         """
@@ -430,7 +525,7 @@ class CacheManagerTest(unittest.TestCase):
         self.assertFalse(res, 'Should be False')
 
 
-    def test_exists_task_valid_dataset_valid_task(self):
+    def test_exists_task__valid_dataset_valid_task(self):
         """
         Test checking if a dataset+task exists in the cache file.
         """
@@ -445,7 +540,7 @@ class CacheManagerTest(unittest.TestCase):
         self.assertTrue(res, 'Should be True')
 
 
-    def test_exists_task_valid_dataset_invalid_task(self):
+    def test_exists_task__valid_dataset_invalid_task(self):
         """
         Test checking if a dataset+task exists in the cache file.
         """
@@ -461,7 +556,7 @@ class CacheManagerTest(unittest.TestCase):
 
 
     @patch('__main__.cache.CacheManager.read_data_cache')
-    def test_get_valid_dataset_storage_paths(self, mock_read):
+    def test_get_dataset_storage_paths__valid_dataset(self, mock_read):
         """
         Test get the cache/data paths for a existing dataset.
         """
@@ -485,7 +580,7 @@ class CacheManagerTest(unittest.TestCase):
 
 
     @patch('__main__.cache.CacheManager.read_data_cache')
-    def test_get_invalid_dataset_storage_paths(self, mock_read):
+    def test_get_dataset_storage_paths__invalid_dataset(self, mock_read):
         """
         Test get the cache/data paths for an invalid dataset.
         """
@@ -508,7 +603,7 @@ class CacheManagerTest(unittest.TestCase):
         self.assertEqual(res[sample_field_data], sample_path_data, 'Paths should be equal')
 
 
-    def test_get_dataset_data_valid_name(self):
+    def test_get_dataset_data__valid_dataset(self):
         """
         Test returning the cache data of a existing dataset.
         """
@@ -523,8 +618,7 @@ class CacheManagerTest(unittest.TestCase):
         self.assertEqual(res, reference_cache_data, 'Dictionaries should be equal')
 
 
-    #@unittest.skip("Skip testing")
-    def test_get_dataset_data_invalid_name(self):
+    def test_get_dataset_data__invalid_dataset(self):
         """
         Test returning the cache data of a existing dataset.
         """
@@ -532,12 +626,12 @@ class CacheManagerTest(unittest.TestCase):
         sample_name = 'cifar1000'
 
         # get dataset data (should raise an exception)
-        with self.assertRaises(self.cache_manager.get_dataset_data(sample_name)):
-            self.assertFalse(True, 'Should have given an exception')
+        with self.assertRaises(KeyError):
+            self.cache_manager.get_dataset_data(sample_name)
 
 
     @patch('__main__.cache.CacheManager.get_dataset_data')
-    def test_get_cache_path_valid_dataset_valid_task(self, mock_get_data):
+    def test_get_cache_path__valid_dataset_valid_task(self, mock_get_data):
         """
         Test fetching the cache path of a specific task.
         """
@@ -559,9 +653,9 @@ class CacheManagerTest(unittest.TestCase):
         # check if the functions were called with the correct parameters
         mock_get_data.assert_called_with(sample_name)
 
-    @unittest.skip("Skip testing")
+
     @patch('__main__.cache.CacheManager.get_dataset_data')
-    def test_get_cache_path_valid_dataset_invalid_task(self, mock_get_data):
+    def test_get_cache_path__valid_dataset_invalid_task(self, mock_get_data):
         """
         Test fetching the cache path of a specific (invalid) task.
         """
@@ -569,14 +663,13 @@ class CacheManagerTest(unittest.TestCase):
         sample_name = 'cifar10'
         sample_task = 'detect'
         sample_data = self.cache_manager.data
-        sample_cache_fname = sample_data['dataset']['image_processing']['cifar10']['task'][sample_task]
 
         # mock function return value
         mock_get_data.return_value = sample_data
 
-        # fetch cache path
-        with self.assertRaises(self.cache_manager.get_cache_path(sample_name, sample_task)):
-            self.assertFalse(True, 'Should have given an exception')
+        # fetch cache path (should raise an exception)
+        with self.assertRaises(KeyError):
+            self.cache_manager.get_cache_path(sample_name, sample_task)
 
         # check if the functions were called with the correct parameters
         mock_get_data.assert_called_with(sample_name)
@@ -584,7 +677,7 @@ class CacheManagerTest(unittest.TestCase):
 
     @patch('__main__.cache.CacheManager.add_data')
     @patch('__main__.cache.CacheManager.write_data_cache')
-    def test_update_cache(self, mock_write, mock_add):
+    def test_update_cache__not_existing_dataset(self, mock_write, mock_add):
         """
         Test updating the cache with new data.
         """
@@ -615,7 +708,7 @@ class CacheManagerTest(unittest.TestCase):
 # Run Test Suite
 #----------------
 
-def main(level=2):
+def main(level=1):
     """Main function to start testing"""
     unittest.main(verbosity=level)
 

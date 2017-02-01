@@ -165,6 +165,19 @@ class CacheManager:
     def create_cache_file_disk(self, fname=None):
         """
         Initialize the dbcollection cache file with empty data.
+
+        Parameters
+        ----------
+        fname : str
+            File name+path on disk.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         self.write_data_cache(self.empty_data(), fname)
 
@@ -194,16 +207,14 @@ class CacheManager:
                 raise OSError('Unable to remove: ' + fname)
 
 
-    def delete_entry(self, category, name):
+    def delete_entry(self, name):
         """
         Delete a dataset entry from a category dictionary.
 
         Parameters
         ----------
-        category : str
-            Category's name.
-        namefname : str
-            Dataset's name.
+        name : str
+            Dataset name.
 
         Returns
         -------
@@ -213,7 +224,7 @@ class CacheManager:
         ------
             None
         """
-        self.data['dataset'][category].pop(name)
+        self.data['dataset'][self.get_category(name)].pop(name)
 
 
     def delete_dataset_cache(self, name):
@@ -233,9 +244,6 @@ class CacheManager:
         ------
             None
         """
-        # category name
-        category = self.get_category(name)
-
         # get cache dir path
         cache_dir_path = self.get_data_from_field(name, 'cache_dir')
 
@@ -243,7 +251,7 @@ class CacheManager:
         self.os_remove(cache_dir_path)
 
         # remove entry from the data
-        self.delete_entry(category, name)
+        self.delete_entry(name)
 
         # write updated data to file
         self.write_data_cache(self.data)
@@ -345,7 +353,7 @@ class CacheManager:
         old_info = self.get_dataset_data(name)
 
         # append the new data
-        old_info['cached_files'].update(new_info['cached_files'])
+        old_info['task'].update(new_info['task'])
 
 
     def delete_dataset(self, name, delete_data=False):
@@ -565,4 +573,3 @@ class CacheManager:
 
         # write to file
         self.write_data_cache(self.data)
-
