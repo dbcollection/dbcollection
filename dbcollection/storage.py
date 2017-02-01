@@ -18,7 +18,7 @@ class StorageHDF5:
         filename : str
             File name + path for the target metadata file.
         mode : str
-            File opem mode: r, r+, w , w+, x, a
+            File openining mode: r, r+, w , w+, x, a
         """
         self.fname = filename
         self.mode = mode
