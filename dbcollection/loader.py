@@ -12,27 +12,21 @@ class ManagerHDF5:
 
 
     def __init__(self, data_handler):
-        """Initialize class.
+        """
+        Initialize class.
 
         Parameters
         ----------
         data_handler : dict (hdf5)
-            A handler for hdf5 'dictionary'.
-
-        Returns
-        -------
-            None
+            A handler for a hdf5 dictionary.
         """
         self.data = data_handler
 
         # fetch list of field names that compose the object list.
-        try:
-            self.object_fields = convert_ascii_str(self.data['object_fields'])
-        except KeyError:
-            raise
+        self.object_fields = convert_ascii_str(self.data['object_fields'])
 
 
-    def get(self, field_name, id):
+    def get(self, field_name, idx):
         """Get data from file.
 
         Retrieve the i'th data from the field 'field_name' into a list.
@@ -41,22 +35,23 @@ class ManagerHDF5:
         ----------
         field_name : str
             Field name identifier.
-		id : int, long or list
+		idx : int/list
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list
 
         Returns
         -------
-        str, int, long, float, list
-            Returns a value/list of a field from the metadata cache file.
+        str, int, list
+            Value/list of a field from the metadata cache file.
+
+        Raises
+        ------
+            None
         """
-        try:
-            return self.data[field_name][id]
-        except KeyError:
-            raise
+        return self.data[field_name][idx]
 
 
-    def object(self, id, is_value=False):
+    def object(self, idx, is_value=False):
         """Get list of ids/values of an object.
 
         Retrieve the data of all fields of an object: It works as calling :get() for
@@ -64,7 +59,7 @@ class ManagerHDF5:
 
         Parameters
         ----------
-        id : int, long or list
+        idx : int, long or list
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list
         is_value : bool
@@ -75,34 +70,35 @@ class ManagerHDF5:
         --------
         list
             Returns a list of indexes (or values if is_value=True).
+
+        Raises
+        ------
+            None
         """
         if not is_value:
-            return self.data['object_id'][id]
+            return self.data['object_id'][idx]
         else:
-            # convert id to a list (in case it is a number)
-            if not isinstance(id, list):
-                id_ = [id]
-            else:
-                id_ = id
+            # convert idx to a list (in case it is a number)
+            if not isinstance(idx, list):
+                idx = [idx]
 
             # fetch the field names composing 'object_id'
             fields = self.object_fields
 
             # iterate over all ids and build an output list
             output = []
-            for idx in id_:
+            for idx_ in idx:
                 # fetch list od indexes for the current id
-                ids = self.data['object_id'][idx]
+                ids = self.data['object_id'][idx_]
 
                 # fetch data for each element of the list
-                #output.append = [self.data[field_name][ids[i]] for i, field_name in enumerate(fields)]
                 data = []
                 for i, field_name in enumerate(fields):
                     data.append(self.data[field_name][ids[i]])
                 output.append(data)
 
             # output data
-            if len(id_) == 1:
+            if len(idx) == 1:
                 return output[0]
             else:
                 return output
@@ -123,19 +119,31 @@ class ManagerHDF5:
         int, long
             Returns the number of elements of a field
             (if empty it returns the size of the object list).
+
+        Raises
+        ------
+            None
         """
-        try:
-            return self.data[field_name].shape[0]
-        except KeyError:
-            return self.data['object_id'].shape[0]
+        return self.data[field_name or 'object_id'].shape[0]
 
 
     def list(self):
         """
         Lists all field names.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         return self.data.keys()
-
 
 
 class DatasetLoader:
@@ -157,10 +165,6 @@ class DatasetLoader:
             Path of the dataset's data directory on disk.
         cache_path : str
             Path of the metadata cache file stored on disk.
-
-        Returns
-        -------
-            None
         """
         # store info
         self.name = name
@@ -179,6 +183,18 @@ class DatasetLoader:
     def add_group_links(self):
         """
         Adds links for the groups for easier access to data.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         for name in self.file.storage.keys():
             setattr(self, name, ManagerHDF5(self.file.storage[name]))

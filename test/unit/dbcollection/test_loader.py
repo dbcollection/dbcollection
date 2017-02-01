@@ -34,8 +34,11 @@ class ManagerHDF5Test(unittest.TestCase):
         """
         # some dummy data
         self.data = {
-            'filenames': utils.convert_str_ascii(['dir1/fname1.jpg', 'dir1/fname2.jpg','dir1/fname3.jpg', 'dir1/fname4.jpg']),
-            'class_names': utils.convert_str_ascii(['banana','orange','apple']),
+            'filenames': utils.convert_str_ascii(['dir1/fname1.jpg', \
+                                                  'dir1/fname2.jpg', \
+                                                  'dir1/fname3.jpg', \
+                                                  'dir1/fname4.jpg']),
+            'class_names': utils.convert_str_ascii(['banana', 'orange', 'apple']),
             'object_fields': utils.convert_str_ascii(['filenames', 'class_id']),
             'object_id': np.array([[0,0], [1,1], [2,2], [3,1]]),
             'class_id': np.array([0, 1, 2, 1])
@@ -43,7 +46,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.manager = loader.ManagerHDF5(self.data)
 
 
-    def test_get_data_from_field_filenames(self):
+    def test_get_data__from_field__filenames(self):
         """
         Test retrieving data from a field.
         """
@@ -59,7 +62,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(sample_field_data.tolist(), res.tolist(), 'Data should be equal')
 
 
-    def test_get_data_from_field_class_names(self):
+    def test_get_data__from_field__class_names(self):
         """
         Test retrieving data from a field.
         """
@@ -75,7 +78,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(sample_field_data.tolist(), res.tolist(), 'Data should be equal')
 
 
-    def test_get_data_from_field_objects(self):
+    def test_get_data__from_field__objects(self):
         """
         Test retrieving data from a field.
         """
@@ -91,7 +94,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(sample_field_data.tolist(), res.tolist(), 'Data should be equal')
 
 
-    def test_get_data_from_field_filenames_multiple_ids(self):
+    def test_get_data__from_field__filenames__multiple_ids(self):
         """
         Test retrieving data from a field.
         """
@@ -107,7 +110,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(sample_field_data.tolist(), res.tolist(), 'Data should be equal')
 
 
-    def test_get_data_from_field_filenames_multiple_ids_sparse(self):
+    def test_get_data__from_field__filenames__multiple_ids_sparse(self):
         """
         Test retrieving data from a field.
         """
@@ -123,7 +126,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(sample_field_data.tolist(), res.tolist(), 'Data should be equal')
 
 
-    def test_get_ids_single_object(self):
+    def test_get_ids__single_object(self):
         """
         Test retrieving all field ids of an object.
         """
@@ -139,7 +142,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(res.tolist(), sample_object_data.tolist(), 'Lists should be equal')
 
 
-    def test_get_ids_multiple_object(self):
+    def test_get_ids__multiple_object(self):
         """
         Test retrieving all field ids of multiple objects.
         """
@@ -155,7 +158,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(res.tolist(), sample_object_data.tolist(), 'Lists should be equal')
 
 
-    def test_get_values_single_object(self):
+    def test_get_values__single_object(self):
         """
         Test retrieving all field values of an object.
         """
@@ -172,7 +175,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(res[1], sample_object_data[1], 'Vals should be equal')
 
 
-    def test_get_values_multiple_object(self):
+    def test_get_values__multiple_object(self):
         """
         Test retrieving all field values of multiple object.
         """
@@ -190,7 +193,7 @@ class ManagerHDF5Test(unittest.TestCase):
             self.assertEqual(res[i][1], sample_object_data[i][1], 'Vals should be equal')
 
 
-    def test_get_size_field_filenames(self):
+    def test_get_size__field__filenames(self):
         """
         Test retrieving the size (num of elements) of an object and a field.
         """
@@ -205,7 +208,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(res, sample_size, 'Sizes should be equal')
 
 
-    def test_get_size_field_class_names(self):
+    def test_get_size__field__class_names(self):
         """
         Test retrieving the size (num of elements) of an object and a field.
         """
@@ -220,7 +223,7 @@ class ManagerHDF5Test(unittest.TestCase):
         self.assertEqual(res, sample_size, 'Sizes should be equal')
 
 
-    def test_get_size_object(self):
+    def test_get_size__object(self):
         """
         Test retrieving the size (num of elements) of an object and a field.
         """
@@ -233,6 +236,18 @@ class ManagerHDF5Test(unittest.TestCase):
 
         # check if the sizes are the same
         self.assertEqual(res, sample_size, 'Sizes should be equal')
+
+
+    def test_get_size__invalid_field(self):
+        """
+        Test retrieving the size (num of elements) of an object and a field.
+        """
+        # sample data
+        sample_field_name = 'non_existing_field'
+
+        # get size from loader api (should raise an exception)
+        with self.assertRaises(KeyError):
+            res = self.manager.size(sample_field_name)
 
 
     def test_list_all_fields(self):
