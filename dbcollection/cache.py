@@ -14,6 +14,10 @@ class CacheManager:
     def __init__(self):
         """
         Initialize class.
+
+        Parameters
+        ----------
+            None
         """
 
         # setup cache paths
