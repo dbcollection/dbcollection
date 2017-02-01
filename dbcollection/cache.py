@@ -334,7 +334,7 @@ class CacheManager:
         self.data['dataset'][self.get_category(name)][name][field] = val
 
 
-    def add_data(self, name, new_info):
+    def add_data(self, name, category, new_info):
         """
         Adds/appends a new category/dataset to the cache file.
 
@@ -342,6 +342,8 @@ class CacheManager:
         ----------
         name : str
             Name of the dataset.
+        category : str
+            Name of the category.
         new_info : dict
             New data.
 
@@ -353,11 +355,15 @@ class CacheManager:
         ------
             None
         """
-        # get stored data
-        old_info = self.get_dataset_data(name)
+        if self.get_category(name) is None:
+            # new category
+            self.data['dataset'][category] = {name:new_info}
+        else:
+            # get stored data
+            old_info = self.get_dataset_data(name)
 
-        # append the new data
-        old_info['task'].update(new_info['task'])
+            # append the new data
+            old_info['task'].update(new_info['task'])
 
 
     def delete_dataset(self, name, delete_data=False):
@@ -502,6 +508,8 @@ class CacheManager:
         ----------
         name : str
             Name of the dataset.
+        category : str
+            Name of the category
 
         Returns
         -------
@@ -542,7 +550,7 @@ class CacheManager:
         return cache_data['task'][task]
 
 
-    def update(self, name, data_dir, cache_dir, cache_info):
+    def update(self, name, category, data_dir, cache_dir, cache_info):
         """
         Update the cache file with new/updated data for a dataset.
 
@@ -550,6 +558,8 @@ class CacheManager:
         ----------
         name : str
             Name of the dataset.
+        category : str
+            Name of the category.
         data_dir : str
             Dataset directory on disk where all data is stored.
         cache_dir : str
@@ -573,7 +583,7 @@ class CacheManager:
         }
 
         # update data with the new info
-        self.add_data(name, new_info_dict)
+        self.add_data(name, category, new_info_dict)
 
         # write to file
         self.write_data_cache(self.data)

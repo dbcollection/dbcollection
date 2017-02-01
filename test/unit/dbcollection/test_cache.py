@@ -278,7 +278,7 @@ class CacheManagerTest(unittest.TestCase):
         # check if it was a successful query
         self.assertTrue(res, 'Should have given True')
 
-    
+
     def test_check_dataset_name__dont_exist(self):
         """
         Test if a name string exists in the caches's dictionary.
@@ -345,7 +345,7 @@ class CacheManagerTest(unittest.TestCase):
         # reset data value
         self.cache_manager.data = data_copy
 
-    
+
     def test_change_field__invalid_dataset(self):
         """
         Test changing the data of a field.
@@ -367,6 +367,7 @@ class CacheManagerTest(unittest.TestCase):
         """
         # sample data
         sample_name = 'cifar10'
+        sample_category = 'image_processing'
         sample_old_info = {'task': {'data':'val'}}
         sample_new_info = {'task': {'data2':'val2'}}
         reference_result = {'task': {'data':'val', 'data2':'val2'}}
@@ -375,7 +376,7 @@ class CacheManagerTest(unittest.TestCase):
         mock_get_data.return_value = sample_old_info
 
         # append data to the old data
-        self.cache_manager.add_data(sample_name, sample_new_info)
+        self.cache_manager.add_data(sample_name, sample_category, sample_new_info)
 
         # check if mocked function was called
         self.assertTrue(mock_get_data.called, 'Function should have been called')
@@ -387,14 +388,15 @@ class CacheManagerTest(unittest.TestCase):
         self.assertEqual(sample_old_info, reference_result, 'Dictionaries should be equal')
 
 
+    @patch('__main__.cache.CacheManager.get_category', return_value=True)
     @patch('__main__.cache.CacheManager.get_dataset_data')
-    def test_add_data__invalid_dataset(self, mock_get_data):
+    def test_add_data__invalid_dataset(self, mock_get_data, mock_get_category):
         """
         Test adding/appending data of a new dataset/category
         """
         # sample data
         sample_name = 'cifar1000'
-        sample_old_info = {'task': {'data':'val'}}
+        sample_category = 'image_processing'
         sample_new_info = {'task': {'data2':'val2'}}
 
         # mock function return value
@@ -402,13 +404,15 @@ class CacheManagerTest(unittest.TestCase):
 
         # append data to the old data (should raise an exception)
         with self.assertRaises(KeyError):
-            self.cache_manager.add_data(sample_name, sample_new_info)
+            self.cache_manager.add_data(sample_name, sample_category, sample_new_info)
 
         # check if mocked function was called
-        self.assertTrue(mock_get_data.called, 'Function should have been called')
+        self.assertTrue(mock_get_data.called, 'Should have been called')
+        self.assertTrue(mock_get_category.called, 'Should have been called')
 
         # check if the function was called with the correct parameters
         mock_get_data.assert_called_with(sample_name)
+        mock_get_category.assert_called_with(sample_name)
 
 
     @patch('__main__.cache.CacheManager.get_dataset_storage_paths')
@@ -683,6 +687,7 @@ class CacheManagerTest(unittest.TestCase):
         """
         # sample data
         sample_new_name = 'cifar1000'
+        sample_category = 'image_processing'
         sample_data_dir = 'dir1/cifar1000/data'
         sample_cache_dir = 'dir1/cifar1000/cache'
         sample_cache_info = {}
@@ -693,14 +698,15 @@ class CacheManagerTest(unittest.TestCase):
         }
 
         # update data
-        self.cache_manager.update(sample_new_name, sample_data_dir, sample_cache_dir, sample_cache_info)
+        self.cache_manager.update(sample_new_name, sample_category, sample_data_dir, \
+                                  sample_cache_dir, sample_cache_info)
 
         # check if functions were called
         self.assertTrue(mock_add.called, 'Function should have been called')
         self.assertTrue(mock_write.called, 'Function should have been called')
 
         # check if the functions were called with the correct parameters
-        mock_add.assert_called_with(sample_new_name, reference_new_info)
+        mock_add.assert_called_with(sample_new_name, sample_category, reference_new_info)
         mock_write.assert_called_with(self.cache_manager.data)
 
 
