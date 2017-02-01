@@ -10,7 +10,8 @@ from .loader import DatasetLoader
 from . import dataset
 
 
-def load(name, data_path=None, save_name=None, task='default', download=True, verbose=True, organize_list=None, select=None, filter=None):
+def load(name, data_dir=None, save_name=None, task='default', download=True, \
+         verbose=True, organize_list=None, select=None, filter=None):
     """loads dataset metadata file.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -19,7 +20,7 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
     ----------
     name : str
         Name of the dataset.
-    data_path : str
+    data_dir : str
         Path to store the data (if the data doesn't exist and the download flag is equal True).
     save_name : bool
         Save the metadata file with a new name.
@@ -43,14 +44,18 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
     Returns
     -------
     DatasetLoader
-       Returns a loader class.
+       Loader class.
+
+    Raises
+    ------
+        None
     """
 
     # Load a cache manager object
     cache_manager = CacheManager()
 
     # check if dataset exists in the cache file
-    if cache_manager.exists(name, task):
+    if cache_manager.exists_task(name, task):
         dataset_category = cache_manager.get_category(name)
     else:
         # get cache default save path
@@ -58,13 +63,14 @@ def load(name, data_path=None, save_name=None, task='default', download=True, ve
 
         # download dataset
         if download:
-            dataset.download(name, data_path, verbose)
+            dataset.download(name, data_dir, verbose)
 
         # preprocess dataset
-        cache_info, dataset_category = dataset.process(name, data_path, cache_save_path, verbose)
+        cache_info = dataset.process(name, data_dir, cache_save_path, verbose)
 
         # update dbcollection.json file with the new data
-        cache_manager.update(name, dataset_category, dataset.data_path, dataset.cache_path, dataset.cache_info)
+        cache_manager.update(name, cache_info['category'], cache_info['data_dir'], \
+                            cache_info['cache_dir'], cache_info['task'])
 
     # get cache path
     cache_path = cache_manager.get_cache_path(name, task)
@@ -103,6 +109,10 @@ def add(name, data_dir, cache_file_path, task='default'):
     Returns
     -------
         None
+
+    Raises
+    ------
+        None
     """
     # Load a cache manager object
     cache_manager = CacheManager()
@@ -130,6 +140,10 @@ def delete(name):
     Returns
     -------
         None
+
+    Raises
+    ------
+        None
     """
     # Load a cache manager object
     cache_manager = CacheManager()
@@ -155,6 +169,10 @@ def reset(name):
 
     Returns
     -------
+        None
+
+    Raises
+    ------
         None
     """
     # Load a cache manager object
@@ -186,6 +204,10 @@ def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None
 
     Returns
     -------
+        None
+
+    Raises
+    ------
         None
     """
     # Load a cache manager object
@@ -227,6 +249,10 @@ def download(name, data_path, verbose=True):
     Returns
     -------
         None
+
+    Raises
+    ------
+        None
     """
     # Load a cache manager object
     cache_manager = CacheManager()
@@ -250,6 +276,10 @@ def query(pattern):
 
     Returns
     -------
+        None
+
+    Raises
+    ------
         None
     """
     # init list
@@ -299,6 +329,10 @@ def list(verbose=False):
 
     Returns
     -------
+        None
+
+    Raises
+    ------
         None
     """
     # Load a cache manager object
