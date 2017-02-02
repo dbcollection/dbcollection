@@ -13,7 +13,6 @@ import unittest
 from unittest import mock
 from unittest.mock import patch, mock_open
 
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
 lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
 sys.path.append(lib_path)
