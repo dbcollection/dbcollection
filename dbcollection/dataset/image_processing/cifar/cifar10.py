@@ -7,11 +7,7 @@ import os
 import sys
 import numpy as np
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', '..'))
-sys.path.append(lib_path)
-
-from dbcollection import utils, storage
+from .... import utils, storage
 
 
 class Cifar10:

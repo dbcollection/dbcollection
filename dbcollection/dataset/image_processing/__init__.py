@@ -1,1 +1,1 @@
-from .cifar import cifar10
+from . import cifar

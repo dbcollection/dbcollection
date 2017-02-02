@@ -4,8 +4,8 @@ Datasets list.
 All available datasets must be added in here.
 """
 
-#import image_processing
-from .image_processing import *
+
+from . import image_processing
 
 
 #---------------------------------------------------------
