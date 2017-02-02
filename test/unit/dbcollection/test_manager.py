@@ -115,16 +115,16 @@ class ManagerTest(unittest.TestCase):
     @patch('__main__.manager.DatasetLoader', return_value=True)
     @patch('__main__.os.path.exists', return_value=True)
     def test_load__non_existing_dataset__download_process(self, mock_path, mock_loader, mock_process, mock_download, \
-                                                          mock_get_paths, mock_get_cache, mock_exists, mock_cache):
+                                                          mock_get_paths, mock_get_cache, mock_exists, mock_read_cache):
         """
         Test fetching a dataset Loader of a non-existing dataset (requried download).
         """
         # sample data
         sample_name = self.sample_name
-        #sample_category = self.sample_category
+        sample_category = self.sample_category
         sample_data_dir = self.sample_data_path
         sample_cache_path = self.sample_cache_path
-        #sample_cache_file_path = self.sample_cache_file_path
+        sample_default_cache_path = os.path.join(os.path.expanduser("~"), 'dbcollection')
         sample_save_name = None
         sample_task = self.sample_task
         sample_download = True
@@ -132,10 +132,15 @@ class ManagerTest(unittest.TestCase):
         sample_organize_list = None
         sample_select = None
         sample_filter = None
-        sample_cache_info = {}
+        sample_cache_info = {
+            'data_dir' : sample_data_dir,
+            'cache_dir' : sample_cache_path,
+            'task' : {sample_task:'val'},
+            'category' : sample_category
+        }
 
         # mock function values
-        mock_cache.return_value = self.sample_dict
+        mock_read_cache.return_value = self.sample_dict
         mock_get_paths.return_value = {'data_dir':'str1'}
         mock_process.return_value = sample_cache_info
 
@@ -161,10 +166,10 @@ class ManagerTest(unittest.TestCase):
         mock_get_cache.assert_called_with(sample_name, sample_task)
         mock_get_paths.assert_called_with(sample_name)
         mock_download.assert_called_with(sample_name, sample_data_dir, sample_verbose)
-        mock_process.assert_called_with(sample_name, sample_data_dir, sample_cache_path, sample_verbose)
+        mock_process.assert_called_with(sample_name, sample_data_dir, sample_default_cache_path, sample_verbose)
 
 
-    @unittest.skip("skip test")
+
     @patch('__main__.manager.CacheManager.update', return_value=True)
     @patch('__main__.manager.CacheManager.read_data_cache')
     @patch('__main__.os.path.exists', return_value=True)
@@ -302,7 +307,6 @@ class ManagerTest(unittest.TestCase):
         mock_download.assert_called_with(sample_name, sample_data_path, sample_cache_save_dir, sample_verbose)
 
 
-    @unittest.skip("skip test")
     @patch('__main__.os.path.exists', return_value=True)
     @patch('__main__.manager.CacheManager.read_data_cache')
     def test_query_cache(self, mock_cache, mock_path):
@@ -335,7 +339,7 @@ class ManagerTest(unittest.TestCase):
 # Run Test Suite
 #----------------
 
-def main(level=2):
+def main(level=1):
     unittest.main(verbosity=level)
 
 if __name__ == '__main__':

@@ -69,7 +69,8 @@ def load(name, data_dir=None, save_name=None, task='default', download=True, \
         cache_info = dataset.process(name, data_dir, cache_save_path, verbose)
 
         # update dbcollection.json file with the new data
-        cache_manager.update(name, cache_info['category'], cache_info['data_dir'], \
+        dataset_category = cache_info['category']
+        cache_manager.update(name, dataset_category, cache_info['data_dir'], \
                             cache_info['cache_dir'], cache_info['task'])
 
     # get cache path
@@ -306,8 +307,8 @@ def query(pattern):
         for name in cache_manager.data['dataset'][category]:
             if pattern in cache_manager.data['dataset'][category][name]:
                 query_list.append(cache_manager.data['dataset'][category][name][pattern])
-            if pattern in cache_manager.data['dataset'][category][name]['cache_files']:
-                query_list.append(cache_manager.data['dataset'][category][name]['cache_files'][pattern])
+            if pattern in cache_manager.data['dataset'][category][name]['task']:
+                query_list.append(cache_manager.data['dataset'][category][name]['task'][pattern])
 
     # output list
     if len(query_list) == 1:
