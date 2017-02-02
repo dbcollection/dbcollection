@@ -36,16 +36,43 @@ class StorageHDF5:
     def open_file(self, name, mode, version='latest'):
         """
         Open a hdf5 file.
+
+        Parameters
+        ----------
+        name : str
+            File name + path on disk.
+        mode : str
+            File openining mode: r, r+, w , w+, x, a.
+        version : str
+            HDF5 file version.
+
+        Returns
+        -------
+        HDF5 file
+            Object handler of the opened file.
+
+        Raises
+        ------
+            None
         """
-        try:
-            return h5py.File(name, mode, libver=version)
-        except IOError:
-            raise
+        return h5py.File(name, mode, libver=version)
 
 
-    def close(self):
+    def close_file(self):
         """
         Close the file.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         self.storage.close()
 
@@ -53,28 +80,65 @@ class StorageHDF5:
     def is_group(self, name):
         """
         Check if the group name exists.
+
+        Parameters
+        ----------
+        name : str
+            Name of the group
+
+        Returns
+        -------
+        bool
+            If group name exists, then return True. Else return False.
+
+        Raises
+        ------
+            None
         """
-        if name in self.storage.keys():
-            return True
-        else:
-            return False
+        return name in self.storage.keys()
 
 
-    def add_group(self, name):
+    def add_group(self, group):
         """
         Create a group in the hdf5 file.
+
+        Parameters
+        ----------
+        group : str
+            Name of the group to add.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         try:
-            grp = self.storage.create_group(name)
+            grp = self.storage.create_group(group)
         except ValueError: #group already exists
             pass
         else:
-            setattr(self, name, grp)
+            setattr(self, group, grp)
 
 
     def delete_group(self, name):
         """
         Delete a group.
+
+        Parameters
+        ----------
+        name : str
+            Name of the group to delete.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         if self.is_group(name):
             del self.storage[name]
@@ -83,6 +147,22 @@ class StorageHDF5:
     def parse_str(self, group, field_name):
         """
         Concatenate two strings.
+
+        Parameters
+        ----------
+        group : str
+            Name of a group.
+        field_name : str
+            Name of a field/sub-group.
+
+        Returns
+        -------
+        str
+            Name of the field/sub-group relative to the root path.
+
+        Raises
+        ------
+            None
         """
         if group == '/':
             return field_name
@@ -93,34 +173,81 @@ class StorageHDF5:
     def is_data(self, group, field_name):
         """
         Check if the field_name exists.
+
+        Parameters
+        ----------
+        group : str
+            Name of a group.
+        field_name : str
+            Name of a field/sub-group.
+
+        Returns
+        -------
+        bool
+            If field exists, return True. Else return False.
+
+        Raises
+        ------
+            None
         """
         # check if the group exists
         if not self.is_group(group):
-            raise Exception('Group name not found: ' + group)
-
-        if field_name in self.storage[group].keys():
-            return True
-        else:
+            #raise Exception('Group name not found: ' + group)
             return False
+
+        return field_name in self.storage[group].keys()
 
 
     def add_data(self, group, field_name, data, dtype=None):
         """
-        Add data to a hdf5 file.
+        Add data to a group + field in a hdf5 file.
+
+        Parameters
+        ----------
+        group : str
+            Name of a group.
+        field_name : str
+            Name of a field/sub-group.
+        dtype : numpy.dtype
+            Data type of a numpy array.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
-        # parse string
+        # concatenate string so it is easier to add fields to the h5py file
         field_str = self.parse_str(group, field_name)
 
-        # add data to the file
+        # check if a data convertion is required
         if not dtype is None:
             data = data.astype(dtype)
 
+        # add data to the file
         self.storage.create_dataset(field_str, data=data)
 
 
     def delete_data(self, group, field_name):
         """
         Delete a data field.
+
+        Parameters
+        ----------
+        group : str
+            Name of a group.
+        field_name : str
+            Name of a field/sub-group.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
         """
         if self.is_data(group, field_name):
             # parse string
