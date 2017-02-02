@@ -4,9 +4,7 @@ Cifar10 download/process functions.
 
 
 import os
-import sys
 import numpy as np
-
 from .... import utils, storage
 
 
