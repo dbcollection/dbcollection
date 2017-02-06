@@ -12,8 +12,7 @@ class CacheManager:
     """ Class to manage the dbcollection cache data """
 
     def __init__(self):
-        """
-        Initialize class.
+        """Initialize class.
 
         Parameters
         ----------
@@ -64,8 +63,7 @@ class CacheManager:
 
 
     def read_data_cache_file(self):
-        """
-        Read the cache file data to memory.
+        """Read the cache file data to memory.
 
         Parameters
         ----------
@@ -89,8 +87,7 @@ class CacheManager:
 
 
     def read_data_cache(self):
-        """
-        Load data from the dbcollection cache file.
+        """Load data from the dbcollection cache file.
 
         Parameters
         ----------
@@ -113,8 +110,7 @@ class CacheManager:
 
 
     def write_data_cache(self, data, fname=None):
-        """
-        Write data to the dbcollection cache file.
+        """Write data to the dbcollection cache file.
 
         Parameters
         ----------
@@ -141,8 +137,7 @@ class CacheManager:
 
 
     def empty_data(self):
-        """
-        Returns an empty template of the cache data structure.
+        """Returns an empty template of the cache data structure.
 
         Parameters
         ----------
@@ -167,8 +162,7 @@ class CacheManager:
 
 
     def create_cache_file_disk(self, fname=None):
-        """
-        Initialize the dbcollection cache file with empty data.
+        """Initialize the dbcollection cache file with empty data.
 
         Parameters
         ----------
@@ -187,8 +181,7 @@ class CacheManager:
 
 
     def os_remove(self, fname):
-        """
-        Remove a file/directory from disk.
+        """Remove a file/directory from disk.
 
         Parameters
         ----------
@@ -212,8 +205,7 @@ class CacheManager:
 
 
     def delete_entry(self, name):
-        """
-        Delete a dataset entry from a category dictionary.
+        """Delete a dataset entry from a category dictionary.
 
         Parameters
         ----------
@@ -232,8 +224,7 @@ class CacheManager:
 
 
     def delete_dataset_cache(self, name):
-        """
-        Delete the cache data from disk of a dataset.
+        """Delete the cache data from disk of a dataset.
 
         Parameters
         ----------
@@ -262,8 +253,7 @@ class CacheManager:
 
 
     def check_dataset_name(self, name):
-        """
-        Check if the dataset name exists in the available dictionary keys.
+        """Check if the dataset name exists in the available dictionary keys.
 
         Parameters
         ----------
@@ -287,8 +277,7 @@ class CacheManager:
 
 
     def get_data_from_field(self, name, field):
-        """
-        Get data from a field of a dataset.
+        """Get data from a field of a dataset.
 
         Parameters
         ----------
@@ -310,8 +299,7 @@ class CacheManager:
 
 
     def change_field(self, name, field, val):
-        """
-        Change the data of a field of a dataset.
+        """Change the data of a field of a dataset.
 
         Parameters
         ----------
@@ -335,8 +323,7 @@ class CacheManager:
 
 
     def add_data(self, name, category, new_info):
-        """
-        Adds/appends a new category/dataset to the cache file.
+        """Adds/appends a new category/dataset to the cache file.
 
         Parameters
         ----------
@@ -367,8 +354,7 @@ class CacheManager:
 
 
     def delete_dataset(self, name, delete_data=False):
-        """
-        Delete a dataset from disk/cache.
+        """Delete a dataset from disk/cache.
 
         Parameters
         ----------
@@ -396,8 +382,7 @@ class CacheManager:
 
 
     def get_category(self, name):
-        """
-        Returns the dataset category name of a dataset.
+        """Returns the dataset category name of a dataset.
 
         Parameters
         ----------
@@ -420,8 +405,7 @@ class CacheManager:
 
 
     def exists_dataset(self, name):
-        """
-        Check if a dataset exists for loading.
+        """Check if a dataset exists for loading.
 
         Parameters
         ----------
@@ -445,8 +429,7 @@ class CacheManager:
 
 
     def exists_task(self, name, task):
-        """
-        Check if a task of a dataset exists in the cache file.
+        """Check if a task of a dataset exists in the cache file.
 
         Parameters
         ----------
@@ -471,8 +454,7 @@ class CacheManager:
 
 
     def get_dataset_storage_paths(self, name):
-        """
-        Get dataset save/load path.
+        """Get dataset save/load path.
 
         Parameters
         ----------
@@ -501,8 +483,7 @@ class CacheManager:
 
 
     def get_dataset_data(self, name):
-        """
-        Fetches the cache data of a dataset.
+        """Fetches the cache data of a dataset.
 
         Parameters
         ----------
@@ -524,8 +505,7 @@ class CacheManager:
 
 
     def get_cache_path(self, name, task):
-        """
-        Return the cache path of a specific task.
+        """Return the cache path of a specific task.
 
         Parameters
         ----------
@@ -551,8 +531,7 @@ class CacheManager:
 
 
     def update(self, name, category, data_dir, cache_dir, cache_info):
-        """
-        Update the cache file with new/updated data for a dataset.
+        """Update the cache file with new/updated data for a dataset.
 
         Parameters
         ----------

@@ -10,8 +10,7 @@ class StorageHDF5:
     """ Manage a HDF5 file """
 
     def __init__(self, filename, mode):
-        """
-        Initialize class.
+        """Initialize class.
 
         Parameters
         ----------
@@ -34,8 +33,7 @@ class StorageHDF5:
 
 
     def open_file(self, name, mode, version='latest'):
-        """
-        Open a hdf5 file.
+        """Open a hdf5 file.
 
         Parameters
         ----------
@@ -59,8 +57,7 @@ class StorageHDF5:
 
 
     def close_file(self):
-        """
-        Close the file.
+        """Close the file.
 
         Parameters
         ----------
@@ -78,8 +75,7 @@ class StorageHDF5:
 
 
     def is_group(self, name):
-        """
-        Check if the group name exists.
+        """Check if the group name exists.
 
         Parameters
         ----------
@@ -99,8 +95,7 @@ class StorageHDF5:
 
 
     def add_group(self, group):
-        """
-        Create a group in the hdf5 file.
+        """Create a group in the hdf5 file.
 
         Parameters
         ----------
@@ -124,8 +119,7 @@ class StorageHDF5:
 
 
     def delete_group(self, name):
-        """
-        Delete a group.
+        """Delete a group.
 
         Parameters
         ----------
@@ -145,8 +139,7 @@ class StorageHDF5:
 
 
     def parse_str(self, group, field_name):
-        """
-        Concatenate two strings.
+        """Concatenate two strings.
 
         Parameters
         ----------
@@ -171,8 +164,7 @@ class StorageHDF5:
 
 
     def is_data(self, group, field_name):
-        """
-        Check if the field_name exists.
+        """Check if the field_name exists.
 
         Parameters
         ----------
@@ -199,8 +191,7 @@ class StorageHDF5:
 
 
     def add_data(self, group, field_name, data, dtype=None):
-        """
-        Add data to a group + field in a hdf5 file.
+        """Add data to a group + field in a hdf5 file.
 
         Parameters
         ----------
@@ -231,8 +222,7 @@ class StorageHDF5:
 
 
     def delete_data(self, group, field_name):
-        """
-        Delete a data field.
+        """Delete a data field.
 
         Parameters
         ----------

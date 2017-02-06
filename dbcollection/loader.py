@@ -12,8 +12,7 @@ class ManagerHDF5:
 
 
     def __init__(self, data_handler):
-        """
-        Initialize class.
+        """Initialize class.
 
         Parameters
         ----------
@@ -128,8 +127,7 @@ class ManagerHDF5:
 
 
     def list(self):
-        """
-        Lists all field names.
+        """Lists all field names.
 
         Parameters
         ----------
@@ -181,8 +179,7 @@ class DatasetLoader:
 
 
     def add_group_links(self):
-        """
-        Adds links for the groups for easier access to data.
+        """Adds links for the groups for easier access to data.
 
         Parameters
         ----------
