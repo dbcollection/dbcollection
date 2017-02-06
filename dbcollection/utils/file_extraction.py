@@ -4,14 +4,12 @@ File extraction functions for common file types: matlab, json, etc.
 
 
 from __future__ import print_function
-import scipy.io
 import tarfile
 import zipfile
 
 
 def get_file_extension(fname):
-    """
-    Retrieve filename extension.
+    """Retrieve filename extension.
 
     Parameters
     ----------
@@ -32,8 +30,7 @@ def get_file_extension(fname):
 
 
 def extract_file_zip(fname, dir_path):
-    """
-    Extract zip file.
+    """Extract zip file.
 
     Parameters
     ----------
@@ -59,8 +56,7 @@ def extract_file_zip(fname, dir_path):
 
 
 def extract_file_tar(fname, dir_path):
-    """
-    Extract .tar file.
+    """Extract .tar file.
 
     Parameters
     ----------
@@ -86,10 +82,10 @@ def extract_file_tar(fname, dir_path):
 
 
 def get_extractor_method(ext):
-    """Get correct extractor method.
+    """Fetch extractor method from list.
 
-    Fetches a method based on the input extension. Raises
-    an exception if the method is not defined.
+    A method based on the input extension is returned based on an
+    input string. An exception is raised if the method is not defined.
 
     Parameters
     ----------
@@ -118,8 +114,7 @@ def get_extractor_method(ext):
 
 
 def extract_file(fname, dir_path, verbose=False):
-    """
-    Extract a compressed file to disk.
+    """Extract a compressed file to disk.
 
     Parameters
     ----------

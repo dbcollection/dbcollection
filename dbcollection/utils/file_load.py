@@ -11,9 +11,33 @@ else:
     import pickle
 
 
-def load_matlab(fname):
+def open_read_file(fname, mode='r'):
+    """Opens a file and returns the data.
+
+    Parameters
+    ----------
+    fname : str
+        File name + path on disk.
+
+    Returns
+    -------
+    <any>
+        File data.
+
+    Raises
+    ------
+        None
     """
-    Load a matlab file to memory.
+    try:
+        file_handle = open(fname, mode)
+    except (IOError, OSError):
+        raise IOError('Error opening file: {}'.format(fname))
+    else:
+        return file_handle
+
+
+def load_matlab(fname):
+    """Load a matlab file to memory.
 
     Parameters
     ----------
@@ -28,17 +52,16 @@ def load_matlab(fname):
     Raises
     ------
     IOError
-        If the file cannot be oppened.
+        If the file cannot be opened.
     """
     try:
         return scipy.loadmat(fname)
-    except IOError:
+    except (IOError, OSError):
         raise IOError('Error opening file: {}'.format(fname))
 
 
 def load_json(fname):
-    """
-    Loads a json file to memory.
+    """Loads a json file to memory.
 
     Parameters
     ----------
@@ -53,18 +76,16 @@ def load_json(fname):
     Raises
     ------
     IOError
-        If the file cannot be oppened.
+        If the file cannot be opened.
     """
-    with open(fname) as (data_file, err):
-        if err:
-            raise IOError(err)
-        else:
-            return json.load(data_file)
+    try:
+        return json.load(open_read_file(fname))
+    except (IOError, OSError):
+        raise IOError('Error opening file: {}'.format(fname))
 
 
 def load_pickle(fname):
-    """
-    Loads a pickle file to memory.
+    """Loads a pickle file to memory.
 
     Parameters
     ----------
@@ -79,10 +100,9 @@ def load_pickle(fname):
     Raises
     ------
     IOError
-        If the file cannot be oppened.
+        If the file cannot be opened.
     """
-    with open(fname, 'rb') as (data_file, err):
-        if err:
-            raise IOError(err)
-        else:
-            return pickle.load(data_file, encoding='latin1')
+    try:
+        return pickle.load(open_read_file(fname, 'rb'), encoding='latin1')
+    except (IOError, OSError):
+        raise IOError('Error opening file: {}'.format(fname))

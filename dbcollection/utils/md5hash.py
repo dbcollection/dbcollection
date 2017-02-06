@@ -3,6 +3,8 @@ MD5 hash string functions.
 """
 
 import hashlib
+from .file_load import open_read_file
+
 
 def get_hash_value(fname):
     """Retrieve the checksum of a file.
@@ -21,7 +23,11 @@ def get_hash_value(fname):
     ------
         None
     """
-    return hashlib.md5(open(fname, 'rb').read()).hexdigest()
+    try:
+        return hashlib.md5(open_read_file(fname, 'rb').read()).hexdigest()
+    except (IOError, OSError):
+        raise IOError('Error opening file: {}'.format(fname))
+    #return hashlib.md5(open(fname, 'rb').read()).hexdigest()
 
 
 def check_file_integrity_md5(fname, md5sum):
@@ -36,12 +42,12 @@ def check_file_integrity_md5(fname, md5sum):
 
     Returns
     -------
-        None
+    bool
+        Return true if the checksum of the file matches the input checksum. 
+        Otherwise, return false
 
     Raises
     ------
-    Exception
-
+        None
     """
-    if not get_hash_value(fname) == md5sum:
-        raise Exception('File check sum is invalid.')
+    return get_hash_value(fname) == md5sum

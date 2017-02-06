@@ -1,8 +1,14 @@
+"""
+Utility functions used for url download, file extract, data parsing, etc.
+"""
+
 from __future__ import print_function
 from .string_ascii import str_to_ascii, ascii_to_str, convert_str_ascii, convert_ascii_str
-from .url_download import url_get_filename, download_file, check_file_integrity_md5, remove_file
 from .file_extraction import extract_file
 from .file_load import load_matlab, load_json, load_pickle
+from .md5hash import check_file_integrity_md5
+from .os_funs import remove_file
+from .download_url import url_get_filename, download_file
 
 
 def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True):
@@ -39,7 +45,7 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
     # download + extract data and remove temporary files
     for i, url in enumerate(urls):
         if verbose:
-            print('Download url ' + str(i+1) + '/' + str(len(urls)))
+            print('Download url {}/{}'.format(i+1, len(urls)))
 
         # get download save filename
         fname_save = url_get_filename(url, dir_save)
@@ -49,7 +55,8 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
 
         # check md5 sum (if available)
         if any(md5sum):
-            check_file_integrity_md5(fname_save, md5sum)
+            if not check_file_integrity_md5(fname_save, md5sum):
+                raise Exception('md5 checksum does not match.')
 
         # extract file
         extract_file(fname_save, dir_save, verbose)

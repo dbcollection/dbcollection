@@ -7,8 +7,10 @@ import numpy as np
 
 
 def str_to_ascii(input_str):
-    """
-    Convert string to ascii list.
+    """Convert string to ascii numpy array.
+
+    Converts a single string of characters into a numpy array
+    coded as ascii.
 
     Parameters
     ----------
@@ -28,8 +30,7 @@ def str_to_ascii(input_str):
 
 
 def ascii_to_str(input_array):
-    """
-    Convert ascii numpy array to a string.
+    """Convert ascii numpy array to a string.
 
     Parameters
     ----------
@@ -75,25 +76,27 @@ def convert_str_ascii(inp_str):
         None
     """
     # check if list
-    if isinstance(inp_str, list):
-        # get max size of the list strings
-        max_size = max([len(a) for a in inp_str])
+    if not isinstance(inp_str, list):
+        inp_str = [inp_str]
 
-        # allocate array
-        ascii_array = np.zeros([len(inp_str), max_size+1], dtype=np.uint8)
+    # get max size of the list strings
+    max_size = max([len(a) for a in inp_str])
 
-        # iteratively copy data to the array
-        for i, val in enumerate(inp_str):
-            ascii_array[i, :len(val)] = str_to_ascii(val)
+    # allocate array
+    ascii_array = np.zeros([len(inp_str), max_size+1], dtype=np.uint8)
 
+    # iteratively copy data to the array
+    for i, val in enumerate(inp_str):
+        ascii_array[i, :len(val)] = str_to_ascii(val)
+
+    if len(inp_str) > 1:
         return ascii_array
     else:
-        return str_to_ascii(inp_str)
+        return ascii_array[0]
 
 
 def convert_ascii_str(input_array):
-    """
-    Convert a numpy array to a string (or a list of strings)
+    """Convert a numpy array to a string (or a list of strings)
 
     Parameters
     ----------
@@ -110,8 +113,7 @@ def convert_ascii_str(input_array):
         None
     """
     list_str = input_array.tolist()
-    if input_array.ndim == 1:
-        return ascii_to_str(list_str)
-    else:
+    if input_array.ndim > 1:
         return [ascii_to_str(list(filter(lambda x: x > 0, str_))) for str_ in list_str]
-
+    else:
+        return ascii_to_str(list(filter(lambda x: x > 0, list_str)))
