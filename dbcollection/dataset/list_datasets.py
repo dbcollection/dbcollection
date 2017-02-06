@@ -1,7 +1,7 @@
 """
 Datasets list.
 
-All available datasets must be added in here.
+All available datasets must be added in this file.
 """
 
 
@@ -22,6 +22,6 @@ image_processing_list = {
 # MAIN list
 #---------------------------------------------------------
 
-dataset_list = {
+datasets = {
     "image_processing": image_processing_list,
 }
