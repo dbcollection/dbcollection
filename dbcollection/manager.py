@@ -3,6 +3,7 @@ dbcollection managing functions.
 """
 
 from __future__ import print_function
+import os
 import sys
 import json
 from .cache import CacheManager
@@ -12,7 +13,7 @@ from . import dataset
 
 def load(name, data_dir=None, save_name=None, task='default', download=True, \
          verbose=True, organize_list=None, select=None, filter=None):
-    """loads dataset metadata file.
+    """Loads dataset metadata file.
 
     Returns a loader with the necessary functions to manage the selected dataset.
 
@@ -62,7 +63,7 @@ def load(name, data_dir=None, save_name=None, task='default', download=True, \
         cache_save_path = cache_manager.default_cache_dir
 
         # download dataset
-        if download:
+        if download or not os.path.exists(data_dir):
             dataset.download(name, data_dir, verbose)
 
         # preprocess dataset
