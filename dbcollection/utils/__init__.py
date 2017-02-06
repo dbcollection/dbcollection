@@ -6,7 +6,7 @@ from __future__ import print_function
 from .string_ascii import str_to_ascii, ascii_to_str, convert_str_ascii, convert_ascii_str
 from .file_extraction import extract_file
 from .file_load import load_matlab, load_json, load_pickle
-from .md5hash import check_file_integrity_md5
+from .md5hash import check_file_integrity_md5, get_hash_value
 from .os_funs import remove_file
 from .download_url import url_get_filename, download_file
 
@@ -56,7 +56,8 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
         # check md5 sum (if available)
         if any(md5sum):
             if not check_file_integrity_md5(fname_save, md5sum):
-                raise Exception('md5 checksum does not match.')
+                print('**WARNING**: md5 checksum does not match for file: {}'.format(fname_save))
+                print('MD5 checksum(File/reference): {} - {}'.format(get_hash_value(fname_save), md5sum))
 
         # extract file
         extract_file(fname_save, dir_save, verbose)
