@@ -12,125 +12,11 @@ import urllib
 import requests
 from clint.textui import progress
 
+from .os_funs import create_dir
 
-#---------------------------------------------------------
-# directory/file os management
-#---------------------------------------------------------
-
-def create_dir(dir_path, verbose=False):
-    """
-    Create directory if not existing.
-
-    Parameters
-    ----------
-    dir_path : str
-        Directory path on disk to create the new directory.
-    verbose : bool
-        Prints a message to the screen if True.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-    OSError
-        If directory cannot be created.
-    """
-    try:
-        os.makedirs(dir_path)
-    except OSError as err:
-        if err.errno != errno.EEXIST: # errno.ENOENT = no such file or directory
-            raise OSError('Unable to create dir: ' + dir_path)
-
-        if verbose:
-            print('Skip creating directory (already exists on disk).')
-    else:
-        if verbose:
-            print('Created directory: {}'.format(dir_path))
-
-
-def remove_file(fname):
-    """
-    Check if the path exists and remove the file.
-
-    Parameters
-    ----------
-    fname : str
-        File name + path on disk.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-    OSError
-        If file cannot be removed.
-    """
-    try:
-        os.remove(fname)
-    except OSError as err:
-        if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
-            raise
-
-
-#---------------------------------------------------------
-# md5 functions
-#---------------------------------------------------------
-
-def get_hash_value(fname):
-    """
-    Retrieve the checksum of a file.
-
-    Parameters
-    ----------
-    fname : str
-        File name + path on disk.
-
-    Returns
-    -------
-    str
-        Checksum string.
-
-    Raises
-    ------
-        None
-    """
-    return hashlib.md5(open(fname, 'rb').read()).hexdigest()
-
-
-def check_file_integrity_md5(fname, md5sum):
-    """
-    Check the integrity of a file using md5 hash.
-
-    Parameters
-    ----------
-    fname : str
-        File name + path on disk.
-    md5sum : str
-        MD5 checksum.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-    Exception
-
-    """
-    if not get_hash_value(fname) == md5sum:
-        raise Exception('File check sum is invalid.')
-
-
-#---------------------------------------------------------
-# Download functions
-#---------------------------------------------------------
 
 def download_single_file_progressbar(url, file_save_name):
-    """
-    Download a file (display a progress bar).
+    """Download a file (displays a progress bar).
 
     Parameters
     ----------
@@ -162,8 +48,7 @@ def download_single_file_progressbar(url, file_save_name):
 
 
 def download_single_file_nodisplay(url, file_save_name):
-    """
-    Download a file (no display text).
+    """Download a file (no display text).
 
     Parameters
     ----------
@@ -186,8 +71,7 @@ def download_single_file_nodisplay(url, file_save_name):
 
 
 def url_get_filename(url, dir_save):
-    """
-    Extract filename from the url string
+    """Extract filename from the url string
 
     Parameters
     ----------
@@ -215,8 +99,7 @@ def url_get_filename(url, dir_save):
 
 
 def download_file(url, dir_path, fname_save, verbose=False):
-    """
-    Download a single url data into a file.
+    """Download a single url data into a file.
 
     Parameters
     ----------
