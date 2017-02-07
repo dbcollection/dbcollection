@@ -5,10 +5,8 @@ Download functions.
 
 from __future__ import print_function
 import os
-import sys
 import urllib
-import requests
-from clint.textui import progress
+import wget
 
 from .os_funs import create_dir
 
@@ -31,18 +29,7 @@ def download_single_file_progressbar(url, file_save_name):
     ------
         None
     """
-    print('Downloading {} to: {}'.format(url, file_save_name))
-    r = requests.get(url, stream=True)
-    with open(file_save_name, 'wb') as (f, err):
-        if err:
-            raise IOError('Error opening file: {}'.format(file_save_name))
-        else:
-            total_length = int(r.headers.get('content-length'))
-            for chunk in progress.bar(r.iter_content(chunk_size=1024), \
-                                      expected_size=(total_length/1024) + 1):
-                if chunk:
-                    f.write(chunk)
-                    f.flush()
+    wget.download(url, out=file_save_name)
 
 
 def download_single_file_nodisplay(url, file_save_name):
@@ -66,34 +53,6 @@ def download_single_file_nodisplay(url, file_save_name):
     with urllib.request.urlopen(url) as response, open(file_save_name, 'wb') as out_file:
         data = response.read() # a `bytes` object
         out_file.write(data)
-
-
-def url_get_filename(url, dir_save):
-    """Extract filename from the url string
-
-    Parameters
-    ----------
-    url : str
-        URL location.
-    dir_save : str
-        Directory path to store the url file on disk.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-    """
-    # split url string
-    if sys.platform == 'win32':
-        url_fname = url.rsplit('\\', 1)[1]
-    else:
-        url_fname = url.rsplit('/', 1)[1]
-
-    # join strings and return them
-    return os.path.join(dir_save, url_fname)
 
 
 def download_file(url, dir_path, fname_save, verbose=False):

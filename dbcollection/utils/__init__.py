@@ -7,8 +7,8 @@ from .string_ascii import str_to_ascii, ascii_to_str, convert_str_ascii, convert
 from .file_extraction import extract_file
 from .file_load import load_matlab, load_json, load_pickle
 from .md5hash import check_file_integrity_md5, get_hash_value
-from .os_funs import remove_file
-from .download_url import url_get_filename, download_file
+from .os_funs import *
+from .download_url import download_file
 
 
 def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True):
@@ -42,16 +42,21 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
     if isinstance(urls, str):
         urls = [urls]
 
+    # check if the save directory exists
+    if not os.path.exists(dir_save):
+        create_dir(dir_save)
+
     # download + extract data and remove temporary files
     for i, url in enumerate(urls):
         if verbose:
-            print('Download url {}/{}'.format(i+1, len(urls)))
+            print('({}/{}) Download url: {}'.format(i+1, len(urls), url))
 
         # get download save filename
-        fname_save = url_get_filename(url, dir_save)
+        fname_save = os.path.join(dir_save, os.path.basename(url))
 
         # download file
-        download_file(url, dir_save, fname_save, verbose)
+        if download_file(url, dir_save, fname_save, verbose) and verbose:
+            print('File already exists, skip downloading this url.')
 
         # check md5 sum (if available)
         if any(md5sum):
@@ -64,4 +69,4 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
 
         # remove downloaded file (if triggered by the user)
         if clean_cache:
-            remove_file(fname_save)
+            delete_file(fname_save)

@@ -74,11 +74,8 @@ def extract_file_tar(fname, dir_path):
     IOError
         In case the file cannot be opened.
     """
-    with tarfile.open(fname) as (tar, err):
-        if err:
-            raise IOError(err)
-        else:
-            tar.extractall(dir_path)
+    with tarfile.open(fname) as tar:
+        tar.extractall(dir_path)
 
 
 def get_extractor_method(ext):
