@@ -2,6 +2,7 @@
 dbcollection managing functions.
 """
 
+
 from __future__ import print_function
 import os
 import sys
@@ -9,6 +10,7 @@ import json
 from .cache import CacheManager
 from .loader import DatasetLoader
 from . import dataset
+from . import utils
 
 
 def load(name, data_dir=None, save_name=None, task='default', download=True, \
@@ -61,10 +63,11 @@ def load(name, data_dir=None, save_name=None, task='default', download=True, \
     else:
         # get cache default save path
         cache_save_path = cache_manager.default_cache_dir
+        data_dir = data_dir or cache_manager.default_data_dir
 
         # download dataset
-        if download or not os.path.exists(data_dir):
-            dataset.download(name, data_dir, verbose)
+        if download and not os.path.exists(data_dir):
+            data_dir = dataset.download(name, data_dir, verbose)
 
         # preprocess dataset
         cache_info = dataset.process(name, data_dir, cache_save_path, verbose)
@@ -89,7 +92,6 @@ def load(name, data_dir=None, save_name=None, task='default', download=True, \
 
     # return Loader
     return dataset_loader
-
 
 
 def add(name, data_dir, cache_file_path, task='default'):
@@ -154,12 +156,12 @@ def delete(name):
     if cache_manager.exists_dataset(name):
         cache_manager.delete_dataset(name, True)
     else:
-        print('Dataset ' + name + ' does not exist.')
+        print('Dataset \'{}\' does not exist.'.format(name))
         #raise Exception('Dataset ' + name + ' does not exist.')
 
 
-def reset(name):
-    """Delete all metadata cache files and dir from disk/list.
+def reset(name=None):
+    """Deletes a dataset's metadata cache files plus dir from disk/cache.
 
     Resets the data of the dbcollection.json cache file for a specific dataset
     (it deletes the cache files for this dataset as well, if any).
@@ -177,15 +179,74 @@ def reset(name):
     ------
         None
     """
+    if name is None:
+        print('No dataset was selected. (do nothing)')
+        return
+
     # Load a cache manager object
     cache_manager = CacheManager()
 
-     # check if dataset exists in the cache file
-    if cache_manager.exists_dataset(name):
-        cache_manager.delete_dataset(name, False)
+    if name.lower() == 'all':
+        if cache_manager.is_empty():
+            print('The cache data is empty. (no datasets available)')
+        else:
+            import time
+
+            # delete the entire cache
+            print('**WARNING**')
+            print('This will delete the entire cache.')
+            print('In 10s all your cache files will be deleted.')
+            print('If this was set by mistake, proceed to terminate the execution')
+            for i in range(10, -1, -1):
+                print('{}..'.format(i))
+                time.sleep(1)
+            cache_manager.delete_cache_all()
+            print('Cache deletion complete.')
     else:
-        print('Dataset ' + name + ' does not exist.')
-        #raise Exception('Dataset ' + name + ' does not exist.')
+        # check if dataset exists in the cache file
+        if cache_manager.exists_dataset(name):
+            cache_manager.delete_dataset(name, False)
+        else:
+            print('Dataset {} does not exist.'.format(name))
+            #raise Exception('Dataset ' + name + ' does not exist.')
+
+
+def clear(flag=False, verbose=False):
+    """Deletes the cache .json file and the cache dir of all datasets.
+
+    Parameters
+    ----------
+    flag : bool
+        Enables the deletion of the entire dbcollection cache if True.
+        Otherwise, do nothing.
+    verbose : bool
+        Displays text information (if true).
+
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    """
+    if flag:
+        # Load a cache manager object
+        cache_manager = CacheManager()
+
+        # delete cache dir
+        if verbose:
+            print('Deleting {} cache root directory and all of its contents...'.format(cache_manager.default_cache_dir))
+        utils.delete_dir(cache_manager.default_cache_dir)
+        if verbose:
+            print('Done.')
+
+        # delete cache file
+        if verbose:
+            print('Deleting {} cache file...'.format(cache_manager.cache_fname))
+        utils.delete_file(cache_manager.cache_fname)
+        if verbose:
+            print('Done.')
 
 
 def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None):
@@ -230,11 +291,11 @@ def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None
                 for field_name in fields.keys():
                     cache_manager.change_field(name, field_name, fields[field_name])
             else:
-                print('Dataset ' + name + ' does not exist.')
+                print('Dataset {} does not exist.'.format(name))
                 #raise Exception('Dataset ' + name + ' does not exist.')
 
 
-def download(name, data_path, verbose=True):
+def download(name, data_dir, verbose=True):
     """Download dataset.
 
     Download the data for one (or several) listed dataset(s).
@@ -245,7 +306,7 @@ def download(name, data_path, verbose=True):
         Name of the dataset to reset the cache.
     cache : bool
         Force the cache file of the preprocessed data to be deleted for the particular dataset.
-	data_path : str
+	data_dir : str
         Data path to store the dataset's data.
 
     Returns
@@ -263,7 +324,7 @@ def download(name, data_path, verbose=True):
     cache_save_dir = cache_manager.default_cache_dir
 
     # download/preprocess dataset
-    dataset.download(name, data_path, cache_save_dir, verbose)
+    dataset.download(name, data_dir, cache_save_dir, verbose)
 
 
 def query(pattern):
@@ -339,6 +400,9 @@ def list(verbose=False):
     """
     # Load a cache manager object
     cache_manager = CacheManager()
+
+    if verbose:
+        print('Printing contents of {}:'.format(cache_manager.cache_fname))
 
     data_ = cache_manager.data
     if not verbose:
