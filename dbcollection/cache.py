@@ -3,6 +3,7 @@ Class to manage the dbcollection.json cache file.
 """
 
 
+from __future__ import print_function
 import os
 import errno
 import json
@@ -24,7 +25,9 @@ class CacheManager:
 
         # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
+            print('Cache file not found. Generating the file: {}'.format(self.cache_fname))
             self.create_cache_file_disk(self.cache_fname)
+            print('Done.')
 
         # load cache data file
         self.data = self.read_data_cache()
@@ -59,7 +62,7 @@ class CacheManager:
 
         # default paths
         self.default_cache_dir = os.path.join(self.cache_dir, 'dbcollection')
-        self.default_data_dir = self.default_cache_dir
+        self.default_data_dir = os.path.join(self.default_cache_dir, 'data')
 
 
     def read_data_cache_file(self):
@@ -201,7 +204,7 @@ class CacheManager:
             os.remove(fname)
         except OSError as err:
             if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
-                raise OSError('Unable to remove: ' + fname)
+                raise OSError('Unable to remove: {}'.format(fname))
 
 
     def delete_entry(self, name):
@@ -250,6 +253,30 @@ class CacheManager:
 
         # write updated data to file
         self.write_data_cache(self.data)
+
+
+    def delete_cache_all(self):
+        """Delete all datasets from cache.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        category_keys = self.data['dataset'].keys()
+        for category in category_keys:
+            dst_keys = self.data['dataset'][category].keys()
+            for name in dst_keys:
+                self.delete_dataset_cache(name)
+        # remove category names from the list
+        self.data['dataset'] = {}
 
 
     def check_dataset_name(self, name):
@@ -402,6 +429,26 @@ class CacheManager:
             if name in self.data['dataset'][category].keys():
                 return category
         return None
+
+
+    def is_empty(self):
+        """Checks if the cache data has any dataset.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+        bool
+            True if it is empty.
+            Otherwise, False.
+
+        Raises
+        ------
+            None
+        """
+        return any(self.data['dataset'])
 
 
     def exists_dataset(self, name):
