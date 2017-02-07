@@ -22,7 +22,10 @@ class ManagerHDF5:
         self.data = data_handler
 
         # fetch list of field names that compose the object list.
-        self.object_fields = convert_ascii_str(self.data['object_fields'])
+        try:
+            self.object_fields = convert_ascii_str(self.data['object_fields'].value)
+        except KeyError:
+            pass
 
 
     def get(self, field_name, idx):
