@@ -23,7 +23,7 @@ class StorageHDF5:
         self.mode = mode
 
         # open a file (read or write mode)
-        self.storage = self.open_file(filename, mode)
+        self.storage = self.open(filename, mode)
 
         # create train, val and test groups (most used groups)
         if mode in ['w', 'w+']:
@@ -32,7 +32,7 @@ class StorageHDF5:
             self.add_group('test')
 
 
-    def open_file(self, name, mode, version='latest'):
+    def open(self, name, mode, version='latest'):
         """Open a hdf5 file.
 
         Parameters
@@ -56,7 +56,7 @@ class StorageHDF5:
         return h5py.File(name, mode, libver=version)
 
 
-    def close_file(self):
+    def close(self):
         """Close the file.
 
         Parameters
