@@ -106,6 +106,53 @@ This repo tries to follow the PEP8 style convention as close as possible.
 		- .load(name='cifar10', filter={"class":['bird', 'cat', 'deer', 'dog', 'frog', 'horse']})
 	```
 
+	################
+	 organize_list
+	################
+
+	- field_name: (str ou lista de strs)
+	Procura por 'ids' do 'campo' no vector 'object_id' e agrupa cada 'object_id' por ordem crescente que tenha um 'id' igual ao do 'campo'. 
+	Isto é, procura-se (por ordem crescente do 'id' do 'campo') por qualquer objecto que possua o mesmo 'id' do 'campo' e constroi-se uma lista ordenada do 'id' do 'object_id'. Isto irá resultar em listas de 'ids' para cada 'id' do 'campo' designado. Estas listas serão guardadas no ficheiro de metadados.
+
+	- Nota: esta funcao é executada após os filtros e selecções (ver abaixo).
+
+	#########
+	 select
+	#########
+
+	- select: dict (name_field: [value, condition])
+	Procura no vector 'object_id' pelo 'campo' inserido, e seleciona so os 'object_id' que possuam o mesmo valor(es) que o campo possua. A condicao de entrada é igual às operacoes matematicas: eq, ne, lt, gt, le, ge. Isto permite que o utilizador escolha intervalos em vez de inserir varios campos manualmente. Resumindo, um utilizador escolhe um ou varios 'campos' para selecionar apenas a informação que pretende manter. Este especifica o(s) valor(es) do(s) campo(s) que pretende e pode ainda selecionar uma condicao de filtragem dos valores (o default será eq - equal). A lista de indices do 'object_id' resultantes desta selecção irão compor (substituir) o novo vector/matriz do 'object_id'.
+
+
+	#########
+	 filter
+	#########
+
+	- filter: dict (name_field: [value, condition])
+	Semelhante ao select, este filtra apenas os campos seleccionados do 'object_id' e substitui esta lista pela nova lista de 'object_id'.
+
+
+	#########
+	 balance
+	#########
+
+	- balance: dict ({'sets':['name_set'], 'load':[value]}, 'ordered'=True/False, 'unique'='field_name')
+	'Balanceia' os sets consoante os valores introduzidos. O utilizador seleciona uma combinação de sets de dados ('train', 'val', 'test', etc) e direcciona a quantidade de dados para um lado ou para outro (a quantidade que vai para cada set tem de totalizar 100 no final senao dá erro). Esta funcao permite ao utilizador, por exemplo, usar o dataset inteiro (train+val+test) ao simplesmente assignar ao set de 'train' todos os dados dos outros sets ({'sets': ['train', 'val', 'test'], 'values': [100, 0, 0]})
+	A opção 'ordered' permite que se faça um shuffle dos dados antes de se assignar para que set armazenar. Para assignar a divisão, os indices do 'object_id' são todos aglomerados numa unica lista e depois são divididos de acordo com a percentagem de divisão. O que esta opcao permite fazer eh um shuffle dos indices antes de efectuar a divisao dos mesmos.
+	A opcao 'unique' força que objectos com o mesmo indice que o(s) campo(s) selecionado(s) esteja(m) presente apenas num set de dados. Por exemplo, evita que varios sets tenham a mesma imagem.
+
+
+	Exemplos1: balance = {'sets': ['train', 'val'], 'values': [75,25]}
+	Exemplos2: balance = {'sets': ['test', 'val'], 'values': [100,0]}
+	Exemplos3: balance = {'sets': ['test', 'test'], 'values': [100,0]} -- nothing happens
+	Exemplos4: balance = {'sets': ['test', 'train', 'val'], 'values': [15,70,15]}
+	Exemplos5: balance = {'sets': ['val', 'train', 'test'], 'values': [0,100,0]} -- everything goes to the set 'train'
+
+	------
+	NOTA
+	------
+	No final, tenho que remover todos os dados que nao tenham sido usados no object_id e libertar espaco.
+
 - **.delete()** - deletes the data of a dataset.
 	options:
 		- name: name of the dataset to delete the data from disk [Type=String]
@@ -216,10 +263,11 @@ unit tests (so far):
 - Fazer loader API (Done)
 - unit tests (a fazer)
 - testes do cifar10 (mostrar imagens random)
-- LuaAPI (TODO)
 - system tests
 - setup.py do pacote
 - testes com python 2.7
 - testes em windows
+- adicionar mais alguns datasets
+- LuaAPI (TODO)
 - MatlabAPI
 - readme + docs + notebooks
