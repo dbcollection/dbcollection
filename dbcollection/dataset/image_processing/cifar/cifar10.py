@@ -104,7 +104,8 @@ class Cifar10:
 
         #return a dictionary
         return {
-            "class_names": class_names['label_names'],
+            "object_fields": ['data', 'class_name'],
+            "class_name": class_names['label_names'],
             "train_data": train_data,
             "train_labels": train_labels,
             "train_object_id_list": train_object_list,
@@ -127,15 +128,17 @@ class Cifar10:
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
         # write data to the metadata file
-        fileh5.add_data('train', 'class_name', utils.convert_str_ascii(data["class_names"]), np.uint8)
+        fileh5.add_data('train', 'class_name', utils.convert_str_ascii(data["class_name"]), np.uint8)
         fileh5.add_data('train', 'data', data["train_data"], np.uint8)
-        #fileh5.add_data('train', 'class_id', data["train_labels"], np.uint8)
-        fileh5.add_data('train', 'object_id', data["train_object_id_list"], np.uint16)
+        fileh5.add_data('train', 'object_id', data["train_object_id_list"], np.int32)
+        # object fields is necessary to identify which fields compose 'object_id'
+        fileh5.add_data('train', 'object_fields', utils.convert_str_ascii(data['object_fields']), np.uint8)
 
-        fileh5.add_data('test', 'class_name', utils.convert_str_ascii(data["class_names"]), np.uint8)
+        fileh5.add_data('test', 'class_name', utils.convert_str_ascii(data["class_name"]), np.uint8)
         fileh5.add_data('test', 'data', data["test_data"], np.uint8)
-        #fileh5.add_data('test', 'class_id', data["test_labels"], np.uint8)
-        fileh5.add_data('test', 'object_id', data["test_object_id_list"], np.uint16)
+        fileh5.add_data('test', 'object_id', data["test_object_id_list"], np.int32)
+        # object fields is necessary to identify which fields compose 'object_id'
+        fileh5.add_data('test', 'object_fields', utils.convert_str_ascii(data['object_fields']), np.uint8)
 
         # close file
         fileh5.close()
