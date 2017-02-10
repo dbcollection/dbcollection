@@ -264,10 +264,10 @@ unit tests (so far):
 - unit tests (a fazer)
 - testes do cifar10 (mostrar imagens random)
 - system tests
+- adicionar mais alguns datasets (voc2007, imagenet, coco)
 - setup.py do pacote
 - testes com python 2.7
 - testes em windows
-- adicionar mais alguns datasets
 - LuaAPI (TODO)
 - MatlabAPI
 - readme + docs + notebooks
