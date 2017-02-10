@@ -67,6 +67,13 @@ class OSFunsTest(unittest.TestCase):
         mock_os.assert_called_with(sample_dir_path)
 
 
+    def test_delete_dir(self):
+        """
+        Test deleting a directory
+        """
+        self.fail()
+    
+
     @patch('os.remove')
     def test_remove_file__succeed(self, mock_remove):
         """

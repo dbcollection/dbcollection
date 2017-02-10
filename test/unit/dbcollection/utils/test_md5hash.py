@@ -28,7 +28,7 @@ class MD5HashTest(unittest.TestCase):
     Test class.
     """
 
-    @patch('__main__open_read_file', return_value)
+    @patch('__main__open_read_file')
     @patch('__main__.hashlib')
     def test_get_hash_value__success(self, mock_hash, mock_file):
         """

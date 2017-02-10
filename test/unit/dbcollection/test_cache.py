@@ -264,6 +264,13 @@ class CacheManagerTest(unittest.TestCase):
         mock_write.assert_called_with(self.cache_manager.data)
 
 
+    def test_delete_cache_all(self):
+        """
+        Test deleting all datasets from the cache.
+        """
+        self.fail()
+    
+
     def test_check_dataset_name__exists(self):
         """
         Test if a name string exists in the caches's dictionary.
@@ -500,6 +507,13 @@ class CacheManagerTest(unittest.TestCase):
         # check if the output category name matches the result reference
         self.assertEqual(res, reference_category, 'Category names should be equal')
 
+
+    def test_is_empty(self):
+        """
+        Test to see if the cache data has any dataset.
+        """
+        self.fail()
+    
 
     def test_exists_dataset__valid_dataset(self):
         """
