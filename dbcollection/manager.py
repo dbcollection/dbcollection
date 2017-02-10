@@ -13,8 +13,10 @@ from . import dataset
 from . import utils
 
 
-def load(name, data_dir=None, save_name=None, task='default', download=True, \
-         verbose=True, organize_list=None, select=None, filter=None):
+def load(name, data_dir=None, save_name=None, task='default', \
+         download=True, \
+         verbose=True, \
+         organize_list=None, select=None, filter=None, balance=None):
     """Loads dataset metadata file.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -25,8 +27,8 @@ def load(name, data_dir=None, save_name=None, task='default', download=True, \
         Name of the dataset.
     data_dir : str
         Path to store the data (if the data doesn't exist and the download flag is equal True).
-    save_name : bool
-        Save the metadata file with a new name.
+    save_name : str
+        Save a custom task with a specified name.
         (usefull to create custom versions of the original).
     task : str
         Specify a specific task to load.
@@ -61,21 +63,29 @@ def load(name, data_dir=None, save_name=None, task='default', download=True, \
     if cache_manager.exists_task(name, task):
         dataset_category = cache_manager.get_category(name)
     else:
-        # get cache default save path
-        cache_save_path = cache_manager.default_cache_dir
-        data_dir = data_dir or cache_manager.default_data_dir
+        # check if the dataset name exists on the available download list
+        if dataset.exists(name):
+            if download:
+                # get cache default save path
+                cache_save_path = cache_manager.default_cache_dir
+                data_dir = data_dir or cache_manager.default_data_dir
 
-        # download dataset
-        if download and not os.path.exists(data_dir):
-            data_dir = dataset.download(name, data_dir, verbose)
+                # download dataset
+                if not os.path.exists(data_dir):
+                    data_dir = dataset.download(name, data_dir, verbose)
 
-        # preprocess dataset
-        cache_info = dataset.process(name, data_dir, cache_save_path, verbose)
+                # preprocess dataset
+                cache_info = dataset.process(name, data_dir, cache_save_path, verbose)
 
-        # update dbcollection.json file with the new data
-        dataset_category = cache_info['category']
-        cache_manager.update(name, dataset_category, cache_info['data_dir'], \
-                            cache_info['cache_dir'], cache_info['task'])
+                # update dbcollection.json file with the new data
+                dataset_category = cache_info['category']
+                cache_manager.update(name, dataset_category, cache_info['data_dir'], \
+                                    cache_info['cache_dir'], cache_info['task'])
+            else:
+                raise Exception('The dataset \'{}\' is not available on the cache list '.format(name) +\
+                                'BUT it is available for download by setting \'download=True\'.')
+        else:
+            raise Exception('The dataset \'{}\' is not available for download.'.format(name))
 
     # get cache path
     cache_path = cache_manager.get_cache_path(name, task)
@@ -83,12 +93,32 @@ def load(name, data_dir=None, save_name=None, task='default', download=True, \
     # get dataset storage path
     dset_paths = cache_manager.get_dataset_storage_paths(name)
 
+    # setup a save name
+
     # Create a loader
-    dataset_loader = DatasetLoader(name, dataset_category, task, dset_paths['data_dir'], cache_path)
+    dataset_loader = DatasetLoader(name, dataset_category, task, dset_paths['data_dir'], cache_path, save_name)
+
+    # do select processing here
+    if select:
+        if verbose:
+            print('Select')
+        dataset_loader.select_fields(select)
+
+    # do filter processing here
+    if filter:
+        if verbose:
+            print('Filter')
+        dataset_loader.filter_fields(filter)
 
     # organize data into a list w.r.t. some field_name
-    # do select/filter processing here
-    # save dataset_loader with a different task name (use save_name)
+    if organize_list:
+        if verbose:
+            print('Organize fields into lists: {}'.format(organize_list))
+        dataset_loader.create_list(organize_list)
+
+    # do data balancing here
+    if balance:
+        dataset_loader.balance_sets(balance)
 
     # return Loader
     return dataset_loader
@@ -122,10 +152,7 @@ def add(name, data_dir, cache_file_path, task='default'):
     cache_manager = CacheManager()
 
     # split dir and filename from path
-    if sys.platform == 'win32':
-        cache_dir = cache_file_path.rsplit('\\', 1)[0]
-    else:
-        cache_dir = cache_file_path.rsplit('/', 1)[0]
+    cache_dir = os.path.dirname(cache_file_path)
 
     # add dataset info to the dataset
     cache_manager.update(name, 'custom', data_dir, cache_dir, {task:cache_file_path})
