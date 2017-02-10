@@ -2,4 +2,4 @@
 This module conveys two functions for importing/downloading datasets.
 """
 
-from .funs import download, process
+from .funs import download, exists, process
