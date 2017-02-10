@@ -27,10 +27,7 @@ class ManagerHDF5:
         self.data = data_handler
 
         # fetch list of field names that compose the object list.
-        try:
-            self.object_fields = convert_ascii_to_str(self.data['object_fields'].value)
-        except KeyError:
-            pass
+        self.object_fields = convert_ascii_to_str(self.data['object_fields'].value)
 
 
     def get(self, field_name, idx):
@@ -235,7 +232,7 @@ class DatasetLoader:
             setattr(self, name, ManagerHDF5(self.file.storage[name]))
 
 
-    def create_list(self, field_list, chunk_size=10000):
+    def create_list(self, field_list):
         """Organize object_ids by fields.
 
         Creates a list w.r.t. a data field and organizes all 'object_id' indexes
@@ -243,7 +240,8 @@ class DatasetLoader:
 
         Parameters
         ----------
-            None
+        field_list : list
+            List of names of existing fields.
 
         Returns
         -------
@@ -252,10 +250,15 @@ class DatasetLoader:
         Raises
         ------
             None
+        
+        Examples
+        --------
+        .create_list(['class_name', 'filename'])
         """
         # create a new metadata file to store the new variable(s)
         for field_name in field_list:
-            create_list_store_to_hdf5(self.file.storage, field_name, chunk_size)
+            field_pos = self.train.object_field_id(field_name)
+            create_list_store_to_hdf5(self.file.storage, field_name, field_pos)
 
 
     def select_data(self, input_dict):
@@ -273,7 +276,10 @@ class DatasetLoader:
         ------
             None
         """
-        pass
+        for field_name in input_dict.keys():
+            conditions = input_dict[field_name]
+            create_list_store_to_hdf5(self.file.storage, field_name, chunk_size)
+
 
 
     def filter_data(self, input_dict):
