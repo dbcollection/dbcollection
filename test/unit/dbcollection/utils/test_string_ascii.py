@@ -58,7 +58,7 @@ class Str2AsciiTest(unittest.TestCase):
         self.assertEqual(res, sample_string, 'Strings should be equal')
 
 
-    def test_convert_str_ascii__single_string(self):
+    def test_convert_str_to_ascii__single_string(self):
         """
         Test converting a single string into a numpy array.
         """
@@ -67,13 +67,13 @@ class Str2AsciiTest(unittest.TestCase):
         sample_res = np.array([116, 101, 115, 116, 0], dtype=np.uint8)
 
         # convert str to ascii
-        res = convert_str_ascii(sample_string)
+        res = convert_str_to_ascii(sample_string)
 
         # check if the arrays are the same
         self.assertEqual(res.tolist(), sample_res.tolist(), 'Arrays should be equal')
 
 
-    def test_convert_str_ascii__list_of_strings(self):
+    def test_convert_str_to_ascii__list_of_strings(self):
         """
         Test converting a list of strings string into a numpy array (matrix).
         """
@@ -85,13 +85,13 @@ class Str2AsciiTest(unittest.TestCase):
                                dtype=np.uint8)
 
         # convert str to ascii
-        res = convert_str_ascii(sample_string_list)
+        res = convert_str_to_ascii(sample_string_list)
 
         # check if the arrays are the same
         self.assertEqual(res.tolist(), sample_res.tolist(), 'Arrays should be equal')
 
 
-    def test_convert_ascii_str__single_array(self):
+    def test_convert_ascii_to_str__single_array(self):
         """
         Test converting a numpy array into a single string of characters.
         """
@@ -100,13 +100,13 @@ class Str2AsciiTest(unittest.TestCase):
         sample_string = 'test'
 
         # convert ascii to str
-        res = convert_ascii_str(sample_array)
+        res = convert_ascii_to_str(sample_array)
 
         # check if the strings are the same
         self.assertEqual(res, sample_string, 'Strings should be equal')
 
 
-    def test_convert_ascii_str__matrix_array(self):
+    def test_convert_ascii_to_str__matrix_array(self):
         """
         Test converting a numpy matrix into a list of string of characters.
         """
@@ -118,7 +118,7 @@ class Str2AsciiTest(unittest.TestCase):
         sample_string_list = ['test1', 'test2', 'test3']
 
         # convert ascii to str
-        res = convert_ascii_str(sample_matrix)
+        res = convert_ascii_to_str(sample_matrix)
 
         # check if the strings are the same
         self.assertEqual(res, sample_string_list, 'Lists should be equal')

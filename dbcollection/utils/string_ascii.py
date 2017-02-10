@@ -49,7 +49,7 @@ def ascii_to_str(input_array):
     return "".join([chr(item) for item in input_array])
 
 
-def convert_str_ascii(inp_str):
+def convert_str_to_ascii(inp_str):
     """Convert a list of strings into a numpy array (uint8).
 
     Converts a string or list of strings to a numpy array. The array size is
@@ -95,7 +95,7 @@ def convert_str_ascii(inp_str):
         return ascii_array[0]
 
 
-def convert_ascii_str(input_array):
+def convert_ascii_to_str(input_array):
     """Convert a numpy array to a string (or a list of strings)
 
     Parameters
