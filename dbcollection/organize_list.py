@@ -2,12 +2,12 @@
 Functions to create lists of organized objects by field.
 
 The user can easily create lookup lists for any number of existing data fields
-that compose the set of data of a dataset. By simply selecting a field, the 
+that compose the set of data of a dataset. By simply selecting a field, the
 organize list property creates lists of objects indexes for each field's id.
 
-For example, creating a list of objects belonging only to a specific class is 
-simply a matter of selecting the 'field_name' of the classes and it will 
-automatically link all object_ids that contain that each specific id of the 
+For example, creating a list of objects belonging only to a specific class is
+simply a matter of selecting the 'field_name' of the classes and it will
+automatically link all object_ids that contain that each specific id of the
 class field.
 """
 
@@ -15,27 +15,26 @@ class field.
 import numpy as np
 
 
-def list_chuncks(handler, field_name, num_objects, chunck_size):
+def list_chunks(handler, field_name, field_pos, num_objects, chunk_size=1000):
 
     list_id = {}
-    field_pos = handler.object_field_id(field_name) # <---fix this. (get field id)
 
     # cycle all object_ids in order and fill the temporary dictionary
-    for idx in range(0,num_objects):
+    for idx in range(0, num_objects):
         # list of ids of a single object entry
-        object_id_list = handler.object(idx)
+        object_id_list = handler['object_id'][idx, :]
 
         # object_id's field index value
-        field_id = object_id_list[field_pos]
+        field_id = object_id_list[field_pos] - 1
 
         # add to the table
         try:
             list_id[field_id].append(idx+1)
-        except ValueError:
+        except KeyError:
             list_id[field_id] = [idx+1]
 
-        # check if the counter is equal to chunck_size
-        if (idx+1) % chunck_size == 0:
+        # check if the counter is equal to chunk_size
+        if (idx+1) % chunk_size == 0:
             yield list_id
             list_id = {} # reset list
 
@@ -65,78 +64,86 @@ def generate_dict_with_zeros(size):
     return d
 
 
-def update_field_list_size(field_dict, chunck_dict):
+def update_field_list_size(field_dict, chunk_dict):
     """
     Update each element size with the new data from the chuck_dict.
     """
     max_size = 0
-    for key in chunck_dict.keys():
-        field_dict[key] += chunck_dict[key]
+    for key in chunk_dict.keys():
+        field_dict[key] += len(chunk_dict[key])
         max_size = max(max_size, field_dict[key])
     return max_size
 
 
-def write_chuncks_to_field(handler, chunck_list):
+def write_chunks_to_field(handler, chunk_list):
     """
     Update the metadata file with the new data.
     """
-    for key in chunck_list.keys():
+    for key in chunk_list.keys():
         # get last idx with data (i.e., != 0)
         idx_min = handler[key, :].argmin(axis=0)
-        for i, val in enumerate(chunck_list[key]):
+        for i, val in enumerate(chunk_list[key]):
             handler[key, idx_min+i] = val
 
 
-def create_list_store_to_hdf5(field_name, chunck_size):
+def setup_new_field(handler, list_field_name, num_objects, size_field):
     """
-    Write chuncks to the hdf5 metadata file.
+    Create a new field in the hdf5 file.
+    """
+    # config the new list field
+    if num_objects < 4e9:
+        dtype = np.int32
+    else:
+        dtype = np.int64
+
+    dset = handler.create_dataset(
+        list_field_name,
+        shape=(size_field, 0),
+        maxshape=(size_field, num_objects),
+        chunks=True,
+        dtype=dtype
+    )
+
+    return dset, generate_dict_with_zeros(size_field)
+
+
+def create_list_store_to_hdf5(handler, field_name, field_pos):
+    """
+    Write chunks to the hdf5 metadata file.
     """
     # craft the new field name
     list_field_name = 'list_' + field_name
 
     # cycle all sets of the dataset
-    for set_name in self.file.storage.keys():
+    for set_name in handler.keys():
         # fetch a data handler for the set
-        hdf5_set = self.file.storage[set_name]
+        hdf5_set = handler[set_name]
 
         # get total size of the 'object_id' list
         num_objects = hdf5_set['object_id'].shape[0]
         size_field = hdf5_set[field_name].shape[0]
 
-        # create a generator of indexes
-        gen = list_chuncks(hdf5_set, field_name, chunck_size)
+        # create a generator of data indexes
+        gen = list_chunks(hdf5_set, field_name, field_pos, num_objects)
 
-        # config new field
-        data = np.zeros()
-        maxshape = (size_field,)
+        # setup the new list field
+        dset, field_list_size = setup_new_field(hdf5_set, list_field_name, num_objects, size_field)
 
-        if size_field < 4e9:
-            dtype = np.int32
-        else:
-            dtype = np.int64
-
-        dset = hdf5_set.create_dataset(
-            list_field_name,
-            shape=(size_field,0),
-            maxshape=(None, None),
-            chunks=chunck_size,
-            dtype=dtype
-        )
-
-        # initialize list with zeros
-        field_list_size = generate_dict_with_zeros(size_field)
+        # initialize maximum size of the new field (axis=1)
         curr_max_size = 0
 
-        # add the rest of the chuncks
-        for chunck_dict in gen:
+        # add the rest of the chunks
+        for chunk_dict in gen:
 
-            # check the max size of row of the chunck list
-            new_max_size = update_field_list_size(field_list_size, chunck_dict)
+            # check the max size of row of the chunk list
+            new_max_size = update_field_list_size(field_list_size, chunk_dict)
 
             # check if the id of the max
             if new_max_size > curr_max_size:
                 # resize the dataset to accommodate the next chunk of rows
                 dset.resize(new_max_size, axis=1)
+                # update the new max size
+                curr_max_size = new_max_size
 
             # write the next chunk
-            write_chuncks_to_field(dset, chunck_dict)
+            write_chunks_to_field(dset, chunk_dict)

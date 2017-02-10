@@ -4,8 +4,13 @@ Dataset loader class.
 
 
 from .storage import StorageHDF5
-from .utils import convert_ascii_str
+from .utils import convert_ascii_to_str
+from .organize_list import create_list_store_to_hdf5
 
+
+#---------------------------------------------------------
+# Data fetching API from the hdf5 metadata file
+#---------------------------------------------------------
 
 class ManagerHDF5:
     """ HDF5 data loading class """
@@ -23,7 +28,7 @@ class ManagerHDF5:
 
         # fetch list of field names that compose the object list.
         try:
-            self.object_fields = convert_ascii_str(self.data['object_fields'].value)
+            self.object_fields = convert_ascii_to_str(self.data['object_fields'].value)
         except KeyError:
             pass
 
@@ -147,6 +152,34 @@ class ManagerHDF5:
         return self.data.keys()
 
 
+    def object_field_id(self, field_name):
+        """retrieves the index position of the field in the object id list.
+
+        Parameters
+        ----------
+        field_name : str
+            Name of the data field.
+
+        Returns
+        -------
+        int
+            Index of the field_name on the list.
+
+        Raises
+        ------
+        ValueError
+            If field_name does not exist on the 'object_fields' list.
+        """
+        try:
+            return self.object_fields.index(field_name)
+        except ValueError:
+            raise ValueError('Field name \'{}\' does not exist.'.format(field_name))
+
+
+#---------------------------------------------------------
+# Dataset loader functions + dataset info
+#---------------------------------------------------------
+
 class DatasetLoader:
     """ Dataset loader """
 
@@ -196,5 +229,85 @@ class DatasetLoader:
         ------
             None
         """
+        self.sets = []
         for name in self.file.storage.keys():
+            self.sets.append(name)
             setattr(self, name, ManagerHDF5(self.file.storage[name]))
+
+
+    def create_list(self, field_list, chunk_size=10000):
+        """Organize object_ids by fields.
+
+        Creates a list w.r.t. a data field and organizes all 'object_id' indexes
+        for each unique value of the data field.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        # create a new metadata file to store the new variable(s)
+        for field_name in field_list:
+            create_list_store_to_hdf5(self.file.storage, field_name, chunk_size)
+
+
+    def select_data(self, input_dict):
+        """Selects data of the object id list w.r.t. some conditions.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        pass
+
+
+    def filter_data(self, input_dict):
+        """Filters data of the object id list w.r.t. some conditions.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        pass
+
+
+    def balance_sets(self, input_dict):
+        """Balances data sets.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        pass
+
