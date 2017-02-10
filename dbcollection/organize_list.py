@@ -1,5 +1,14 @@
 """
 Functions to create lists of organized objects by field.
+
+The user can easily create lookup lists for any number of existing data fields
+that compose the set of data of a dataset. By simply selecting a field, the 
+organize list property creates lists of objects indexes for each field's id.
+
+For example, creating a list of objects belonging only to a specific class is 
+simply a matter of selecting the 'field_name' of the classes and it will 
+automatically link all object_ids that contain that each specific id of the 
+class field.
 """
 
 
