@@ -38,7 +38,9 @@ def list_chunks(handler, field_name, field_pos, num_objects, chunk_size=1000):
             yield list_id
             list_id = {} # reset list
 
-    yield list_id
+    # check if the dictionary still has any values inside
+    if any(list_id):
+        yield list_id
 
 
 def get_dict_max_row_size(dict_table):
