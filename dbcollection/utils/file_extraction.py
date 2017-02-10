@@ -45,14 +45,10 @@ def extract_file_zip(fname, dir_path):
 
     Raises
     ------
-    IOError
-        In case the file cannot be opened.
+        None
     """
-    with zipfile.ZipFile(fname, 'r') as (zip_ref, err):
-        if err:
-            raise IOError(err)
-        else:
-            zip_ref.extractall(dir_path)
+    with zipfile.ZipFile(fname, 'r') as zip_ref:
+        zip_ref.extractall(dir_path)
 
 
 def extract_file_tar(fname, dir_path):
