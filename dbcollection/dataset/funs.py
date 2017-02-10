@@ -78,6 +78,28 @@ def setup_dataset_constructor(name, data_dir, cache_dir, verbose=True, is_downlo
     return dataset_loader, data_dir_, cache_dir_, category
 
 
+def exists(name):
+    """Checks if a dataset name exists for download.
+
+    Parameters
+    ----------
+    name : str
+        Name of the dataset.
+
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    """
+    for category in datasets.keys():
+        if name in datasets[category].keys():
+            return True
+    return False
+
+
 def download(name, data_dir, cache_dir, verbose=True):
     """Download data of a dataset.
 
