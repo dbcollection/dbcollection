@@ -21,8 +21,8 @@ class ManagerHDF5:
 
         Parameters
         ----------
-        data_handler : dict (hdf5)
-            A handler for a hdf5 dictionary.
+        data_handler : hdf5
+            A handler for a hdf5 file.
         """
         self.data = data_handler
 

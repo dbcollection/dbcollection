@@ -83,7 +83,7 @@ def generate_index_list_objects(handler, field_name, field_pos, indexes, chunk_s
         object_id_list = handler_object[idx, :]
 
         # object_id's field index value
-        field_id = object_id_list[field_pos] - 1 # fix this (check if it needs the -1 or not)
+        field_id = object_id_list[field_pos] - 1
 
         # check if the id exists in the index list
         if field_id in indexes.keys():
@@ -108,10 +108,10 @@ def setup_new_field(handler, field_name):
 
     dset = handler.create_dataset(
         new_field_name,
-        shape=handler.shape,
-        maxshape=handler.shape,
+        shape=([0 for i in range(0, handler[field_name].ndim)]),
+        maxshape=handler[field_name].shape,
         chunks=True,
-        dtype=handler.dtype
+        dtype=handler[field_name].dtype
     )
 
     return dset, new_field_name
@@ -155,7 +155,7 @@ def filter_data(handler, field_name, val, operation, is_select):
     gen_list = generate_index_list(handler_field, val, operation, is_select)
 
     # create new temporary field and store only the wanted indexes
-    handler_temp, new_field_name = setup_new_field(handler_field, field_name)
+    handler_temp, new_field_name = setup_new_field(handler, field_name)
     used_indexes = write_hdf5_selected_indexes(handler_temp, handler_field, gen_list)
 
     # delete old field
@@ -198,6 +198,7 @@ def field_data_filter(handler, field_name, field_pos, conditions, is_select):
     """
     Select values from a field.
     """
+    main_indexes = []
     for condition in conditions:
         val = condition[0]
         operation = condition[1]
@@ -210,6 +211,10 @@ def field_data_filter(handler, field_name, field_pos, conditions, is_select):
 
             # filter field data w.r.t. the input conditions
             used_indexes = filter_data(hdf5_set, field_name, val, operation, is_select)
+            indexes = get_filter_indexes(hdf5_set, field_name, val, operation, is_select)
 
-            # filter object_id that contain different ids comparing with the input field
-            remove_unused_indexes(hdf5_set, field_name, field_pos, used_indexes)
+            # merge the resulting index list to the main list
+            main_indexes = sorted(main_indexes + list(set(indexes) - set(main_indexes)))
+
+    # filter object_id that contain different ids comparing with the input field
+    remove_unused_indexes(hdf5_set, field_name, field_pos, main_indexes)

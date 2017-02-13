@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-organize_list.py unit testing.
+select.py unit testing.
 """
 
 
@@ -17,7 +17,7 @@ from unittest.mock import patch, mock_open
 dir_path = os.path.dirname(os.path.realpath(__file__))
 lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection'))
 sys.path.append(lib_path)
-from organize_list import *
+from select_filter import *
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection', 'utils'))
@@ -29,7 +29,7 @@ from string_ascii import *
 # Unit Test definitions
 #-----------------------
 
-class OrganizeTest(unittest.TestCase):
+class SelectTest(unittest.TestCase):
     """
     Test class.
     """
@@ -39,7 +39,7 @@ class OrganizeTest(unittest.TestCase):
         Initialize class.
         """
         # sample data
-        self.sample_test_hdf_file = 'test_organize_list__valid_field.h5'
+        self.sample_test_hdf_file = 'test_select_data.h5'
 
         sample_train_filename = convert_str_to_ascii(['fname1', 'fname2', 'fname3', \
                                     'fname4', 'fname5', 'fname6', \
@@ -64,59 +64,28 @@ class OrganizeTest(unittest.TestCase):
         tr.create_dataset('object_id', data=sample_train_object_id)
 
 
-    def test_organize_list__valid_field_class(self):
+    def test_select_two_classes_from_data__valid_field(self):
         """
-        Test organizing a list of a valid field.
+        Test selecting two classes from the available 4 classes.
         """
         # sample data
         sample_storage = self.data
         sample_field_name = 'class'
         sample_field_pos = 1
-        sample_chunk_size = 1000
-        sample_field_list = 'list_' + sample_field_name
-        expected_result = np.array([[1,2,3],[4,5,6],[7,8,9],[0,0,0]])
+        sample_is_select = True
+        sample_conditions = [[2, 'le']] # lower or equal
+        expected_result = np.array([[1, 1], [2, 1], [3, 1], \
+                                    [4, 2], [5, 2], [6, 2]])
+        expected_classes = convert_str_to_ascii(['class1', 'class2'])
 
-        # create an organized list for sample_field_name
-        create_list_store_to_hdf5(sample_storage, sample_field_name, \
-                                  sample_field_pos, sample_chunk_size)
-
-        # check if the field sample_field_list exists
-        self.assertTrue(sample_field_list in self.data['train'].keys(), '{}'.format(sample_field_list))
-        self.assertEqual(self.data['train'][sample_field_list].value.tolist(), expected_result.tolist(), \
-                         'expected equal result')
-
-
-    def test_organize_list__valid_field_filename(self):
-        """
-        Test organizing a list of a valid field.
-        """
-        # sample data
-        sample_storage = self.data
-        sample_field_name = 'filename'
-        sample_field_pos = 0
-        sample_chunk_size = 1000
-        sample_field_list = 'list_' + sample_field_name
-        expected_result = np.array([[1],[2],[3],[4],[5],[6],[7],[8],[9]])
-
-        # create an organized list for sample_field_name
-        create_list_store_to_hdf5(sample_storage, sample_field_name, \
-                                  sample_field_pos, sample_chunk_size)
+        # select data
+        field_data_filter(self.data, sample_field_name, sample_field_pos, sample_conditions, sample_is_select)
 
         # check if the field sample_field_list exists
-        self.assertTrue(sample_field_list in self.data['train'].keys(), '{}'.format(sample_field_list))
-        self.assertEqual(self.data['train'][sample_field_list].value.tolist(), expected_result.tolist(), \
-                         'expected result different')
-
-
-    def tearDown(self):
-        """
-        Remove the temporary data files.
-        """
-        self.data.close()
-
-        # check if the file exists on disk
-        if os.path.exists(self.sample_test_hdf_file):
-            os.remove(self.sample_test_hdf_file)
+        self.assertEqual(self.data['train']['class'].value.tolist(), expected_classes.tolist(), \
+                         'classes: expected equal result')
+        self.assertEqual(self.data['train']['object_id'].value.tolist(), expected_result.tolist(), \
+                         'objects: expected equal result')
 
 
 #----------------
