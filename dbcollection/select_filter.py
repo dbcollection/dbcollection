@@ -1,7 +1,7 @@
 """
-Select data from the metadata file.
+Select/filter data from the metadata file.
 
-Whenever an user requires to select only a set of the available data
+Whenever an user requires to select/filter only a set of the available data
 from a specific task, it can use the selection property in the load()
 API.
 
@@ -9,7 +9,46 @@ This enables the user to select, for example, only a specific set of
 classes from the available class list. The resulting metadata removes
 all data objects that do not contain the specified set of classes
 automatically.
+
+Also, the user can filter, for example, certain fields like age
+or gender from a field automatically by selecting the field values and
+the condition which the values should be evaluated.
 """
+
+
+import numpy as np
+from utils import convert_ascii_to_str
+
+
+def parse_search_inputs(input_list):
+    """
+    Parse the input search fields.
+    """
+    assert len(input_list) > 1, "Select/filter requires at least a field and a value"
+    assert isinstance(input_list[0], str), 'needs to be a string'
+
+    if len(input_list) == 2:
+        field_name = input_list[0]
+        values = input_list[1]
+        conditions = 'eq'
+    elif len(input_list) == 3:
+        field_name = input_list[0]
+        values = input_list[1]
+        conditions = input_list[2]
+    else:
+        raise Exception('Too many fields per search: ' + str(len(input_list[i])) + \
+                        'It only accepts a maximum of 3 fields.')
+
+    if not isinstance(values, list):
+        values = [values]
+
+    if not isinstance(conditions, list):
+        conditions = [conditions]
+
+    assert len(values) == len(conditions), 'List size mismatch: {} ! = {}'\
+                                           .format(len(values), len(conditions))
+
+    return field_name, values, conditions
 
 
 def match_vals(val1, val2, condition):
@@ -32,72 +71,61 @@ def match_vals(val1, val2, condition):
         raise SyntaxError('Invalid condition: {}'.format(condition))
 
 
-def generate_index_list(handler, val, operation, is_select, chunk_size=1000):
+def get_field_value(handler_field, idx):
     """
-    Generate a list of indexes.
+    Return the value of a field by its id.
     """
-    # intialize list + counter
-    keep = []
-    counter = 0
-
-    # cycle all data values
-    for idx in range(0, handler.shape[0]):
-        field_val = handler[idx]
-
-        # fill the list
-        if match_vals(field_val, val, operation):
-            if is_select:
-                keep.append(idx)
-                counter += 1
-        else:
-            if not is_select:
-                keep.append(idx)
-                counter += 1
-
-        # check if the list is filled with enough data
-        if counter % chunk_size == 0:
-            yield keep
-            keep = []
-            counter = 0
-
-    # check if the list still has any values inside
-    if any(keep):
-        yield keep
+    val = handler_field[idx, :]
+    # check if the field is a str
+    if val.dtype == np.uint8:
+        # convert values to a string
+        return convert_ascii_to_str(val)
+    else:
+        return val
 
 
-def generate_index_list_objects(handler, field_name, field_pos, indexes, chunk_size=1000):
+def merge_lists(listA, listB):
     """
-    Generate a list of indexes to keep from 'object_id'
+    Merge two lists and return a sorted list with unique values.
     """
-    # set a handler for 'object_id' and field_name
-    handler_object = handler['object_id']
-    handler_field = handler[field_name]
+    if len(listA)>0:
+        return sorted(listA + list(set(listB) - set(listA)))
+    else:
+        return listB
 
-    # intialize a list + counter
-    keep = []
-    counter = 0
 
-    # cycle all objects
+def get_idx_list_filter(hdf5_set, field_name, field_pos, values, conditions):
+    """
+    Select/discard indexes w.r.t. the input condition(s).
+
+    Returns a list of object and field indexes to keep.
+    """
+    # initialize list
+    keep_object = []
+    keep_field = []
+
+    # set a handler to the field
+    handler_object = hdf5_set['object_id']
+
+    # cycle all object_ids
     for idx in range(0, handler_object.shape[0]):
-        # list of ids of a single object entry
-        object_id_list = handler_object[idx, :]
 
-        # object_id's field index value
-        field_id = object_id_list[field_pos] - 1
+        obj = handler_object[idx, :]
 
-        # check if the id exists in the index list
-        if field_id in indexes.keys():
-            keep.append(idx)
-            counter += 1
+        # fetch field value using the id
+        field_val = get_field_value(hdf5_set[field_name], obj[field_pos]-1)
 
-        if counter % chunk_size == 0:
-            yield keep
-            keep = []
-            counter = 0
+        # match values
+        for i in range(0, len(values)):
+            val = values[i]
+            condition = conditions[i]
 
-    # check if the list still has any values inside
-    if any(keep):
-        yield keep
+            if match_vals(field_val, val, condition):
+                keep_object.append(idx)
+                keep_field.append(obj[field_pos] - 1)
+                break
+
+    return keep_object, list(set(keep_field))
 
 
 def setup_new_field(handler, field_name):
@@ -106,9 +134,13 @@ def setup_new_field(handler, field_name):
     """
     new_field_name =  '_temporary_name_' + field_name
 
+    shape = list(handler[field_name].shape)
+    shape[0]=0
+    shape = tuple(shape)
+
     dset = handler.create_dataset(
         new_field_name,
-        shape=([0 for i in range(0, handler[field_name].ndim)]),
+        shape=shape,# ([0 for i in range(0, handler[field_name].ndim)]),
         maxshape=handler[field_name].shape,
         chunks=True,
         dtype=handler[field_name].dtype
@@ -117,104 +149,89 @@ def setup_new_field(handler, field_name):
     return dset, new_field_name
 
 
-def write_hdf5_selected_indexes(handler_temp, handler, list_idx):
+def filter_lists(listA, listB):
+    """
+    Remove list B from list A.
+    """
+    return [x for x in listA if x not in listB]
+
+
+def write_hdf5_selected_indexes(handler_temp, handler, list_idx, is_select):
     """
     Write chunks of data into the new field.
     """
 
     used_indexes = {}
 
-    data_size = 0
-    for chunk in list_idx:
-        size_chunk = len(chunk)
+    if is_select:
+        indexes = list_idx
+    else:
+        indexes = filter_lists(list(range(0, handler.shape[0])), list_idx)
 
-        # resize the dataset to accommodate the next chunk of cols
-        handler_temp.resize(data_size + size_chunk, axis=0)
+    size_list = len(indexes)
+    handler_temp.resize(size_list, axis=0)
 
-        # copy the new values to the temp data field
-        for i in range(0, size_chunk):
-            handler_temp[data_size + i, :] = handler[chunk[i], :]
-            used_indexes[chunk[i]] = 1
-
-        # increment size
-        data_size = data_size + size_chunk
-
-    # Output a table with all the used to be used to discard data
-    # from the 'object_id' field
-    return used_indexes
+    # copy the new values to the temp data field
+    for i in range(0, size_list):
+        handler_temp[i, :] = handler[indexes[i], :]
 
 
-def filter_data(handler, field_name, val, operation, is_select):
+def clean_unused_indexes(hdf5_set, field_dict, is_select):
     """
-    Filter/keep indexes in a data field.
+    Remove ids that are not used anymore.
     """
-    # set a handler to the field
-    handler_field = handler[field_name]
+    for field_name in field_dict.keys():
+        # fetch data from the dictionary for the current 'field_name'
+        handler_field = hdf5_set[field_name]
+        indexes_list = field_dict[field_name]
 
-    # get a generator of the matched list
-    gen_list = generate_index_list(handler_field, val, operation, is_select)
+        handler_temp, new_field_name = setup_new_field(hdf5_set, field_name)
+        write_hdf5_selected_indexes(handler_temp, handler_field, indexes_list, is_select)
 
-    # create new temporary field and store only the wanted indexes
-    handler_temp, new_field_name = setup_new_field(handler, field_name)
-    used_indexes = write_hdf5_selected_indexes(handler_temp, handler_field, gen_list)
+        # delete old field
+        del hdf5_set[field_name]
 
-    # delete old field
-    del handler[field_name]
+        # create the field again and assign the temp handler's data
+        hdf5_set.create_dataset(field_name, data=handler_temp.value, chunks=True)
 
-    # create the field again and assign the temp handler's data
-    handler.create_dataset(field_name, data=handler_temp.value, chunk=True)
-
-    # remove the temporary handler
-    del handler[new_field_name]
-
-    return used_indexes
+        # remove the temporary handler
+        del hdf5_set[new_field_name]
 
 
-def remove_unused_indexes(handler, field_name, field_pos, indexes):
+def filter_data(hdf5_set, searches, is_select):
     """
-    Remove any object_id that has removed indexes from the field_name.
+    Select/discard data of a set w.r.t. input selections.
     """
-    # set a handler to the 'object_id' field
-    handler_field = handler['object_id']
+    object_fields = convert_ascii_to_str(hdf5_set['object_fields'].value)
 
-    # craft a generator of chunks of 'object_id' indexes to copy
-    gen_list = generate_index_list_objects(handler, field_name, field_pos, indexes)
+    # check if searches is a list of lists
+    if isinstance(searches, list):
+        if not isinstance(searches[0], list):
+            searches = [searches]
+    else:
+        raise Exception('Input should be a list of lists.')
 
-    # create new temporary field and store only the wanted indexes
-    handler_temp, new_field_name = setup_new_field(handler['object_id'], 'object_id')
-    write_hdf5_selected_indexes(handler_temp, handler_field, gen_list)
+    keep = {}
+    for i in range(0, len(searches)):
 
-    # delete old field
-    del handler['object_id']
+        # get inputs
+        field_name, values, conditions = parse_search_inputs(searches[i])
+        field_pos = object_fields.index(field_name)
 
-    # create the field again and assign the temp handler's data
-    handler.create_dataset('object_id', data=handler_temp.value, chunk=True)
+        # fetch indexes that match the condition criteria
+        obj_ids, field_ids = get_idx_list_filter(hdf5_set, field_name, field_pos, values, conditions)
 
-    # remove the temporary handler
-    del handler[new_field_name]
+        # update 'field_name' index list
+        try:
+            keep[field_name] = merge_lists(keep[field_name], field_ids)
+        except KeyError:
+            keep[field_name] = field_ids
 
+        # update 'object_id' index list
+        try:
+            keep['object_id'] = merge_lists(keep['object_id'], obj_ids)
+        except KeyError:
+            keep['object_id'] = obj_ids
 
-def field_data_filter(handler, field_name, field_pos, conditions, is_select):
-    """
-    Select values from a field.
-    """
-    main_indexes = []
-    for condition in conditions:
-        val = condition[0]
-        operation = condition[1]
-
-        # cycle all sets of the dataset
-        for set_name in handler.keys():
-
-            # fetch a data handler for the set
-            hdf5_set = handler[set_name]
-
-            # filter field data w.r.t. the input conditions
-            used_indexes = filter_data(hdf5_set, field_name, val, operation, is_select)
-            indexes = get_filter_indexes(hdf5_set, field_name, val, operation, is_select)
-
-            # merge the resulting index list to the main list
-            main_indexes = sorted(main_indexes + list(set(indexes) - set(main_indexes)))
-
-    # filter object_id that contain different ids comparing with the input field
-    remove_unused_indexes(hdf5_set, field_name, field_pos, main_indexes)
+    # remove all unused entries
+    clean_unused_indexes(hdf5_set, keep, is_select)

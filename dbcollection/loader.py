@@ -6,6 +6,7 @@ Dataset loader class.
 from .storage import StorageHDF5
 from .utils import convert_ascii_to_str
 from .organize_list import create_list_store_to_hdf5
+from .select_filter import filter_data
 
 
 #---------------------------------------------------------
@@ -250,7 +251,7 @@ class DatasetLoader:
         Raises
         ------
             None
-        
+
         Examples
         --------
         .create_list(['class_name', 'filename'])
@@ -261,7 +262,7 @@ class DatasetLoader:
             create_list_store_to_hdf5(self.file.storage, field_name, field_pos)
 
 
-    def select_data(self, input_dict):
+    def select_data(self, input_selections):
         """Selects data of the object id list w.r.t. some conditions.
 
         Parameters
@@ -276,13 +277,13 @@ class DatasetLoader:
         ------
             None
         """
-        for field_name in input_dict.keys():
-            conditions = input_dict[field_name]
-            create_list_store_to_hdf5(self.file.storage, field_name, chunk_size)
+        # cycle all sets of the dataset
+        for set_name in self.file.storage.keys():
+            filter_data(self.file.storage[set_name], input_selections, True)
+        #self._select_filter_data(input_dict, True)
 
 
-
-    def filter_data(self, input_dict):
+    def filter_data(self, input_selections):
         """Filters data of the object id list w.r.t. some conditions.
 
         Parameters
@@ -297,7 +298,9 @@ class DatasetLoader:
         ------
             None
         """
-        pass
+        # cycle all sets of the dataset
+        for set_name in self.file.storage.keys():
+            filter_data(self.file.storage[set_name], input_selections, False)
 
 
     def balance_sets(self, input_dict):

@@ -22,7 +22,8 @@ from select_filter import *
 dir_path = os.path.dirname(os.path.realpath(__file__))
 lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection', 'utils'))
 sys.path.append(lib_path)
-from string_ascii import *
+from string_ascii import convert_str_to_ascii
+
 
 
 #-----------------------
@@ -64,28 +65,99 @@ class SelectTest(unittest.TestCase):
         tr.create_dataset('object_id', data=sample_train_object_id)
 
 
+    def test_select_one_class_from_data__valid_field(self):
+        """
+        Test selecting two classes from the available 4 classes.
+        """
+        # sample data
+        sample_field_name = 'class'
+        sample_is_select = True
+        target_class = 'class1'
+        sample_search = [sample_field_name, target_class, 'eq']
+        expected_result = np.array([[1, 1], [2, 1], [3, 1]])
+        expected_classes = [convert_str_to_ascii([target_class]).tolist()]
+
+        # select data
+        filter_data(self.data['train'], sample_search, sample_is_select)
+
+        # check if the field sample_field_list exists
+        self.assertEqual(self.data['train']['class'].value.tolist(), expected_classes, \
+                         'classes: expected equal result')
+        self.assertEqual(self.data['train']['object_id'].value.tolist(), expected_result.tolist(), \
+                         'objects: expected equal result')
+
+
     def test_select_two_classes_from_data__valid_field(self):
         """
         Test selecting two classes from the available 4 classes.
         """
         # sample data
-        sample_storage = self.data
         sample_field_name = 'class'
-        sample_field_pos = 1
         sample_is_select = True
-        sample_conditions = [[2, 'le']] # lower or equal
-        expected_result = np.array([[1, 1], [2, 1], [3, 1], \
-                                    [4, 2], [5, 2], [6, 2]])
-        expected_classes = convert_str_to_ascii(['class1', 'class2'])
+        target_class1 = 'class1'
+        target_class2 = 'class3'
+        sample_search = [sample_field_name, [target_class1, target_class2], ['eq', 'eq']]
+        expected_object_id = np.array([[1, 1], [2, 1], [3, 1], \
+                                           [7, 3], [8, 3], [9, 3], \
+                                          ])
+        expected_classes = convert_str_to_ascii([target_class1, target_class2]).tolist()
 
         # select data
-        field_data_filter(self.data, sample_field_name, sample_field_pos, sample_conditions, sample_is_select)
+        filter_data(self.data['train'], sample_search, sample_is_select)
+
+        # check if the field sample_field_list exists
+        self.assertEqual(self.data['train']['class'].value.tolist(), expected_classes, \
+                         'classes: expected equal result')
+        self.assertEqual(self.data['train']['object_id'].value.tolist(), expected_object_id.tolist(), \
+                         'objects: expected equal result')
+
+
+    def test_filter_one_class_from_data__valid_field(self):
+        """
+        Test selecting two classes from the available 4 classes.
+        """
+        # sample data
+        sample_field_name = 'class'
+        sample_is_select = False
+        target_class = 'class1'
+        sample_search = [sample_field_name, target_class, 'eq']
+        expected_object_id = np.array([ [4, 2], [5, 2], [6, 2], \
+                                        [7, 3], [8, 3], [9, 3], \
+                                      ])
+        expected_classes = convert_str_to_ascii(['class2', 'class3', 'class4'])
+
+        # select data
+        filter_data(self.data['train'], sample_search, sample_is_select)
 
         # check if the field sample_field_list exists
         self.assertEqual(self.data['train']['class'].value.tolist(), expected_classes.tolist(), \
                          'classes: expected equal result')
-        self.assertEqual(self.data['train']['object_id'].value.tolist(), expected_result.tolist(), \
+        self.assertEqual(self.data['train']['object_id'].value.tolist(), expected_object_id.tolist(), \
                          'objects: expected equal result')
+    
+
+    def test_filter_two_classes_from_data__valid_field(self):
+        """
+        Test selecting two classes from the available 4 classes.
+        """
+        # sample data
+        sample_field_name = 'class'
+        sample_is_select = False
+        target_class1 = 'class1'
+        target_class2 = 'class3'
+        sample_search = [sample_field_name, [target_class1, target_class2], ['eq', 'eq']]
+        expected_object_id = np.array([[4, 2], [5, 2], [6, 2]])
+        expected_classes = convert_str_to_ascii(['class2', 'class4']).tolist()
+
+        # select data
+        filter_data(self.data['train'], sample_search, sample_is_select)
+
+        # check if the field sample_field_list exists
+        self.assertEqual(self.data['train']['class'].value.tolist(), expected_classes, \
+                         'classes: expected equal result')
+        self.assertEqual(self.data['train']['object_id'].value.tolist(), expected_object_id.tolist(), \
+                         'objects: expected equal result')
+        
 
 
 #----------------
