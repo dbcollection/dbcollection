@@ -25,12 +25,6 @@ class StorageHDF5:
         # open a file (read or write mode)
         self.storage = self.open(filename, mode)
 
-        # create train, val and test groups (most used groups)
-        if mode in ['w', 'w+']:
-            self.add_group('train')
-            self.add_group('val')
-            self.add_group('test')
-
 
     def open(self, name, mode, version='latest'):
         """Open a hdf5 file.
@@ -113,7 +107,7 @@ class StorageHDF5:
         try:
             grp = self.storage.create_group(group)
         except ValueError: #group already exists
-            pass
+            raise Exception('Error creating a group.')
         else:
             setattr(self, group, grp)
 
@@ -210,6 +204,9 @@ class StorageHDF5:
         ------
             None
         """
+        if not self.is_group(group):
+            self.add_group(group)
+
         # concatenate string so it is easier to add fields to the h5py file
         field_str = self.parse_str(group, field_name)
 
