@@ -271,3 +271,17 @@ unit tests (so far):
 - LuaAPI (TODO)
 - MatlabAPI
 - readme + docs + notebooks
+
+
+**** TODO: ****
+- acabar select/filter - (DONE)
+- fazer balance - (a fazer)
+- remover a categoria do cache manager e meter como um campo separado no dicionario. Sempre que adicionar um dataset, este tem que fazer o update das keywords neste novo campo e adicionar o nome do dataset na categoria especifica.
+- adicionar o object_field ao DatasetLoader para nao estar sempre a procurar pelo campo do field (faço sempre a convercao para str e ta feito)
+- adicionar keywords ao cifar10
+- reformular a funcao adicionar de um dataset (talvez usar a formula escrita para o metodo new() que vem a seguir)
+- criar uma funcao de criar um dataset ao adicionar so o caminho da pasta root dos datasets que tenham os caminhos das pastas de teste, train, val, etc.
+  Por exemplo: .new(name, data_dir, keywords)
+- reformular a funcao de print de datasets (.list()) para englobar a nova lista de categorias como opcao para listar os datasets
+- reformular a funcao de .query() para o novo formato
+- fazer um codigo de exemplo de como retornar dados (imagens, etc) de um dataset usando o LoaderAPI. Fazer o plot de imagens usando matplotlib.
