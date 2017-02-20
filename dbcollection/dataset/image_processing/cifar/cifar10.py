@@ -26,6 +26,10 @@ class Cifar10:
         "test_batch"
     ]
 
+    # some keywords. These are used to classify datasets for easier
+    # categorization.
+    keywords = ['image_processing', 'classification']
+
 
     def __init__(self, data_path, cache_path, verbose=True):
         """
@@ -153,11 +157,11 @@ class Cifar10:
         """
         info_classification = self.classification_metadata_process()
 
-        info_default = {"default":info_classification["classification"]}
+        info_default = {"default" : info_classification["classification"]}
 
         # concatenate all cache info into a single dictionary
         info_output = {}
         info_output.update(info_classification)
         info_output.update(info_default)
 
-        return info_output
+        return info_output,  self.keywords

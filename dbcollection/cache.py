@@ -160,7 +160,8 @@ class CacheManager:
                 "default_cache_dir": self.default_cache_dir,
 		        "default_data_dir": self.default_data_dir
             },
-            "dataset": {}
+            "dataset": {},
+            "category": {}
         }
 
 
@@ -223,7 +224,7 @@ class CacheManager:
         ------
             None
         """
-        self.data['dataset'][self.get_category(name)].pop(name)
+        self.data['dataset'].pop(name)
 
 
     def delete_dataset_cache(self, name):
@@ -243,7 +244,7 @@ class CacheManager:
             None
         """
         # get cache dir path
-        cache_dir_path = self.get_data_from_field(name, 'cache_dir')
+        cache_dir_path = self.data['dataset'][name]['cache_dir']
 
         # remove cache dir
         self.os_remove(cache_dir_path)
@@ -270,13 +271,12 @@ class CacheManager:
         ------
             None
         """
-        category_keys = self.data['dataset'].keys()
-        for category in category_keys:
-            dst_keys = self.data['dataset'][category].keys()
-            for name in dst_keys:
-                self.delete_dataset_cache(name)
-        # remove category names from the list
+        for name in self.data['dataset'].keys():
+            self.delete_dataset_cache(name)
+
+        # remove dataset names/categories from the list
         self.data['dataset'] = {}
+        self.data['category'] = {}
 
 
     def check_dataset_name(self, name):
@@ -297,69 +297,20 @@ class CacheManager:
         ------
             None
         """
-        try:
-            return name in self.data['dataset'][self.get_category(name)].keys()
-        except KeyError:
-            return False
+        return name in self.data['dataset'].keys()
 
 
-    def get_data_from_field(self, name, field):
-        """Get data from a field of a dataset.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        field : str
-            Field name identifier.
-
-        Returns
-        -------
-        dict
-            Cache's data structure.
-
-        Raises
-        ------
-            None
-        """
-        return self.data['dataset'][self.get_category(name)][name][field]
-
-
-    def change_field(self, name, field, val):
-        """Change the data of a field of a dataset.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        field : str
-            Field name identifier.
-        val : <any>
-            New value.
-
-        Returns
-        -------
-        dict
-            Cache's data structure.
-
-        Raises
-        ------
-            None
-        """
-        self.data['dataset'][self.get_category(name)][name][field] = val
-
-
-    def add_data(self, name, category, new_info):
+    def add_data(self, name, new_info, is_append=False):
         """Adds/appends a new category/dataset to the cache file.
 
         Parameters
         ----------
         name : str
             Name of the dataset.
-        category : str
-            Name of the category.
         new_info : dict
             New data.
+        is_append : bool
+            Appends the task cache data to existing ones.
 
         Returns
         -------
@@ -369,15 +320,13 @@ class CacheManager:
         ------
             None
         """
-        if self.get_category(name) is None:
-            # new category
-            self.data['dataset'][category] = {name:new_info}
+        if is_append:
+            if name in self.data['dataset']:
+                self.data['dataset'][name].update(new_info['tasks'])
+            else:
+                self.data['dataset'][name] = new_info
         else:
-            # get stored data
-            old_info = self.get_dataset_data(name)
-
-            # append the new data
-            old_info['task'].update(new_info['task'])
+            self.data['dataset'][name] = new_info
 
 
     def delete_dataset(self, name, delete_data=False):
@@ -406,29 +355,6 @@ class CacheManager:
         # delete data from disk
         if delete_data:
             self.os_remove(dset_paths['data_dir'])
-
-
-    def get_category(self, name):
-        """Returns the dataset category name of a dataset.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-
-        Returns
-        -------
-        str
-            Returns the category name if found, else returns None.
-
-        Raises
-        ------
-            None
-        """
-        for category in self.data['dataset'].keys():
-            if name in self.data['dataset'][category].keys():
-                return category
-        return None
 
 
     def is_empty(self):
@@ -469,10 +395,7 @@ class CacheManager:
             None
         """
         # check if the dataset exists in the cache file
-        try:
-            return name in self.data['dataset'][self.get_category(name)]
-        except KeyError:
-            return False
+        return name in self.data['dataset'].keys()
 
 
     def exists_task(self, name, task):
@@ -495,7 +418,7 @@ class CacheManager:
             None
         """
         try:
-            return task in self.data['dataset'][self.get_category(name)][name]['task'].keys()
+            return task in self.data['dataset'][name]['tasks'].keys()
         except KeyError:
             return False
 
@@ -519,8 +442,8 @@ class CacheManager:
         """
         if self.exists_dataset(name):
             return {
-                "cache_dir": self.get_data_from_field(name, "cache_dir"),
-                "data_dir": self.get_data_from_field(name, "data_dir")
+                "cache_dir": self.data['dataset'][name]["cache_dir"],
+                "data_dir": self.data['dataset'][name]["data_dir"]
             }
         else:
             return {
@@ -529,30 +452,8 @@ class CacheManager:
             }
 
 
-    def get_dataset_data(self, name):
-        """Fetches the cache data of a dataset.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        category : str
-            Name of the category
-
-        Returns
-        -------
-        dict
-            Cache data structure of a particular dataset.
-
-        Raises
-        ------
-            None
-        """
-        return self.data['dataset'][self.get_category(name)][name]
-
-
     def get_cache_path(self, name, task):
-        """Return the cache path of a specific task.
+        """Return the cache path of the metadata file of a specific task.
 
         Parameters
         ----------
@@ -568,16 +469,45 @@ class CacheManager:
 
         Raises
         ------
+        KeyError
+            In case the dataset name
+        """
+        try:
+            return self.data['dataset'][name]['tasks'][task]
+        except KeyError:
+            raise KeyError('Dataset name/task cache data is empty or does not exist: {}/{}'.format(name, task))
+
+
+    def add_keywords(self, name, keywords):
+        """Add keywords to the category dictionary for the dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        keywords : list
+            Keyword categories of the dataset.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
             None
         """
-        # fetch cache data of the dataset
-        cache_data = self.get_dataset_data(name)
+        if not isinstance(keywords, list):
+            keywords = [keywords]
 
-        # fetch the path of the metadata file for this task
-        return cache_data['task'][task]
+        for keyword in keywords:
+            if keyword in self.data['category']:
+                if not name in self.data['category'][keyword]:
+                    self.data['category'][keyword].append(name)
+            else:
+                self.data['category'][keyword] = [name]
 
 
-    def update(self, name, category, data_dir, cache_dir, cache_info):
+    def update(self, name, data_dir, cache_dir, cache_tasks, cache_keywords, is_append=True):
         """Update the cache file with new/updated data for a dataset.
 
         Parameters
@@ -592,6 +522,8 @@ class CacheManager:
             Cache's directory on disk where the metadata files are store.
         cache_info : dict
             New task + path information.
+        is_append : bool
+            Overrides existing cache info data with new data.
 
         Returns
         -------
@@ -605,11 +537,15 @@ class CacheManager:
         new_info_dict = {
             "data_dir": data_dir,
             "cache_dir": cache_dir,
-            "task": cache_info
+            "tasks": cache_tasks,
+            "keywords" : cache_keywords
         }
 
-        # update data with the new info
-        self.add_data(name, category, new_info_dict)
+        # add/update data with the new info to the dataset dictionary
+        self.add_data(name, new_info_dict, is_append)
+
+        # add/update the keyword list of the category dictionary
+        self.add_keywords(name, cache_keywords)
 
         # write to file
         self.write_data_cache(self.data)
