@@ -134,7 +134,7 @@ class SelectTest(unittest.TestCase):
                          'classes: expected equal result')
         self.assertEqual(self.data['train']['object_id'].value.tolist(), expected_object_id.tolist(), \
                          'objects: expected equal result')
-    
+
 
     def test_filter_two_classes_from_data__valid_field(self):
         """
@@ -157,8 +157,17 @@ class SelectTest(unittest.TestCase):
                          'classes: expected equal result')
         self.assertEqual(self.data['train']['object_id'].value.tolist(), expected_object_id.tolist(), \
                          'objects: expected equal result')
-        
 
+
+    def tearDown(self):
+        """
+        Remove the temporary data files.
+        """
+        self.data.close()
+
+        # check if the file exists on disk
+        if os.path.exists(self.sample_test_hdf_file):
+            os.remove(self.sample_test_hdf_file)
 
 #----------------
 # Run Test Suite
