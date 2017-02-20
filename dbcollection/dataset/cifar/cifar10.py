@@ -5,7 +5,7 @@ Cifar10 download/process functions.
 
 import os
 import numpy as np
-from .... import utils, storage
+from ... import utils, storage
 
 
 class Cifar10:
@@ -46,6 +46,8 @@ class Cifar10:
         """
         # download + extract data and remove temporary files
         utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
+
+        return self.keywords
 
 
     def get_object_list(self, data, labels):
@@ -132,17 +134,17 @@ class Cifar10:
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
         # write data to the metadata file
-        fileh5.add_data('train', 'class_name', utils.convert_str_ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('train', 'class_name', utils.convert_str_to_ascii(data["class_name"]), np.uint8)
         fileh5.add_data('train', 'data', data["train_data"], np.uint8)
         fileh5.add_data('train', 'object_id', data["train_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('train', 'object_fields', utils.convert_str_ascii(data['object_fields']), np.uint8)
+        fileh5.add_data('train', 'object_fields', utils.convert_str_to_ascii(data['object_fields']), np.uint8)
 
-        fileh5.add_data('test', 'class_name', utils.convert_str_ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('test', 'class_name', utils.convert_str_to_ascii(data["class_name"]), np.uint8)
         fileh5.add_data('test', 'data', data["test_data"], np.uint8)
         fileh5.add_data('test', 'object_id', data["test_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('test', 'object_fields', utils.convert_str_ascii(data['object_fields']), np.uint8)
+        fileh5.add_data('test', 'object_fields', utils.convert_str_to_ascii(data['object_fields']), np.uint8)
 
         # close file
         fileh5.close()
@@ -164,4 +166,4 @@ class Cifar10:
         info_output.update(info_classification)
         info_output.update(info_default)
 
-        return info_output,  self.keywords
+        return info_output, self.keywords
