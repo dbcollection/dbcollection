@@ -5,6 +5,7 @@ Class to manage the dbcollection.json cache file.
 
 from __future__ import print_function
 import os
+import shutil
 import errno
 import json
 
@@ -202,7 +203,10 @@ class CacheManager:
             If the file does not exist.
         """
         try:
-            os.remove(fname)
+            if os.path.isdir(fname):
+                shutil.rmtree(fname, ignore_errors=True)
+            else:
+                os.remove(fname)
         except OSError as err:
             if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
                 raise OSError('Unable to remove: {}'.format(fname))
@@ -244,7 +248,7 @@ class CacheManager:
             None
         """
         # get cache dir path
-        cache_dir_path = self.data['dataset'][name]['cache_dir']
+        cache_dir_path = os.path.join(self.default_cache_dir, name)
 
         # remove cache dir
         self.os_remove(cache_dir_path)
@@ -322,11 +326,8 @@ class CacheManager:
         """
         if is_append:
             if name in self.data['dataset']:
-                self.data['dataset'][name].update(new_info['tasks'])
-            else:
-                self.data['dataset'][name] = new_info
-        else:
-            self.data['dataset'][name] = new_info
+                self.data['dataset'][name]['tasks'].update(new_info['tasks'])
+        self.data['dataset'][name] = new_info
 
 
     def delete_dataset(self, name, delete_data=False):
@@ -375,6 +376,31 @@ class CacheManager:
             None
         """
         return any(self.data['dataset'])
+
+
+    def is_task(self, name, task):
+        """Check if the task exists for the dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the classification.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        try:
+            return task in self.data['dataset'][name]['tasks'].keys()
+        except expression as identifier:
+            return False
+
 
 
     def exists_dataset(self, name):
@@ -441,15 +467,14 @@ class CacheManager:
             None
         """
         if self.exists_dataset(name):
-            return {
-                "cache_dir": self.data['dataset'][name]["cache_dir"],
-                "data_dir": self.data['dataset'][name]["data_dir"]
-            }
+            data_dir = self.data['dataset'][name]["data_dir"]
         else:
-            return {
-                "cache_dir": os.path.join(self.default_cache_dir, name, 'cache'),
-                "data_dir": os.path.join(self.default_data_dir, name, 'data')
-            }
+            data_dir = os.path.join(self.default_data_dir, name, 'data')
+
+        return {
+            "data_dir": data_dir,
+            "cache_dir": os.path.join(self.default_cache_dir, name)
+        }
 
 
     def get_cache_path(self, name, task):
@@ -507,7 +532,7 @@ class CacheManager:
                 self.data['category'][keyword] = [name]
 
 
-    def update(self, name, data_dir, cache_dir, cache_tasks, cache_keywords, is_append=True):
+    def update(self, name, data_dir, cache_tasks, cache_keywords, is_append=True):
         """Update the cache file with new/updated data for a dataset.
 
         Parameters
@@ -536,7 +561,6 @@ class CacheManager:
         # build info dictionary
         new_info_dict = {
             "data_dir": data_dir,
-            "cache_dir": cache_dir,
             "tasks": cache_tasks,
             "keywords" : cache_keywords
         }
@@ -545,7 +569,8 @@ class CacheManager:
         self.add_data(name, new_info_dict, is_append)
 
         # add/update the keyword list of the category dictionary
-        self.add_keywords(name, cache_keywords)
+        if any(cache_keywords):
+            self.add_keywords(name, cache_keywords)
 
         # write to file
         self.write_data_cache(self.data)
