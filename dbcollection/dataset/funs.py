@@ -126,8 +126,7 @@ def download(name, data_dir, cache_dir, verbose=True):
     dataset_loader, data_dir_, cache_dir_, category = setup_dataset_constructor(name, data_dir, cache_dir, verbose, True)
 
     # check if the directories exist already
-    if not os.path.exists(data_dir_):
-        os.makedirs(data_dir_)
+    assert os.path.exists(data_dir_), 'Data directory does not exist'
 
     # download data
     dataset_loader.download()

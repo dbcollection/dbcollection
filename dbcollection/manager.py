@@ -68,11 +68,14 @@ def load(name, data_dir=None, save_name=None, task='default', \
             if download:
                 # get cache default save path
                 cache_save_path = cache_manager.default_cache_dir
-                data_dir = data_dir or cache_manager.default_data_dir
+                
+                # get data directory to store the data
+                data_dir = data_dir or os.path.join(cache_manager.default_data_dir, name)
+                if not os.path.exists(data_dir):
+                    utils.create_dir(data_dir)
 
                 # download dataset
-                if not os.path.exists(data_dir):
-                    data_dir = dataset.download(name, data_dir, verbose)
+                data_dir = dataset.download(name, data_dir, verbose)
 
                 # preprocess dataset
                 cache_info = dataset.process(name, data_dir, cache_save_path, verbose)
