@@ -126,10 +126,8 @@ def extract_file(fname, dir_path, verbose=False):
     ------
         None
     """
-    file_name = dir_path + fname
-
     if verbose:
-        print('Extracting file to disk: ' + file_name)
+        print('Extracting file to disk: ' + dir_path)
 
     # check filename extension
     extension = get_file_extension(fname)
