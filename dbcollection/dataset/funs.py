@@ -23,14 +23,13 @@ def fetch_dataset_constructor(name):
 
     Raises
     ------
-    Exception
-        If a dataset name does not appear on the list.
+    KeyError
+        If a dataset name does not exist on the list.
     """
-    for category in datasets.keys():
-        if name in datasets[category].keys():
-            return category, datasets[category][name]
-
-    raise Exception('Undefined dataset name: {}'.format(name))
+    try:
+        return datasets[name]
+    except KeyError:
+        raise KeyError('Undefined dataset name: {}'.format(name))
 
 
 def setup_dataset_constructor(name, data_dir, cache_dir, verbose=True, is_download=True):
@@ -62,20 +61,17 @@ def setup_dataset_constructor(name, data_dir, cache_dir, verbose=True, is_downlo
     ------
         None
     """
-    # fetch dataset constructor
-    category, constructor = fetch_dataset_constructor(name)
+    # check if the directories exist already
+    assert os.path.exists(data_dir), 'Data directory does not exist: {}'.format(data_dir)
 
-    # merge paths with the name+category
-    if is_download:
-        data_dir_ = os.path.join(data_dir, name)
-    else:
-        data_dir_ = data_dir
-    cache_dir_ = os.path.join(cache_dir, category, name)
+    # check if the directories exist already
+    assert os.path.exists(cache_dir), 'Cache directory does not exist: {}'.format(cache_dir)
+
+    # fetch dataset constructor
+    constructor = fetch_dataset_constructor(name)
 
     # setup dataset constructor
-    dataset_loader = constructor(data_dir_, cache_dir_, verbose)
-
-    return dataset_loader, data_dir_, cache_dir_, category
+    return constructor(data_dir, cache_dir, verbose)
 
 
 def exists(name):
@@ -123,15 +119,10 @@ def download(name, data_dir, cache_dir, verbose=True):
         None
     """
     # get dataset constructor
-    dataset_loader, data_dir_, cache_dir_, category = setup_dataset_constructor(name, data_dir, cache_dir, verbose, True)
-
-    # check if the directories exist already
-    assert os.path.exists(data_dir_), 'Data directory does not exist'
+    dataset_loader = setup_dataset_constructor(name, data_dir, cache_dir, verbose, True)
 
     # download data
-    dataset_loader.download()
-
-    return data_dir
+    return dataset_loader.download()
 
 
 def process(name, data_dir, cache_dir, verbose):
@@ -158,19 +149,19 @@ def process(name, data_dir, cache_dir, verbose):
         None
     """
     # get dataset constructor
-    dataset_loader, data_dir, cache_dir, category = setup_dataset_constructor(name, data_dir, cache_dir, verbose, False)
+    dataset_loader = setup_dataset_constructor(name, data_dir, cache_dir, verbose, False)
 
     # check if the directories exist already
     if not os.path.exists(cache_dir):
         os.makedirs(cache_dir)
 
     # process metadata
-    cache_info = dataset_loader.process()
+    cache_info, keywords = dataset_loader.process()
 
     # return some info to update the cache file
     return {
         'data_dir' : data_dir,
         'cache_dir' : cache_dir,
-        'task' : cache_info,
-        'category' : category
+        'tasks' : cache_info,
+        'keywords' : keywords
     }
