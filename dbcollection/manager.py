@@ -13,10 +13,9 @@ from . import dataset
 from . import utils
 
 
-def load(name, data_dir=None, save_name=None, task='default', \
-         download=True, \
-         verbose=True, \
-         organize_list=None, select=None, filter=None, balance=None):
+def load(name, data_dir=None, task='default', custom_task_name=None, \
+         download_data=True, verbose=True, \
+         organize_list=None, select_data=None, filter_data=None, balance_sets=None):
     """Loads dataset metadata file.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -59,69 +58,58 @@ def load(name, data_dir=None, save_name=None, task='default', \
     # Load a cache manager object
     cache_manager = CacheManager()
 
-    # check if dataset exists in the cache file
-    if cache_manager.exists_task(name, task):
-        dataset_category = cache_manager.get_category(name)
-    else:
-        # check if the dataset name exists on the available download list
-        if dataset.exists(name):
-            if download:
-                # get cache default save path
-                cache_save_path = cache_manager.default_cache_dir
-                
-                # get data directory to store the data
-                data_dir = data_dir or os.path.join(cache_manager.default_data_dir, name)
-                if not os.path.exists(data_dir):
-                    utils.create_dir(data_dir)
-
-                # download dataset
-                data_dir = dataset.download(name, data_dir, verbose)
-
-                # preprocess dataset
-                cache_info = dataset.process(name, data_dir, cache_save_path, verbose)
-
-                # update dbcollection.json file with the new data
-                dataset_category = cache_info['category']
-                cache_manager.update(name, dataset_category, cache_info['data_dir'], \
-                                    cache_info['cache_dir'], cache_info['task'])
-            else:
-                raise Exception('The dataset \'{}\' is not available on the cache list '.format(name) +\
-                                'BUT it is available for download by setting \'download=True\'.')
+    # Check if the dataset's data has already been downloaded.
+    # If not, attempt to download the data.
+    if not cache_manager.exists_dataset(name):
+        if download_data:
+            download(name, data_dir, verbose)
         else:
-            raise Exception('The dataset \'{}\' is not available for download.'.format(name))
+            raise Exception('The dataset \'{}\' is not available on the cache list. '.format(name)+\
+                            'BUT it is available for download by setting \'download=True\'.')
 
-    # get cache path
-    cache_path = cache_manager.get_cache_path(name, task)
-
-    # get dataset storage path
+    # get data + cache dir paths
     dset_paths = cache_manager.get_dataset_storage_paths(name)
 
-    # setup a save name
+    # get task cache file path
+    if not cache_manager.is_task(name, task):
+        # get cache default save path
+        cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
+        if not os.path.exists(cache_save_path):
+            utils.create_dir(cache_save_path)
+
+        # preprocess dataset
+        cache_info = dataset.process(name, dset_paths['data_dir'], dset_paths['cache_dir'], verbose)
+
+        # update dbcollection.json file with the new data
+        cache_manager.update(name, cache_info['data_dir'], cache_info['tasks'], cache_info['keywords'])
+
+    # get task cache file path
+    task_cache_path = cache_manager.get_cache_path(name, task)
 
     # Create a loader
-    dataset_loader = DatasetLoader(name, dataset_category, task, dset_paths['data_dir'], cache_path, save_name)
+    dataset_loader = DatasetLoader(name, task, dset_paths['data_dir'], task_cache_path)
 
     # do select processing here
-    if select:
+    if select_data:
         if verbose:
             print('Select')
-        dataset_loader.select_fields(select)
+        dataset_loader.select_data(select_data, custom_task_name)
 
     # do filter processing here
-    if filter:
+    if filter_data:
         if verbose:
             print('Filter')
-        dataset_loader.filter_fields(filter)
+        dataset_loader.filter_data(filter_data, custom_task_name)
 
     # organize data into a list w.r.t. some field_name
     if organize_list:
         if verbose:
             print('Organize fields into lists: {}'.format(organize_list))
-        dataset_loader.create_list(organize_list)
+        dataset_loader.create_list(organize_list, custom_task_name)
 
     # do data balancing here
-    if balance:
-        dataset_loader.balance_sets(balance)
+    if balance_sets:
+        dataset_loader.balance_sets(balance_sets, custom_task_name)
 
     # return Loader
     return dataset_loader
@@ -351,10 +339,21 @@ def download(name, data_dir, verbose=True):
     cache_manager = CacheManager()
 
     # get cache default save path
-    cache_save_dir = cache_manager.default_cache_dir
+    cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
+    if not os.path.exists(cache_save_path):
+        utils.create_dir(cache_save_path)
+
+    # get data directory to store the data
+    data_dir = os.path.join(data_dir, name) or os.path.join(cache_manager.default_data_dir, name)
+    if not os.path.exists(data_dir):
+        utils.create_dir(data_dir)
 
     # download/preprocess dataset
-    dataset.download(name, data_dir, cache_save_dir, verbose)
+    keywords = dataset.download(name, data_dir, cache_save_path, verbose)
+
+    # update dbcollection.json file with the new data
+    cache_manager.update(name, data_dir, {}, keywords)
+
 
 
 def query(pattern):
@@ -444,5 +443,3 @@ def list(verbose=False):
         data_['dataset'] = cat_dataset_dict
 
     print(json.dumps(data_, sort_keys=True, indent=4))
-
-

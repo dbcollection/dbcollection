@@ -182,7 +182,7 @@ class DatasetLoader:
     """ Dataset loader """
 
 
-    def __init__(self, name, category, task, data_dir, cache_path):
+    def __init__(self, name, task, data_dir, cache_path):
         """Initialize class.
 
         Parameters
@@ -200,7 +200,6 @@ class DatasetLoader:
         """
         # store info
         self.name = name
-        self.category = category
         self.task = task
         self.data_dir = data_dir
         self.cache_path = cache_path
@@ -209,10 +208,10 @@ class DatasetLoader:
         self.file = StorageHDF5(self.cache_path, 'r')
 
         # make links for all groups (train/val/test) for easier access
-        self.add_group_links()
+        self.setup_sets()
 
 
-    def add_group_links(self):
+    def setup_sets(self):
         """Adds links for the groups for easier access to data.
 
         Parameters
@@ -233,7 +232,7 @@ class DatasetLoader:
             setattr(self, name, ManagerHDF5(self.file.storage[name]))
 
 
-    def create_list(self, field_list):
+    def create_list(self, field_list, custom_save_name=None):
         """Organize object_ids by fields.
 
         Creates a list w.r.t. a data field and organizes all 'object_id' indexes
@@ -262,7 +261,7 @@ class DatasetLoader:
             create_list_store_to_hdf5(self.file.storage, field_name, field_pos)
 
 
-    def select_data(self, input_selections):
+    def select_data(self, input_selections, custom_save_name=None):
         """Selects data of the object id list w.r.t. some conditions.
 
         Parameters
@@ -283,7 +282,7 @@ class DatasetLoader:
         #self._select_filter_data(input_dict, True)
 
 
-    def filter_data(self, input_selections):
+    def filter_data(self, input_selections, custom_save_name=None):
         """Filters data of the object id list w.r.t. some conditions.
 
         Parameters
@@ -303,7 +302,7 @@ class DatasetLoader:
             filter_data(self.file.storage[set_name], input_selections, False)
 
 
-    def balance_sets(self, input_dict):
+    def balance_sets(self, input_dict, custom_save_name=None):
         """Balances data sets.
 
         Parameters
@@ -319,4 +318,3 @@ class DatasetLoader:
             None
         """
         pass
-
