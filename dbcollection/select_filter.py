@@ -17,7 +17,7 @@ the condition which the values should be evaluated.
 
 
 import numpy as np
-from utils import convert_ascii_to_str
+from .utils import convert_ascii_to_str
 
 
 def parse_search_inputs(input_list):
