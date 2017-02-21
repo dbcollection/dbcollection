@@ -1,0 +1,4 @@
+# include the license file
+include LICENSE
+
+# include the docs
