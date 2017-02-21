@@ -57,6 +57,7 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
         # download file
         if download_file(url, dir_save, fname_save, verbose) and verbose:
             print('File already exists, skip downloading this url.')
+            continue
 
         # check md5 sum (if available)
         if any(md5sum):

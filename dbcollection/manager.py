@@ -54,6 +54,9 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
         None
     """
 
+    if verbose:
+        print('Fetching {} metadata from disk:'.format(name))
+
     # Load a cache manager object
     cache_manager = CacheManager()
 
@@ -62,6 +65,7 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
     if not cache_manager.exists_dataset(name):
         if download_data:
             download(name, data_dir, verbose)
+            cache_manager = CacheManager() # update the cache_manager by re-opening the cache file
         else:
             raise Exception('The dataset \'{}\' is not available on the cache list. '.format(name)+\
                             'BUT it is available for download by setting \'download=True\'.')
@@ -71,6 +75,9 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
 
     # get task cache file path
     if not cache_manager.is_task(name, task):
+        if verbose:
+            print('Processing metadata files...')
+
         # get cache default save path
         cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
         if not os.path.exists(cache_save_path):
@@ -81,6 +88,9 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
 
         # update dbcollection.json file with the new data
         cache_manager.update(name, cache_info['data_dir'], cache_info['tasks'], cache_info['keywords'])
+
+        if verbose:
+            print('Done.')
 
     # get task cache file path
     task_cache_path = cache_manager.get_cache_path(name, task)
@@ -109,6 +119,9 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
     # do data balancing here
     if balance_sets:
         dataset_loader.balance_sets(balance_sets, custom_task_name)
+
+    if verbose:
+        print('Fetch complete.')
 
     # return Loader
     return dataset_loader
@@ -178,7 +191,7 @@ def delete(name):
 
 
 def reset(name=None):
-    """Deletes a dataset's metadata cache files plus dir from disk/cache.
+    """Deletes a dataset's metadata cache files/dir.
 
     Resets the data of the dbcollection.json cache file for a specific dataset
     (it deletes the cache files for this dataset as well, if any).
@@ -205,39 +218,26 @@ def reset(name=None):
 
     if name.lower() == 'all':
         if cache_manager.is_empty():
-            print('The cache data is empty. (no datasets available)')
+            print('The cache data is empty.')
         else:
-            import time
-
             # delete the entire cache
-            print('**WARNING**')
-            print('This will delete the entire cache.')
-            print('In 10s all your cache files will be deleted.')
-            print('If this was set by mistake, proceed to terminate the execution')
-            for i in range(10, -1, -1):
-                print('{}..'.format(i))
-                time.sleep(1)
             cache_manager.delete_cache_all()
-            print('Cache deletion complete.')
+            print('Deleted all datasets\' metadata from cache.')
     else:
         # check if dataset exists in the cache file
         if cache_manager.exists_dataset(name):
             cache_manager.delete_dataset(name, False)
         else:
-            print('Dataset {} does not exist.'.format(name))
-            #raise Exception('Dataset ' + name + ' does not exist.')
+            print('Dataset {} does not exist. Skip deletion.'.format(name))
 
 
-def clear(flag=False, verbose=False):
+def clear(verbose=True):
     """Deletes the cache .json file and the cache dir of all datasets.
 
     Parameters
     ----------
-    flag : bool
-        Enables the deletion of the entire dbcollection cache if True.
-        Otherwise, do nothing.
     verbose : bool
-        Displays text information (if true).
+        Displays text information.
 
     Returns
     -------
@@ -247,23 +247,18 @@ def clear(flag=False, verbose=False):
     ------
         None
     """
-    if flag:
-        # Load a cache manager object
-        cache_manager = CacheManager()
+    # Load a cache manager object
+    cache_manager = CacheManager()
 
-        # delete cache dir
-        if verbose:
-            print('Deleting {} cache root directory and all of its contents...'.format(cache_manager.default_cache_dir))
-        utils.delete_dir(cache_manager.default_cache_dir)
-        if verbose:
-            print('Done.')
+    # delete cache dir
+    utils.delete_dir(cache_manager.default_cache_dir)
 
-        # delete cache file
-        if verbose:
-            print('Deleting {} cache file...'.format(cache_manager.cache_fname))
-        utils.delete_file(cache_manager.cache_fname)
-        if verbose:
-            print('Done.')
+    # delete cache file
+    utils.delete_file(cache_manager.cache_fname)
+
+    if verbose:
+        print('Deleted {} directory.'.format(cache_manager.default_cache_dir))
+        print('Deleted {} cache file.'.format(cache_manager.cache_fname))
 
 
 def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None):
@@ -353,9 +348,11 @@ def download(name, data_dir, verbose=True):
     # update dbcollection.json file with the new data
     cache_manager.update(name, data_dir, {}, keywords)
 
+    print('{} has been successfully downloaded.'.format(name))
+    print('')
 
 
-def query(pattern):
+def query(pattern='info'):
     """Query the cache file.
 
     list all available datasets for download/preprocess. (tenho que pensar melhor sobre este)
@@ -373,41 +370,42 @@ def query(pattern):
     ------
         None
     """
-    # init list
-    query_list = []
-
     # Load a cache manager object
     cache_manager = CacheManager()
 
+    # init list
+    query_list = {}
+
     # check info / dataset lists first
     if pattern in cache_manager.data:
-        query_list.append(cache_manager.data[pattern].keys())
+        query_list.update({pattern : cache_manager.data[pattern]})
 
     # match default paths
     if pattern in cache_manager.data['info']:
-        query_list.append(cache_manager.data['info'][pattern])
+        query_list.update({pattern : cache_manager.data['info'][pattern]})
 
     # match datasets/tasks
     if pattern in cache_manager.data['dataset']:
-        query_list.append(cache_manager.data['info'][pattern].keys())
+        query_list.update({pattern : cache_manager.data['dataset'][pattern]})
 
-    for category in cache_manager.data['dataset']:
-        if pattern in cache_manager.data['dataset'][category]:
-            query_list.append(cache_manager.data['dataset'][category][pattern])
-        for name in cache_manager.data['dataset'][category]:
-            if pattern in cache_manager.data['dataset'][category][name]:
-                query_list.append(cache_manager.data['dataset'][category][name][pattern])
-            if pattern in cache_manager.data['dataset'][category][name]['task']:
-                query_list.append(cache_manager.data['dataset'][category][name]['task'][pattern])
+    # match datasets/tasks
+    if pattern in cache_manager.data['category']:
+        query_list.update({pattern : list(cache_manager.data['category'][pattern].keys())})
 
-    # output list
-    if len(query_list) == 1:
-        return query_list[0]
-    else:
-        return query_list
+    for name in cache_manager.data['dataset']:
+        if pattern in cache_manager.data['dataset'][name]:
+            query_list.update({pattern : cache_manager.data['dataset'][name][pattern]})
+        if pattern in cache_manager.data['dataset'][name]['tasks']:
+            query_list.update({pattern : cache_manager.data['dataset'][name]['tasks'][pattern]})
+        if pattern in cache_manager.data['dataset'][name]['keywords']:
+            query_list.update({pattern : cache_manager.data['dataset'][name]['keywords'][pattern]})
+
+    #print(query_list)
+    print('*** Query results ***')
+    print(json.dumps(query_list, sort_keys=True, indent=4))
 
 
-def list(verbose=False):
+def info(verbose=True):
     """List cache data.
 
     Prints the contents of the dbcollection.json cache file
@@ -429,16 +427,29 @@ def list(verbose=False):
     # Load a cache manager object
     cache_manager = CacheManager()
 
+    print('Printing contents of {}:'.format(cache_manager.cache_fname))
+    print('')
     if verbose:
-        print('Printing contents of {}:'.format(cache_manager.cache_fname))
+        data = cache_manager.data
+    else:
+        # display all datasets
+        data = {
+            'info' : cache_manager.data['info'],
+            'dataset' : [db for db in cache_manager.data['dataset'].keys()],
+            'category' : [cat for cat in cache_manager.data['category'].keys()],
+        }
 
-    data_ = cache_manager.data
-    if not verbose:
-        cat_dataset_dict = {}
-        for category in cache_manager.data['dataset'].keys():
-            cat_dataset_dict[category] = {}
-            for name in cache_manager.data['dataset'][category].keys():
-                cat_dataset_dict[category][name] = cache_manager.data['dataset'][category][name]['cache_files']['default']
-        data_['dataset'] = cat_dataset_dict
+    # print info header
+    print('*** Cache info ***')
+    print(json.dumps(data['info'], sort_keys=True, indent=4))
+    print('')
 
-    print(json.dumps(data_, sort_keys=True, indent=4))
+    # print datasets
+    print('*** Dataset info ***')
+    print(json.dumps(data['dataset'], sort_keys=True, indent=4))
+    print('')
+
+    # print categories
+    print('*** Dataset categories ***')
+    print(json.dumps(data['category'], sort_keys=True, indent=4))
+    print('')

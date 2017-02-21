@@ -147,7 +147,7 @@ class ManagerHDF5:
         ------
             None
         """
-        return self.data.keys()
+        return list(self.data.keys())
 
 
     def object_field_id(self, field_name):

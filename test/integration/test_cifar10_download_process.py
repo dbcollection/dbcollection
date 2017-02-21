@@ -17,13 +17,18 @@ sys.path.append(lib_path)
 import dbcollection.manager as dbclt
 
 
+# delete all cache data
+print('==> dbcollection.clear:')
+dbclt.clear()
+
 # download dataset
 print('==> dbcollection.download:')
 dbclt.download(name='cifar10', data_dir='/home/mf/tmp/download_data', verbose=True)
 
 # load dataset (process metadata file)
 print('==> dbcollection.load:')
-loader = dbclt.load(name='cifar10', verbose=True)
+#loader = dbclt.load(name='cifar10', data_dir='/home/mf/tmp/download_data', verbose=True)
+loader = dbclt.load(name='cifar10')
 
 # print data from the loader
 print('Dataset: ' + loader.name)

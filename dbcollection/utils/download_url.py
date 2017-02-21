@@ -30,6 +30,7 @@ def download_single_file_progressbar(url, file_save_name):
         None
     """
     wget.download(url, out=file_save_name)
+    print('')
 
 
 def download_single_file_nodisplay(url, file_save_name):

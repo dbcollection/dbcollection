@@ -26,9 +26,8 @@ class CacheManager:
 
         # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
-            print('Cache file not found. Generating the file: {}'.format(self.cache_fname))
+            print('Cache file not found. Generated the following file on disk: {}'.format(self.cache_fname))
             self.create_cache_file_disk(self.cache_fname)
-            print('Done.')
 
         # load cache data file
         self.data = self.read_data_cache()
@@ -231,6 +230,29 @@ class CacheManager:
         self.data['dataset'].pop(name)
 
 
+    def delete_category_entry(self, name):
+        """Delete all entries in the category keywords list where 'name' exists.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        for keyword in self.data['category']:
+            if name in keyword:
+                self.data['category'][keyword].remove(name)
+                if not any(self.data['category'][keyword]):
+                    self.data['category'].pop(keyword)
+
+
     def delete_dataset_cache(self, name):
         """Delete the cache data from disk of a dataset.
 
@@ -255,6 +277,9 @@ class CacheManager:
 
         # remove entry from the data
         self.delete_entry(name)
+
+        # remove dataset from the category keywords
+        self.delete_category_entry(name)
 
         # write updated data to file
         self.write_data_cache(self.data)
@@ -397,10 +422,9 @@ class CacheManager:
             None
         """
         try:
-            return task in self.data['dataset'][name]['tasks'].keys()
-        except expression as identifier:
+            return task in self.data['dataset'][name]['tasks']
+        except KeyError:
             return False
-
 
 
     def exists_dataset(self, name):
@@ -421,7 +445,7 @@ class CacheManager:
             None
         """
         # check if the dataset exists in the cache file
-        return name in self.data['dataset'].keys()
+        return name in self.data['dataset']
 
 
     def exists_task(self, name, task):
