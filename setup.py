@@ -15,6 +15,9 @@ metadata by using the standard HDF5 file format.
 with open('LICENSE') as f:
     license_mit = f.read()
 
+with open('requirements.txt') as f:
+    requirements = f.read()
+
 setup(
     name='dbcollection',
     version='0.1.0',
@@ -40,6 +43,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    packages=find_packages(exclude=['test']),
-    install_requires=['h5py'],
+    packages=find_packages(exclude=['test', 'APIs', '.vscode']),
+    install_requires=requirements
 )
