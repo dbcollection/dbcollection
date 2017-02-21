@@ -256,16 +256,16 @@ unit tests (so far):
 ### Requirements to go live
 
 - Manager API:
-	- selecionar campos
-	- filtrar campos
-	- organizar campos
+	- ~~selecionar campos~~
+	- ~~filtrar campos~~
+	- ~~organizar campos~~
 	- data balancing (train/test/val)
-- Fazer loader API (Done)
+- ~~Fazer loader API~~ (Done)
 - unit tests (a fazer)
 - testes do cifar10 (mostrar imagens random)
 - system tests
 - adicionar mais alguns datasets (voc2007, imagenet, coco)
-- setup.py do pacote
+- ~~setup.py do pacote~~
 - testes com python 2.7
 - testes em windows
 - LuaAPI (TODO)
@@ -278,7 +278,7 @@ unit tests (so far):
 - fazer balance - (a fazer)
 - remover a categoria do cache manager e meter como um campo separado no dicionario. Sempre que adicionar um dataset, este tem que fazer o update das keywords neste novo campo e adicionar o nome do dataset na categoria especifica.
 - adicionar o object_field ao DatasetLoader para nao estar sempre a procurar pelo campo do field (faço sempre a convercao para str e ta feito)
-- adicionar keywords ao cifar10
+- adicionar keywords ao cifar10 (Done)
 - reformular a funcao adicionar de um dataset (talvez usar a formula escrita para o metodo new() que vem a seguir)
 - criar uma funcao de criar um dataset ao adicionar so o caminho da pasta root dos datasets que tenham os caminhos das pastas de teste, train, val, etc.
   Por exemplo: .new(name, data_dir, keywords)
