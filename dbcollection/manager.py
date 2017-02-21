@@ -5,7 +5,6 @@ dbcollection managing functions.
 
 from __future__ import print_function
 import os
-import sys
 import json
 from .cache import CacheManager
 from .loader import DatasetLoader
