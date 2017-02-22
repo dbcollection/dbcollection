@@ -14,7 +14,8 @@ from . import utils
 
 def load(name, data_dir=None, task='default', custom_task_name=None, \
          download_data=True, verbose=True, \
-         organize_list=None, select_data=None, filter_data=None, balance_sets=None):
+         organize_list=None, select_data=None, filter_data=None, balance_sets=None, \
+         is_test=False):
     """Loads dataset metadata file.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -43,6 +44,8 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
 	filter_data : dict
         Removes indexes from 'field_name' equal to the selected value(s)
         (removes objects ids with those 'field_name''s values)
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -58,14 +61,14 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
         print('Fetching {} metadata from disk:'.format(name))
 
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     # Check if the dataset's data has already been downloaded.
     # If not, attempt to download the data.
     if not cache_manager.exists_dataset(name):
         if download_data:
             download(name, data_dir, verbose)
-            cache_manager = CacheManager() # update the cache_manager by re-opening the cache file
+            cache_manager = CacheManager(is_test) # update the cache_manager by re-opening the cache file
         else:
             raise Exception('The dataset \'{}\' is not available on the cache list. '.format(name)+\
                             'BUT it is available for download by setting \'download=True\'.')
@@ -108,7 +111,7 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
     return dataset_loader
 
 
-def construct(name, data_dir, task='default'):
+def construct(name, data_dir, task='default', is_test=False):
     """Constructs a dataset from a directory.
 
     This method constructs a dataset based on the hierarchy of a directory,
@@ -155,7 +158,7 @@ def construct(name, data_dir, task='default'):
     pass
 
 
-def add(name, data_dir, cache_file_path, task='default'):
+def add(name, data_dir, cache_file_path, task='default', is_test=False):
     """Add dataset to list.
 
     Adds a custom dataset to the list.
@@ -170,6 +173,8 @@ def add(name, data_dir, cache_file_path, task='default'):
         Cache's metadata file path.
 	task : str
         Name of the new task.
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -180,7 +185,7 @@ def add(name, data_dir, cache_file_path, task='default'):
         None
     """
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     # split dir and filename from path
     cache_dir = os.path.dirname(cache_file_path)
@@ -189,7 +194,7 @@ def add(name, data_dir, cache_file_path, task='default'):
     cache_manager.update(name, 'custom', data_dir, cache_dir, {task:cache_file_path})
 
 
-def delete(name):
+def delete(name, is_test=False):
     """Delete a dataset from disk (cache+data).
 
     Deletes the data+metadata of a dataset on disk (cache file included).
@@ -198,6 +203,8 @@ def delete(name):
     ----------
     name : str
         Name of the dataset to delete the data from disk.
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -208,7 +215,7 @@ def delete(name):
         None
     """
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     # check if dataset exists in the cache file
     if cache_manager.exists_dataset(name):
@@ -218,7 +225,7 @@ def delete(name):
         #raise Exception('Dataset ' + name + ' does not exist.')
 
 
-def reset(name=None):
+def reset(name=None, is_test=False):
     """Deletes a dataset's metadata cache files/dir.
 
     Resets the data of the dbcollection.json cache file for a specific dataset
@@ -228,6 +235,8 @@ def reset(name=None):
     ----------
 	name : str
         Name of the dataset to reset the cache.
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -242,7 +251,7 @@ def reset(name=None):
         return
 
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     if name.lower() == 'all':
         if cache_manager.is_empty():
@@ -259,13 +268,15 @@ def reset(name=None):
             print('Dataset {} does not exist. Skip deletion.'.format(name))
 
 
-def clear(verbose=True):
+def clear(verbose=True, is_test=False):
     """Deletes the cache .json file and the cache dir of all datasets.
 
     Parameters
     ----------
     verbose : bool
         Displays text information.
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -276,7 +287,7 @@ def clear(verbose=True):
         None
     """
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     # delete cache dir
     utils.delete_dir(cache_manager.default_cache_dir)
@@ -289,7 +300,7 @@ def clear(verbose=True):
         print('Deleted {} cache file.'.format(cache_manager.cache_fname))
 
 
-def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None):
+def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None, is_test=False):
     """config cache file.
 
     Manually setup the configurations of the cache file dbcollection.json.
@@ -304,6 +315,8 @@ def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None
         New path to the metadata cache files root directory.
     data_dir_default : str
         New path to the dataset's data storage root directory.
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -314,7 +327,7 @@ def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None
         None
     """
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     # change default cache path
     if not cache_dir_default is None:
@@ -335,7 +348,7 @@ def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None
                 #raise Exception('Dataset ' + name + ' does not exist.')
 
 
-def download(name, data_dir, verbose=True):
+def download(name, data_dir, verbose=True, is_test=False):
     """Download dataset.
 
     Download the data for one (or several) listed dataset(s).
@@ -348,6 +361,8 @@ def download(name, data_dir, verbose=True):
         Force the cache file of the preprocessed data to be deleted for the particular dataset.
 	data_dir : str
         Data path to store the dataset's data.
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -358,7 +373,7 @@ def download(name, data_dir, verbose=True):
         None
     """
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     # get cache default save path
     cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
@@ -380,7 +395,7 @@ def download(name, data_dir, verbose=True):
     print('')
 
 
-def query(pattern='info'):
+def query(pattern='info', is_test=False):
     """Query the cache file.
 
     list all available datasets for download/preprocess. (tenho que pensar melhor sobre este)
@@ -389,6 +404,8 @@ def query(pattern='info'):
     -----------
 	pattern : str
         Field name used to search for a matching pattern in cache data.
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -399,7 +416,7 @@ def query(pattern='info'):
         None
     """
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     # init list
     query_list = {}
@@ -433,7 +450,7 @@ def query(pattern='info'):
     print(json.dumps(query_list, sort_keys=True, indent=4))
 
 
-def info(verbose=True):
+def info(verbose=True, is_test=False):
     """List cache data.
 
     Prints the contents of the dbcollection.json cache file
@@ -443,6 +460,8 @@ def info(verbose=True):
     verbose : bool
         If true, prints the full cache file to the screen.
         Else, prints only the categories + dataset names.
+    is_test : bool
+        Flag used for integration tests.
 
     Returns
     -------
@@ -453,7 +472,7 @@ def info(verbose=True):
         None
     """
     # Load a cache manager object
-    cache_manager = CacheManager()
+    cache_manager = CacheManager(is_test)
 
     print('Printing contents of {}:'.format(cache_manager.cache_fname))
     print('')

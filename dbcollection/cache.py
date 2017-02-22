@@ -13,16 +13,17 @@ import json
 class CacheManager:
     """ Class to manage the dbcollection cache data """
 
-    def __init__(self):
+    def __init__(self, is_test=False):
         """Initialize class.
 
         Parameters
         ----------
-            None
+        is_test : bool
+            Flag used for integration tests.
         """
 
         # setup cache paths
-        self.setup_paths()
+        self.setup_paths(is_test)
 
         # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
@@ -33,7 +34,7 @@ class CacheManager:
         self.data = self.read_data_cache()
 
 
-    def setup_paths(self):
+    def setup_paths(self, is_test):
         """Setup the cache/data directories for storing the cache file.
 
         This returns two paths for the default cache directory for storing the cache data,
@@ -41,6 +42,36 @@ class CacheManager:
         is stored.
 
         This paths were designed to work on windows, linx, mac, etc.
+
+        Parameters
+        ----------
+        is_test : bool
+            Flag used for integration tests.
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        # cache directory path (should work for all platforms)
+        if is_test:
+            self.cache_dir = os.path.join(os.path.expanduser("~"), 'tmp')
+        else:
+            self.cache_dir = os.path.expanduser("~")
+
+        # cache file path
+        self.cache_fname = os.path.join(self.cache_dir, '.dbcollection.json')
+
+        # default paths
+        self.default_cache_dir = os.path.join(self.cache_dir, 'dbcollection')
+        self.default_data_dir = os.path.join(self.default_cache_dir, 'data')
+
+
+    def clear(self):
+        """Delete the cache file + directory from disk.
 
         Parameters
         ----------
@@ -54,15 +85,13 @@ class CacheManager:
         ------
             None
         """
-        # cache directory path (should work for all platforms)
-        self.cache_dir = os.path.expanduser("~")
+        # cache file
+        if os.path.exists(self.cache_fname):
+            self.os_remove(self.cache_fname)
 
-        # cache file path
-        self.cache_fname = os.path.join(self.cache_dir, '.dbcollection.json')
-
-        # default paths
-        self.default_cache_dir = os.path.join(self.cache_dir, 'dbcollection')
-        self.default_data_dir = os.path.join(self.default_cache_dir, 'data')
+        # cache dir
+        if os.path.exists(self.default_cache_dir):
+            self.os_remove(self.default_cache_dir)
 
 
     def read_data_cache_file(self):
