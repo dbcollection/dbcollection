@@ -14,9 +14,9 @@ from unittest import mock
 from unittest.mock import patch, mock_open
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection'))
+lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
 sys.path.append(lib_path)
-from cache import CacheManager
+from dbcollection.cache import CacheManager
 
 
 #-----------------------
@@ -35,11 +35,13 @@ class CacheManagerTest(unittest.TestCase):
         """
         Initialize class.
         """
-         # create a sample cache data dictionary
+        # create a sample cache data dictionary
+        default_cache_dir =  "tmp/dir/"
+        default_data_dir =  "tmp/dir/data/"
         self.sample_cache_data = {
             "info":{
-                "default_cache_dir": "tmp/dir/",
-                "default_data_dir": "tmp/dir/",
+                "default_cache_dir": default_cache_dir,
+                "default_data_dir": default_data_dir,
             },
             "dataset":{
                 "cifar10":{
@@ -65,6 +67,8 @@ class CacheManagerTest(unittest.TestCase):
 
         # create class
         self.cache_manager = CacheManager()
+        self.cache_manager.default_cache_dir = default_cache_dir
+        self.cache_manager.default_data_dir = default_data_dir
 
         # check if the object is of the same type
         self.assertIsInstance(self.cache_manager, CacheManager, 'Object: CacheManager')
@@ -238,26 +242,29 @@ class CacheManagerTest(unittest.TestCase):
 
     @patch('__main__.CacheManager.os_remove')
     @patch('__main__.CacheManager.delete_entry')
+    @patch('__main__.CacheManager.delete_category_entry')
     @patch('__main__.CacheManager.write_data_cache')
-    def test_delete_dataset_cache__fake_remove_cachedir_from_disk(self, mock_write, mock_delete, mock_remove):
+    def test_delete_dataset_cache__fake_remove_cachedir_from_disk(self, mock_write, mock_del_category, mock_delete, mock_remove):
         """
         Test deleting the cache data of a dataset.
         """
         # sample data
-        name = 'cifar10'
-        cache_dir_path = self.sample_cache_data['dataset'][name]['cache_dir']
+        dataset_name = 'cifar10'
+        cache_dir_path = os.path.join(self.cache_manager.default_cache_dir, dataset_name)
 
         # delete the cache file for 'sample_name'
-        self.cache_manager.delete_dataset_cache(name)
+        self.cache_manager.delete_dataset_cache(dataset_name)
 
         # check if the mocked function were called
-        self.assertTrue(mock_remove.called, 'Function should have been called')
-        self.assertTrue(mock_delete.called, 'Function should have been called')
-        self.assertTrue(mock_write.called, 'Function should have been called')
+        self.assertTrue(mock_remove.called, 'error calling: mock_remove')
+        self.assertTrue(mock_delete.called, 'error calling: mock_delete')
+        self.assertTrue(mock_del_category.called, 'error calling: mock_del_category')
+        self.assertTrue(mock_write.called, 'error calling: mock_write')
 
         # check if the functions were called with the correct parameters
         mock_remove.assert_called_with(cache_dir_path)
-        mock_delete.assert_called_with(name)
+        mock_delete.assert_called_with(dataset_name)
+        mock_del_category.assert_called_with(dataset_name)
         mock_write.assert_called_with(self.cache_manager.data)
 
     
@@ -456,39 +463,37 @@ class CacheManagerTest(unittest.TestCase):
         name = 'cifar10'
         reference_dirs = {
             "data_dir": self.sample_cache_data['dataset'][name]['data_dir'],
-            "cache_dir": self.sample_cache_data['dataset'][name]['cache_dir']
+            "cache_dir": os.path.join(self.cache_manager.default_cache_dir, name)
         }
 
         # get path
         res = self.cache_manager.get_dataset_storage_paths(name)
 
         # check if the paths are the same
-        self.assertEqual(res['data_dir'], reference_dirs['data_dir'], 'data_dir')
-        self.assertEqual(res['cache_dir'], reference_dirs['cache_dir'], 'cache_dir')
+        self.assertEqual(res['data_dir'], reference_dirs['data_dir'], 'Should be equal (data_dir)')
+        self.assertEqual(res['cache_dir'], reference_dirs['cache_dir'], 'Should be equal (cache_dir)')
 
 
-    @patch('__main__.CacheManager.read_data_cache')
-    def test_get_dataset_storage_paths__invalid_dataset(self, mock_read):
+    @patch('__main__.CacheManager.exists_dataset', return_value=False)
+    def test_get_dataset_storage_paths__invalid_dataset(self, mock_exists):
         """
         Test get the cache/data paths for an invalid dataset.
         """
-        # dataset name
-        sample_data = self.sample_cache_data
-        sample_name = 'dataset'
-        sample_field_cache = "cache_dir"
-        sample_field_data = "data_dir"
-        sample_path_cache = os.path.join(self.cache_manager.default_cache_dir, sample_name, 'cache')
-        sample_path_data = os.path.join(self.cache_manager.default_data_dir, sample_name, 'data')
-
-        # set custom return value for the mocked functions
-        mock_read.return_value = self.sample_cache_data
+        # sample data
+        name = 'dataset'
+        cache_dir = os.path.join(self.cache_manager.default_cache_dir, name)
+        data_dir = os.path.join(self.cache_manager.default_data_dir, name, 'data')
 
         # get path
-        res = self.cache_manager.get_dataset_storage_paths(sample_name)
+        res = self.cache_manager.get_dataset_storage_paths(name)
+
+        # check if the mocked function was called
+        self.assertTrue(mock_exists.called, 'error calling: mock_exists')
+        mock_exists.assert_called_with(name)
 
         # check if the paths are the same
-        self.assertEqual(res[sample_field_cache], sample_path_cache, 'Paths should be equal')
-        self.assertEqual(res[sample_field_data], sample_path_data, 'Paths should be equal')
+        self.assertEqual(res["cache_dir"], cache_dir, 'Paths should be equal')
+        self.assertEqual(res["data_dir"], data_dir, 'Paths should be equal')
 
 
     def test_get_cache_path__valid_dataset_valid_task(self):
@@ -548,20 +553,17 @@ class CacheManagerTest(unittest.TestCase):
         # sample data
         new_name = 'cifar1000'
         new_data_dir = 'dir1/cifar1000/data'
-        new_cache_dir = 'dir1/cifar1000/cache'
         new_cache_tasks = {}
-        new_keywords = []
+        new_keywords = ['banana']
         reference_new_info = {
             "data_dir": new_data_dir,
-            "cache_dir": new_cache_dir,
             "tasks": new_cache_tasks,
             "keywords": new_keywords
         }
         is_append = False
 
         # update data
-        self.cache_manager.update(new_name, new_data_dir, new_cache_dir, \
-                                  new_cache_tasks, new_keywords, is_append)
+        self.cache_manager.update(new_name, new_data_dir, new_cache_tasks, new_keywords, is_append)
 
         # check if functions were called
         self.assertTrue(mock_add.called, 'Mock function: CacheManager.add_data')

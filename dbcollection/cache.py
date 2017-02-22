@@ -54,7 +54,7 @@ class CacheManager:
         ------
             None
         """
-         # cache directory path (should work for all platforms)
+        # cache directory path (should work for all platforms)
         self.cache_dir = os.path.expanduser("~")
 
         # cache file path
@@ -352,7 +352,10 @@ class CacheManager:
         if is_append:
             if name in self.data['dataset']:
                 self.data['dataset'][name]['tasks'].update(new_info['tasks'])
-        self.data['dataset'][name] = new_info
+            else:
+                self.data['dataset'][name] = new_info
+        else:
+            self.data['dataset'][name] = new_info
 
 
     def delete_dataset(self, name, delete_data=False):
@@ -563,14 +566,12 @@ class CacheManager:
         ----------
         name : str
             Name of the dataset.
-        category : str
-            Name of the category.
         data_dir : str
             Dataset directory on disk where all data is stored.
-        cache_dir : str
-            Cache's directory on disk where the metadata files are store.
-        cache_info : dict
-            New task + path information.
+        cache_tasks : dict
+            A table of tasks.
+        cache_keywords : str
+            A list of keywords caracterizing the dataset.
         is_append : bool
             Overrides existing cache info data with new data.
 

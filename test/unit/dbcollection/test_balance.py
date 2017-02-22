@@ -15,14 +15,10 @@ from unittest import mock
 from unittest.mock import patch, mock_open
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection'))
+lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
 sys.path.append(lib_path)
-from balance import *
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection', 'utils'))
-sys.path.append(lib_path)
-from string_ascii import convert_str_to_ascii
+from dbcollection.balance import balance
+from dbcollection.utils import convert_str_to_ascii
 
 
 #-----------------------
@@ -188,7 +184,7 @@ class BalanceSetsTest(unittest.TestCase):
 
         # do balancing
         balance(self.data, sets, splits)
-        
+
         # check if the data remains the same
         self.assertNotEqual(self.data['train']['filename'].value.tolist(), \
                          self.train_filename.tolist(), \
@@ -205,7 +201,7 @@ class BalanceSetsTest(unittest.TestCase):
         self.assertNotEqual(self.data['val']['object_fields'].value.tolist(), \
                          self.val_object_fields.tolist(), \
                          'val: object_fields')
-        
+
 
     def tearDown(self):
         """
@@ -222,7 +218,8 @@ class BalanceSetsTest(unittest.TestCase):
 #----------------
 
 def main(level=1):
-    unittest.main(verbosity=level)
+    #unittest.main(verbosity=level)
+    pass
 
 if __name__ == '__main__':
     main()

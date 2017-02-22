@@ -4,12 +4,14 @@
 select.py unit testing.
 """
 
-import unittest
-
 import os
 import sys
 import numpy as np
 import h5py
+
+import unittest
+from unittest import mock
+from unittest.mock import patch, mock_open
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
