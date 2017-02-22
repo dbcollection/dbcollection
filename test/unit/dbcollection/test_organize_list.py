@@ -15,14 +15,10 @@ from unittest import mock
 from unittest.mock import patch, mock_open
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection'))
+lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
 sys.path.append(lib_path)
-from organize_list import *
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection', 'utils'))
-sys.path.append(lib_path)
-from string_ascii import *
+from dbcollection.organize_list import create_list_store_to_hdf5
+from dbcollection.utils import convert_str_to_ascii
 
 
 #-----------------------
@@ -69,20 +65,19 @@ class OrganizeTest(unittest.TestCase):
         Test organizing a list of a valid field.
         """
         # sample data
-        sample_storage = self.data
-        sample_field_name = 'class'
-        sample_field_pos = 1
-        sample_chunk_size = 1000
-        sample_field_list = 'list_' + sample_field_name
+        storage = self.data
+        set_name = 'train'
+        field_name = 'class'
+        field_pos = 1
+        field_list = 'list_' + field_name
         expected_result = np.array([[1,2,3],[4,5,6],[7,8,9],[0,0,0]])
 
         # create an organized list for sample_field_name
-        create_list_store_to_hdf5(sample_storage, sample_field_name, \
-                                  sample_field_pos, sample_chunk_size)
+        create_list_store_to_hdf5(storage[set_name], field_name, field_pos)
 
         # check if the field sample_field_list exists
-        self.assertTrue(sample_field_list in self.data['train'].keys(), '{}'.format(sample_field_list))
-        self.assertEqual(self.data['train'][sample_field_list].value.tolist(), expected_result.tolist(), \
+        self.assertTrue(field_list in self.data['train'].keys(), '{}'.format(field_list))
+        self.assertEqual(self.data['train'][field_list].value.tolist(), expected_result.tolist(), \
                          'expected equal result')
 
 
@@ -91,20 +86,19 @@ class OrganizeTest(unittest.TestCase):
         Test organizing a list of a valid field.
         """
         # sample data
-        sample_storage = self.data
-        sample_field_name = 'filename'
-        sample_field_pos = 0
-        sample_chunk_size = 1000
-        sample_field_list = 'list_' + sample_field_name
+        storage = self.data
+        set_name = 'train'
+        field_name = 'filename'
+        field_pos = 0
+        field_list = 'list_' + field_name
         expected_result = np.array([[1],[2],[3],[4],[5],[6],[7],[8],[9]])
 
         # create an organized list for sample_field_name
-        create_list_store_to_hdf5(sample_storage, sample_field_name, \
-                                  sample_field_pos, sample_chunk_size)
+        create_list_store_to_hdf5(storage[set_name], field_name, field_pos)
 
         # check if the field sample_field_list exists
-        self.assertTrue(sample_field_list in self.data['train'].keys(), '{}'.format(sample_field_list))
-        self.assertEqual(self.data['train'][sample_field_list].value.tolist(), expected_result.tolist(), \
+        self.assertTrue(field_list in self.data['train'].keys(), '{}'.format(field_list))
+        self.assertEqual(self.data['train'][field_list].value.tolist(), expected_result.tolist(), \
                          'expected result different')
 
 

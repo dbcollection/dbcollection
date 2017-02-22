@@ -7,7 +7,7 @@ from __future__ import print_function
 import os
 import json
 from .cache import CacheManager
-from .loader import DatasetLoader
+from .db_loader_postprocess import fetch_dataset_loader
 from . import dataset
 from . import utils
 
@@ -37,10 +37,10 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
 	organize_list : dict
         Organizes the data w.r.t. to other fields. The data must be organized in a
         dictionary with the following format: {"new_field_name":"field_name"}
-	select : dict
+	select_data : dict
         Selects indexes from 'field_name' equal to the selected value(s)
         (removes objects ids without those 'field_name''s values)
-	filter : dict
+	filter_data : dict
         Removes indexes from 'field_name' equal to the selected value(s)
         (removes objects ids with those 'field_name''s values)
 
@@ -96,35 +96,63 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
     task_cache_path = cache_manager.get_cache_path(name, task)
 
     # Create a loader
-    dataset_loader = DatasetLoader(name, task, dset_paths['data_dir'], task_cache_path)
-
-    # do select processing here
-    if select_data:
-        if verbose:
-            print('Select')
-        dataset_loader.select_data(select_data, custom_task_name)
-
-    # do filter processing here
-    if filter_data:
-        if verbose:
-            print('Filter')
-        dataset_loader.filter_data(filter_data, custom_task_name)
-
-    # organize data into a list w.r.t. some field_name
-    if organize_list:
-        if verbose:
-            print('Organize fields into lists: {}'.format(organize_list))
-        dataset_loader.create_list(organize_list, custom_task_name)
-
-    # do data balancing here
-    if balance_sets:
-        dataset_loader.balance_sets(balance_sets, custom_task_name)
+    custom_name = custom_task_name or (task + 'custom')
+    #dataset_loader = DatasetLoader(name, task, dset_paths['data_dir'], task_cache_path)
+    dataset_loader = fetch_dataset_loader(name, task, dset_paths['data_dir'], task_cache_path, custom_name,\
+                                        select_data, filter_data, organize_list, balance_sets, verbose)
 
     if verbose:
         print('Fetch complete.')
 
     # return Loader
     return dataset_loader
+
+
+def construct(name, data_dir, task='default'):
+    """Constructs a dataset from a directory.
+
+    This method constructs a dataset based on the hierarchy of a directory,
+    where the images are arranged in this way:
+
+    root/
+        (sets)
+        train/
+            (classes)
+                dog/
+                    (files)
+                    dg_1.png
+                    dg_n.png
+                cat/
+                    ct_1.png
+                    ct_n.png
+                mouse/
+                    ms_1.png
+                    ms_n.png
+        val/
+                dog/
+                cat/
+                mouse/
+        test/
+        test-dev/
+
+    Parameters
+    ----------
+    name : str
+        Dataset name to add to the list.
+	data_dir : str
+        Folder path of the dataset's data on disk.
+	task : str
+        Name of the new task.
+
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    """
+    pass
 
 
 def add(name, data_dir, cache_file_path, task='default'):

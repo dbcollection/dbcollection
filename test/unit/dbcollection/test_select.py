@@ -4,26 +4,18 @@
 select.py unit testing.
 """
 
+import unittest
 
 import os
 import sys
 import numpy as np
 import h5py
 
-import unittest
-from unittest import mock
-from unittest.mock import patch, mock_open
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection'))
+lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
 sys.path.append(lib_path)
-from select_filter import *
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', 'dbcollection', 'utils'))
-sys.path.append(lib_path)
-from string_ascii import convert_str_to_ascii
-
+from dbcollection.select_filter import filter_data
+from dbcollection.utils import convert_str_to_ascii
 
 
 #-----------------------

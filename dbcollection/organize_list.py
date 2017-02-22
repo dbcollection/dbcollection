@@ -109,43 +109,39 @@ def setup_new_field(handler, list_field_name, num_objects, size_field):
     return dset, generate_dict_with_zeros(size_field)
 
 
-def create_list_store_to_hdf5(handler, field_name, field_pos):
+def create_list_store_to_hdf5(hdf5_set, field_name, field_pos):
     """
     Write chunks to the hdf5 metadata file.
     """
     # craft the new field name
     list_field_name = 'list_' + field_name
 
-    # cycle all sets of the dataset
-    for set_name in handler.keys():
-        # fetch a data handler for the set
-        hdf5_set = handler[set_name]
+    # get total size of the 'object_id' list
+    num_objects = hdf5_set['object_id'].shape[0]
+    size_field = hdf5_set[field_name].shape[0]
 
-        # get total size of the 'object_id' list
-        num_objects = hdf5_set['object_id'].shape[0]
-        size_field = hdf5_set[field_name].shape[0]
+    # create a generator of data indexes
+    gen = list_chunks(hdf5_set, field_name, field_pos, num_objects)
 
-        # create a generator of data indexes
-        gen = list_chunks(hdf5_set, field_name, field_pos, num_objects)
+    # setup the new list field
+    dset, field_list_size = setup_new_field(hdf5_set, list_field_name, num_objects, size_field)
 
-        # setup the new list field
-        dset, field_list_size = setup_new_field(hdf5_set, list_field_name, num_objects, size_field)
+    # initialize maximum size of the new field (axis=1)
+    curr_max_size = 0
 
-        # initialize maximum size of the new field (axis=1)
-        curr_max_size = 0
+    # add the rest of the chunks
+    for chunk_dict in gen:
 
-        # add the rest of the chunks
-        for chunk_dict in gen:
+        # check the max size of row of the chunk list
+        new_max_size = update_field_list_size(field_list_size, chunk_dict)
 
-            # check the max size of row of the chunk list
-            new_max_size = update_field_list_size(field_list_size, chunk_dict)
+        # check if the id of the max
+        if new_max_size > curr_max_size:
+            # resize the dataset to accommodate the next chunk of rows
+            dset.resize(new_max_size, axis=1)
 
-            # check if the id of the max
-            if new_max_size > curr_max_size:
-                # resize the dataset to accommodate the next chunk of rows
-                dset.resize(new_max_size, axis=1)
-                # update the new max size
-                curr_max_size = new_max_size
+            # update the new max size
+            curr_max_size = new_max_size
 
-            # write the next chunk
-            write_chunks_to_field(dset, chunk_dict)
+        # write the next chunk
+        write_chunks_to_field(dset, chunk_dict)

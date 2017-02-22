@@ -5,8 +5,6 @@ Dataset loader class.
 
 from .storage import StorageHDF5
 from .utils import convert_ascii_to_str
-from .organize_list import create_list_store_to_hdf5
-from .select_filter import filter_data
 
 
 #---------------------------------------------------------
@@ -198,123 +196,17 @@ class DatasetLoader:
         cache_path : str
             Path of the metadata cache file stored on disk.
         """
-        # store info
+        # store information of the dataset
         self.name = name
         self.task = task
         self.data_dir = data_dir
         self.cache_path = cache_path
 
-        # load the cache file
+        # create a handler for the cache file
         self.file = StorageHDF5(self.cache_path, 'r')
 
-        # make links for all groups (train/val/test) for easier access
-        self.setup_sets()
-
-
-    def setup_sets(self):
-        """Adds links for the groups for easier access to data.
-
-        Parameters
-        ----------
-            None
-
-        Returns
-        -------
-            None
-
-        Raises
-        ------
-            None
-        """
+        # make links for all groups (train/val/test/etc) for easier access
         self.sets = []
         for name in self.file.storage.keys():
             self.sets.append(name)
             setattr(self, name, ManagerHDF5(self.file.storage[name]))
-
-
-    def create_list(self, field_list, custom_save_name=None):
-        """Organize object_ids by fields.
-
-        Creates a list w.r.t. a data field and organizes all 'object_id' indexes
-        for each unique value of the data field.
-
-        Parameters
-        ----------
-        field_list : list
-            List of names of existing fields.
-
-        Returns
-        -------
-            None
-
-        Raises
-        ------
-            None
-
-        Examples
-        --------
-        .create_list(['class_name', 'filename'])
-        """
-        # create a new metadata file to store the new variable(s)
-        for field_name in field_list:
-            field_pos = self.train.object_field_id(field_name)
-            create_list_store_to_hdf5(self.file.storage, field_name, field_pos)
-
-
-    def select_data(self, input_selections, custom_save_name=None):
-        """Selects data of the object id list w.r.t. some conditions.
-
-        Parameters
-        ----------
-            None
-
-        Returns
-        -------
-            None
-
-        Raises
-        ------
-            None
-        """
-        # cycle all sets of the dataset
-        for set_name in self.file.storage.keys():
-            filter_data(self.file.storage[set_name], input_selections, True)
-        #self._select_filter_data(input_dict, True)
-
-
-    def filter_data(self, input_selections, custom_save_name=None):
-        """Filters data of the object id list w.r.t. some conditions.
-
-        Parameters
-        ----------
-            None
-
-        Returns
-        -------
-            None
-
-        Raises
-        ------
-            None
-        """
-        # cycle all sets of the dataset
-        for set_name in self.file.storage.keys():
-            filter_data(self.file.storage[set_name], input_selections, False)
-
-
-    def balance_sets(self, input_dict, custom_save_name=None):
-        """Balances data sets.
-
-        Parameters
-        ----------
-            None
-
-        Returns
-        -------
-            None
-
-        Raises
-        ------
-            None
-        """
-        pass
