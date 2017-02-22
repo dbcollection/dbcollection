@@ -67,7 +67,7 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
     # If not, attempt to download the data.
     if not cache_manager.exists_dataset(name):
         if download_data:
-            download(name, data_dir, verbose)
+            download(name, data_dir, verbose, is_test=is_test)
             cache_manager = CacheManager(is_test) # update the cache_manager by re-opening the cache file
         else:
             raise Exception('The dataset \'{}\' is not available on the cache list. '.format(name)+\
