@@ -5,6 +5,7 @@ Data loading functions from files.
 import sys
 import json
 import scipy.io as scipy
+import xmltodict
 if sys.version_info[0] == 2:
     import cPickle as pickle
 else:
@@ -106,3 +107,23 @@ def load_pickle(fname):
         return pickle.load(open_read_file(fname, 'rb'), encoding='latin1')
     except (IOError, OSError):
         raise IOError('Error opening file: {}'.format(fname))
+
+
+def load_xml(fname):
+    """Load+parse a xml file to memory.
+
+    Parameters
+    ----------
+    fname : str
+        File name + path on disk.
+
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    """
+    with open(fname) as fd:
+        return xmltodict.parse(fd.read())
