@@ -7,6 +7,8 @@ import os
 import numpy as np
 from ... import utils, storage
 
+str2ascii = utils.convert_str_to_ascii
+
 
 class Cifar10:
     """ Cifar10 preprocessing/downloading functions """
@@ -133,37 +135,45 @@ class Cifar10:
         file_name = os.path.join(self.cache_path, 'classification.h5')
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
-        # write data to the metadata file
-        fileh5.add_data('train', 'class_name', utils.convert_str_to_ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('train', 'data', data["train_data"], np.uint8)
-        fileh5.add_data('train', 'object_id', data["train_object_id_list"], np.int32)
-        # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('train', 'object_fields', utils.convert_str_to_ascii(data['object_fields']), np.uint8)
+        # add data to the **default** group
+        fileh5.add_data('default/train', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('default/train', 'data', data["train_data"], np.uint8)
+        fileh5.add_data('default/train', 'labels', data["train_labels"], np.int8)
 
-        fileh5.add_data('test', 'class_name', utils.convert_str_to_ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('test', 'data', data["test_data"], np.uint8)
-        fileh5.add_data('test', 'object_id', data["test_object_id_list"], np.int32)
+        fileh5.add_data('default/test', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('default/test', 'data', data["test_data"], np.uint8)
+        fileh5.add_data('default/test', 'labels', data["test_labels"], np.int8)
+
+        # add data to the **list** group
+        # write data to the metadata file
+        fileh5.add_data('list/train', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('list/train', 'data', data["train_data"], np.uint8)
+        fileh5.add_data('list/train', 'object_id', data["train_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('test', 'object_fields', utils.convert_str_to_ascii(data['object_fields']), np.uint8)
+        fileh5.add_data('list/train', 'object_fields', str2ascii(data['object_fields']), np.uint8)
+
+        fileh5.add_data('list/test', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('list/test', 'data', data["test_data"], np.uint8)
+        fileh5.add_data('list/test', 'object_id', data["test_object_id_list"], np.int32)
+        # object fields is necessary to identify which fields compose 'object_id'
+        fileh5.add_data('list/test', 'object_fields', str2ascii(data['object_fields']), np.uint8)
 
         # close file
         fileh5.close()
 
         # return information of the task + cache file
-        return {"classification":file_name}
+        return file_name
 
 
     def process(self):
         """
         Process metadata for all tasks
         """
-        info_classification = self.classification_metadata_process()
+        classification_filename = self.classification_metadata_process()
 
-        info_default = {"default" : info_classification["classification"]}
-
-        # concatenate all cache info into a single dictionary
-        info_output = {}
-        info_output.update(info_classification)
-        info_output.update(info_default)
+        info_output = {
+            "default" : classification_filename,
+            "classification" : classification_filename,
+        }
 
         return info_output, self.keywords

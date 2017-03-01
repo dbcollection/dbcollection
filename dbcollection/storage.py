@@ -3,6 +3,7 @@ HDF5 storage class.
 """
 
 
+import os
 import h5py
 
 
@@ -24,6 +25,14 @@ class StorageHDF5:
 
         # open a file (read or write mode)
         self.storage = self.open(filename, mode)
+
+        # create two sub-groups:
+        # default - metadata is stored wrt the original annotation scheme
+        #           (usually data is stored in a nested format)
+        # list - all metadata fields are lists (no nesting)
+        self.main_groups = ['default', 'list']
+        self.storage.create_group('default')
+        self.storage.create_group('list')
 
 
     def open(self, name, mode, version='latest'):
@@ -88,12 +97,12 @@ class StorageHDF5:
         return name in self.storage.keys()
 
 
-    def add_group(self, group):
+    def add_group(self, group_name):
         """Create a group in the hdf5 file.
 
         Parameters
         ----------
-        group : str
+        group_name : str
             Name of the group to add.
 
         Returns
@@ -102,14 +111,13 @@ class StorageHDF5:
 
         Raises
         ------
-            None
+        ValueError
+            If a group already exists.
         """
         try:
-            grp = self.storage.create_group(group)
+            self.storage.create_group(group_name)
         except ValueError: #group already exists
-            raise Exception('Error creating a group.')
-        else:
-            setattr(self, group, grp)
+            raise ValueError('Error creating a group.')
 
 
     def delete_group(self, name):
