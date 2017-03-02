@@ -107,7 +107,7 @@ class Cifar10:
 
         test_data = test_batch['data'].reshape(10000, 3, 32, 32)
         test_data = np.transpose(test_data, (0,2,3,1)) # NxHxWxC
-        test_labels = test_batch['labels']
+        test_labels = np.array(test_batch['labels'], dtype=np.uint8)
         test_object_list = self.get_object_list(test_data, test_labels)
 
         #return a dictionary
@@ -136,27 +136,27 @@ class Cifar10:
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
         # add data to the **default** group
-        fileh5.add_data('default/train', 'class_name', str2ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('default/train', 'data', data["train_data"], np.uint8)
-        fileh5.add_data('default/train', 'labels', data["train_labels"], np.int8)
+        fileh5.add_data('train/source', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('train/source', 'data', data["train_data"], np.uint8)
+        fileh5.add_data('train/source', 'labels', data["train_labels"], np.uint8)
 
-        fileh5.add_data('default/test', 'class_name', str2ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('default/test', 'data', data["test_data"], np.uint8)
-        fileh5.add_data('default/test', 'labels', data["test_labels"], np.int8)
+        fileh5.add_data('test/source', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('test/source', 'data', data["test_data"], np.uint8)
+        fileh5.add_data('test/source', 'labels', data["test_labels"], np.uint8)
 
         # add data to the **list** group
         # write data to the metadata file
-        fileh5.add_data('list/train', 'class_name', str2ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('list/train', 'data', data["train_data"], np.uint8)
-        fileh5.add_data('list/train', 'object_id', data["train_object_id_list"], np.int32)
+        fileh5.add_data('train/default', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('train/default', 'data', data["train_data"], np.uint8)
+        fileh5.add_data('train/default', 'object_id', data["train_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('list/train', 'object_fields', str2ascii(data['object_fields']), np.uint8)
+        fileh5.add_data('train/default', 'object_fields', str2ascii(data['object_fields']), np.uint8)
 
-        fileh5.add_data('list/test', 'class_name', str2ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('list/test', 'data', data["test_data"], np.uint8)
-        fileh5.add_data('list/test', 'object_id', data["test_object_id_list"], np.int32)
+        fileh5.add_data('test/default', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('test/default', 'data', data["test_data"], np.uint8)
+        fileh5.add_data('test/default', 'object_id', data["test_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('list/test', 'object_fields', str2ascii(data['object_fields']), np.uint8)
+        fileh5.add_data('test/default', 'object_fields', str2ascii(data['object_fields']), np.uint8)
 
         # close file
         fileh5.close()
