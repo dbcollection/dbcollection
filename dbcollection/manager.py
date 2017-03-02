@@ -7,15 +7,13 @@ from __future__ import print_function
 import os
 import json
 from .cache import CacheManager
+from .loader import DatasetLoader
 from .db_loader_postprocess import fetch_dataset_loader
 from . import dataset
 from . import utils
 
 
-def load(name, data_dir=None, task='default', custom_task_name=None, \
-         download_data=True, verbose=True, \
-         organize_list=None, select_data=None, filter_data=None, balance_sets=None, \
-         is_test=False):
+def load(name, task='default', verbose=True, is_test=False):
     """Loads dataset metadata file.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -24,26 +22,10 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
     ----------
     name : str
         Name of the dataset.
-    data_dir : str
-        Path to store the data (if the data doesn't exist and the download flag is equal True).
-    save_name : str
-        Save a custom task with a specified name.
-        (usefull to create custom versions of the original).
     task : str
         Specify a specific task to load.
-	download : bool
-        Downloads data from the host to disk (if true).
 	verbose : bool
         Displays text information (if true).
-	organize_list : dict
-        Organizes the data w.r.t. to other fields. The data must be organized in a
-        dictionary with the following format: {"new_field_name":"field_name"}
-	select_data : dict
-        Selects indexes from 'field_name' equal to the selected value(s)
-        (removes objects ids without those 'field_name''s values)
-	filter_data : dict
-        Removes indexes from 'field_name' equal to the selected value(s)
-        (removes objects ids with those 'field_name''s values)
     is_test : bool
         Flag used for integration tests.
 
@@ -63,116 +45,54 @@ def load(name, data_dir=None, task='default', custom_task_name=None, \
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
-    # Check if the dataset's data has already been downloaded.
-    # If not, attempt to download the data.
-    if not cache_manager.exists_dataset(name):
-        if download_data:
-            download(name, data_dir, verbose, is_test=is_test)
-            cache_manager = CacheManager(is_test) # update the cache_manager by re-opening the cache file
-        else:
-            raise Exception('The dataset \'{}\' is not available on the cache list. '.format(name)+\
-                            'BUT it is available for download by setting \'download=True\'.')
-
     # get data + cache dir paths
     dset_paths = cache_manager.get_dataset_storage_paths(name)
 
     # get task cache file path
     if not cache_manager.is_task(name, task):
-        if verbose:
-            print('Processing metadata files...')
-
-        # get cache default save path
-        cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
-        if not os.path.exists(cache_save_path):
-            utils.create_dir(cache_save_path)
-
-        # preprocess dataset
-        cache_info = dataset.process(name, dset_paths['data_dir'], dset_paths['cache_dir'], verbose)
-
-        # update dbcollection.json file with the new data
-        cache_manager.update(name, cache_info['data_dir'], cache_info['tasks'], cache_info['keywords'])
-
-        if verbose:
-            print('Done.')
+        raise Exception('Dataset/task not available for load.')
 
     # get task cache file path
     task_cache_path = cache_manager.get_cache_path(name, task)
 
     # Create a loader
-    custom_name = custom_task_name or (task + 'custom')
-    #dataset_loader = DatasetLoader(name, task, dset_paths['data_dir'], task_cache_path)
-    dataset_loader = fetch_dataset_loader(name, task, dset_paths['data_dir'], task_cache_path, custom_name,\
-                                        select_data, filter_data, organize_list, balance_sets, verbose)
-
-    if verbose:
-        print('Fetch complete.')
+    dataset_loader = DatasetLoader(name, task, dset_paths['data_dir'], task_cache_path)
 
     # return Loader
     return dataset_loader
 
 
-def construct(name, data_dir, task='default', is_test=False):
-    """Constructs a dataset from a directory.
-
-    This method constructs a dataset based on the hierarchy of a directory,
-    where the images are arranged in this way:
-
-    root/
-        (sets)
-        train/
-            (classes)
-                dog/
-                    (files)
-                    dg_1.png
-                    dg_n.png
-                cat/
-                    ct_1.png
-                    ct_n.png
-                mouse/
-                    ms_1.png
-                    ms_n.png
-        val/
-                dog/
-                cat/
-                mouse/
-        test/
-        test-dev/
+def setup(name, data_dir=None, task_name=None,\
+          organize_list=None, \
+          select_data=None, filter_data=None, \
+          balance_sets=None, \
+          verbose=True, is_test=False):
+    """Description
 
     Parameters
     ----------
     name : str
-        Dataset name to add to the list.
-	data_dir : str
-        Folder path of the dataset's data on disk.
-	task : str
-        Name of the new task.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-    """
-    pass
-
-
-def add(name, data_dir, cache_file_path, task='default', is_test=False):
-    """Add dataset to list.
-
-    Adds a custom dataset to the list.
-
-    Parameters
-    ----------
-    name : str
-        Dataset name to add to the list.
-	data_dir : str
-        Folder path of the dataset's data on disk.
-	cache_file_path : str
-        Cache's metadata file path.
-	task : str
-        Name of the new task.
+        Name of the dataset.
+    data_dir : str
+        Path to store the data (if the data doesn't exist and the download flag is equal True).
+    save_name : str
+        Save a custom task with a specified name.
+        (usefull to create custom versions of the original).
+    task_name : str
+        Specify a specific task to save.
+	download : bool
+        Downloads data from the host to disk (if true).
+	verbose : bool
+        Displays text information (if true).
+	organize_list : dict
+        Organizes the data w.r.t. to other fields. The data must be organized in a
+        dictionary with the following format: {"new_field_name":"field_name"}
+	select_data : dict
+        Selects indexes from 'field_name' equal to the selected value(s)
+        (removes objects ids without those 'field_name''s values)
+	filter_data : dict
+        Removes indexes from 'field_name' equal to the selected value(s)
+        (removes objects ids with those 'field_name''s values)
     is_test : bool
         Flag used for integration tests.
 
@@ -187,14 +107,41 @@ def add(name, data_dir, cache_file_path, task='default', is_test=False):
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
-    # split dir and filename from path
-    cache_dir = os.path.dirname(cache_file_path)
+    # Check if the dataset's data has already been downloaded.
+    # If not, attempt to download the data.
+    if not cache_manager.exists_dataset(name):
+        assert data_dir, 'Must insert a valid path: data_dir={}'.format(data_dir)
 
-    # add dataset info to the dataset
-    cache_manager.update(name, 'custom', data_dir, cache_dir, {task:cache_file_path})
+        # get cache default save path
+        cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
+        if not os.path.exists(cache_save_path):
+            utils.create_dir(cache_save_path)
+
+        # get data directory to store the data
+        data_dir_ = os.path.join(data_dir, name) or os.path.join(cache_manager. default_data_dir, name)
+        if not os.path.exists(data_dir):
+            utils.create_dir(data_dir)
+
+        # download/preprocess dataset
+        keywords = dataset.download(name, data_dir_, cache_save_path, verbose)
+
+        # update dbcollection.json file with the new data
+        cache_manager.update(name, data_dir_, {}, keywords)
+
+    # get data + cache dir paths
+    dset_paths = cache_manager.get_dataset_storage_paths(name)
+
+    # process dataset metadata
+    if not cache_manager.is_task(name, 'default'):
+        cache_info = dataset.process(name, dset_paths['data_dir'], dset_paths['cache_dir'], verbose)
+
+        # update dbcollection.json file with the new data
+        cache_manager.update(name, cache_info['data_dir'], cache_info['tasks'], cache_info['keywords'])
+
+    # post-process
 
 
-def delete(name, is_test=False):
+def remove(name, is_test=False):
     """Delete a dataset from disk (cache+data).
 
     Deletes the data+metadata of a dataset on disk (cache file included).
@@ -222,57 +169,33 @@ def delete(name, is_test=False):
         cache_manager.delete_dataset(name, True)
     else:
         print('Dataset \'{}\' does not exist.'.format(name))
-        #raise Exception('Dataset ' + name + ' does not exist.')
 
 
-def reset(name=None, is_test=False):
-    """Deletes a dataset's metadata cache files/dir.
+def manage_cache(field=None, value=None, delete_cache=False, clear_cache=False, verbose=True, is_test=False):
+    """Manages the cache file.
 
-    Resets the data of the dbcollection.json cache file for a specific dataset
-    (it deletes the cache files for this dataset as well, if any).
+    This method allows to configure the cache file directly by selecting
+    any data field/value. The user can also manually configure the file
+    if he/she desires.
+
+    To modify any entry in the cache file, simply input the field name
+    you want to change along with the new data you want to insert. This
+    applies to any field/data in the file.
+
+    Another thing available is to reset/clear the entire cache paths/configs
+    from the file by simply enabling the 'clear_cache' flag to true.
+
+    Also, there is an option to completely remove the cache file+folder
+    from the disk by enabling the 'delete_cache' flag to true. This will
+    remove the cache dbcollection.json and the dbcollection/ folder from
+    disk.
 
     Parameters
     ----------
 	name : str
         Name of the dataset to reset the cache.
-    is_test : bool
-        Flag used for integration tests.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-    """
-    if name is None:
-        print('No dataset was selected. (do nothing)')
-        return
-
-    # Load a cache manager object
-    cache_manager = CacheManager(is_test)
-
-    if name.lower() == 'all':
-        if cache_manager.is_empty():
-            print('The cache data is empty.')
-        else:
-            # delete the entire cache
-            cache_manager.delete_cache_all()
-            print('Deleted all datasets\' metadata from cache.')
-    else:
-        # check if dataset exists in the cache file
-        if cache_manager.exists_dataset(name):
-            cache_manager.delete_dataset(name, False)
-        else:
-            print('Dataset {} does not exist. Skip deletion.'.format(name))
-
-
-def clear(verbose=True, is_test=False):
-    """Deletes the cache .json file and the cache dir of all datasets.
-
-    Parameters
-    ----------
+    clear_cache : bool
+        Flag indicating to delete the cache file+data from disk.
     verbose : bool
         Displays text information.
     is_test : bool
@@ -289,114 +212,31 @@ def clear(verbose=True, is_test=False):
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
-    # delete cache dir
-    utils.delete_dir(cache_manager.default_cache_dir)
+    if delete_cache:
+        # delete cache dir
+        utils.delete_dir(cache_manager.default_cache_dir)
 
-    # delete cache file
-    utils.delete_file(cache_manager.cache_fname)
+        # delete cache file
+        utils.delete_file(cache_manager.cache_fname)
 
-    if verbose:
-        print('Deleted {} directory.'.format(cache_manager.default_cache_dir))
-        print('Deleted {} cache file.'.format(cache_manager.cache_fname))
+        if verbose:
+            print('Deleted {} directory.'.format(cache_manager.default_cache_dir))
+            print('Deleted {} cache file.'.format(cache_manager.cache_fname))
 
-
-def config(name=None, fields=None, cache_dir_default=None, data_dir_default=None, is_test=False):
-    """config cache file.
-
-    Manually setup the configurations of the cache file dbcollection.json.
-
-    Parameters
-    ----------
-    name : str
-        Name of the dataset.
-	fields : dict
-        Specifies which fields and values to update the dbcollection cache file.
-    cache_dir_default : str
-        New path to the metadata cache files root directory.
-    data_dir_default : str
-        New path to the dataset's data storage root directory.
-    is_test : bool
-        Flag used for integration tests.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-    """
-    # Load a cache manager object
-    cache_manager = CacheManager(is_test)
-
-    # change default cache path
-    if not cache_dir_default is None:
-        cache_manager.default_cache_dir = cache_dir_default
-
-    # change default data path
-    if not data_dir_default is None:
-        cache_manager.default_data_dir = data_dir_default
-
-    # change paths of a dataset
-    if not name is None:
-        if isinstance(fields, dict):
-            if cache_manager.exists_dataset(name):
-                for field_name in fields.keys():
-                    cache_manager.change_field(name, field_name, fields[field_name])
+    else:
+        if clear_cache:
+            # delete the entire cache
+            cache_manager.delete_cache_all()
+            print('Deleted all datasets\' metadata information from cache.')
+        else:
+            if field is None:
+                print('No dataset was selected. (do nothing)')
             else:
-                print('Dataset {} does not exist.'.format(name))
-                #raise Exception('Dataset ' + name + ' does not exist.')
-
-
-def download(name, data_dir, verbose=True, is_test=False):
-    """Download dataset.
-
-    Download the data for one (or several) listed dataset(s).
-
-    Parameters
-    ----------
-    name : str
-        Name of the dataset to reset the cache.
-    cache : bool
-        Force the cache file of the preprocessed data to be deleted for the particular dataset.
-	data_dir : str
-        Data path to store the dataset's data.
-    is_test : bool
-        Flag used for integration tests.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-    """
-    # Load a cache manager object
-    cache_manager = CacheManager(is_test)
-
-    # get cache default save path
-    cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
-    if not os.path.exists(cache_save_path):
-        utils.create_dir(cache_save_path)
-
-    # get data directory to store the data
-    data_dir = os.path.join(data_dir, name) or os.path.join(cache_manager.default_data_dir, name)
-    if not os.path.exists(data_dir):
-        utils.create_dir(data_dir)
-
-    # download/preprocess dataset
-    keywords = dataset.download(name, data_dir, cache_save_path, verbose)
-
-    # update dbcollection.json file with the new data
-    cache_manager.update(name, data_dir, {}, keywords)
-
-    print('{} has been successfully downloaded.'.format(name))
-    print('')
+                cache_manager.modify_field(field, value)
 
 
 def query(pattern='info', is_test=False):
-    """Query the cache file.
+    """Do simple queries to the cache.
 
     list all available datasets for download/preprocess. (tenho que pensar melhor sobre este)
 
@@ -451,9 +291,9 @@ def query(pattern='info', is_test=False):
 
 
 def info(verbose=True, is_test=False):
-    """List cache data.
+    """Display the cache data contents to the screen.
 
-    Prints the contents of the dbcollection.json cache file
+    Prints the contents of the dbcollection.json cache file to the screen.
 
     Parameters
     ----------

@@ -209,4 +209,4 @@ class DatasetLoader:
         self.sets = []
         for name in self.file.storage.keys():
             self.sets.append(name)
-            setattr(self, name, ManagerHDF5(self.file.storage[name]))
+            setattr(self, name, ManagerHDF5(self.file.storage[name+'/default']))

@@ -628,3 +628,49 @@ class CacheManager:
 
         # write to file
         self.write_data_cache(self.data)
+
+
+    def modify_field(self, field=None, value=None):
+        """Modify a field value.
+
+        Parameters
+        ----------
+        field : str
+            Name of the field of the cache file.
+        value : str/list/dict
+            New content to modify the field with.
+
+        Returns
+        -------
+        bool
+            Return True if a valid field was inserted.
+
+        Raises
+        ------
+        Exception
+            If the input field is not valid.
+        """
+        assert field, 'Invalid field: {}'.format(field)
+        assert value, 'Invalid value: {}'.format(value)
+
+        # check info / dataset lists first
+        if field in self.data:
+            self.data[field] = value
+            return True
+
+        # match default paths
+        if field in self.data['info']:
+            self.data['info'][field] = value
+            return True
+
+        # match datasets/tasks
+        if field in self.data['dataset']:
+            self.data['dataset'][field] = value
+            return True
+
+        # match datasets/tasks
+        if field in self.data['category']:
+            self.data['category'][field] = value
+            return True
+
+        raise Exception('Field name not existing: {}'.format(field))

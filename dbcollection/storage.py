@@ -26,14 +26,6 @@ class StorageHDF5:
         # open a file (read or write mode)
         self.storage = self.open(filename, mode)
 
-        # create two sub-groups:
-        # default - metadata is stored wrt the original annotation scheme
-        #           (usually data is stored in a nested format)
-        # list - all metadata fields are lists (no nesting)
-        self.main_groups = ['default', 'list']
-        self.storage.create_group('default')
-        self.storage.create_group('list')
-
 
     def open(self, name, mode, version='latest'):
         """Open a hdf5 file.
