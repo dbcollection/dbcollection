@@ -1,5 +1,5 @@
 """
-Dataset loader + preprocess functions.
+Metadata post-processing functions.
 """
 
 import shutil
