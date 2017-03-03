@@ -42,12 +42,13 @@ class Cifar10:
         self.verbose = verbose
 
 
-    def download(self):
+    def download(self, is_download=True):
         """
         Download and extract files to disk.
         """
         # download + extract data and remove temporary files
-        utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
+        if is_download:
+            utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
 
         return self.keywords
 

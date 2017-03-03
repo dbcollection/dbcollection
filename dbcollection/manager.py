@@ -8,7 +8,7 @@ import os
 import json
 from .cache import CacheManager
 from .loader import DatasetLoader
-from .db_loader_postprocess import fetch_dataset_loader
+from .postprocess import fetch_dataset_loader
 from . import dataset
 from . import utils
 
@@ -66,7 +66,7 @@ def setup(name, data_dir=None, task_name=None,\
           organize_list=None, \
           select_data=None, filter_data=None, \
           balance_sets=None, \
-          verbose=True, is_test=False):
+          is_download=True, verbose=True, is_test=False):
     """Description
 
     Parameters
@@ -119,11 +119,11 @@ def setup(name, data_dir=None, task_name=None,\
 
         # get data directory to store the data
         data_dir_ = os.path.join(data_dir, name) or os.path.join(cache_manager. default_data_dir, name)
-        if not os.path.exists(data_dir):
-            utils.create_dir(data_dir)
+        if not os.path.exists(data_dir_):
+            utils.create_dir(data_dir_)
 
         # download/preprocess dataset
-        keywords = dataset.download(name, data_dir_, cache_save_path, verbose)
+        keywords = dataset.download(name, data_dir_, cache_save_path, is_download, verbose)
 
         # update dbcollection.json file with the new data
         cache_manager.update(name, data_dir_, {}, keywords)

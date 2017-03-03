@@ -96,7 +96,7 @@ def exists(name):
     return False
 
 
-def download(name, data_dir, cache_dir, verbose=True):
+def download(name, data_dir, cache_dir, is_download=True, verbose=True):
     """Download data of a dataset.
 
     Parameters
@@ -109,6 +109,8 @@ def download(name, data_dir, cache_dir, verbose=True):
         Indicates if the cache_dir should be deleted.
     verbose : bool
         Display messages on the screen.
+    is_download : bool
+        Enables/disables data download/extraction.
 
     Returns
     -------
@@ -122,7 +124,7 @@ def download(name, data_dir, cache_dir, verbose=True):
     dataset_loader = setup_dataset_constructor(name, data_dir, cache_dir, verbose, True)
 
     # download data
-    return dataset_loader.download()
+    return dataset_loader.download(is_download)
 
 
 def process(name, data_dir, cache_dir, verbose):
