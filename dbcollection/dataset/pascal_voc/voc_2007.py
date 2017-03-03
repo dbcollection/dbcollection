@@ -3,8 +3,10 @@ Pascal VOC 2007 download/process functions.
 """
 
 
+from __future__ import print_function, division
 import os
 import numpy as np
+import progressbar
 from ... import utils, storage
 
 
@@ -38,81 +40,73 @@ class PascalVOC2007:
 
         # paths
         self.annotations_path = os.path.join(self.data_path, 'VOCdevkit', 'VOC2007', 'Annotations')
-        self.images_path = os.path.join(self.data_path, 'VOCdevkit', 'VOC2007', 'Annotations')
-        self.set_split_path = os.path.join(self.data_path, 'VOCdevkit', 'VOC2007', 'ImageSets', 'Layout')
-
-
-    def load_file_ids(self, filename):
-        """
-        Load ids from file.
-        """
-        with open(filename) as f:
-            ids = f.read()
-
-        # convert to a list
-        return ids.split('\n')
+        self.images_path = os.path.join('VOCdevkit', 'VOC2007', 'ImageSets')
 
 
     def sets_ids(self):
         """
         Return the train/val/test/trainval set id lists.
         """
+        from .voc_2007_indexes import train_ids, val_ids, trainval_ids, test_ids
+
         self.ids = {
-            'train' : self.load_file_ids(os.path.join(self.set_split_path, 'train.txt')),
-            'val' : self.load_file_ids(os.path.join(self.set_split_path, 'val.txt')),
-            'trainval' : self.load_file_ids(os.path.join(self.set_split_path, 'trainval.txt')),
-            'test' : self.load_file_ids(os.path.join(self.set_split_path, 'test.txt'))
+            'train' : train_ids,
+            'val' : val_ids,
+            'trainval' : trainval_ids,
+            'test' : test_ids
         }
 
 
-    def download(self):
+    def download(self, is_download=True):
         """
         Download and extract files to disk.
         """
         # download + extract data and remove temporary files
-        utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
+        if is_download:
+            utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
+
         return self.keywords
 
 
-    def set_add_data_default(self, hdf5_handler, id_list):
+    def set_add_data_source(self, hdf5_handler, id_list):
         """
         Load+parse annotations of a set and store the metadata in the
         orignal annotation form (nested).
         """
-        for i, fileid in id_list:
-            # setup file names
-            annot_filename = os.path.join(self.annotations_path, fileid + '.xml')
-            image_filename = os.path.join(self.images_path, fileid + '.jpg')
+        with progressbar.ProgressBar(max_value=len(id_list)) as bar:
+            for i, fileid in enumerate(id_list):
+                # setup file names
+                annot_filename = os.path.join(self.annotations_path, fileid + '.xml')
+                image_filename = os.path.join(self.images_path, fileid + '.jpg')
 
-            # load annotation
-            annotation = utils.load_xml(annot_filename)
+                # load annotation
+                annotation = utils.load_xml(annot_filename)
 
-            # add data to the set
-            root_path = '{}/'.format(i)
-            hdf5_handler[root_path + 'filename'] = image_filename
-            hdf5_handler[root_path + 'class_name'] = self.classes
+                # add data to the set
+                root_path = '{}/'.format(i)
+                hdf5_handler[root_path + 'filename'] = image_filename
 
-            hdf5_handler[root_path + 'size/width'] = annotation['annotation']['size']['width']
-            hdf5_handler[root_path + 'size/height'] = annotation['annotation']['size']['height']
-            hdf5_handler[root_path + 'size/depth'] = annotation['annotation']['size']['depth']
+                hdf5_handler[root_path + 'size/width'] = annotation['annotation']['size']['width']
+                hdf5_handler[root_path + 'size/height'] = annotation['annotation']['size']['height']
+                hdf5_handler[root_path + 'size/depth'] = annotation['annotation']['size']['depth']
 
-            hdf5_handler[root_path + 'segmented']=annotation['annotation']['segmented']
+                hdf5_handler[root_path + 'segmented'] = annotation['annotation']['segmented']
 
-            if isinstance(annotation['annotation']['object'], list):
-                subroot_path = root_path + 'object/0/'
-                obj = annotation['annotation']['object']
-                hdf5_handler[subroot_path + 'name'] = obj['name']
-                hdf5_handler[subroot_path + 'pose'] = obj['pose']
-                hdf5_handler[subroot_path + 'truncated'] = obj['truncated']
-                hdf5_handler[subroot_path + 'difficult'] = obj['difficult']
-                hdf5_handler[subroot_path + 'bndbox/xmin'] = obj['bndbox']['xmin']
-                hdf5_handler[subroot_path + 'bndbox/ymin'] = obj['bndbox']['ymin']
-                hdf5_handler[subroot_path + 'bndbox/xmax'] = obj['bndbox']['xmax']
-                hdf5_handler[subroot_path + 'bndbox/ymax'] = obj['bndbox']['ymax']
-            else:
-                for j in range(0, len(annotation['annotation']['object'])):
-                    subroot_path = root_path + 'object/{}/'.format(j)
-                    obj = annotation['annotation']['object'][j]
+                if isinstance(annotation['annotation']['object'], list):
+                    for j in range(0, len(annotation['annotation']['object'])):
+                        subroot_path = root_path + 'object/{}/'.format(j)
+                        obj = annotation['annotation']['object'][j]
+                        hdf5_handler[subroot_path + 'name'] = obj['name']
+                        hdf5_handler[subroot_path + 'pose'] = obj['pose']
+                        hdf5_handler[subroot_path + 'truncated'] = obj['truncated']
+                        hdf5_handler[subroot_path + 'difficult'] = obj['difficult']
+                        hdf5_handler[subroot_path + 'bndbox/xmin'] = obj['bndbox']['xmin']
+                        hdf5_handler[subroot_path + 'bndbox/ymin'] = obj['bndbox']['ymin']
+                        hdf5_handler[subroot_path + 'bndbox/xmax'] = obj['bndbox']['xmax']
+                        hdf5_handler[subroot_path + 'bndbox/ymax'] = obj['bndbox']['ymax']
+                else:
+                    subroot_path = root_path + 'object/0/'
+                    obj = annotation['annotation']['object']
                     hdf5_handler[subroot_path + 'name'] = obj['name']
                     hdf5_handler[subroot_path + 'pose'] = obj['pose']
                     hdf5_handler[subroot_path + 'truncated'] = obj['truncated']
@@ -122,8 +116,11 @@ class PascalVOC2007:
                     hdf5_handler[subroot_path + 'bndbox/xmax'] = obj['bndbox']['xmax']
                     hdf5_handler[subroot_path + 'bndbox/ymax'] = obj['bndbox']['ymax']
 
+                # update progressbar
+                bar.update(i)
 
-    def set_add_data_list(self, hdf5_handler, id_list):
+
+    def set_add_data_default(self, hdf5_handler, id_list):
         """
         Load+parse annotations of a set and store the metadata in the
         orignal annotation form.
@@ -135,34 +132,38 @@ class PascalVOC2007:
         difficult = [0, 1]
         object_id = []
         object_fields = ['filename', 'class_name', 'bbox', 'size', 'difficult', 'truncated']
-        for i, fileid in id_list:
-            # setup file names
-            annot_filename = os.path.join(self.annotations_path, fileid + '.xml')
-            image_filename = os.path.join(self.images_path, fileid + '.jpg')
+        with progressbar.ProgressBar(max_value=len(id_list)) as bar:
+            for i, fileid in enumerate(id_list):
+                # setup file names
+                annot_filename = os.path.join(self.annotations_path, fileid + '.xml')
+                image_filename = os.path.join(self.images_path, fileid + '.jpg')
 
-            # load annotation
-            annotation = utils.load_xml(annot_filename)
+                # load annotation
+                annotation = utils.load_xml(annot_filename)
 
-            image_filenames.append(image_filename)
+                image_filenames.append(image_filename)
 
-            width = annotation['annotation']['size']['width']
-            height = annotation['annotation']['size']['height']
-            depth = annotation['annotation']['size']['depth']
-            size.append([depth, height, width])
+                width = annotation['annotation']['size']['width']
+                height = annotation['annotation']['size']['height']
+                depth = annotation['annotation']['size']['depth']
+                size.append([depth, height, width])
 
-            if isinstance(annotation['annotation']['object'], list):
-                obj = annotation['annotation']['object']
-                bbox.append([obj['bndbox']['xmin'], obj['bndbox']['ymin'], obj['bndbox']['xmax'], obj['bndbox']['ymax']])
-                object_id.append([len(image_filenames), self.classes.index(obj['name']) + 1, \
-                                  len(bbox), len(size), difficult.index(obj['difficult']) + 1, \
-                                  difficult.index(obj['truncated']) + 1])
-            else:
-                for j in range(0, len(annotation['annotation']['object'])):
-                    obj = annotation['annotation']['object'][j]
+                if isinstance(annotation['annotation']['object'], list):
+                    for j in range(0, len(annotation['annotation']['object'])):
+                        obj = annotation['annotation']['object'][j]
+                        bbox.append([obj['bndbox']['xmin'], obj['bndbox']['ymin'], obj['bndbox']['xmax'], obj['bndbox']['ymax']])
+                        object_id.append([len(image_filenames), self.classes.index(obj['name']) + 1, \
+                                          len(bbox), len(size), difficult.index(int(obj['difficult'])) + 1, \
+                                          difficult.index(int(obj['truncated'])) + 1])
+                else:
+                    obj = annotation['annotation']['object']
                     bbox.append([obj['bndbox']['xmin'], obj['bndbox']['ymin'], obj['bndbox']['xmax'], obj['bndbox']['ymax']])
                     object_id.append([len(image_filenames), self.classes.index(obj['name']) + 1, \
-                                  len(bbox), len(size), difficult.index(obj['difficult']) + 1, \
-                                  difficult.index(obj['truncated']) + 1])
+                                    len(bbox), len(size), difficult.index(int(obj['difficult'])) + 1, \
+                                    difficult.index(int(obj['truncated'])) + 1])
+
+                # update the progressbar
+                bar.update(i)
 
         # add data to the hdf5 file
         hdf5_handler['filename'] = utils.convert_str_to_ascii(image_filenames)
@@ -187,17 +188,20 @@ class PascalVOC2007:
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
         for set_name in self.ids.keys():
+            print('Processing set: {}'.format(set_name))
             # list of ids
             id_list = self.ids[set_name]
 
             # create set in the hdf5 file
             fileh5.add_group(set_name)
+            fileh5.add_group(set_name + '/source')
+            fileh5.add_group(set_name + '/default')
 
             # add data default (original)
-            self.set_add_data_default(fileh5.storage['/default/' + set_name], id_list)
+            self.set_add_data_source(fileh5.storage[set_name + '/source/'], id_list)
 
             # add data flatten
-            self.set_add_data_list(fileh5.storage['/list/' + set_name], id_list)
+            self.set_add_data_default(fileh5.storage[set_name + '/default/'], id_list)
 
         # close file
         fileh5.close()
