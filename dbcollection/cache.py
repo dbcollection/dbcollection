@@ -25,6 +25,10 @@ class CacheManager:
         # setup cache paths
         self.setup_paths(is_test)
 
+        # check if the cache directory exists
+        if not os.path.exists(self.default_cache_dir):
+            os.makedirs(self.default_cache_dir)
+
         # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
             print('Cache file not found. Generated the following file on disk: {}'.format(self.cache_fname))
@@ -38,7 +42,7 @@ class CacheManager:
         """Setup the cache/data directories for storing the cache file.
 
         This returns two paths for the default cache directory for storing the cache data,
-        and the filepath for the dbcollection.json file where the metadata for all datasets
+        and the filepath for the db_cache_info.json file where the metadata for all datasets
         is stored.
 
         This paths were designed to work on windows, linx, mac, etc.
@@ -58,16 +62,15 @@ class CacheManager:
         """
         # cache directory path (should work for all platforms)
         if is_test:
-            self.cache_dir = os.path.join(os.path.expanduser("~"), 'tmp')
+            self.default_cache_dir = os.path.join(os.path.expanduser("~"), 'tmp', 'dbcollection')
         else:
-            self.cache_dir = os.path.expanduser("~")
+            self.default_cache_dir = os.path.join(os.path.expanduser("~"), 'dbcollection')
 
         # cache file path
-        self.cache_fname = os.path.join(self.cache_dir, '.dbcollection.json')
+        self.cache_fname = os.path.join(self.default_cache_dir, 'db_cache_info.json')
 
-        # default paths
-        self.default_cache_dir = os.path.join(self.cache_dir, 'dbcollection')
-        self.default_data_dir = os.path.join(self.default_cache_dir, 'data')
+        # default data path
+        self.default_data_dir = os.path.join(os.path.expanduser("~"), 'db_data')
 
 
     def clear(self):
