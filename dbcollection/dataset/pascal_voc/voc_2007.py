@@ -40,7 +40,7 @@ class PascalVOC2007:
 
         # paths
         self.annotations_path = os.path.join(self.data_path, 'VOCdevkit', 'VOC2007', 'Annotations')
-        self.images_path = os.path.join('VOCdevkit', 'VOC2007', 'ImageSets')
+        self.images_path = os.path.join('VOCdevkit', 'VOC2007', 'JPEGImages')
 
 
     def sets_ids(self):
