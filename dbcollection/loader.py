@@ -29,10 +29,10 @@ class ManagerHDF5:
         self.object_fields = convert_ascii_to_str(self.data['object_fields'].value)
 
 
-    def get(self, field_name, idx):
+    def get(self, field_name, idx=None):
         """Get data from file.
 
-        Retrieve the i'th data from the field 'field_name' into a list.
+        Retrieve the i'th data from the field 'field_name'.
 
         Parameters
         ----------
@@ -51,14 +51,19 @@ class ManagerHDF5:
         ------
             None
         """
-        return self.data[field_name][idx]
+        if idx is None:
+            return self.data[field_name]
+        else:
+            return self.data[field_name][idx]
 
 
     def object(self, idx, is_value=False):
         """Get list of ids/values of an object.
 
-        Retrieve the data of all fields of an object: It works as calling :get() for
-        each field individually and grouping them into a list.
+        Retrieves the data's ids or contents of all fields of an object. 
+
+        It works as calling :get() for each field individually and grouping 
+        them into a list.
 
         Parameters
         ----------
@@ -107,10 +112,10 @@ class ManagerHDF5:
                 return output
 
 
-    def size(self, field_name=None):
+    def size(self, field_name=None, full=False):
         """Size of a field.
 
-        Returns the size of the elements of a field_name.
+        Returns the number of the elements of a field_name.
 
         Parameters
         ----------
@@ -127,7 +132,10 @@ class ManagerHDF5:
         ------
             None
         """
-        return self.data[field_name or 'object_id'].shape[0]
+        if full:
+            return self.data[field_name or 'object_id'].shape
+        else:
+            return self.data[field_name or 'object_id'].shape[0]
 
 
     def list(self):
@@ -149,7 +157,7 @@ class ManagerHDF5:
 
 
     def object_field_id(self, field_name):
-        """retrieves the index position of the field in the object id list.
+        """Retrieves the index position of a field in the object id list.
 
         Parameters
         ----------
