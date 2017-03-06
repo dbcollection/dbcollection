@@ -5,10 +5,12 @@ All available datasets must be added in this file.
 """
 
 
-from . import cifar, pascal_voc
+from . import cifar, pascal_voc, mnist
 
 
 datasets = {
+    'mnist': mnist.mnist.MNIST,
+
     "cifar10" : cifar.cifar10.Cifar10,
     "cifar100" : cifar.cifar100.Cifar100,
 
