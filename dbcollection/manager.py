@@ -14,7 +14,7 @@ from . import utils
 
 
 def load(name, task='default', verbose=True, is_test=False):
-    """Loads dataset metadata file.
+    """Returns a metadata loader of a dataset.
 
     Returns a loader with the necessary functions to manage the selected dataset.
 
@@ -38,10 +38,6 @@ def load(name, task='default', verbose=True, is_test=False):
     ------
         None
     """
-
-    if verbose:
-        print('Fetching {} metadata from disk:'.format(name))
-
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
@@ -67,7 +63,15 @@ def setup(name, data_dir=None, task_name=None,\
           select_data=None, filter_data=None, \
           balance_sets=None, \
           is_download=True, verbose=True, is_test=False):
-    """Description
+    """Setup a dataset's metadata and cache files on disk.
+
+    When selecting a dataset name from the list, this method will download
+    and process a dataset's metadata and store it on disk. The data is
+    contained in a HSF5 file for a specific task previously setup by the
+    dataset's loading methods.
+
+    If the user already has the dataset's data files on disk, the download
+    step can be skipped by setting the 'is_download' flag to false.
 
     Parameters
     ----------
@@ -112,15 +116,21 @@ def setup(name, data_dir=None, task_name=None,\
     if not cache_manager.exists_dataset(name):
         assert data_dir, 'Must insert a valid path: data_dir={}'.format(data_dir)
 
+        if verbose:
+            print('==> (1/3) Download/setup {} data to disk...'.format(name))
+
         # get cache default save path
         cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
         if not os.path.exists(cache_save_path):
             utils.create_dir(cache_save_path)
 
         # get data directory to store the data
-        data_dir_ = os.path.join(data_dir, name) or os.path.join(cache_manager. default_data_dir, name)
-        if not os.path.exists(data_dir_):
-            utils.create_dir(data_dir_)
+        if is_download:
+            data_dir_ = os.path.join(data_dir, name) or os.path.join(cache_manager. default_data_dir, name)
+            if not os.path.exists(data_dir_):
+                utils.create_dir(data_dir_)
+        else:
+            data_dir_ = data_dir
 
         # download/preprocess dataset
         keywords = dataset.download(name, data_dir_, cache_save_path, is_download, verbose)
@@ -128,23 +138,35 @@ def setup(name, data_dir=None, task_name=None,\
         # update dbcollection.json file with the new data
         cache_manager.update(name, data_dir_, {}, keywords)
 
+        if verbose:
+            print('==> (1/3) Download/setup complete.')
+
     # get data + cache dir paths
     dset_paths = cache_manager.get_dataset_storage_paths(name)
 
     # process dataset metadata
     if not cache_manager.is_task(name, 'default'):
+        if verbose:
+            print('==> (2/3) Processing {} metadata files...'.format(name))
         cache_info = dataset.process(name, dset_paths['data_dir'], dset_paths['cache_dir'], verbose)
 
         # update dbcollection.json file with the new data
         cache_manager.update(name, cache_info['data_dir'], cache_info['tasks'], cache_info['keywords'])
 
+        if verbose:
+            print('==> (2/3) Processing complete.')
+
     # post-process
+    if verbose:
+        print('==> (3/3/) Skip post processing.')
 
 
-def remove(name, is_test=False):
-    """Delete a dataset from disk (cache+data).
+def remove(name, delete_data=False, is_test=False):
+    """Delete a dataset from the cache.
 
-    Deletes the data+metadata of a dataset on disk (cache file included).
+    Removes the datasets cache information from the dbcollection.json file.
+    The dataset's data files remain on disk if 'delete_data' is set to False,
+    otherwise it removes also the data files.
 
     Parameters
     ----------
@@ -166,7 +188,12 @@ def remove(name, is_test=False):
 
     # check if dataset exists in the cache file
     if cache_manager.exists_dataset(name):
-        cache_manager.delete_dataset(name, True)
+        if delete_data:
+            cache_manager.delete_dataset(name, True)
+        else:
+            cache_manager.delete_dataset(name, False)
+
+        print('Removed dataset {}: cache=True, disk={}'.format(name, delete_data))
     else:
         print('Dataset \'{}\' does not exist.'.format(name))
 
@@ -220,8 +247,8 @@ def manage_cache(field=None, value=None, delete_cache=False, clear_cache=False, 
         utils.delete_file(cache_manager.cache_fname)
 
         if verbose:
-            print('Deleted {} directory.'.format(cache_manager.default_cache_dir))
             print('Deleted {} cache file.'.format(cache_manager.cache_fname))
+            print('Deleted {} directory.'.format(cache_manager.default_cache_dir))
 
     else:
         if clear_cache:
@@ -291,7 +318,7 @@ def query(pattern='info', is_test=False):
 
 
 def info(verbose=True, is_test=False):
-    """Display the cache data contents to the screen.
+    """Prints the cache file contents.
 
     Prints the contents of the dbcollection.json cache file to the screen.
 
