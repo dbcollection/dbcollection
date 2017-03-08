@@ -52,7 +52,7 @@ class ManagerHDF5:
             None
         """
         if idx is None:
-            return self.data[field_name]
+            return self.data[field_name].value
         else:
             return self.data[field_name][idx]
 
@@ -84,20 +84,20 @@ class ManagerHDF5:
             None
         """
         if not is_value:
-            return self.data['object_id'][idx]
+            return self.data['object_ids'][idx]
         else:
             # convert idx to a list (in case it is a number)
             if not isinstance(idx, list):
                 idx = [idx]
 
-            # fetch the field names composing 'object_id'
+            # fetch the field names composing 'object_ids'
             fields = self.object_fields
 
             # iterate over all ids and build an output list
             output = []
             for idx_ in idx:
                 # fetch list od indexes for the current id
-                ids = self.data['object_id'][idx_]
+                ids = self.data['object_ids'][idx_]
 
                 # fetch data for each element of the list
                 data = []
@@ -133,9 +133,9 @@ class ManagerHDF5:
             None
         """
         if full:
-            return self.data[field_name or 'object_id'].shape
+            return list(self.data[field_name or 'object_ids'].shape)
         else:
-            return self.data[field_name or 'object_id'].shape[0]
+            return self.data[field_name or 'object_ids'].shape[0]
 
 
     def list(self):

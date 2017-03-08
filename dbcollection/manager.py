@@ -259,7 +259,7 @@ def manage_cache(field=None, value=None, delete_cache=False, clear_cache=False, 
             if field is None:
                 print('No dataset was selected. (do nothing)')
             else:
-                cache_manager.modify_field(field, value)
+                print(cache_manager.modify_field(field, value))
 
 
 def query(pattern='info', is_test=False):
@@ -312,12 +312,13 @@ def query(pattern='info', is_test=False):
         if pattern in cache_manager.data['dataset'][name]['keywords']:
             query_list.update({pattern : cache_manager.data['dataset'][name]['keywords'][pattern]})
 
+    return query_list
     #print(query_list)
-    print('*** Query results ***')
-    print(json.dumps(query_list, sort_keys=True, indent=4))
+    #print('*** Query results ***')
+    #print(json.dumps(query_list, sort_keys=True, indent=4))
 
 
-def info(verbose=True, is_test=False):
+def info(verbose=True, list_datasets=False, is_test=False):
     """Prints the cache file contents.
 
     Prints the contents of the dbcollection.json cache file to the screen.
@@ -327,6 +328,8 @@ def info(verbose=True, is_test=False):
     verbose : bool
         If true, prints the full cache file to the screen.
         Else, prints only the categories + dataset names.
+    list_datasets : bool
+        Print available datasets in the dbcollection package.
     is_test : bool
         Flag used for integration tests.
 
@@ -341,29 +344,32 @@ def info(verbose=True, is_test=False):
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
-    print('Printing contents of {}:'.format(cache_manager.cache_fname))
-    print('')
-    if verbose:
-        data = cache_manager.data
+    if list_datasets:
+        print('dbcollection available datasets: ', dataset.available_datasets)
     else:
-        # display all datasets
-        data = {
-            'info' : cache_manager.data['info'],
-            'dataset' : [db for db in cache_manager.data['dataset'].keys()],
-            'category' : [cat for cat in cache_manager.data['category'].keys()],
-        }
+        print('Printing contents of {}:'.format(cache_manager.cache_fname))
+        print('')
+        if verbose:
+            data = cache_manager.data
+        else:
+            # display all datasets
+            data = {
+                'info' : cache_manager.data['info'],
+                'dataset' : [db for db in cache_manager.data['dataset'].keys()],
+                'category' : [cat for cat in cache_manager.data['category'].keys()],
+            }
 
-    # print info header
-    print('*** Cache info ***')
-    print(json.dumps(data['info'], sort_keys=True, indent=4))
-    print('')
+        # print info header
+        print('*** Paths info ***')
+        print(json.dumps(data['info'], sort_keys=True, indent=4))
+        print('')
 
-    # print datasets
-    print('*** Dataset info ***')
-    print(json.dumps(data['dataset'], sort_keys=True, indent=4))
-    print('')
+        # print datasets
+        print('*** Dataset info ***')
+        print(json.dumps(data['dataset'], sort_keys=True, indent=4))
+        print('')
 
-    # print categories
-    print('*** Dataset categories ***')
-    print(json.dumps(data['category'], sort_keys=True, indent=4))
-    print('')
+        # print categories
+        print('*** Dataset categories ***')
+        print(json.dumps(data['category'], sort_keys=True, indent=4))
+        print('')

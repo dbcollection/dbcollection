@@ -15,3 +15,5 @@ datasets = {
     'mnist': mnist.mnist.MNIST,
     "pascal_voc_2007" : pascal_voc.voc_2007.PascalVOC2007
 }
+
+available_datasets = list(datasets.keys())

@@ -166,7 +166,7 @@ class CacheManager:
         filename = fname or self.cache_fname
         try:
             with open(filename, 'w') as file_cache:
-                json.dump(data, file_cache, ensure_ascii=False)
+                json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
         except IOError:
             raise IOError('Unable to open file: ' + filename)
 
