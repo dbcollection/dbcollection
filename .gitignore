@@ -3,3 +3,4 @@
 /dbcollection.egg-info/
 *.pyc
 test/.vscode/
+docs/.ipynb_checkpoints

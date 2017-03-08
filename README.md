@@ -25,3 +25,9 @@ luarocks install hdf5
 ## APIs
 - Lua (TODO)
 
+
+## TODO
+- list of datasets
+- create detailed doc for each dataset
+- **how to** for creating and submitting a dataset loader
+- 
