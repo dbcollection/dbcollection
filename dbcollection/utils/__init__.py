@@ -5,7 +5,7 @@ Utility functions used for url download, file extract, data parsing, etc.
 from __future__ import print_function
 from .string_ascii import str_to_ascii, ascii_to_str, convert_str_to_ascii, convert_ascii_to_str
 from .file_extraction import extract_file
-from .file_load import load_matlab, load_json, load_pickle, load_xml
+from .file_load import load_matlab, load_json, load_pickle, load_xml, load_txt
 from .md5hash import check_file_integrity_md5, get_hash_value
 from .os_funs import *
 from .download_url import download_file

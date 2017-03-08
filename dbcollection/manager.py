@@ -114,7 +114,7 @@ def setup(name, data_dir=None, task_name=None,\
     # Check if the dataset's data has already been downloaded.
     # If not, attempt to download the data.
     if not cache_manager.exists_dataset(name):
-        assert data_dir, 'Must insert a valid path: data_dir={}'.format(data_dir)
+        assert os.path.isdir(data_dir), 'Must insert a valid path: data_dir={}'.format(data_dir)
 
         if verbose:
             print('==> (1/3) Download/setup {} data to disk...'.format(name))
