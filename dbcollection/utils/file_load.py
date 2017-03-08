@@ -19,6 +19,8 @@ def open_read_file(fname, mode='r'):
     ----------
     fname : str
         File name + path on disk.
+    mode : str
+        File open mode.
 
     Returns
     -------
@@ -35,6 +37,30 @@ def open_read_file(fname, mode='r'):
         raise IOError('Error opening file: {}'.format(fname))
     else:
         return file_handle
+
+
+def load_txt(fname, mode='r'):
+    """Load a .txt file to memory.
+
+    Parameters
+    ----------
+    fname : str
+        File name + path on disk.
+    mode : str
+        File open mode.
+
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    """
+    with open(fname, mode) as f:
+        data = f.read()
+
+    return data.split('\n')
 
 
 def load_matlab(fname):
