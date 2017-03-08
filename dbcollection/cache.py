@@ -659,21 +659,25 @@ class CacheManager:
         # check info / dataset lists first
         if field in self.data:
             self.data[field] = value
+            self.write_data_cache(self.data)
             return True
 
         # match default paths
         if field in self.data['info']:
             self.data['info'][field] = value
+            self.write_data_cache(self.data)
             return True
 
         # match datasets/tasks
         if field in self.data['dataset']:
             self.data['dataset'][field] = value
+            self.write_data_cache(self.data)
             return True
 
         # match datasets/tasks
         if field in self.data['category']:
             self.data['category'][field] = value
+            self.write_data_cache(self.data)
             return True
 
         raise Exception('Field name not existing: {}'.format(field))
