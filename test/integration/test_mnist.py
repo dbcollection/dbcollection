@@ -18,27 +18,27 @@ import dbcollection.manager as dbclt
 
 
 # delete all cache data + dir
-print('==> dbcollection.remove:')
+print('==> dbcollection.remove:\n')
 dbclt.manage_cache(delete_cache=True, is_test=True)
 
 # download/setup dataset
-print('==> dbcollection.download:')
+print('==> dbcollection.download:\n')
 dbclt.setup(name='mnist', data_dir='/home/mf/tmp/download_data', verbose=True, is_test=True)
 
 # download dataset
-print('==> dbcollection.download:')
+print('==> dbcollection.download:\n')
 loader = dbclt.load(name='mnist', task='classification', verbose=True, is_test=True)
 
 # print data from the loader
 dbclt.info(is_test=True)
 
 # print data from the loader
-print('######### info #########')
+print('######### info #########\n')
 print('Dataset: ' + loader.name)
 print('Task: ' + loader.task)
 print('Data path: ' + loader.data_dir)
 print('Metadata cache path: ' + loader.cache_path)
 
 # delete all cache data + dir
-print('==> dbcollection.remove:')
+print('==> dbcollection.remove:\n')
 dbclt.manage_cache(delete_cache=True, is_test=True)

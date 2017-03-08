@@ -33,7 +33,22 @@ class MNIST:
         """
         Download and extract files to disk.
         """
+        import shutil
+
+        # copy files to the specified data directory
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+        fname_train_imgs = os.path.join(path, 'train-images.idx3-ubyte')
+        fname_train_lbls = os.path.join(path, 'train-labels.idx1-ubyte')
+        fname_test_imgs = os.path.join(path, 't10k-images.idx3-ubyte')
+        fname_test_lbls = os.path.join(path, 't10k-labels.idx1-ubyte')
+
+        shutil.copy2(fname_train_imgs, self.data_path)
+        shutil.copy2(fname_train_lbls, self.data_path)
+        shutil.copy2(fname_test_imgs, self.data_path)
+        shutil.copy2(fname_test_lbls, self.data_path)
+
         return self.keywords
+
 
     def load_images_numpy(self, fname):
         with open(fname, 'rb') as f:
@@ -41,22 +56,23 @@ class MNIST:
             data = np.fromfile(f, dtype=np.int8)
         return data
 
+
     def load_labels_numpy(self, fname):
         with open(fname, 'rb') as f:
             annotations = f.read(8)
             data = np.fromfile(f, dtype=np.int8)
         return data
 
+
     def load_data(self):
         """
         Load the data from the files.
         """
         # files path
-        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
-        fname_train_imgs = os.path.join(path, 'train-images.idx3-ubyte')
-        fname_train_lbls = os.path.join(path, 'train-labels.idx1-ubyte')
-        fname_test_imgs = os.path.join(path, 't10k-images.idx3-ubyte')
-        fname_test_lbls = os.path.join(path, 't10k-labels.idx1-ubyte')
+        fname_train_imgs = os.path.join(self.data_path, 'train-images.idx3-ubyte')
+        fname_train_lbls = os.path.join(self.data_path, 'train-labels.idx1-ubyte')
+        fname_test_imgs = os.path.join(self.data_path, 't10k-images.idx3-ubyte')
+        fname_test_lbls = os.path.join(self.data_path, 't10k-labels.idx1-ubyte')
 
         # read files to memory
         train_images = self.load_images_numpy(fname_train_imgs)
@@ -68,14 +84,12 @@ class MNIST:
         size_test = 10000
 
         # reshape images
-        train_data = train_images.reshape(size_train, 1, 28, 28)
-        test_data = test_images.reshape(size_test, 1, 28, 28)
-
+        train_data = train_images.reshape(size_train, 28, 28)
+        test_data = test_images.reshape(size_test, 28, 28)
 
         # get object_id lists
         train_object_list = np.array([[i, train_labels[i]] for i in range(size_train)])
         test_object_list = np.array([[i, test_labels[i]] for i in range(size_test)])
-
 
         #return a dictionary
         return {
