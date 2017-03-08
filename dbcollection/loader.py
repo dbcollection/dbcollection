@@ -14,7 +14,6 @@ from .utils import convert_ascii_to_str
 class ManagerHDF5:
     """ HDF5 data loading class """
 
-
     def __init__(self, data_handler):
         """Initialize class.
 

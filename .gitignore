@@ -1,5 +1,5 @@
 /.vscode/
-/__pycache__/
+
 /dbcollection.egg-info/
 *.pyc
 test/.vscode/

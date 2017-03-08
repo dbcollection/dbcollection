@@ -8,7 +8,6 @@ import os
 import json
 from .cache import CacheManager
 from .loader import DatasetLoader
-from .postprocess import fetch_dataset_loader
 from . import dataset
 from . import utils
 
@@ -59,9 +58,6 @@ def load(name, task='default', verbose=True, is_test=False):
 
 
 def setup(name, data_dir=None, task_name=None,\
-          organize_list=None, \
-          select_data=None, filter_data=None, \
-          balance_sets=None, \
           is_download=True, verbose=True, is_test=False):
     """Setup a dataset's metadata and cache files on disk.
 
@@ -79,24 +75,12 @@ def setup(name, data_dir=None, task_name=None,\
         Name of the dataset.
     data_dir : str
         Path to store the data (if the data doesn't exist and the download flag is equal True).
-    save_name : str
-        Save a custom task with a specified name.
-        (usefull to create custom versions of the original).
     task_name : str
         Specify a specific task to save.
-	download : bool
+	is_download : bool
         Downloads data from the host to disk (if true).
 	verbose : bool
         Displays text information (if true).
-	organize_list : dict
-        Organizes the data w.r.t. to other fields. The data must be organized in a
-        dictionary with the following format: {"new_field_name":"field_name"}
-	select_data : dict
-        Selects indexes from 'field_name' equal to the selected value(s)
-        (removes objects ids without those 'field_name''s values)
-	filter_data : dict
-        Removes indexes from 'field_name' equal to the selected value(s)
-        (removes objects ids with those 'field_name''s values)
     is_test : bool
         Flag used for integration tests.
 
@@ -117,7 +101,7 @@ def setup(name, data_dir=None, task_name=None,\
         assert os.path.isdir(data_dir), 'Must insert a valid path: data_dir={}'.format(data_dir)
 
         if verbose:
-            print('==> (1/3) Download/setup {} data to disk...'.format(name))
+            print('==> (1/2) Download/setup {} data to disk...'.format(name))
 
         # get cache default save path
         cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
@@ -139,7 +123,7 @@ def setup(name, data_dir=None, task_name=None,\
         cache_manager.update(name, data_dir_, {}, keywords)
 
         if verbose:
-            print('==> (1/3) Download/setup complete.')
+            print('==> (1/2) Download/setup complete.')
 
     # get data + cache dir paths
     dset_paths = cache_manager.get_dataset_storage_paths(name)
@@ -147,18 +131,14 @@ def setup(name, data_dir=None, task_name=None,\
     # process dataset metadata
     if not cache_manager.is_task(name, 'default'):
         if verbose:
-            print('==> (2/3) Processing {} metadata files...'.format(name))
+            print('==> (2/2) Processing {} metadata files...'.format(name))
         cache_info = dataset.process(name, dset_paths['data_dir'], dset_paths['cache_dir'], verbose)
 
         # update dbcollection.json file with the new data
         cache_manager.update(name, cache_info['data_dir'], cache_info['tasks'], cache_info['keywords'])
 
         if verbose:
-            print('==> (2/3) Processing complete.')
-
-    # post-process
-    if verbose:
-        print('==> (3/3/) Skip post processing.')
+            print('==> (2/2) Processing complete.')
 
 
 def remove(name, delete_data=False, is_test=False):
