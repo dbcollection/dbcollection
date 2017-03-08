@@ -136,26 +136,26 @@ class Cifar10:
         file_name = os.path.join(self.cache_path, 'classification.h5')
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
-        # add data to the **default** group
-        fileh5.add_data('train/source', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        # add data to the **source** group
+        fileh5.add_data('train/source', 'classes', str2ascii(data["class_name"]), np.uint8)
         fileh5.add_data('train/source', 'data', data["train_data"], np.uint8)
         fileh5.add_data('train/source', 'labels', data["train_labels"], np.uint8)
 
-        fileh5.add_data('test/source', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('test/source', 'classes', str2ascii(data["class_name"]), np.uint8)
         fileh5.add_data('test/source', 'data', data["test_data"], np.uint8)
         fileh5.add_data('test/source', 'labels', data["test_labels"], np.uint8)
 
-        # add data to the **list** group
+        # add data to the **default** group
         # write data to the metadata file
-        fileh5.add_data('train/default', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('train/default', 'classes', str2ascii(data["class_name"]), np.uint8)
         fileh5.add_data('train/default', 'data', data["train_data"], np.uint8)
-        fileh5.add_data('train/default', 'object_id', data["train_object_id_list"], np.int32)
+        fileh5.add_data('train/default', 'object_ids', data["train_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
         fileh5.add_data('train/default', 'object_fields', str2ascii(data['object_fields']), np.uint8)
 
-        fileh5.add_data('test/default', 'class_name', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('test/default', 'classes', str2ascii(data["class_name"]), np.uint8)
         fileh5.add_data('test/default', 'data', data["test_data"], np.uint8)
-        fileh5.add_data('test/default', 'object_id', data["test_object_id_list"], np.int32)
+        fileh5.add_data('test/default', 'object_ids', data["test_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
         fileh5.add_data('test/default', 'object_fields', str2ascii(data['object_fields']), np.uint8)
 
