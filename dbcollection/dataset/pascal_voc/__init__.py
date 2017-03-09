@@ -1,3 +1,3 @@
-__all__ = ['voc_2007']
+__all__ = ['y2007']
 
 from . import *
