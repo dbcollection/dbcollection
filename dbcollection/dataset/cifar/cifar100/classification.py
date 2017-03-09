@@ -1,21 +1,18 @@
 """
-Cifar100 download/process functions.
+Cifar100 classification process functions.
 """
 
 
+from __future__ import print_function, division
 import os
 import numpy as np
-from ... import utils, storage
+from .... import utils, storage
 
 str2ascii = utils.convert_str_to_ascii
 
 
-class Cifar100:
-    """ Cifar100 preprocessing/downloading functions """
-
-    # download url
-    url = 'https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz'
-    md5_checksum = 'eb9058c3a382ffc7106e4002c42a8d85'
+class ClassificationTask:
+    """ Cifar100 Classification preprocessing functions """
 
     # extracted file names
     data_files = [
@@ -24,10 +21,7 @@ class Cifar100:
         "test",
     ]
 
-    # some keywords. These are used to classify datasets for easier
-    # categorization.
-    keywords = ['image_processing', 'classification']
-
+    # classes
     coarse_classes = [
         'aquatic mammals',
         'fish',
@@ -82,17 +76,6 @@ class Cifar100:
         self.cache_path = cache_path
         self.data_path = data_path
         self.verbose = verbose
-
-
-    def download(self, is_download=True):
-        """
-        Download and extract files to disk.
-        """
-        # download + extract data and remove temporary files
-        if is_download:
-            utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
-
-        return self.keywords
 
 
     def get_object_list(self, data, fine_labels, coarse_labels):
@@ -206,15 +189,8 @@ class Cifar100:
         return file_name
 
 
-    def process(self):
+    def run(self):
         """
-        Process metadata for all tasks
+        Run task processing.
         """
-        classification_filename = self.classification_metadata_process()
-
-        info_output = {
-            "default" : classification_filename,
-            "classification" : classification_filename,
-        }
-
-        return info_output, self.keywords
+        return self.classification_metadata_process()
