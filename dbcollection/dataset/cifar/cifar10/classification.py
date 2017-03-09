@@ -1,21 +1,18 @@
 """
-Cifar10 download/process functions.
+Cifar10 classification process functions.
 """
 
 
+from __future__ import print_function, division
 import os
 import numpy as np
-from ... import utils, storage
+from .... import utils, storage
 
 str2ascii = utils.convert_str_to_ascii
 
 
-class Cifar10:
-    """ Cifar10 preprocessing/downloading functions """
-
-    # download url
-    url = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
-    md5_checksum = 'c58f30108f718f92721af3b95e74349a'
+class ClassificationTask:
+    """ Cifar10 Classification preprocessing functions """
 
     # extracted file names
     data_files = [
@@ -28,10 +25,6 @@ class Cifar10:
         "test_batch"
     ]
 
-    # some keywords. These are used to classify datasets for easier
-    # categorization.
-    keywords = ['image_processing', 'classification']
-
 
     def __init__(self, data_path, cache_path, verbose=True):
         """
@@ -40,17 +33,6 @@ class Cifar10:
         self.cache_path = cache_path
         self.data_path = data_path
         self.verbose = verbose
-
-
-    def download(self, is_download=True):
-        """
-        Download and extract files to disk.
-        """
-        # download + extract data and remove temporary files
-        if is_download:
-            utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
-
-        return self.keywords
 
 
     def get_object_list(self, data, labels):
@@ -83,21 +65,27 @@ class Cifar10:
         train_batch5 = utils.load_pickle(os.path.join(data_path_, self.data_files[5]))
 
         # concatenate data
-        train_data = np.concatenate((
-            train_batch1['data'],
-            train_batch2['data'],
-            train_batch3['data'],
-            train_batch4['data'],
-            train_batch5['data']),
-            axis=0)
+        train_data = np.concatenate(
+            (
+                train_batch1['data'],
+                train_batch2['data'],
+                train_batch3['data'],
+                train_batch4['data'],
+                train_batch5['data']
+            ),
+            axis=0
+        )
 
-        train_labels = np.concatenate((
-            train_batch1['labels'],
-            train_batch2['labels'],
-            train_batch3['labels'],
-            train_batch4['labels'],
-            train_batch5['labels']),
-            axis=0)
+        train_labels = np.concatenate(
+            (
+                train_batch1['labels'],
+                train_batch2['labels'],
+                train_batch3['labels'],
+                train_batch4['labels'],
+                train_batch5['labels']
+            ),
+            axis=0
+        )
 
         train_data = train_data.reshape((50000, 3, 32, 32))
         train_data = np.transpose(train_data, (0,2,3,1)) # NxHxWxC
@@ -166,15 +154,8 @@ class Cifar10:
         return file_name
 
 
-    def process(self):
+    def run(self):
         """
-        Process metadata for all tasks
+        Run task processing.
         """
-        classification_filename = self.classification_metadata_process()
-
-        info_output = {
-            "default" : classification_filename,
-            "classification" : classification_filename,
-        }
-
-        return info_output, self.keywords
+        return self.classification_metadata_process()

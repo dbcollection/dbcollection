@@ -1,5 +1,5 @@
 """
-Pascal VOC 2007 download/process functions.
+Pascal VOC 2007 object detection processing functions.
 """
 
 
@@ -7,22 +7,11 @@ from __future__ import print_function, division
 import os
 import numpy as np
 import progressbar
-from ... import utils, storage
+from .... import utils, storage
 
 
-class PascalVOC2007:
-    """ Pascal VOC 2007 preprocessing/downloading class """
-
-    # download url
-    url = [
-        'http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar',
-        'http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar',
-    ]
-    md5_checksum = []
-
-    # some keywords. These are used to classify datasets for easier
-    # categorization.
-    keywords = ['image_processing', 'object_detection']
+class DetectionTask:
+    """ Pascal VOC 2007 object detection task class """
 
     # object classes
     classes = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car',  \
@@ -47,7 +36,7 @@ class PascalVOC2007:
         """
         Return the train/val/test/trainval set id lists.
         """
-        from .voc_2007_indexes import train_ids, val_ids, trainval_ids, test_ids
+        from .set_indexes import train_ids, val_ids, trainval_ids, test_ids
 
         self.ids = {
             'train' : train_ids,
@@ -55,17 +44,6 @@ class PascalVOC2007:
             'trainval' : trainval_ids,
             'test' : test_ids
         }
-
-
-    def download(self, is_download=True):
-        """
-        Download and extract files to disk.
-        """
-        # download + extract data and remove temporary files
-        if is_download:
-            utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
-
-        return self.keywords
 
 
     def set_add_data_source(self, hdf5_handler, id_list):
@@ -178,7 +156,7 @@ class PascalVOC2007:
         hdf5_handler['image_filenames'] = utils.convert_str_to_ascii(image_filenames)
         hdf5_handler['sizes'] = np.array(size, dtype=np.int32)
         hdf5_handler['classes'] = utils.convert_str_to_ascii(self.classes)
-        hdf5_handler['bbox'] = np.array(bbox, dtype=np.float)
+        hdf5_handler['bboxes'] = np.array(bbox, dtype=np.float)
         hdf5_handler['truncated'] = np.array(truncated, dtype=np.int32)
         hdf5_handler['difficult'] = np.array(difficult, dtype=np.int32)
         hdf5_handler['object_ids'] = np.array(object_id, dtype=np.int32)
@@ -197,7 +175,8 @@ class PascalVOC2007:
         fileh5 = storage.StorageHDF5(file_name, 'w')
 
         for set_name in self.ids.keys():
-            print('Processing set: {}'.format(set_name))
+            if self.verbose:
+                print('Processing set: {}'.format(set_name))
             # list of ids
             id_list = self.ids[set_name]
 
@@ -219,16 +198,8 @@ class PascalVOC2007:
         return file_name
 
 
-    def process(self):
+    def run(self):
         """
-        Process metadata for all tasks
+        Run task processing.
         """
-        # object detection data parsing
-        detection_filename = self.detection_metadata_process()
-
-        info_output = {
-            "default" : detection_filename,
-            "detection" : detection_filename
-        }
-
-        return info_output, self.keywords
+        return self.detection_metadata_process()
