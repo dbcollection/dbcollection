@@ -3,7 +3,8 @@ ImageNet ILSVRC 2012 download/process functions.
 """
 
 
-from .classification import ILSVRC2012Classification
+from __future__ import print_function
+from .classification import ClassificationTask
 
 
 class ILSVRC2012:
@@ -38,13 +39,13 @@ class ILSVRC2012:
         Process metadata for all tasks
         """
         # init tasks
-        self.tasks = {
-            "classification": ILSVRC2012Classification(self.data_path, self.cache_path, self.verbose)
+        tasks = {
+            "classification": ClassificationTask(self.data_path, self.cache_path, self.verbose)
         }
 
         # process all tasks
         info_output = {}
-        for task in self.tasks:
+        for task in tasks:
             if self.verbose:
                 print('Processing <{}> task:\n'.format(task))
             info_output[task] = task.run()

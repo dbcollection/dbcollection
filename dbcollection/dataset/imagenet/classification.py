@@ -1,8 +1,9 @@
 """
-ImageNet ILSVRC 2012 download/process functions.
+ImageNet ILSVRC 2012 classification process functions.
 """
 
 
+from __future__ import print_function, division
 import os
 import numpy as np
 import progressbar
@@ -11,7 +12,7 @@ from ... import utils, storage
 str2ascii = utils.convert_str_to_ascii
 
 
-class ILSVRC2012Classification:
+class ClassificationTask:
     """ Imagenet ILSVRC 2012 Classification preprocessing functions """
 
     def __init__(self, data_path, cache_path, verbose=True):
