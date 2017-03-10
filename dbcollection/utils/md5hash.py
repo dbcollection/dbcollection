@@ -3,7 +3,6 @@ MD5 hash string functions.
 """
 
 import hashlib
-from .file_load import open_read_file
 
 
 def get_hash_value(fname):
@@ -24,10 +23,9 @@ def get_hash_value(fname):
         None
     """
     try:
-        return hashlib.md5(open_read_file(fname, 'rb').read()).hexdigest()
+        return hashlib.md5(open(fname, 'rb').read()).hexdigest()
     except (IOError, OSError):
         raise IOError('Error opening file: {}'.format(fname))
-    #return hashlib.md5(open(fname, 'rb').read()).hexdigest()
 
 
 def check_file_integrity_md5(fname, md5sum):

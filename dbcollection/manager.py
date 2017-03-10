@@ -12,7 +12,7 @@ from . import dataset
 from . import utils
 
 
-def load(name, task='default', verbose=True, is_test=False):
+def load(name, task='default', is_test=False):
     """Returns a metadata loader of a dataset.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -23,19 +23,18 @@ def load(name, task='default', verbose=True, is_test=False):
         Name of the dataset.
     task : str
         Specify a specific task to load.
-	verbose : bool
-        Displays text information (if true).
     is_test : bool
         Flag used for integration tests.
 
     Returns
     -------
     DatasetLoader
-       Loader class.
+       Data loader class.
 
     Raises
     ------
-        None
+    Exception
+        If dataset is not available for loading.
     """
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
@@ -106,13 +105,13 @@ def setup(name, data_dir=None, task_name=None,\
         # get cache default save path
         cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
         if not os.path.exists(cache_save_path):
-            utils.create_dir(cache_save_path)
+            os.makedirs(cache_save_path)
 
         # get data directory to store the data
         if is_download:
             data_dir_ = os.path.join(data_dir, name) or os.path.join(cache_manager. default_data_dir, name)
             if not os.path.exists(data_dir_):
-                utils.create_dir(data_dir_)
+                os.makedirs(data_dir_)
         else:
             data_dir_ = data_dir
 

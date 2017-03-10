@@ -525,10 +525,10 @@ class CacheManager:
         ------
             None
         """
-        if self.exists_dataset(name):
+        try:
             data_dir = self.data['dataset'][name]["data_dir"]
-        else:
-            data_dir = os.path.join(self.default_data_dir, name, 'data')
+        except KeyError:
+            raise KeyError('Dataset name does not exist in cache: {}'.format(name))
 
         return {
             "data_dir": data_dir,

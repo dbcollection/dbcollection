@@ -28,52 +28,6 @@ class OSFunsTest(unittest.TestCase):
     Test class.
     """
 
-    @patch('os.makedirs', return_value=True)
-    def test_create_dir__succeed(self, mock_os):
-        """
-        Test dir creation.
-        """
-        # sample data
-        sample_dir_path = 'dir1/test/'
-        sample_verbose = False
-
-        # test removing a file
-        create_dir(sample_dir_path, sample_verbose)
-
-        # check if the mocked function was correctly called
-        self.assertTrue(mock_os.called, 'Function should have been called')
-
-        # check if the function was called with the right parameters
-        mock_os.assert_called_with(sample_dir_path)
-
-
-    @patch('os.makedirs', side_effect=OSError)
-    def test_create_dir__fail_raise_error(self, mock_os):
-        """
-        Test dir creation.
-        """
-        # sample data
-        sample_dir_path = 'dir1/test/'
-        sample_verbose = False
-
-        # test removing a file (should raise an exception)
-        with self.assertRaises(OSError):
-            create_dir(sample_dir_path, sample_verbose)
-
-        # check if the mocked function was correctly called
-        self.assertTrue(mock_os.called, 'Function should have been called')
-
-        # check if the function was called with the right parameters
-        mock_os.assert_called_with(sample_dir_path)
-
-
-    def test_delete_dir(self):
-        """
-        Test deleting a directory
-        """
-        self.fail()
-    
-
     @patch('os.remove')
     def test_remove_file__succeed(self, mock_remove):
         """
@@ -83,7 +37,7 @@ class OSFunsTest(unittest.TestCase):
         sample_fname = 'test'
 
         # remove a dummy file
-        remove_file(sample_fname)
+        delete_file(sample_fname)
 
         # check if the mocked function was correctly called
         self.assertTrue(mock_remove.called, 'Function should have been called')
@@ -102,7 +56,7 @@ class OSFunsTest(unittest.TestCase):
 
         # remove a dummy file
         with self.assertRaises(OSError):
-            remove_file(sample_fname)
+            delete_file(sample_fname)
 
         # check if the mocked function was correctly called
         self.assertTrue(mock_remove.called, 'Function should have been called')

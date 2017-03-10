@@ -267,7 +267,7 @@ class CacheManagerTest(unittest.TestCase):
         mock_del_category.assert_called_with(dataset_name)
         mock_write.assert_called_with(self.cache_manager.data)
 
-    
+
 
     def test_check_dataset_name__exists(self):
         """
@@ -474,8 +474,8 @@ class CacheManagerTest(unittest.TestCase):
         self.assertEqual(res['cache_dir'], reference_dirs['cache_dir'], 'Should be equal (cache_dir)')
 
 
-    @patch('__main__.CacheManager.exists_dataset', return_value=False)
-    def test_get_dataset_storage_paths__invalid_dataset(self, mock_exists):
+
+    def test_get_dataset_storage_paths__invalid_dataset(self):
         """
         Test get the cache/data paths for an invalid dataset.
         """
@@ -485,15 +485,8 @@ class CacheManagerTest(unittest.TestCase):
         data_dir = os.path.join(self.cache_manager.default_data_dir, name, 'data')
 
         # get path
-        res = self.cache_manager.get_dataset_storage_paths(name)
-
-        # check if the mocked function was called
-        self.assertTrue(mock_exists.called, 'error calling: mock_exists')
-        mock_exists.assert_called_with(name)
-
-        # check if the paths are the same
-        self.assertEqual(res["cache_dir"], cache_dir, 'Paths should be equal')
-        self.assertEqual(res["data_dir"], data_dir, 'Paths should be equal')
+        with self.assertRaises(KeyError):
+            res = self.cache_manager.get_dataset_storage_paths(name)
 
 
     def test_get_cache_path__valid_dataset_valid_task(self):

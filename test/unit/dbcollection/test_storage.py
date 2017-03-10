@@ -10,15 +10,14 @@ dbcollection/storage.py unit testing.
 import os
 import sys
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
-sys.path.append(lib_path)
-from dbcollection import storage
-
 import unittest
 from unittest import mock
 from unittest.mock import patch, mock_open
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
+sys.path.append(lib_path)
+from dbcollection import storage
 
 #-----------------------
 # Unit Test definitions
@@ -29,7 +28,7 @@ class StorageHDF5Test(unittest.TestCase):
     Test class.
     """
 
-    @patch("__main__.storage.StorageHDF5.open_file")
+    @patch("__main__.storage.StorageHDF5.open")
     @patch("__main__.storage.StorageHDF5.add_group")
     def setUp(self, mock_group, mock_file):
         """
@@ -78,7 +77,7 @@ class StorageHDF5Test(unittest.TestCase):
         mock_h5file.return_value = True
 
         # open the file
-        res = self.hdf5storage.open_file(sample_file_name, sample_mode)
+        res = self.hdf5storage.open(sample_file_name, sample_mode)
 
         # check if the file open successfuly
         self.assertTrue(res, 'Should have given True')

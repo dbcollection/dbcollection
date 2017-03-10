@@ -8,8 +8,6 @@ import os
 import urllib
 import wget
 
-from .os_funs import create_dir
-
 
 def download_single_file_progressbar(url, file_save_name):
     """Download a file (displays a progress bar).
@@ -87,7 +85,7 @@ def download_file(url, dir_path, fname_save, verbose=False):
 
     # check if the path exists
     if not os.path.exists(dir_path):
-        create_dir(dir_path, verbose)
+        os.makedirs(dir_path)
 
     # download the file
     if verbose:

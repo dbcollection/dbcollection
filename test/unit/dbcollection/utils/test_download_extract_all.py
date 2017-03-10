@@ -27,11 +27,11 @@ class DownloadExtractTest(unittest.TestCase):
     Test class.
     """
 
-    @patch('__main__.utils.url_get_filename')
     @patch('__main__.utils.download_file')
     @patch('__main__.utils.extract_file')
-    @patch('__main__.utils.remove_file')
-    def test_download_extract_all__succeed(self, mock_remove, mock_extract, mock_download, mock_url):
+    @patch('__main__.utils.delete_file')
+    @patch('os.path.exists', return_value=True)
+    def test_download_extract_all__succeed(self, mock_path, mock_remove, mock_extract, mock_download):
         """
         Test download+extract all files
         """
@@ -47,18 +47,17 @@ class DownloadExtractTest(unittest.TestCase):
                                    sample_clean_cache, sample_verbose)
 
         # check if the mocked functions were called properly
-        self.assertTrue(mock_url.called, "Failed to mock utils.url_get_filename().")
         self.assertTrue(mock_download.called, "Failed to mock utils.download_file().")
         self.assertTrue(mock_extract.called, "Failed to mock utils.extract_file().")
         self.assertFalse(mock_remove.called, "Failed to mock utils.remove_file().")
 
 
-    @patch('__main__.utils.url_get_filename')
     @patch('__main__.utils.download_file')
     @patch('__main__.utils.check_file_integrity_md5')
     @patch('__main__.utils.extract_file')
-    @patch('__main__.utils.remove_file')
-    def test_download_extract_all__succeed_md5(self, mock_remove, mock_extract, mock_md5, mock_download, mock_url):
+    @patch('__main__.utils.delete_file')
+    @patch('os.path.exists', return_value=True)
+    def test_download_extract_all__succeed_md5(self, mock_path, mock_remove, mock_extract, mock_md5, mock_download):
         """
         Test download+extract all files
         """
@@ -76,19 +75,18 @@ class DownloadExtractTest(unittest.TestCase):
         utils.download_extract_all(sample_urls, sample_md5sum, sample_dir_save, sample_clean_cache, sample_verbose)
 
         # check if the mocked functions were called properly
-        self.assertTrue(mock_url.called, "Failed to mock utils.url_get_filename().")
         self.assertTrue(mock_download.called, "Failed to mock utils.download_file().")
         self.assertTrue(mock_md5.called, "Failed to mock utils.check_file_integrity_md5().")
         self.assertTrue(mock_extract.called, "Failed to mock utils.extract_file().")
         self.assertFalse(mock_remove.called, "Failed to mock utils.remove_file().")
 
 
-    @patch('__main__.utils.url_get_filename')
     @patch('__main__.utils.download_file')
     @patch('__main__.utils.check_file_integrity_md5')
     @patch('__main__.utils.extract_file')
-    @patch('__main__.utils.remove_file')
-    def test_download_extract_all__fail_md5(self, mock_remove, mock_extract, mock_md5, mock_download, mock_url):
+    @patch('__main__.utils.delete_file')
+    @patch('os.path.exists', return_value=True)
+    def test_download_extract_all__fail_md5(self, mock_path,  mock_remove, mock_extract, mock_md5, mock_download):
         """
         Test download+extract all files
         """
@@ -108,7 +106,6 @@ class DownloadExtractTest(unittest.TestCase):
                                    sample_clean_cache, sample_verbose)
 
         # check if the mocked functions were called properly
-        self.assertTrue(mock_url.called, "Failed to mock utils.url_get_filename().")
         self.assertTrue(mock_download.called, "Failed to mock utils.download_file().")
         self.assertFalse(mock_extract.called, "Failed to mock utils.extract_file().")
         self.assertFalse(mock_remove.called, "Failed to mock utils.remove_file().")

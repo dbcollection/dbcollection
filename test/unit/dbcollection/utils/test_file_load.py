@@ -41,7 +41,7 @@ class FileLoadTest(unittest.TestCase):
 
         # check if the output is true
         self.assertTrue(res, 'Should have given true')
-    
+
 
     @patch('__main__.open',side_effect=IOError)
     def test_open_read_file__fail(self, mock_file):
@@ -115,7 +115,7 @@ class FileLoadTest(unittest.TestCase):
 
         # load a json file
         res = load_json(sample_file_name)
-    
+
         # check if the output is True
         self.assertTrue(res, 'Should have given True')
 
@@ -134,7 +134,7 @@ class FileLoadTest(unittest.TestCase):
 
         # load a json file
         res = load_pickle(sample_file_name)
-    
+
         # check if the output is True
         self.assertTrue(res, 'Should have given True')
 

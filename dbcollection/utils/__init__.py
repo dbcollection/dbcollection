@@ -44,7 +44,7 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
 
     # check if the save directory exists
     if not os.path.exists(dir_save):
-        create_dir(dir_save)
+        os.makedirs(dir_save)
 
     # download + extract data and remove temporary files
     for i, url in enumerate(urls):

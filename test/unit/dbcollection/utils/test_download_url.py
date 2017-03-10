@@ -28,23 +28,6 @@ class URLDownloadTest(unittest.TestCase):
     Test class.
     """
 
-    def test_url_get_filename(self):
-        """
-        Test extracting a filename from a string.
-        """
-        # sample data
-        sample_file_name = 'myfile'
-        sample_url = 'http://my.url.com/' + sample_file_name
-        sample_dir_save = 'dir/test'
-        reference_res = os.path.join(sample_dir_save, sample_file_name)
-
-        # get url file name + path
-        res = url_get_filename(sample_url, sample_dir_save)
-
-        # check if the result matches with the reference path
-        self.assertEqual(res, reference_res, 'Strings should be equal')
-
-
     @patch('__main__.os.path.exists')
     @patch('__main__.download_single_file_progressbar')
     @patch('__main__.download_single_file_nodisplay')

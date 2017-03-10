@@ -18,38 +18,6 @@ img_extensions = [
 ]
 
 
-def create_dir(dir_path, verbose=False):
-    """Create directory if not existing.
-
-    Parameters
-    ----------
-    dir_path : str
-        Directory path on disk to create the new directory.
-    verbose : bool
-        Prints a message to the screen if True.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-    OSError
-        If directory cannot be created.
-    """
-    try:
-        os.makedirs(dir_path)
-    except OSError as err:
-        if err.errno != errno.EEXIST: # errno.ENOENT = no such file or directory
-            raise OSError('Unable to create dir: {}'.format(dir_path))
-
-        if verbose:
-            print('Skip creating directory (already exists on disk).')
-    else:
-        if verbose:
-            print('Created directory: {}'.format(dir_path))
-
-
 def delete_dir(dir_path, verbose=False):
     """Delete a directory and its contents.
 
@@ -233,7 +201,8 @@ def construct_dataset_from_dir(dir_path, verbose=True):
             continue
 
         # fetch all data for this set folder
-        print('Processing dir: {}'.format(dir_set))
+        if verbose:
+            print('Processing dir: {}'.format(dir_set))
         dataset[set_name] = construct_set_from_dir(dir_set)
 
     return dataset
