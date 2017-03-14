@@ -9,6 +9,7 @@ From personal experience, working with different datasets under different system
 ## What problems does it solve
 
 This project tries to tackle some of the problems that I have been facing:
+
 - increase code reusage when switching between systems (Windows, Linux)
 - easily write scripts to download/process datasets.
 - setup the datasets once, avoiding repetitive preprocessing steps when starting my code
@@ -20,6 +21,7 @@ This project tries to tackle some of the problems that I have been facing:
 This module uses python for writting scripts for data download and metadata processing. The reason for using python was simple: it provides a simple, easy, fast and portable format to write code and it is considered the "lingua franca" in computer science.
 
 The processed metadata is stored to disk by using the HDF5 file format. This format provides some key features:
+
 - portable across languages and operating systems;
 - fast access to data;
 - easy to use;
@@ -45,6 +47,7 @@ The `dbcollection` manager API creates a folder in your home dir named `~/dbcoll
 ## requirements
 
 This package requires:
+
 - Python (>=2.7 or >=3.5)
 - Numpy (>=1.11.1)
 - h5py (>=2.6.0)
