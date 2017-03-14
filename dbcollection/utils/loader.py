@@ -2,9 +2,8 @@
 Dataset loader class.
 """
 
-
-from .storage import StorageHDF5
-from .utils import convert_ascii_to_str
+from dbcollection.utils.storage import StorageHDF5
+from dbcollection.utils.string_ascii import convert_ascii_to_str
 
 
 #---------------------------------------------------------

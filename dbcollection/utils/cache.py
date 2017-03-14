@@ -25,13 +25,9 @@ class CacheManager:
         # setup cache paths
         self.setup_paths(is_test)
 
-        # check if the cache directory exists
-        if not os.path.exists(self.default_cache_dir):
-            os.makedirs(self.default_cache_dir)
-
         # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
-            print('Cache file not found. Generated the following file on disk: {}'.format(self.cache_fname))
+            print('Cache file not found. Generating the following file on disk: {}'.format(self.cache_fname))
             self.create_cache_file_disk(self.cache_fname)
 
         # load cache data file
@@ -42,7 +38,7 @@ class CacheManager:
         """Setup the cache/data directories for storing the cache file.
 
         This returns two paths for the default cache directory for storing the cache data,
-        and the filepath for the db_cache_info.json file where the metadata for all datasets
+        and the filepath for the dbcollection.json file where the metadata for all datasets
         is stored.
 
         This paths were designed to work on windows, linx, mac, etc.
@@ -61,16 +57,33 @@ class CacheManager:
             None
         """
         # cache directory path (should work for all platforms)
+        home_dir = os.path.expanduser("~")
         if is_test:
-            self.default_cache_dir = os.path.join(os.path.expanduser("~"), 'tmp', 'dbcollection')
+            self.default_cache_dir = os.path.join(home_dir, 'tmp', 'dbcollection')
         else:
-            self.default_cache_dir = os.path.join(os.path.expanduser("~"), 'dbcollection')
+            self.default_cache_dir = os.path.join(home_dir, 'dbcollection')
 
         # cache file path
-        self.cache_fname = os.path.join(self.default_cache_dir, 'db_cache_info.json')
+        self.cache_fname = os.path.join(home_dir, 'dbcollection.json')
 
-        # default data path
-        self.default_data_dir = os.path.join(os.path.expanduser("~"), 'db_data')
+
+    def create_root_dir(self):
+        """Create the main dir to store all metadata files.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        if not os.path.exists(self.default_cache_dir):
+            os.makedirs(self.default_cache_dir)
 
 
     def clear(self):
@@ -189,8 +202,7 @@ class CacheManager:
         """
         return {
             "info": {
-                "default_cache_dir": self.default_cache_dir,
-		        "default_data_dir": self.default_data_dir
+                "default_cache_dir": self.default_cache_dir
             },
             "dataset": {},
             "category": {}

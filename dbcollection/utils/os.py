@@ -49,30 +49,6 @@ def delete_dir(dir_path, verbose=False):
             print('Directory deleted successfully.')
 
 
-def delete_file(fname):
-    """Check if the path exists and remove the file.
-
-    Parameters
-    ----------
-    fname : str
-        File name + path on disk.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-    OSError
-        If file cannot be removed.
-    """
-    try:
-        os.remove(fname)
-    except OSError as err:
-        if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
-            raise
-
-
 def dir_get_size(dir_path):
     """Returns the number of files and subfolders in a directory.
 

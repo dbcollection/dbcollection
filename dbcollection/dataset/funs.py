@@ -5,7 +5,7 @@ Functions to download/process a dataset using a constructor.
 
 from __future__ import print_function
 import os
-from .list_datasets import datasets
+from dbcollection.dataset.list_datasets import datasets
 
 
 def fetch_dataset_constructor(name):
@@ -126,7 +126,7 @@ def download(name, data_dir, cache_dir, is_download=True, verbose=True):
     dataset_loader = setup_dataset_constructor(name, data_dir, cache_dir, verbose, True)
 
     # download data
-    return dataset_loader.download(is_download)
+    return dataset_loader.download()
 
 
 def process(name, data_dir, cache_dir, verbose):

@@ -5,10 +5,13 @@ All available datasets must be added in this file.
 """
 
 
+#---------------------------------------------------------
+# List of image processing datasets
+#---------------------------------------------------------
+
 from . import cifar, pascal_voc, mnist, imagenet
 
-
-datasets = {
+classification_list = {
     "cifar10" : cifar.cifar10.Cifar10,
     "cifar100" : cifar.cifar100.Cifar100,
     "ilsvrc2012": imagenet.ilsvrc2012.ILSVRC2012,
@@ -16,4 +19,13 @@ datasets = {
     "pascal_voc_2007" : pascal_voc.y2007.PascalVOC2007
 }
 
+
+#---------------------------------------------------------
+# MAIN list
+#---------------------------------------------------------
+
+datasets = {}
+datasets.update(classification_list) # image processing
+
+# list of all dataset's names
 available_datasets = list(datasets.keys())
