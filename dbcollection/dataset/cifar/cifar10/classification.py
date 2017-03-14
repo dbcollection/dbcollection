@@ -6,12 +6,13 @@ Cifar10 classification process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
-from .... import utils, storage
 
-str2ascii = utils.convert_str_to_ascii
+from dbcollection.utils.storage import StorageHDF5
+from dbcollection.utils.file_load import load_pickle
+from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
-class ClassificationTask:
+class Classification:
     """ Cifar10 Classification preprocessing functions """
 
     # extracted file names
@@ -55,14 +56,14 @@ class ClassificationTask:
         data_path_ = os.path.join(self.data_path, 'cifar-10-batches-py')
 
         # load classes name file
-        class_names = utils.load_pickle(os.path.join(data_path_, self.data_files[0]))
+        class_names = load_pickle(os.path.join(data_path_, self.data_files[0]))
 
         # load train data files
-        train_batch1 = utils.load_pickle(os.path.join(data_path_, self.data_files[1]))
-        train_batch2 = utils.load_pickle(os.path.join(data_path_, self.data_files[2]))
-        train_batch3 = utils.load_pickle(os.path.join(data_path_, self.data_files[3]))
-        train_batch4 = utils.load_pickle(os.path.join(data_path_, self.data_files[4]))
-        train_batch5 = utils.load_pickle(os.path.join(data_path_, self.data_files[5]))
+        train_batch1 = load_pickle(os.path.join(data_path_, self.data_files[1]))
+        train_batch2 = load_pickle(os.path.join(data_path_, self.data_files[2]))
+        train_batch3 = load_pickle(os.path.join(data_path_, self.data_files[3]))
+        train_batch4 = load_pickle(os.path.join(data_path_, self.data_files[4]))
+        train_batch5 = load_pickle(os.path.join(data_path_, self.data_files[5]))
 
         # concatenate data
         train_data = np.concatenate(
@@ -92,7 +93,7 @@ class ClassificationTask:
         train_object_list = self.get_object_list(train_data, train_labels)
 
         # load test data file
-        test_batch = utils.load_pickle(os.path.join(data_path_, self.data_files[6]))
+        test_batch = load_pickle(os.path.join(data_path_, self.data_files[6]))
 
         test_data = test_batch['data'].reshape(10000, 3, 32, 32)
         test_data = np.transpose(test_data, (0,2,3,1)) # NxHxWxC
@@ -122,30 +123,30 @@ class ClassificationTask:
 
         # create/open hdf5 file with subgroups for train/val/test
         file_name = os.path.join(self.cache_path, 'classification.h5')
-        fileh5 = storage.StorageHDF5(file_name, 'w')
+        fileh5 = StorageHDF5(file_name, 'w')
 
         # add data to the **source** group
-        fileh5.add_data('train/source', 'classes', str2ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('train/source', 'data', data["train_data"], np.uint8)
-        fileh5.add_data('train/source', 'labels', data["train_labels"], np.uint8)
+        fileh5.add_data('source/train', 'classes', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('source/train', 'data', data["train_data"], np.uint8)
+        fileh5.add_data('source/train', 'labels', data["train_labels"], np.uint8)
 
-        fileh5.add_data('test/source', 'classes', str2ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('test/source', 'data', data["test_data"], np.uint8)
-        fileh5.add_data('test/source', 'labels', data["test_labels"], np.uint8)
+        fileh5.add_data('source/test', 'classes', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('source/test', 'data', data["test_data"], np.uint8)
+        fileh5.add_data('source/test', 'labels', data["test_labels"], np.uint8)
 
         # add data to the **default** group
         # write data to the metadata file
-        fileh5.add_data('train/default', 'classes', str2ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('train/default', 'data', data["train_data"], np.uint8)
-        fileh5.add_data('train/default', 'object_ids', data["train_object_id_list"], np.int32)
+        fileh5.add_data('default/train', 'classes', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('default/train', 'data', data["train_data"], np.uint8)
+        fileh5.add_data('default/train', 'object_ids', data["train_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('train/default', 'object_fields', str2ascii(data['object_fields']), np.uint8)
+        fileh5.add_data('default/train', 'object_fields', str2ascii(data['object_fields']), np.uint8)
 
-        fileh5.add_data('test/default', 'classes', str2ascii(data["class_name"]), np.uint8)
-        fileh5.add_data('test/default', 'data', data["test_data"], np.uint8)
-        fileh5.add_data('test/default', 'object_ids', data["test_object_id_list"], np.int32)
+        fileh5.add_data('default/test', 'classes', str2ascii(data["class_name"]), np.uint8)
+        fileh5.add_data('default/test', 'data', data["test_data"], np.uint8)
+        fileh5.add_data('default/test', 'object_ids', data["test_object_id_list"], np.int32)
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('test/default', 'object_fields', str2ascii(data['object_fields']), np.uint8)
+        fileh5.add_data('default/test', 'object_fields', str2ascii(data['object_fields']), np.uint8)
 
         # close file
         fileh5.close()

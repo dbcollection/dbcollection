@@ -1,19 +1,14 @@
 """
-Cifar100 download/process functions.
+ImageNet ILSVRC 2012 download/process functions.
 """
 
 
-from __future__ import print_function, division
-from .... import utils
-from .classification import ClassificationTask
+from __future__ import print_function
+from .classification import Classification
 
 
-class Cifar100:
-    """ Cifar100 preprocessing/downloading functions """
-
-    # download url
-    url = 'https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz'
-    md5_checksum = 'eb9058c3a382ffc7106e4002c42a8d85'
+class ILSVRC2012:
+    """ Imagenet ILSVRC 2012 preprocessing/downloading functions """
 
     # some keywords. These are used to classify datasets for easier
     # categorization.
@@ -29,13 +24,12 @@ class Cifar100:
         self.verbose = verbose
 
 
-    def download(self, is_download=True):
+    def download(self):
         """
         Download and extract files to disk.
         """
-        # download + extract data and remove temporary files
-        if is_download:
-            utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
+        if self.verbose:
+            print('Please download this dataset from the official source: www.image-net.org')
 
         return self.keywords
 
@@ -46,7 +40,7 @@ class Cifar100:
         """
         # init tasks
         tasks = {
-            "classification": ClassificationTask(self.data_path, self.cache_path, self.verbose)
+            "classification": Classification(self.data_path, self.cache_path, self.verbose)
         }
 
         # process all tasks

@@ -1,3 +1,1 @@
-__all__ = ['mnist']
-
-from . import *
+from .main import MNIST

@@ -7,12 +7,14 @@ from __future__ import print_function, division
 import os
 import numpy as np
 import progressbar
-from ... import utils, storage
 
-str2ascii = utils.convert_str_to_ascii
+from dbcollection.utils.storage import StorageHDF5
+from dbcollection.utils.file_load import load_txt, load_matlab
+from dbcollection.utils.os import construct_set_from_dir, dir_get_size
+from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
-class ClassificationTask:
+class Classification:
     """ Imagenet ILSVRC 2012 Classification preprocessing functions """
 
     def __init__(self, data_path, cache_path, verbose=True):
@@ -44,7 +46,7 @@ class ClassificationTask:
         """
         Load ILSVRC2012 ground truth indexes.
         """
-        return utils.load_txt(self.get_file_path(self.fname_val_groundtruth_idx))
+        return load_txt(self.get_file_path(self.fname_val_groundtruth_idx))
 
 
     def load_annotations_mat(self):
@@ -52,7 +54,7 @@ class ClassificationTask:
         Load ILSVRC2012 annotations (.mat file).
         """
         # load annotation file
-        return utils.load_matlab(self.get_file_path(self.fname_metadata))
+        return load_matlab(self.get_file_path(self.fname_metadata))
 
 
     def get_annotations(self):
@@ -200,7 +202,7 @@ class ClassificationTask:
         #============
         if self.verbose:
             print('\n==> Fetch train set data from dir: {}'.format(train_dir))
-        train_data = utils.construct_set_from_dir(train_dir, self.verbose)
+        train_data = construct_set_from_dir(train_dir, self.verbose)
         if self.verbose:
             print('\n==> Process train set data... ')
         train_processed = self.process_set(train_data)
@@ -211,9 +213,9 @@ class ClassificationTask:
         # check if the val dir is in the original format or in a converted format
         if self.verbose:
             print('\n==> Fetch val set data from dir: {}'.format(val_dir))
-        _, folders = utils.dir_get_size(val_dir)
+        _, folders = dir_get_size(val_dir)
         if folders > 0:
-            val_data = utils.construct_set_from_dir(val_dir, self.verbose)
+            val_data = construct_set_from_dir(val_dir, self.verbose)
         else:
             val_data = self.fetch_val_dir_data(val_dir)
         if self.verbose:
@@ -247,16 +249,16 @@ class ClassificationTask:
         # cycle all classes from the data with the original annotations
         for cname in data_:
             for i, filename in enumerate(data_[cname]):
-                handler.add_data(set_name + '/source/images/' + cname, str(i), str2ascii(filename), np.uint8)
+                handler.add_data('source/' + set_name +'/images/' + cname, str(i), str2ascii(filename), np.uint8)
 
             # update progress bar
             if self.verbose:
                 counter += 1
                 prgbar.update(counter)
 
-        handler.add_data(set_name + '/source/', "classes", data[set_name]["flattened"]["class_names"])
-        handler.add_data(set_name + '/source/', "labels", data[set_name]["flattened"]["labels"])
-        handler.add_data(set_name + '/source/', "descriptions", data[set_name]["flattened"]["descriptions"])
+        handler.add_data('source/' + set_name, "classes", data[set_name]["flattened"]["class_names"])
+        handler.add_data('source/' + set_name, "labels", data[set_name]["flattened"]["labels"])
+        handler.add_data('source/' + set_name, "descriptions", data[set_name]["flattened"]["descriptions"])
 
 
     def classification_metadata_process(self):
@@ -272,20 +274,20 @@ class ClassificationTask:
         file_name = os.path.join(self.cache_path, 'classification.h5')
         if self.verbose:
             print('\nWritting data to file: {}'.format(file_name))
-        fileh5 = storage.StorageHDF5(file_name, 'w')
+        fileh5 = StorageHDF5(file_name, 'w')
 
         if self.verbose:
             print('==> Writing train set data...')
 
         # add data to the **list** group
-        fileh5.add_data('train/default', 'classes', data["train"]["flattened"]["class_names"], np.uint8)
-        fileh5.add_data('train/default', 'labels', data["train"]["flattened"]["labels"], np.uint8)
-        fileh5.add_data('train/default', 'descriptions', data["train"]["flattened"]["descriptions"], np.uint8)
-        fileh5.add_data('train/default', 'image_filenames', data["train"]["flattened"]["image_filenames"], np.uint8)
-        fileh5.add_data('train/default', 'class_ids', data["train"]["flattened"]["class_ids"])
-        fileh5.add_data('train/default', 'object_ids', data["train"]["flattened"]["object_ids"])
+        fileh5.add_data('default/train', 'classes', data["train"]["flattened"]["class_names"], np.uint8)
+        fileh5.add_data('default/train', 'labels', data["train"]["flattened"]["labels"], np.uint8)
+        fileh5.add_data('default/train', 'descriptions', data["train"]["flattened"]["descriptions"], np.uint8)
+        fileh5.add_data('default/train', 'image_filenames', data["train"]["flattened"]["image_filenames"], np.uint8)
+        fileh5.add_data('default/train', 'class_ids', data["train"]["flattened"]["class_ids"])
+        fileh5.add_data('default/train', 'object_ids', data["train"]["flattened"]["object_ids"])
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('train/default', 'object_fields', data["train"]["flattened"]['object_fields'], np.uint8)
+        fileh5.add_data('default/train', 'object_fields', data["train"]["flattened"]['object_fields'], np.uint8)
 
         # add data to the **source** group
         self.hdf5_add_data_source(fileh5, data, "train")
@@ -294,14 +296,14 @@ class ClassificationTask:
             print('\n==> Writing val set data...')
 
         # add data to the **list** group
-        fileh5.add_data('val/default', 'classes', data["val"]["flattened"]["class_names"], np.uint8)
-        fileh5.add_data('val/default', 'labels', data["val"]["flattened"]["labels"], np.uint8)
-        fileh5.add_data('val/default', 'descriptions', data["val"]["flattened"]["descriptions"], np.uint8)
-        fileh5.add_data('val/default', 'image_filenames', data["val"]["flattened"]["image_filenames"], np.uint8)
-        fileh5.add_data('val/default', 'class_ids', data["val"]["flattened"]["class_ids"])
-        fileh5.add_data('val/default', 'object_ids', data["val"]["flattened"]["object_ids"])
+        fileh5.add_data('default/val', 'classes', data["val"]["flattened"]["class_names"], np.uint8)
+        fileh5.add_data('default/val', 'labels', data["val"]["flattened"]["labels"], np.uint8)
+        fileh5.add_data('default/val', 'descriptions', data["val"]["flattened"]["descriptions"], np.uint8)
+        fileh5.add_data('default/val', 'image_filenames', data["val"]["flattened"]["image_filenames"], np.uint8)
+        fileh5.add_data('default/val', 'class_ids', data["val"]["flattened"]["class_ids"])
+        fileh5.add_data('default/val', 'object_ids', data["val"]["flattened"]["object_ids"])
         # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('val/default', 'object_fields', data["val"]["flattened"]['object_fields'], np.uint8)
+        fileh5.add_data('default/val', 'object_fields', data["val"]["flattened"]['object_fields'], np.uint8)
 
         # add data to the **source** group
         self.hdf5_add_data_source(fileh5, data, "val")

@@ -1,23 +1,21 @@
 """
-Cifar10 download/process functions.
+MNIST download/process functions.
 """
 
 
 from __future__ import print_function, division
-from .... import utils
-from .classification import ClassificationTask
+import os
+import shutil
+
+from .classification import Classification
 
 
-class Cifar10:
+class MNIST:
     """ Cifar10 preprocessing/downloading functions """
-
-    # download url
-    url = 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz'
-    md5_checksum = 'c58f30108f718f92721af3b95e74349a'
 
     # some keywords. These are used to classify datasets for easier
     # categorization.
-    keywords = ['image_processing', 'classification']
+    keywords = ['classification']
 
 
     def __init__(self, data_path, cache_path, verbose=True):
@@ -33,9 +31,17 @@ class Cifar10:
         """
         Download and extract files to disk.
         """
-        # download + extract data and remove temporary files
-        if is_download:
-            utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
+        # copy files to the specified data directory
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data')
+        fname_train_imgs = os.path.join(path, 'train-images.idx3-ubyte')
+        fname_train_lbls = os.path.join(path, 'train-labels.idx1-ubyte')
+        fname_test_imgs = os.path.join(path, 't10k-images.idx3-ubyte')
+        fname_test_lbls = os.path.join(path, 't10k-labels.idx1-ubyte')
+
+        shutil.copy2(fname_train_imgs, self.data_path)
+        shutil.copy2(fname_train_lbls, self.data_path)
+        shutil.copy2(fname_test_imgs, self.data_path)
+        shutil.copy2(fname_test_lbls, self.data_path)
 
         return self.keywords
 
@@ -46,7 +52,7 @@ class Cifar10:
         """
         # init tasks
         tasks = {
-            "classification": ClassificationTask(self.data_path, self.cache_path, self.verbose)
+            "classification": Classification(self.data_path, self.cache_path, self.verbose)
         }
 
         # process all tasks

@@ -1,1 +1,1 @@
-from .cifar100 import Cifar100
+from .main import Cifar100

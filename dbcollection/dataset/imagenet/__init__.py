@@ -1,3 +1,1 @@
-__all__ = ['ilsvrc2012']
-
-from . import *
+from .main import ILSVRC2012

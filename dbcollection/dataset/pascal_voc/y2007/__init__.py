@@ -1,1 +1,1 @@
-from .voc_2007 import PascalVOC2007
+from .main import PascalVOC2007

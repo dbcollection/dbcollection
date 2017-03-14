@@ -7,10 +7,13 @@ from __future__ import print_function, division
 import os
 import numpy as np
 import progressbar
-from .... import utils, storage
+
+from dbcollection.utils.storage import StorageHDF5
+from dbcollection.utils.file_load import load_xml
+from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
-class DetectionTask:
+class Detection:
     """ Pascal VOC 2007 object detection task class """
 
     # object classes
@@ -74,7 +77,7 @@ class DetectionTask:
             image_filename = os.path.join(self.images_path, fileid + '.jpg')
 
             # load annotation
-            annotation = utils.load_xml(annot_filename)
+            annotation = load_xml(annot_filename)
 
             # add data to the set
             root_path = '{}/'.format(i)
@@ -125,7 +128,7 @@ class DetectionTask:
             image_filename = os.path.join(self.images_path, fileid + '.jpg')
 
             # load annotation
-            annotation = utils.load_xml(annot_filename)
+            annotation = load_xml(annot_filename)
 
             image_filenames.append(image_filename)
 
@@ -153,14 +156,14 @@ class DetectionTask:
                 prgbar.update(i)
 
         # add data to the hdf5 file
-        hdf5_handler['image_filenames'] = utils.convert_str_to_ascii(image_filenames)
+        hdf5_handler['image_filenames'] = str2ascii(image_filenames)
         hdf5_handler['sizes'] = np.array(size, dtype=np.int32)
-        hdf5_handler['classes'] = utils.convert_str_to_ascii(self.classes)
+        hdf5_handler['classes'] = str2ascii(self.classes)
         hdf5_handler['bboxes'] = np.array(bbox, dtype=np.float)
         hdf5_handler['truncated'] = np.array(truncated, dtype=np.int32)
         hdf5_handler['difficult'] = np.array(difficult, dtype=np.int32)
         hdf5_handler['object_ids'] = np.array(object_id, dtype=np.int32)
-        hdf5_handler['object_fields'] = utils.convert_str_to_ascii(object_fields)
+        hdf5_handler['object_fields'] = str2ascii(object_fields)
 
 
     def detection_metadata_process(self):
@@ -172,7 +175,10 @@ class DetectionTask:
 
         # create/open hdf5 file with subgroups for train/val/test
         file_name = os.path.join(self.cache_path, 'detection.h5')
-        fileh5 = storage.StorageHDF5(file_name, 'w')
+        fileh5 = StorageHDF5(file_name, 'w')
+
+        fileh5.add_group('source')
+        fileh5.add_group('default')
 
         for set_name in self.ids.keys():
             if self.verbose:
@@ -181,9 +187,8 @@ class DetectionTask:
             id_list = self.ids[set_name]
 
             # create set in the hdf5 file
-            fileh5.add_group(set_name)
-            fileh5.add_group(set_name + '/source')
-            fileh5.add_group(set_name + '/default')
+            fileh5.add_group('default/' + set_name)
+            fileh5.add_group('source/' + set_name)
 
             # add data source (original)
             self.set_add_data_source(fileh5.storage[set_name + '/source/'], id_list)

@@ -4,9 +4,9 @@ Pascal VOC 2007 download/process functions.
 
 
 from __future__ import print_function, division
-from .... import utils
+from dbcollection.utils.url import download_extract_all
 
-from .detection import DetectionTask
+from .detection import Detection
 
 
 class PascalVOC2007:
@@ -38,13 +38,12 @@ class PascalVOC2007:
         self.verbose = verbose
 
 
-    def download(self, is_download=True):
+    def download(self):
         """
         Download and extract files to disk.
         """
         # download + extract data and remove temporary files
-        if is_download:
-            utils.download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
+        download_extract_all(self.url, self.md5_checksum, self.data_path, False, self.verbose)
 
         return self.keywords
 
@@ -55,7 +54,7 @@ class PascalVOC2007:
         """
         # init tasks
         tasks = {
-            "detection": DetectionTask(self.data_path, self.cache_path, self.verbose)
+            "detection": Detection(self.data_path, self.cache_path, self.verbose)
         }
 
         # process all tasks

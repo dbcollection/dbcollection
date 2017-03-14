@@ -6,12 +6,12 @@ MNIST classification process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
-from ... import utils, storage
 
-str2ascii = utils.convert_str_to_ascii
+from dbcollection.utils.storage import StorageHDF5
+from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
-class ClassificationTask:
+class Classification:
     """ Cifar10 Classification preprocessing functions """
 
     classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -96,7 +96,7 @@ class ClassificationTask:
 
         # create/open hdf5 file with subgroups for train/val/test
         file_name = os.path.join(self.cache_path, 'classification.h5')
-        fileh5 = storage.StorageHDF5(file_name, 'w')
+        fileh5 = StorageHDF5(file_name, 'w')
 
         # add data to the **source** group
         fileh5.add_data('train/source', 'data', data["train"]["images"], np.uint8)
