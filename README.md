@@ -30,7 +30,7 @@ The processed metadata is stored to disk by using the HDF5 file format. This for
 
 Also, by using the HDF5 format, it is simple to deploy a common API to interface with the stored metadata and other languages that have HDF5 support. For more information about the HDF5 file format see [here](https://support.hdfgroup.org/HDF5/).
 
-The `dbcollection` manager API creates a folder in your home dir named `~/dbcollection` where all the metadata files and grouped. The contents of this folder is tracked by a .json cache file which is stored in your home dir named `~/dbcollection.json` which contains information/configurations of the stored datasets.
+The **dbcollection** manager API creates a folder in your home dir named `~/dbcollection` where all the metadata files and grouped. The contents of this folder is tracked by a .json cache file which is stored in your home dir named `~/dbcollection.json` which contains information/configurations of the stored datasets.
 
 ## Main features
 
@@ -69,7 +69,7 @@ pip install dbcollection
 
 ### From source
 
-To install `dbcollection` from source you need to do the following setps:
+To install **dbcollection** from source you need to do the following setps:
 
 - Clone the repo to your hard drive:
 ```
@@ -119,7 +119,7 @@ Note: For a more detailed overview of how to use this module check the next sect
 
 ## Tutorial
 
-A more detailed tutorial on using the `dbcollection` module main APIs for dataset managing and data loading is provided as a python notebook format [here](todo).
+A more detailed tutorial on using the **dbcollection** module main APIs for dataset managing and data loading is provided as a python notebook format [here](todo).
 
 
 # Supported languages
