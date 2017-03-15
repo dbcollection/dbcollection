@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-os_funs.py unit testing.
+os.py unit testing.
 """
 
 
@@ -14,7 +14,7 @@ from unittest import mock
 from unittest.mock import patch, mock_open
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', '..', 'dbcollection', 'utils'))
+sys.path.insert(0, os.path.abspath(os.path.join(dir_path, '..', '..', '..', '..')))
 sys.path.append(lib_path)
 from os_funs import *
 

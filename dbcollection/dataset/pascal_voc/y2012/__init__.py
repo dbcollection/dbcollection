@@ -1,0 +1,1 @@
+from .main import PascalVOC2012

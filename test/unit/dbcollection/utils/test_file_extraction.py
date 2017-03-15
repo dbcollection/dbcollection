@@ -12,11 +12,16 @@ import unittest
 from unittest import mock
 from unittest.mock import patch, mock_open
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', '..', 'dbcollection', 'utils'))
-sys.path.append(lib_path)
-from file_extraction import *
+#dir_path = os.path.dirname(os.path.realpath(__file__))
+#lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..', '..', 'dbcollection', 'utils'))
+#sys.path.append(lib_path)
+#from file_extraction import *
 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+lib_path = os.path.abspath(os.path.join(dir_path, '..', '..', '..'))
+#sys.path.append(lib_path)
+sys.path.insert(0, lib_path)
+from dbcollection.utils.file_extraction import *
 
 #-----------------------
 # Unit Test definitions
