@@ -13,4 +13,4 @@ pipelines:
           - pip install -U tox
           - pip --version
           - tox --version
-          - pytest test/unit3/
+          - tox

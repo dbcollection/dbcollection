@@ -4,3 +4,4 @@ build/
 *.pyc
 test/.vscode/
 docs/.ipynb_checkpoints
+.tox/
