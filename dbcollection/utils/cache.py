@@ -59,11 +59,9 @@ class CacheManager:
         # cache directory path (should work for all platforms)
         home_dir = os.path.expanduser("~")
         if is_test:
-            self.default_cache_dir = os.path.join(home_dir, 'tmp', 'dbcollection')
-        else:
-            self.default_cache_dir = os.path.join(home_dir, 'dbcollection')
+            home_dir = os.path.join(home_dir, 'tmp')
 
-        # cache file path
+        self.default_cache_dir = os.path.join(home_dir,  'dbcollection')
         self.cache_fname = os.path.join(home_dir, 'dbcollection.json')
 
 
@@ -539,13 +537,12 @@ class CacheManager:
         """
         try:
             data_dir = self.data['dataset'][name]["data_dir"]
+            return {
+                "data_dir": data_dir,
+                "cache_dir": os.path.join(self.default_cache_dir, name)
+            }
         except KeyError:
             raise KeyError('Dataset name does not exist in cache: {}'.format(name))
-
-        return {
-            "data_dir": data_dir,
-            "cache_dir": os.path.join(self.default_cache_dir, name)
-        }
 
 
     def get_cache_path(self, name, task):

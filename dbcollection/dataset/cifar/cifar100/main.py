@@ -53,8 +53,8 @@ class Cifar100:
         info_output = {}
         for task in tasks:
             if self.verbose:
-                print('Processing <{}> task:\n'.format(task))
-            info_output[task] = task.run()
+                print('Processing ::{}:: task:\n'.format(task))
+            info_output[task] = tasks[task].run()
 
         # define a default task
         info_output['default'] = info_output['classification']

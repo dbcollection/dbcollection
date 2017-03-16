@@ -4,29 +4,9 @@ File extraction functions for common file types: matlab, json, etc.
 
 
 from __future__ import print_function
+import os
 import tarfile
 import zipfile
-
-
-def get_file_extension(fname):
-    """Retrieve filename extension.
-
-    Parameters
-    ----------
-    fname : str
-        File name + path on disk.
-
-    Returns
-    -------
-    str
-        File name without the path.
-
-    Raises
-    ------
-        None
-    """
-    str_split = fname.split('.')
-    return str_split[-1]
 
 
 def extract_file_zip(fname, dir_path):
@@ -95,9 +75,9 @@ def get_extractor_method(ext):
         None
     """
     methods = {
-        "zip":extract_file_zip,
-        "tar":extract_file_tar,
-        "gz":extract_file_tar
+        "zip":extract_file_zip, ".zip":extract_file_zip,
+        "tar":extract_file_tar, ".tar":extract_file_tar,
+        "gz":extract_file_tar, ".gz":extract_file_tar
     }
 
     try:
@@ -127,10 +107,10 @@ def extract_file(fname, dir_path, verbose=False):
         None
     """
     if verbose:
-        print('Extracting file to disk: ' + dir_path)
+        print('Extracting file to disk: {}'.format(dir_path))
 
     # check filename extension
-    extension = get_file_extension(fname)
+    extension = os.path.splitext(fname)[1]
 
     # get extraction method
     extractor = get_extractor_method(extension)

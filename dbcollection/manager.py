@@ -6,9 +6,9 @@ dbcollection managing functions.
 from __future__ import print_function
 import os
 import json
+import shutil
 
 from dbcollection import dataset
-from dbcollection import utils
 from dbcollection.utils.cache import CacheManager
 from dbcollection.utils.loader import DatasetLoader
 
@@ -284,7 +284,8 @@ def config_cache(field=None, value=None, delete_cache=False, clear_cache=False, 
 
     if delete_cache:
         # delete cache dir
-        utils.os.delete_dir(cache_manager.default_cache_dir)
+        if os.path.exists(cache_manager.default_cache_dir):
+            shutil.rmtree(cache_manager.default_cache_dir)
 
         # delete cache file
         os.remove(cache_manager.cache_fname)
@@ -400,7 +401,6 @@ def info(list_datasets=False, is_test=False):
         print(json.dumps(data['dataset'], sort_keys=True, indent=4))
         print('')
 
-        # print categories
         print('*** Dataset categories ***')
-        print(json.dumps(data['category'], sort_keys=True, indent=4))
-        print('')
+        for name in data['category']:
+            print('>> {}: {}'.format(name, data['category'][name]))

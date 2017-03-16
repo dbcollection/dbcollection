@@ -6,9 +6,9 @@ Pascal VOC 2007 object detection processing functions.
 from __future__ import print_function, division
 import os
 import numpy as np
+import h5py
 import progressbar
 
-from dbcollection.utils.storage import StorageHDF5
 from dbcollection.utils.file_load import load_xml
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
@@ -175,10 +175,11 @@ class Detection:
 
         # create/open hdf5 file with subgroups for train/val/test
         file_name = os.path.join(self.cache_path, 'detection.h5')
-        fileh5 = StorageHDF5(file_name, 'w')
+        fileh5 = h5py.File(file_name, 'w', version='latest')
 
-        fileh5.add_group('source')
-        fileh5.add_group('default')
+        # create main groups
+        fileh5.create_group('source')
+        fileh5.create_group('default')
 
         for set_name in self.ids.keys():
             if self.verbose:
@@ -187,14 +188,16 @@ class Detection:
             id_list = self.ids[set_name]
 
             # create set in the hdf5 file
-            fileh5.add_group('default/' + set_name)
-            fileh5.add_group('source/' + set_name)
+            source_name = 'source/' + set_name
+            default_name = 'default/' + set_name
+            fileh5.create_group(default_name)
+            fileh5.create_group(source_name)
 
             # add data source (original)
-            self.set_add_data_source(fileh5.storage[set_name + '/source/'], id_list)
+            self.set_add_data_source(fileh5[source_name], id_list)
 
             # add data default
-            self.set_add_data_default(fileh5.storage[set_name + '/default/'], id_list)
+            self.set_add_data_default(fileh5[default_name], id_list)
 
         # close file
         fileh5.close()

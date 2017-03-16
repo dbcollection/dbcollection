@@ -6,8 +6,8 @@ Cifar100 classification process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
+import h5py
 
-from dbcollection.utils.storage import StorageHDF5
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
@@ -131,10 +131,10 @@ class Classification:
                 "object_id_list": train_object_list,
             },
             "test" : {
-                "object_fields": ['data', 'class', 'superclass'],
+                "object_fields": str2ascii(['data', 'class', 'superclass']),
                 "data": test_data,
-                "class_name": self.finer_classes,
-                "coarse_class_name": self.coarse_classes,
+                "class_name": str2ascii(self.finer_classes),
+                "coarse_class_name": str2ascii(self.coarse_classes),
                 "labels": test_labels,
                 "coarse_labels": test_coarse_labels,
                 "object_id_list": test_object_list,
@@ -152,36 +152,25 @@ class Classification:
 
         # create/open hdf5 file with subgroups for train/val/test
         file_name = os.path.join(self.cache_path, 'classification.h5')
-        fileh5 = StorageHDF5(file_name, 'w')
+        fileh5 = h5py.File(file_name, 'w', version='latest')
 
         # add data to the **source** group
-        fileh5.add_data('source/train', 'classes', str2ascii(data["train"]["class_name"]), np.uint8)
-        fileh5.add_data('source/train', 'superclasses', str2ascii(data["train"]["coarse_class_name"]), np.uint8)
-        fileh5.add_data('source/train', 'data', data["train"]["data"], np.uint8)
-        fileh5.add_data('source/train', 'labels', data["train"]["labels"], np.uint8)
-        fileh5.add_data('source/train', 'coarse_labels', data["train"]["coarse_labels"], np.uint8)
-
-        fileh5.add_data('source/test', 'classes', str2ascii(data["test"]["class_name"]), np.uint8)
-        fileh5.add_data('source/test', 'superclasses', str2ascii(data["test"]["coarse_class_name"]), np.uint8)
-        fileh5.add_data('source/test', 'data', data["test"]["data"], np.uint8)
-        fileh5.add_data('source/test', 'labels', data["test"]["labels"], np.uint8)
-        fileh5.add_data('source/test', 'coarse_labels', data["test"]["coarse_labels"], np.uint8)
+        for set_name in ['train', 'test']:
+            sourceg = fileh5.create_group('source/' + set_name)
+            sourceg.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
+            sourceg.create_dataset('superclasses', data=data[set_name]["coarse_class_name"], dtype=np.uint8)
+            sourceg.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
+            sourceg.create_dataset('labels', data=data[set_name]["labels"], dtype=np.uint8)
+            sourceg.create_dataset('coarse_labels', data=data[set_name]["coarse_labels"], dtype=np.uint8)
 
         # add data to the **default** group
-        # write data to the metadata file
-        fileh5.add_data('default/train', 'classes', str2ascii(data["train"]["class_name"]), np.uint8)
-        fileh5.add_data('default/train', 'superclasses', str2ascii(data["train"]["coarse_class_name"]), np.uint8)
-        fileh5.add_data('default/train', 'data', data["train"]["data"], np.uint8)
-        fileh5.add_data('default/train', 'object_ids', data["train"]["object_id_list"], np.int32)
-        # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('default/train', 'object_fields', str2ascii(data["train"]['object_fields']), np.uint8)
-
-        fileh5.add_data('default/test', 'classes', str2ascii(data["test"]["class_name"]), np.uint8)
-        fileh5.add_data('default/test', 'superclasses', str2ascii(data["test"]["coarse_class_name"]), np.uint8)
-        fileh5.add_data('default/test', 'data', data["test"]["data"], np.uint8)
-        fileh5.add_data('default/test', 'object_ids', data["test"]["object_id_list"], np.int32)
-        # object fields is necessa/defaultry to identify which fields compose 'object_id'
-        fileh5.add_data('default/test', 'object_fields', str2ascii(data["test"]['object_fields']), np.uint8)
+        for set_name in ['train', 'test']:
+            defaultg = fileh5.create_group('default/' + set_name)
+            defaultg.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
+            defaultg.create_dataset('superclasses', data=data[set_name]["coarse_class_name"], dtype=np.uint8)
+            defaultg.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
+            defaultg.create_dataset('object_ids', data=data[set_name]["object_id_list"], dtype=np.int32)
+            defaultg.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.uint8)
 
         # close file
         fileh5.close()

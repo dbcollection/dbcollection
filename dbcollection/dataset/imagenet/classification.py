@@ -6,9 +6,9 @@ ImageNet ILSVRC 2012 classification process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
+import h5py
 import progressbar
 
-from dbcollection.utils.storage import StorageHDF5
 from dbcollection.utils.file_load import load_txt, load_matlab
 from dbcollection.utils.os import construct_set_from_dir, dir_get_size
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -272,42 +272,26 @@ class Classification:
 
         # create/open hdf5 file with subgroups for train/val/test
         file_name = os.path.join(self.cache_path, 'classification.h5')
+        fileh5 = h5py.File(file_name, 'w', version='latest')
         if self.verbose:
             print('\nWritting data to file: {}'.format(file_name))
-        fileh5 = StorageHDF5(file_name, 'w')
-
-        if self.verbose:
-            print('==> Writing train set data...')
 
         # add data to the **list** group
-        fileh5.add_data('default/train', 'classes', data["train"]["flattened"]["class_names"], np.uint8)
-        fileh5.add_data('default/train', 'labels', data["train"]["flattened"]["labels"], np.uint8)
-        fileh5.add_data('default/train', 'descriptions', data["train"]["flattened"]["descriptions"], np.uint8)
-        fileh5.add_data('default/train', 'image_filenames', data["train"]["flattened"]["image_filenames"], np.uint8)
-        fileh5.add_data('default/train', 'class_ids', data["train"]["flattened"]["class_ids"])
-        fileh5.add_data('default/train', 'object_ids', data["train"]["flattened"]["object_ids"])
-        # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('default/train', 'object_fields', data["train"]["flattened"]['object_fields'], np.uint8)
+        for set_name in ['train', 'val']:
+            if self.verbose:
+                print('==> Writing ::{}:: set data...'.format(set_name))
 
-        # add data to the **source** group
-        self.hdf5_add_data_source(fileh5, data, "train")
+            defaultg = fileh5.create_group('default/' + set_name)
+            defaultg.create_dataset( 'classes', data=data[set_name]["flattened"]["class_names"], dtype=np.uint8)
+            defaultg.create_dataset( 'labels', data=data[set_name]["flattened"]["labels"], dtype=np.uint8)
+            defaultg.create_dataset( 'descriptions', data=data[set_name]["flattened"]["descriptions"], dtype=np.uint8)
+            defaultg.create_dataset( 'image_filenames', data=data[set_name]["flattened"]["image_filenames"], dtype=np.uint8)
+            defaultg.create_dataset( 'class_ids', data=data[set_name]["flattened"]["class_ids"], dtype=np.uint8)
+            defaultg.create_dataset( 'object_ids', data=data[set_name]["flattened"]["object_ids"], dtype=np.int32)
+            defaultg.create_dataset( 'object_fields', data=data[set_name]["flattened"]["object_fields"], dtype=np.uint8)
 
-        if self.verbose:
-            print('\n==> Writing val set data...')
-
-        # add data to the **list** group
-        fileh5.add_data('default/val', 'classes', data["val"]["flattened"]["class_names"], np.uint8)
-        fileh5.add_data('default/val', 'labels', data["val"]["flattened"]["labels"], np.uint8)
-        fileh5.add_data('default/val', 'descriptions', data["val"]["flattened"]["descriptions"], np.uint8)
-        fileh5.add_data('default/val', 'image_filenames', data["val"]["flattened"]["image_filenames"], np.uint8)
-        fileh5.add_data('default/val', 'class_ids', data["val"]["flattened"]["class_ids"])
-        fileh5.add_data('default/val', 'object_ids', data["val"]["flattened"]["object_ids"])
-        # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('default/val', 'object_fields', data["val"]["flattened"]['object_fields'], np.uint8)
-
-        # add data to the **source** group
-        self.hdf5_add_data_source(fileh5, data, "val")
-
+            # add data to the **source** group
+            self.hdf5_add_data_source(fileh5, data, set_name)
 
         # close file
         fileh5.close()

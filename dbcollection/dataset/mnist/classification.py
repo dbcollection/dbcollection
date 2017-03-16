@@ -6,8 +6,8 @@ MNIST classification process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
+import h5py
 
-from dbcollection.utils.storage import StorageHDF5
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
@@ -69,18 +69,23 @@ class Classification:
         train_object_list = np.array([[i, train_labels[i]] for i in range(size_train)])
         test_object_list = np.array([[i, test_labels[i]] for i in range(size_test)])
 
+        # classes
+        classes = str2ascii(self.classes)
+
         #return a dictionary
         return {
             "train": {
+                "classes": classes,
                 "images": train_data,
                 "labels": train_labels,
-                "object_fields": ['data', 'labels'],
+                "object_fields": str2ascii(['data', 'labels']),
                 "object_ids": train_object_list
             },
             "test": {
+                "classes": classes,
                 "images": test_data,
                 "labels": test_labels,
-                "object_fields": ['data', 'labels'],
+                "object_fields": str2ascii(['data', 'labels']),
                 "object_ids": test_object_list
             }
         }
@@ -96,30 +101,22 @@ class Classification:
 
         # create/open hdf5 file with subgroups for train/val/test
         file_name = os.path.join(self.cache_path, 'classification.h5')
-        fileh5 = StorageHDF5(file_name, 'w')
+        fileh5 = h5py.File(file_name, 'w', version='latest')
 
         # add data to the **source** group
-        fileh5.add_data('train/source', 'data', data["train"]["images"], np.uint8)
-        fileh5.add_data('train/source', 'labels', data["train"]["labels"], np.uint8)
-
-        fileh5.add_data('test/source', 'data', data["test"]["images"], np.uint8)
-        fileh5.add_data('test/source', 'labels', data["test"]["labels"], np.uint8)
+        for set_name in ['train', 'test']:
+            sourceg = fileh5.create_group('source/' + set_name)
+            sourceg.create_dataset('images', data=data[set_name]["images"], dtype=np.uint8)
+            sourceg.create_dataset('labels', data=data[set_name]["labels"], dtype=np.uint8)
 
         # add data to the **default** group
-        # write data to the metadata file
-        fileh5.add_data('train/default', 'classes', str2ascii(self.classes), np.uint8)
-        fileh5.add_data('train/default', 'data',  data["train"]["images"], np.uint8)
-        fileh5.add_data('train/default', 'labels', data["train"]["labels"], np.uint8)
-        fileh5.add_data('train/default', 'object_ids', data["train"]["object_ids"], np.int32)
-        # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('train/default', 'object_fields', str2ascii(data['train']["object_fields"]), np.uint8)
-
-        fileh5.add_data('test/default', 'classes', str2ascii(self.classes), np.uint8)
-        fileh5.add_data('test/default', 'data', data["test"]["images"], np.uint8)
-        fileh5.add_data('test/default', 'labels', data["test"]["labels"], np.uint8)
-        fileh5.add_data('test/default', 'object_ids', data["test"]["object_ids"], np.int32)
-        # object fields is necessary to identify which fields compose 'object_id'
-        fileh5.add_data('test/default', 'object_fields', str2ascii(data['test']["object_fields"]), np.uint8)
+        for set_name in ['train', 'test']:
+            defaultg = fileh5.create_group('default/' + set_name)
+            defaultg.create_dataset('classes', data=data[set_name]["classes"], dtype=np.uint8)
+            defaultg.create_dataset('images', data=data[set_name]["images"], dtype=np.uint8)
+            defaultg.create_dataset('labels', data=data[set_name]["labels"], dtype=np.uint8)
+            defaultg.create_dataset('object_ids', data=data[set_name]["object_ids"], dtype=np.int32)
+            defaultg.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.uint8)
 
         # close file
         fileh5.close()

@@ -18,37 +18,6 @@ img_extensions = [
 ]
 
 
-def delete_dir(dir_path, verbose=False):
-    """Delete a directory and its contents.
-
-    Parameters
-    ----------
-    dir_path : str
-        Directory path on disk for deletion.
-    verbose : bool
-        Displays text information on the screen if True.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-    OSError
-        If directory cannot be deleted.
-    """
-    if verbose:
-        print('Deleting {} and all its contents...'.format(dir_path))
-    try:
-        shutil.rmtree(dir_path, ignore_errors=True)
-    except OSError as err:
-        if err.errno != errno.EEXIST: # errno.ENOENT = no such file or directory
-            raise OSError('Unable to delete dir: {}'.format(dir_path))
-    else:
-        if verbose:
-            print('Directory deleted successfully.')
-
-
 def dir_get_size(dir_path):
     """Returns the number of files and subfolders in a directory.
 

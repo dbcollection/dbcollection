@@ -32,11 +32,9 @@ def open_read_file(fname, mode='r'):
         None
     """
     try:
-        file_handle = open(fname, mode)
+        return open(fname, mode)
     except (IOError, OSError):
         raise IOError('Error opening file: {}'.format(fname))
-    else:
-        return file_handle
 
 
 def load_txt(fname, mode='r'):
