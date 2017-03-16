@@ -9,7 +9,7 @@ pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
-          - pip install -U pytest
+          - pip install -r requirements.txt
           - pip install -U tox
           - pip --version
           - tox --version
