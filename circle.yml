@@ -3,7 +3,7 @@ machine:
     version: 3.5.1
 
 dependencies:
-  pre:
+  override:
     - pip install --upgrade pip
     - pip install -r requirements.txt
     - pip install -U tox
