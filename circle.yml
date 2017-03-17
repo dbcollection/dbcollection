@@ -1,0 +1,12 @@
+machine:
+  python:
+    version:
+      3.5.1
+
+dependencies:
+  override:
+    - pip install -r requirements.txt
+
+test:
+  override:
+    - tox
