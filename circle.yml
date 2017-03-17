@@ -8,8 +8,6 @@ dependencies:
     - pip install -U tox
     - pip --version
     - tox --version
-  override:
-    - pip install -r requirements.txt
 
 test:
   override:
