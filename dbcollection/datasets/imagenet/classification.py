@@ -10,7 +10,7 @@ import h5py
 import progressbar
 
 from dbcollection.utils.file_load import load_txt, load_matlab
-from dbcollection.utils.os import construct_set_from_dir, dir_get_size
+from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 

@@ -89,6 +89,7 @@ This method will download a dataset's data files to disk. After download, it upd
 - `is_test`: Flag used for tests. (*type=boolean, default=false*)
 
 
+
 #### Usage examples
 
 A simple usage example for downloading a dataset (without providing a storage path for the data) requires only the name of the target dataset and it will download its data files and then extract them to disk without any supervision required.

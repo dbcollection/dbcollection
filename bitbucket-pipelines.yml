@@ -3,14 +3,13 @@
 # Only use spaces to indent your .yml configuration.
 # -----
 # You can specify a custom docker image from Docker Hub as your build environment.
-image: themattrix/tox
+image: themattrix/tox:latest
 
 pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
           - pip install --upgrade pip
-          - pip install -r requirements.txt
           - pip install -U setuptools pip
           - pip install -U tox
           - pip --version

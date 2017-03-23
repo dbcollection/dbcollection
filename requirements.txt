@@ -1,7 +1,7 @@
-h5py>=2.6.0
+h5py
 numpy
 scipy
 wget
 xmltodict
-progressbar2==3.15.0
-pytest>=3.0.0
+progressbar2
+pytest

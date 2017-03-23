@@ -49,12 +49,12 @@ The **dbcollection** manager API creates a folder in your home dir named `~/dbco
 
 This package requires:
 
-- Python (>=2.7 or >=3.5)
-- Numpy (>=1.11.1)
-- h5py (>=2.6.0)
-- wget (>=2.2)
-- xmltodict (>=0.10.2)
-- progressbar2 (>=3.12.0)
+- Python (>=2.7 or >=3.4)
+- Numpy
+- h5py
+- wget
+- xmltodict
+- progressbar2
 
 > Note: earlier versions will probably work as well, but I've only tested these ones.
 
