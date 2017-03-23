@@ -4,6 +4,7 @@ build/
 /dbcollection.egg-info/
 test/.vscode/
 docs/.ipynb_checkpoints
+APIs/lua/build.luarocks/
 .tox/
 *.pyc
 *.egg

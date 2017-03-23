@@ -26,6 +26,11 @@ class DatasetLoader:
         cache_path : str
             Path of the metadata cache file stored on disk.
         """
+        assert name
+        assert task
+        assert data_dir
+        assert cache_path
+
         # store information of the dataset
         self.name = name
         self.task = task
@@ -37,15 +42,17 @@ class DatasetLoader:
         self.root_path = 'default/'
 
         # make links for all groups (train/val/test/etc) for easier access
-        self.sets = [name for name in self.file.keys()]
+        self.sets = [name for name in self.file['default/'].keys()]
 
         # fetch list of field names that compose the object list.
-        if 'train' in self.sets:
-            self.object_fields = convert_ascii_to_str(self.file['default/train/object_fields'].value)
+        self.object_fields = {}
+        for set_name in self.sets:
+            data = self.file['default/{}/object_fields'.format(set_name)].value
+            self.object_fields[set_name] = convert_ascii_to_str(data)
 
 
     def get(self, set_name, field_name, idx=None):
-        """Get data from file.
+        """Retrieve data from the dataset's hdf5 metadata file.
 
         Retrieve the i'th data from the field 'field_name'.
 
@@ -68,6 +75,9 @@ class DatasetLoader:
         ------
             None
         """
+        assert set_name, 'Must input a valid set name: {}'.format(set_name)
+        assert field_name, 'Must input a valid field_name name: {}'.format(field_name)
+
         field_path = self.root_path + set_name + '/' + field_name
         if idx is None:
             return self.file[field_path].value
@@ -76,7 +86,7 @@ class DatasetLoader:
 
 
     def object(self, set_name, idx, is_value=False):
-        """Get list of ids/values of an object.
+        """Retrieves a list of all fields' indexes/values of an object composition.
 
         Retrieves the data's ids or contents of all fields of an object.
 
@@ -103,6 +113,9 @@ class DatasetLoader:
         ------
             None
         """
+        assert set_name, 'Must input a valid set name: {}'.format(set_name)
+        assert idx >= 0, 'idx must be >=0: {}'.format(idx)
+
         dir_path = self.root_path + set_name + '/'
         field_path = dir_path + 'object_ids'
         if not is_value:
@@ -113,7 +126,7 @@ class DatasetLoader:
                 idx = [idx]
 
             # fetch the field names composing 'object_ids'
-            fields = self.object_fields
+            fields = self.object_fields[set_name]
 
             # iterate over all ids and build an output list
             output = []
@@ -134,7 +147,7 @@ class DatasetLoader:
                 return output
 
 
-    def size(self, set_name, field_name=None, full=False):
+    def size(self, set_name, field_name='object_ids'):
         """Size of a field.
 
         Returns the number of the elements of a field_name.
@@ -145,29 +158,24 @@ class DatasetLoader:
             Name of the set.
         field_name : str
             Name of the field in the metadata cache file.
-        full : bool
-            Display the numpy array's shape if True, otherwise
-            returns the size (number of rows) of the array.
 
         Returns:
         --------
-        int, long
-            Returns the number of elements of a field
-            (if empty it returns the size of the object list).
+        list
+            Returns the size of the object list.
 
         Raises
         ------
             None
         """
-        field_path = self.root_path + set_name + '/' + (field_name or 'object_ids')
-        if full:
-            return list(self.file[field_path].shape)
-        else:
-            return self.file[field_path].shape[0]
+        assert set_name, 'Must input a valid set name: {}'.format(set_name)
+
+        field_path = self.root_path + set_name + '/' + field_name
+        return list(self.file[field_path].shape)
 
 
     def list(self, set_name):
-        """Lists all field names.
+        """Lists all fields' names.
 
         Parameters
         ----------
@@ -183,15 +191,19 @@ class DatasetLoader:
         ------
             None
         """
+        assert set_name, 'Must input a valid set name: {}'.format(set_name)
+
         field_path = self.root_path + set_name
         return list(self.file[field_path].keys())
 
 
-    def object_field_id(self, field_name):
-        """Retrieves the index position of a field in the object id list.
+    def object_field_id(self, set_name, field_name):
+        """Retrieves the index position of a field in the 'object_ids' list.
 
         Parameters
         ----------
+        set_name : str
+            Name of the set.
         field_name : str
             Name of the data field.
 
@@ -205,7 +217,10 @@ class DatasetLoader:
         ValueError
             If field_name does not exist on the 'object_fields' list.
         """
+        assert set_name, 'Must input a valid set name: {}'.format(set_name)
+        assert field_name, 'Must input a valid field_name name: {}'.format(field_name)
+
         try:
-            return self.object_fields.index(field_name)
+            return self.object_fields[set_name].index(field_name)
         except ValueError:
             raise ValueError('Field name \'{}\' does not exist.'.format(field_name))

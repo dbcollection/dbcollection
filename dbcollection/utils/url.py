@@ -121,7 +121,7 @@ def download_file(url, dir_path, fname_save, verbose=False):
 
 
 
-def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True):
+def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True):
     """Download urls + extract files to disk.
 
     Download + extract all url files to disk. If clean_cache is
@@ -135,8 +135,8 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
         List of md5 checksum strings for each url.
     dir_save : str
         Directory path to store the data.
-    clean_cache : bool
-        Remove downloaded files and keep only the extracted data.
+    extract_data : bool
+        Extracts/unpacks the data files (if true).
     verbose : bool
         Display messages on screen.
 
@@ -177,8 +177,5 @@ def download_extract_all(urls, md5sum, dir_save, clean_cache=False, verbose=True
                 print('Checksum expected: {}, got: {}'.format(md5sum, file_hash))
 
         # extract file
-        extract_file(fname_save, dir_save, verbose)
-
-        # remove downloaded file (if triggered by the user)
-        if clean_cache:
-            os.remove(fname_save)
+        if extract_data:
+            extract_file(fname_save, dir_save, verbose)

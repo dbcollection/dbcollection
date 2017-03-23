@@ -56,7 +56,7 @@ This package requires:
 - xmltodict (>=0.10.2)
 - progressbar2 (>=3.12.0)
 
-Note: earlier versions will probably work as well, but I've only tested these ones.
+> Note: earlier versions will probably work as well, but I've only tested these ones.
 
 
 ## installation
@@ -91,7 +91,7 @@ import dbcollection as dbc
 
 To load a dataset, you need to use `dbc.manager` API `load()` method. 
 
-(Note: by default, the `MNIST` dataset is already included in the package, so loading it does not need to download/setup any data. However, this may not be valid for most datasets.)
+> Note: by default, the `MNIST` dataset is already included in the package, so loading it does not need to download/setup any data. However, this may not be valid for most datasets.
 
 ```python
 mnist = dbc.manager.load('mnist')
@@ -116,7 +116,7 @@ plt.imshow(mnist.get("train", "data", 0))
 plt.show()
 ```
 
-Note: For a more detailed overview of how to use this module check the next section.
+> Note: For a more detailed overview of how to use this module check the next section.
 
 ## Tutorial
 
@@ -147,4 +147,4 @@ See the [docs](todo) for more information. .... TODO link
 
 # License
 
-MIT license (see [LICENSE]() file). .... TODO link
+MIT license (see the LICENSE file)

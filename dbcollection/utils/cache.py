@@ -27,7 +27,7 @@ class CacheManager:
 
         # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
-            print('Cache file not found. Generating the following file on disk: {}'.format(self.cache_fname))
+            print('Generating the dbcollection\'s package cache file on disk: {}'.format(self.cache_fname))
             self.create_cache_file_disk(self.cache_fname)
 
         # load cache data file
@@ -327,8 +327,8 @@ class CacheManager:
         self.write_data_cache(self.data)
 
 
-    def delete_cache_all(self):
-        """Delete all datasets from cache.
+    def reset_cache(self):
+        """Resets all datasets from cache.
 
         Parameters
         ----------
@@ -537,12 +537,12 @@ class CacheManager:
         """
         try:
             data_dir = self.data['dataset'][name]["data_dir"]
-            return {
-                "data_dir": data_dir,
-                "cache_dir": os.path.join(self.default_cache_dir, name)
-            }
         except KeyError:
             raise KeyError('Dataset name does not exist in cache: {}'.format(name))
+        return {
+            "data_dir": data_dir,
+            "cache_dir": os.path.join(self.default_cache_dir, name)
+        }
 
 
     def get_cache_path(self, name, task):
