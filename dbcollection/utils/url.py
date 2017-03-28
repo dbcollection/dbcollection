@@ -3,13 +3,13 @@ Download functions.
 """
 
 
-from __future__ import print_function
+from __future__ import print_function, division
 import os
 import urllib
-import wget
 import hashlib
-
-from dbcollection.utils.file_extraction import extract_file
+import patoolib
+import requests
+import progressbar
 
 
 def get_hash_value(fname):
@@ -35,7 +35,7 @@ def get_hash_value(fname):
         raise IOError('Error opening file: {}'.format(fname))
 
 
-def download_single_file_progressbar(url, file_save_name):
+def download_url_progressbar(url, file_save_name):
     """Download a file (displays a progress bar).
 
     Parameters
@@ -53,11 +53,28 @@ def download_single_file_progressbar(url, file_save_name):
     ------
         None
     """
-    wget.download(url, out=file_save_name)
-    print('')
+    chunk_size = 4096*2
+    max_size = 1024*1024
+    with open(file_save_name, 'wb') as f:
+        response = requests.get(url, stream=True)
+        file_size = response.headers.get('content-length')
+
+        if file_size is None:
+            f.write(response.content)
+        else:
+            file_size = int(file_size)
+            if file_size >= max_size*10:
+                chunk_size = max_size
+            num_bars = file_size / chunk_size
+            progbar = progressbar.ProgressBar(maxval=num_bars).start()
+            i = 0
+            for data in response.iter_content(chunk_size=chunk_size):
+                f.write(data)
+                progbar.update(i)
+                i += 1
 
 
-def download_single_file_nodisplay(url, file_save_name):
+def download_url_nodisplay(url, file_save_name):
     """Download a file (no display text).
 
     Parameters
@@ -80,7 +97,7 @@ def download_single_file_nodisplay(url, file_save_name):
         out_file.write(data)
 
 
-def download_file(url, dir_path, fname_save, verbose=False):
+def download_url(url, dir_path, fname_save, verbose=False):
     """Download a single url data into a file.
 
     Parameters
@@ -115,9 +132,9 @@ def download_file(url, dir_path, fname_save, verbose=False):
 
     # download the file
     if verbose:
-        download_single_file_progressbar(url, file_save_name)
+        download_url_progressbar(url, file_save_name)
     else:
-        download_single_file_nodisplay(url, file_save_name)
+        download_url_nodisplay(url, file_save_name)
 
 
 
@@ -162,20 +179,21 @@ def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True
             print('Download url ({}/{}): {}'.format(i+1, len(urls), url))
 
         # get download save filename
-        fname_save = os.path.join(dir_save, os.path.basename(url))
+        filename = os.path.join(dir_save, os.path.basename(url))
 
         # download file
-        if download_file(url, dir_save, fname_save, verbose) and verbose:
+        if download_url(url, dir_save, filename, verbose) and verbose:
             print('File already exists, skip downloading this url.')
             continue
 
         # check md5 sum (if available)
         if any(md5sum):
-            file_hash = get_hash_value(fname_save)
+            file_hash = get_hash_value(filename)
             if not file_hash == md5sum:
-                print('**WARNING**: md5 checksum does not match for file: {}'.format(fname_save))
+                print('**WARNING**: md5 checksum does not match for file: {}'.format(filename))
                 print('Checksum expected: {}, got: {}'.format(md5sum, file_hash))
 
         # extract file
         if extract_data:
-            extract_file(fname_save, dir_save, verbose)
+            patoolib.extract_archive(filename, outdir=dir_save, verbosity=verbose)
+

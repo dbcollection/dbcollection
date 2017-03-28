@@ -119,7 +119,7 @@ class Classification:
         }
 
 
-    def classification_metadata_process(self):
+    def process_metadata(self):
         """
         Process metadata and store it in a hdf5 file.
         """
@@ -157,4 +157,4 @@ class Classification:
         """
         Run task processing.
         """
-        return self.classification_metadata_process()
+        return self.process_metadata()

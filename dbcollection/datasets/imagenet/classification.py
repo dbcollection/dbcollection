@@ -12,6 +12,7 @@ import progressbar
 from dbcollection.utils.file_load import load_txt, load_matlab
 from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.utils.pad import pad_list
 
 
 class Classification:
@@ -154,11 +155,12 @@ class Classification:
         object_id = []
         list_class_fname = []
         for cname in data:
-            range_ini = len(filenames) + 1
+            range_ini = len(filenames)
+
             for filename in data[cname]:
                 filenames.append(filename)
                 class_id.append(class_list.index(cname))
-                object_id.append([len(filenames)-1, class_id[-1]])
+                object_id.append([len(filenames), class_id[-1]])
 
             # organize filenames by class id
             list_class_fname.append(list(range(range_ini, len(filenames))))
@@ -169,8 +171,7 @@ class Classification:
                 prgbar.update(counter)
 
         # pad list with zeros in order to have all lists of the same size
-        max_size = len(max(list_class_fname, key=len))
-        list_class_fname = [l + [0]*(max_size-len(l)) for l in list_class_fname]
+        list_class_fname = pad_list(list_class_fname, -1)
 
         return {
             "object_fields": str2ascii(['image_filename', 'class_name']),
@@ -261,7 +262,7 @@ class Classification:
         handler.add_data('source/' + set_name, "descriptions", data[set_name]["flattened"]["descriptions"])
 
 
-    def classification_metadata_process(self):
+    def process_metadata(self):
         """
         Process metadata and store it in a hdf5 file.
         """
@@ -304,4 +305,4 @@ class Classification:
         """
         Run task processing.
         """
-        return self.classification_metadata_process()
+        return self.process_metadata()

@@ -166,7 +166,7 @@ class Detection:
         hdf5_handler['object_fields'] = str2ascii(object_fields)
 
 
-    def detection_metadata_process(self):
+    def process_metadata(self):
         """
         Process metadata for the  and store it in a hdf5 file.
         """
@@ -210,4 +210,4 @@ class Detection:
         """
         Run task processing.
         """
-        return self.detection_metadata_process()
+        return self.process_metadata()

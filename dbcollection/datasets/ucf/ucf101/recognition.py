@@ -7,24 +7,17 @@ from __future__ import print_function, division
 import os
 import numpy as np
 import h5py
+import progressbar
 
-from dbcollection.utils.file_load import load_pickle
+from dbcollection.utils.file_load import load_txt
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.utils.pad import pad_list
+
+from .extract_frames import extract_video_frames
 
 
 class Recognition:
     """ UCF101 action recognition preprocessing functions """
-
-    # extracted file names
-    data_files = [
-        "batches.meta",
-        "data_batch_1",
-        "data_batch_2",
-        "data_batch_3",
-        "data_batch_4",
-        "data_batch_5",
-        "test_batch"
-    ]
 
 
     def __init__(self, data_path, cache_path, verbose=True):
@@ -36,113 +29,231 @@ class Recognition:
         self.verbose = verbose
 
 
-    def get_object_list(self, data, labels):
+    def load_classes(self):
         """
-        Groups the data + labels info in a 'list' of indexes.
+        Load action classes from the annotation files.
         """
-        #object_id = np.ndarray((data.shape[0], 2), dtype=np.uint16)
-        object_id = np.ndarray((data.shape[0], 2), dtype=int)
-        for i in range(data.shape[0]):
-            object_id[i][0] = i
-            object_id[i][1] = labels[i]
-        return object_id
+        filename = os.path.join(self.data_path, 'ucfTrainTestlist', 'classInd.txt')
+        data = load_txt(filename)
+        return [row_str.split(' ')[1] for row_str in data if any(row_str)]
+
+
+    def load_file(self, fname):
+        """
+        Load data from a .txt file.
+        """
+        filename = os.path.join(self.data_path, 'ucfTrainTestlist', fname)
+        data = load_txt(filename)
+        return [row_str.split(' ')[0] for row_str in data if any(row_str)]
+
+
+    def convert_to_dict(self, data):
+        """
+        Parse the data list into a table. (keys=classes, values=videos)
+        """
+        out_dict = {}
+        for content in data:
+            str_split = content.split('/')
+            class_name = str_split[0]
+            video_name = os.path.splitext(str_split[1])[0]
+
+            try:
+                out_dict[class_name].append(video_name)
+            except KeyError:
+                out_dict[class_name] = [video_name]
+
+        # order video names per class
+        for class_name in out_dict:
+            out_dict[class_name].sort()
+
+        return out_dict
+
+
+    def load_train_test_splits(self):
+        """
+        Load train+test index lists from the annotation files.
+        """
+        splits = [
+            ['trainlist01.txt', 'train01'],
+            ['trainlist02.txt', 'train02'],
+            ['trainlist03.txt', 'train03'],
+            ['testlist01.txt', 'test01'],
+            ['testlist02.txt', 'test02'],
+            ['testlist03.txt', 'test03']
+        ]
+        splits_idx = {}
+        for names in splits:
+            data = self.load_file(names[0])
+            splits_idx[names[1]] = self.convert_to_dict(data)
+
+        return splits_idx
+
+
+    def get_set_data(self, set_split, class_list):
+        """
+        Retrieve the specific data for the set
+        """
+        # cycle all sets
+        out = {}
+        iset = 0
+        for set_name in set_split:
+
+            if self.verbose:
+                iset += 1
+                print('\n > Split ({}/{}): {}'.format(iset, len(set_split.keys()), set_name))
+
+            # initialize lists
+            object_ids = []
+            videos = []
+            video_filenames = []
+            image_filenames = []
+            total_frames = []
+            list_videos_per_class = {}
+            list_image_filenames_per_video = []
+            source_data = {} # stores the folder tree of the classes + videos + image files
+
+            if self.verbose:
+                total_vids = sum([len(set_split[set_name][category]) for category in set_split[set_name]])
+                progbar = progressbar.ProgressBar(maxval=total_vids).start()
+                i = 0
+
+            # fill the lists
+            count_class, count_video, count_imgs = 0, 0, 0
+            for class_id, category in enumerate(class_list):
+                source_data[category] = {}
+                #class_id = class_list.index(category)
+                for _, video_name in enumerate(set_split[set_name][category]):
+                    videos.append(video_name) # add video name
+                    video_dir = os.path.join(self.root_dir_imgs, category, video_name)
+                    video_filenames.append(os.path.join('UCF-101', category, video_name + '.avi'))
+
+                    # fetch all files in the dir
+                    images_fnames = os.listdir(video_dir)
+
+                    # remove any file that does not have .jpg ext
+                    images_fnames = [fname for fname in images_fnames if fname.endswith('.jpg')]
+
+                    # add category + video_name to the file paths
+                    images_fnames = [os.path.join(self.images_dir, category, video_name, fname) for fname in images_fnames]
+                    images_fnames.sort() # sort images
+                    image_filenames = image_filenames + images_fnames # add images filenames
+                    count_imgs += len(images_fnames)
+                    total_frames.append(count_imgs)
+
+                    # add image filenames to source
+                    source_data[category][video_name] = {
+                        "images" : str2ascii(images_fnames),
+                        "video" : str2ascii(video_filenames[-1])
+                    }
+
+
+                    # add to list of images per video
+                    list_range = list(range(count_imgs-len(images_fnames), count_imgs))
+                    list_image_filenames_per_video.append(list_range)
+
+                    # add to list of videos per class
+                    try:
+                        list_videos_per_class[class_id].append(count_video)
+                    except KeyError:
+                        list_videos_per_class[class_id] = [count_video]
+
+                    # add data to 'object_ids' [video, video_filename, list_images_per_video, class, total_imgs]
+                    object_ids.append([count_video, count_video, count_video, class_id, count_video])
+
+                    # update video counter
+                    count_video += 1
+
+                    # update progress bar
+                    if self.verbose:
+                        i += 1
+                        progbar.update(i)
+
+                # update class counter
+                count_class += 1
+
+            # force set progressbar to 100%
+            progbar.finish()
+
+            out[set_name] = {
+                "object_fields" : str2ascii(['videos', 'video_filenames',
+                                            'list_image_filenames_per_video',
+                                            'activities', 'total_frames']),
+                "object_ids" : np.array(object_ids, dtype=np.int32),
+                "videos" : str2ascii(videos),
+                "video_filenames" : str2ascii(video_filenames),
+                "activities" : str2ascii(class_list),
+                "image_filenames" : str2ascii(image_filenames),
+                "total_frames" : np.array(total_frames, dtype=np.int32),
+                "list_videos_per_activity" : np.array(pad_list(list(list_videos_per_class.values()), -1), dtype=np.int32),
+                "list_image_filenames_per_video" : np.array(pad_list(list_image_filenames_per_video, -1),
+                                                            dtype=np.int32),
+                "source_data" : source_data
+            }
+
+        return out
 
 
     def load_data(self):
         """
         Load the data from the files.
         """
-        # merge the path with the extracted folder name
-        data_path_ = os.path.join(self.data_path, 'cifar-10-batches-py')
+        self.images_dir = 'UCF-101-images'
+        self.root_dir_imgs = os.path.join(self.data_path, self.images_dir)
 
-        # load classes name file
-        class_names = load_pickle(os.path.join(data_path_, self.data_files[0]))
+        # extract images from videos into a new folder
+        if not os.path.exists(self.root_dir_imgs):
+            extract_video_frames(self.data_path, self.verbose)
 
-        # load train data files
-        train_batch1 = load_pickle(os.path.join(data_path_, self.data_files[1]))
-        train_batch2 = load_pickle(os.path.join(data_path_, self.data_files[2]))
-        train_batch3 = load_pickle(os.path.join(data_path_, self.data_files[3]))
-        train_batch4 = load_pickle(os.path.join(data_path_, self.data_files[4]))
-        train_batch5 = load_pickle(os.path.join(data_path_, self.data_files[5]))
+        # load classes
+        class_list = self.load_classes()
 
-        # concatenate data
-        train_data = np.concatenate(
-            (
-                train_batch1['data'],
-                train_batch2['data'],
-                train_batch3['data'],
-                train_batch4['data'],
-                train_batch5['data']
-            ),
-            axis=0
-        )
+        # load train+test set splits
+        set_splits_vids = self.load_train_test_splits()
 
-        train_labels = np.concatenate(
-            (
-                train_batch1['labels'],
-                train_batch2['labels'],
-                train_batch3['labels'],
-                train_batch4['labels'],
-                train_batch5['labels']
-            ),
-            axis=0
-        )
+        # fetch folder struct
+        if self.verbose:
+            print('==> Processing train/set data splits:')
+        set_splits_data = self.get_set_data(set_splits_vids, class_list)
 
-        train_data = train_data.reshape((50000, 3, 32, 32))
-        train_data = np.transpose(train_data, (0,2,3,1)) # NxHxWxC
-        train_object_list = self.get_object_list(train_data, train_labels)
-
-        # load test data file
-        test_batch = load_pickle(os.path.join(data_path_, self.data_files[6]))
-
-        test_data = test_batch['data'].reshape(10000, 3, 32, 32)
-        test_data = np.transpose(test_data, (0,2,3,1)) # NxHxWxC
-        test_labels = np.array(test_batch['labels'], dtype=np.uint8)
-        test_object_list = self.get_object_list(test_data, test_labels)
-
-        #return a dictionary
-        return {
-            "train": {
-                "object_fields": str2ascii(['data', 'class_name']),
-                "class_name": str2ascii(class_names['label_names']),
-                "data": train_data,
-                "labels": train_labels,
-                "object_ids": train_object_list,
-            },
-            "test": {
-                "object_fields": str2ascii(['data', 'class_name']),
-                "class_name": str2ascii(class_names['label_names']),
-                "data": test_data,
-                "labels": test_labels,
-                "object_ids": test_object_list,
-            }
-        }
+        return set_splits_data
 
 
-    def classification_metadata_process(self):
+    def process_metadata(self):
         """
         Process metadata and store it in a hdf5 file.
         """
-
         # load data to memory
         data = self.load_data()
 
-        # create/open hdf5 file with subgroups for train/val/test
-        file_name = os.path.join(self.cache_path, 'classification.h5')
+        # create/open hdf5 file with subgroups for train/test
+        file_name = os.path.join(self.cache_path, 'recognition.h5')
         fileh5 = h5py.File(file_name, 'w', version='latest')
 
+        if self.verbose:
+            print('\n\n==> Storing metadata to file: {}'.format(file_name))
+            print('Saving data ...')
+
         # add data to the **source** group
-        for set_name in ['train', 'test']:
+        for set_name in data:
             sourceg = fileh5.create_group('source/' + set_name)
-            sourceg.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
-            sourceg.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
-            sourceg.create_dataset('labels', data=data[set_name]["labels"], dtype=np.uint8)
+            for category in data[set_name]['source_data']:
+                #category_grp = sourceg.create_group(data[set_name]['source_data'][category])
+                category_grp = sourceg.create_group(category)
+                for video_name in data[set_name]['source_data'][category]:
+                    video_grp = category_grp.create_group(video_name)
+                    video_grp.create_dataset('images_path', data=data[set_name]['source_data'][category][video_name]['images'])
+                    video_grp.create_dataset('video_path', data=data[set_name]['source_data'][category][video_name]['video'])
 
         # add data to the **default** group
-        for set_name in ['train', 'test']:
+        for set_name in data:
             defaultg = fileh5.create_group('default/' + set_name)
-            defaultg.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
-            defaultg.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
+            defaultg.create_dataset('activities', data=data[set_name]["activities"], dtype=np.uint8)
+            defaultg.create_dataset('videos', data=data[set_name]["videos"], dtype=np.uint8)
+            defaultg.create_dataset('video_filenames', data=data[set_name]["video_filenames"], dtype=np.uint8)
+            defaultg.create_dataset('image_filenames', data=data[set_name]["image_filenames"], dtype=np.uint8)
+            defaultg.create_dataset('total_frames', data=data[set_name]["total_frames"], dtype=np.int32)
+            defaultg.create_dataset('list_videos_per_activity', data=data[set_name]["list_videos_per_activity"], dtype=np.int32)
+            defaultg.create_dataset('list_image_filenames_per_video', data=data[set_name]["list_image_filenames_per_video"], dtype=np.int32)
             defaultg.create_dataset('object_ids', data=data[set_name]["object_ids"], dtype=np.int32)
             defaultg.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.int32)
 
@@ -157,4 +268,4 @@ class Recognition:
         """
         Run task processing.
         """
-        return self.classification_metadata_process()
+        return self.process_metadata()

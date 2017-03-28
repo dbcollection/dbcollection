@@ -30,9 +30,9 @@ description = {
  }
 
 dependencies = {
-    "lua ~> 5.1",
+    "lua >= 5.1",
     "torch >= 7.0",
-    "json >= 1.0.0",
+    "json >= 1.0",
     "argcheck >= 1.0"
 }
 
