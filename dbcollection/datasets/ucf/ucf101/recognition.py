@@ -118,7 +118,7 @@ class Recognition:
                 i = 0
 
             # fill the lists
-            count_class, count_video, count_imgs = 0, 0, 0
+            count_video, count_imgs = 0, 0
             for class_id, category in enumerate(class_list):
                 source_data[category] = {}
                 #class_id = class_list.index(category)
@@ -157,7 +157,7 @@ class Recognition:
                     except KeyError:
                         list_videos_per_class[class_id] = [count_video]
 
-                    # add data to 'object_ids' [video, video_filename, list_images_per_video, class, total_imgs]
+                    # add data to 'object_ids' [video, video_filename, list_images_per_video, class (activity), total_imgs]
                     object_ids.append([count_video, count_video, count_video, class_id, count_video])
 
                     # update video counter
@@ -168,10 +168,7 @@ class Recognition:
                         i += 1
                         progbar.update(i)
 
-                # update class counter
-                count_class += 1
-
-            # force set progressbar to 100%
+            # set progressbar to 100%
             progbar.finish()
 
             out[set_name] = {

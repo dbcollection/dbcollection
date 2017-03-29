@@ -20,7 +20,8 @@ object_classification = {
 }
 
 human_action = {
-    "ucf101" : ucf.ucf101.UCF101
+    "ucf101" : ucf.ucf101.UCF101,
+    "ucfsports" : ucf.ucfsports.UCFSports
 }
 
 #---------------------------------------------------------

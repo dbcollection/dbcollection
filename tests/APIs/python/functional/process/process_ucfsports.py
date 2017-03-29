@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Test processing ucf101.
+Test processing ucfsports.
 """
 
 
@@ -19,11 +19,11 @@ dbc.config_cache(delete_cache=True, is_test=True)
 
 # download dataset
 print('\n==> dbcollection: download()')
-dbc.download(name='ucf101', data_dir=data_dir, verbose=True, is_test=True)
+dbc.download(name='ucfsports', data_dir=data_dir, verbose=True, is_test=True)
 
 # Process dataset
 print('\n==> dbcollection: process()')
-dbc.process(name='ucf101', verbose=True, is_test=True)
+dbc.process(name='ucfsports', verbose=True, is_test=True)
 
 # print data from the loader
 print('\n==> dbcollection: info()')

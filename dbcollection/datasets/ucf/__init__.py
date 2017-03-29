@@ -1,3 +1,3 @@
-__all__=['ucf101']
+__all__=['ucf101', 'ucfsports']
 
 from . import *
