@@ -42,7 +42,7 @@ class Cifar10:
         return self.keywords
 
 
-    def process(self):
+    def process(self, task='default'):
         """
         Process metadata for all tasks
         """
@@ -51,14 +51,29 @@ class Cifar10:
             "classification": Classification(self.data_path, self.cache_path, self.verbose)
         }
 
-        # process all tasks
+        default_task = 'classification'
+
+        # check if task exists
+        if task not in tasks:
+            if task not in ['default', 'all']:
+                raise Exception('The task ::{}:: does not exists for loading/processing.'.format(task))
+
         info_output = {}
-        for task in tasks:
+        if task == 'default':
+            if self.verbose:
+                print('Processing ::{}:: task:\n'.format(default_task))
+            info_output[task] = tasks[default_task].run()
+        elif task == 'all':
+            for task in tasks:
+                if self.verbose:
+                    print('Processing ::{}:: task:\n'.format(task))
+                info_output[task] = tasks[task].run()
+
+            # define a default task
+            info_output['default'] = info_output[default_task]
+        else:
             if self.verbose:
                 print('Processing ::{}:: task:\n'.format(task))
             info_output[task] = tasks[task].run()
-
-        # define a default task
-        info_output['default'] = info_output['classification']
 
         return info_output, self.keywords

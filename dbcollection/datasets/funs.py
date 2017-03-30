@@ -20,7 +20,7 @@ def fetch_dataset_constructor(name):
     -------
     str
         Name of the category of the dataset
-    <class object>
+    class
         Dataset class constructor to download/preprocess data.
 
     Raises
@@ -52,7 +52,7 @@ def setup_dataset_constructor(name, data_dir, cache_dir, extract_data=True, verb
 
     Returns
     -------
-    <class>
+    class
         Dataset class object contianing the download/preprocess data methods.
 
     Raises
@@ -88,8 +88,8 @@ def exists(name):
     ------
         None
     """
-    for category in datasets.keys():
-        if name in datasets[category].keys():
+    for category in datasets:
+        if name in datasets[category]:
             return True
     return False
 
@@ -127,13 +127,15 @@ def download(name, data_dir, cache_dir, extract_data=True, verbose=True):
     return dataset_loader.download()
 
 
-def process(name, data_dir, cache_dir, verbose):
+def process(name, task, data_dir, cache_dir, verbose):
     """Process metadata of a dataset.
 
     Parameters
     ----------
     name : str
         Name of the dataset
+    task : str
+        Name of the task to process.
     data_dir : str
         Directory path on the disk.
     cache_dir : bool
@@ -158,7 +160,7 @@ def process(name, data_dir, cache_dir, verbose):
         os.makedirs(cache_dir)
 
     # process metadata
-    cache_info, keywords = dataset_loader.process()
+    cache_info, keywords = dataset_loader.process(task)
 
     # return some info to update the cache file
     return {

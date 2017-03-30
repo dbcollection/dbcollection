@@ -74,7 +74,7 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
         print('==> Download complete.')
 
 
-def process(name, verbose=True, is_test=False):
+def process(name, task='all', verbose=True, is_test=False):
     """Process a dataset's metadata and stores it to file.
 
     The data is stored a a HSF5 file for each task composing the dataset's tasks.
@@ -83,6 +83,8 @@ def process(name, verbose=True, is_test=False):
     ----------
     name : str
         Name of the dataset.
+    task : str
+        Name of the task to process.
     verbose : bool
         Displays text information (if true).
     is_test : bool
@@ -107,7 +109,7 @@ def process(name, verbose=True, is_test=False):
     # process dataset metadata
     if verbose:
         print('==> Processing {} metadata ...'.format(name))
-    cache_info = dataset.process(name, dset_paths['data_dir'], dset_paths['cache_dir'], verbose)
+    cache_info = dataset.process(name, task, dset_paths['data_dir'], dset_paths['cache_dir'], verbose)
 
     # update dbcollection.json file with the new data
     cache_manager.update(name, cache_info['data_dir'], cache_info['tasks'], cache_info['keywords'])
@@ -157,7 +159,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     # get task cache file path
     if not cache_manager.is_task(name, task):
         if not cache_manager.is_task(name, 'default'):
-            process(name, verbose, is_test)
+            process(name, task, verbose, is_test)
             cache_manager = CacheManager(is_test) # reopen the cache file
         else:
             raise Exception('Dataset name/task not available in cache for load.')
