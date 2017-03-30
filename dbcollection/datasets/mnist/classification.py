@@ -9,6 +9,7 @@ import numpy as np
 import h5py
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.utils.pad import pad_list
 
 
 class Classification:
@@ -72,6 +73,17 @@ class Classification:
         # classes
         classes = str2ascii(self.classes)
 
+        # organize list of image indexes per class
+        train_images_per_class = []
+        test_images_per_class = []
+        labels = np.unique(train_labels)
+        for label in labels:
+            tr_images_idx = np.where(train_labels == label)[0].tolist()
+            train_images_per_class.append(tr_images_idx)
+
+            ts_images_idx = np.where(test_labels == label)[0].tolist()
+            test_images_per_class.append(ts_images_idx)
+
         #return a dictionary
         return {
             "train": {
@@ -79,14 +91,16 @@ class Classification:
                 "images": train_data,
                 "labels": train_labels,
                 "object_fields": str2ascii(['images', 'labels']),
-                "object_ids": train_object_list
+                "object_ids": train_object_list,
+                "list_images_per_class": np.array(pad_list(train_images_per_class, 1), dtype=np.int32)
             },
             "test": {
                 "classes": classes,
                 "images": test_data,
                 "labels": test_labels,
                 "object_fields": str2ascii(['images', 'labels']),
-                "object_ids": test_object_list
+                "object_ids": test_object_list,
+                "list_images_per_class": np.array(pad_list(test_images_per_class, 1), dtype=np.int32)
             }
         }
 
@@ -115,8 +129,9 @@ class Classification:
             defaultg.create_dataset('classes', data=data[set_name]["classes"], dtype=np.uint8)
             defaultg.create_dataset('images', data=data[set_name]["images"], dtype=np.uint8)
             defaultg.create_dataset('labels', data=data[set_name]["labels"], dtype=np.uint8)
-            defaultg.create_dataset('object_ids', data=data[set_name]["object_ids"], dtype=np.int32)
             defaultg.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.uint8)
+            defaultg.create_dataset('object_ids', data=data[set_name]["object_ids"], dtype=np.int32)
+            defaultg.create_dataset('list_images_per_class', data=data[set_name]["list_images_per_class"], dtype=np.int32)
 
         # close file
         fileh5.close()

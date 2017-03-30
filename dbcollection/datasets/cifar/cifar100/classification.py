@@ -10,6 +10,7 @@ import h5py
 
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.utils.pad import pad_list
 
 
 class Classification:
@@ -110,6 +111,13 @@ class Classification:
         train_coarse_labels = np.array(train_batch['coarse_labels'], dtype=np.uint8)
         train_object_list = self.get_object_list(train_data, train_labels, train_coarse_labels)
 
+        # organize list of image indexes per class
+        train_images_per_class = []
+        labels = np.unique(train_labels)
+        for label in labels:
+            images_idx = np.where(train_labels == label)[0].tolist()
+            train_images_per_class.append(images_idx)
+
         # load test data file
         test_batch = load_pickle(os.path.join(data_path_, self.data_files[2]))
 
@@ -118,6 +126,13 @@ class Classification:
         test_labels = np.array(test_batch['fine_labels'], dtype=np.uint8)
         test_coarse_labels = np.array(test_batch['coarse_labels'], dtype=np.uint8)
         test_object_list = self.get_object_list(test_data, test_labels, test_coarse_labels)
+
+        # organize list of image indexes per class
+        test_images_per_class = []
+        labels = np.unique(test_labels)
+        for label in labels:
+            images_idx = np.where(test_labels == label)[0].tolist()
+            test_images_per_class.append(images_idx)
 
         #return a dictionary
         return {
@@ -129,6 +144,7 @@ class Classification:
                 "labels": train_labels,
                 "coarse_labels": train_coarse_labels,
                 "object_id_list": train_object_list,
+                "list_images_per_class": np.array(pad_list(train_images_per_class, 1), dtype=np.int32)
             },
             "test" : {
                 "object_fields": str2ascii(['images', 'classes', 'superclasses']),
@@ -138,6 +154,7 @@ class Classification:
                 "labels": test_labels,
                 "coarse_labels": test_coarse_labels,
                 "object_id_list": test_object_list,
+                "list_images_per_class": np.array(pad_list(test_images_per_class, 1), dtype=np.int32)
             }
         }
 
@@ -171,6 +188,7 @@ class Classification:
             defaultg.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
             defaultg.create_dataset('object_ids', data=data[set_name]["object_id_list"], dtype=np.int32)
             defaultg.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.uint8)
+            defaultg.create_dataset('list_images_per_class', data=data[set_name]["list_images_per_class"], dtype=np.uint8)
 
         # close file
         fileh5.close()
