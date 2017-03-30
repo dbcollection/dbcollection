@@ -114,7 +114,7 @@ class Classification:
         # progress bar
         if self.verbose:
             counter = 0
-            prgbar = progressbar.ProgressBar(max_value=len(filenames))
+            prgbar = progressbar.ProgressBar(max_value=len(filenames)).start()
 
         # cycle all filenames and assign them the correct class
         set_data = {}
@@ -133,6 +133,9 @@ class Classification:
                 counter += 1
                 if counter % 1000 == 0:
                     prgbar.update(counter)
+
+        # force progressbar to 100%
+        prgbar.finish()
 
         return set_data
 
@@ -237,7 +240,8 @@ class Classification:
                 progbar.update(counter)
 
         # force progressbar to 100%
-        progbar.finish()
+        if self.verbose:
+            progbar.finish()
 
         # pad list with zeros in order to have all lists of the same size
         list_image_filenames_per_video = pad_list(list_image_filenames_per_class, -1)
