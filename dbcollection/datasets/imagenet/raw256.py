@@ -5,18 +5,17 @@ ImageNet ILSVRC 2012 classification raw256 process functions.
 
 from __future__ import print_function, division
 import os
+import PIL
+from PIL import Image
 import numpy as np
-import h5py
 import progressbar
 
 from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
-from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
-from dbcollection.utils.pad import pad_list
 
 from .classification import Classification
 
 
-class Raw256:
+class Raw256(Classification):
     """ ImageNet ILSVRC 2012 Classification raw256 preprocessing functions """
 
     def __init__(self, data_path, cache_path, verbose=True):
@@ -34,24 +33,81 @@ class Raw256:
         self.dirnames_val = ['ILSVRC2012_img_val', 'val']
 
 
-    def dir_resize_images(self, new_data_dir):
+    def dir_resize_images(self, new_data_dir, data_dir):
         """
         Resize all images from the dir.
         """
+        # fetch all files and folders of the original folder
+        data_dir_ = self.get_dir_path(data_dir),
+        data = construct_set_from_dir(data_dir_, self.verbose)
+
+        base_size = 256
+
+        # progress bar
+        if self.verbose:
+            progbar = progressbar.ProgressBar(max_value=len(data)).start()
+            counter = 0
+
+        # cycle all folders and files + resize images + store to the new directory
+        for cname in data:
+            for fname in data[cname]:
+                save_dir = os.path.join(new_data_dir, cname)
+                if not os.path.exists(save_dir):
+                    os.makedirs(save_dir)
+
+                img_filename = os.path.join(self.data_path, data_dir, cname, fname)
+                new_img_filename = os.path.join(save_dir, fname)
+
+                # load img
+                img = Image.open(img_filename)
+
+                # resize img
+                height, width = img.size[0], img.size[1]
+                if height > width:
+                    wsize = 256
+                    hsize = height * 256 / width
+                else:
+                    hsize = 256
+                    wsize = width * 256 / height
+
+                img = img.resize((wsize, hsize), PIL.Image.ANTIALIAS)
+
+                # save img
+                img.save(new_img_filename)
+
+            # update progress bar
+            if self.verbose:
+                counter += 1
+                progbar.update(counter)
+
+        # force progressbar to 100%
+        if self.verbose:
+            progbar.finish()
+            print('')
 
 
     def setup_dirs(self):
         """
         Setup new train/val directories and resize all images.
         """
-        for set_dir in [self.new_dir_train, self.new_dir_val]:
+        if self.verbose:
+            print('==> Setup resized data dirs + images:')
+
+        sets = {
+            "train" : [self.new_dir_train, self.dirnames_train],
+            "val" : [self.new_dir_val, self.dirnames_val]
+        }
+
+        for set_name in sets:
             # setup new directory
-            new_data_dir = os.path.join(self.data_path, set_dir)
+            new_data_dir = os.path.join(self.data_path, sets[set_name][0])
             if not os.path.exists(new_data_dir):
                 os.makedirs(new_data_dir)
 
             # resize all images and save into the new directory
-            self.dir_resize_images(new_data_dir)
+            if self.verbose:
+                print(' > Resizing images for the set: {}'.format(set_name))
+            self.dir_resize_images(new_data_dir, sets[set_name][1])
 
 
     def run(self):
