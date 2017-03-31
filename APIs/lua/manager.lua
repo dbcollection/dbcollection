@@ -49,6 +49,19 @@ local function get_dataset_paths(cache, name, task)
     return data_dir, cache_path
 end
 
+-- check if the task exists in the cache
+local function exists_task(cache, name, task)
+    if next(cache['dataset'][name]['tasks']) then
+        if cache['dataset'][name]['tasks'][task] then
+            return true
+        else
+            return false
+        end
+    else
+        return false
+    end
+end
+
 
 -----------------------------------------------------------
 -- Manager API functions
@@ -111,13 +124,18 @@ function manager.load(options)
     -- read the cache file (dbcollection.json)
     local cache = json.load(home_path)
 
-    -- check if the dataset exists on cache
+    -- check if the dataset exists in the cache
     if not cache['dataset'][args.name] then
-        manager.download({name=args.name, data_dir=args.data_dir, extract_data=true, verbose=args.verbose, is_test=args.is_test })
-        manager.process({name=args.name, verbose=args.verbose, is_test=args.is_test })
+        manager.download({name=args.name, data_dir=args.data_dir, extract_data=true,
+                          verbose=args.verbose, is_test=args.is_test})
+        cache = json.load(home_path) -- reload the cache file
+    end
 
-        -- reload the cache file
-        cache = json.load(home_path)
+    -- check if the task exists in the cache
+    if not exists_task(cache, args.name, args.task) then
+        manager.process({name=args.name, task=args.task, verbose=args.verbose, 
+                         is_test=args.is_test})
+        cache = json.load(home_path) -- reload the cache file
     end
 
     -- load check if task exists
@@ -226,7 +244,8 @@ function manager.process(options)
         {name="name", type="string",
         help="Name of the dataset."},
         {name="task", type="string", default='all',
-        help="Name of the dataset."},
+        help="Name of the dataset.",
+        opt = true},
         {name="verbose", type="boolean", default=true,
         help="Displays text information (if true).",
         opt = true},
@@ -241,7 +260,7 @@ function manager.process(options)
     assert(args.name, ('Must input a valid dataset name: %s'):format(args.name))
 
     local command = ('import dbcollection.manager as dbc;' ..
-                    'dbc.process(name=\'%s\',task=\'%s\'verbose=%s,is_test=%s)')
+                    'dbc.process(name=\'%s\',task=\'%s\',verbose=%s,is_test=%s)')
                     :format(args.name, args.task, tostring_py(args.verbose),
                             tostring_py(args.is_test))
 
@@ -529,15 +548,21 @@ function manager.info(options)
         opt = true},
         {name="is_test", type="boolean", default=false,
         help="Flag used for tests.",
+        opt = true},
+        {name="t", type="boolean", default=false, -- without this it gives an error
+        help="Flag used for tests.",
         opt = true}
     }
 
     -- parse options
     local args = initcheck(options)
 
+    print(args)
+
     local command = ('import dbcollection.manager as dbc;' ..
                     'dbc.info(list_datasets=%s,is_test=%s)')
-                    :format(tostring_py(args.list_datasets), tostring_py(args.is_test))
+                    :format(tostring_py(args.list_datasets),
+                            tostring_py(args.is_test or false))
 
     os.execute(('python -c "%s"'):format(command))
 end

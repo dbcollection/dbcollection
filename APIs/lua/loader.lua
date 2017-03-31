@@ -152,16 +152,19 @@ function DataLoader:object(set_name, idx, is_value)
 
     local set_path = ('%s/%s/'):format(self.root_path,set_name)
 
-    if not is_value then
-        -- list of indexes
-        return self:get(set_name, 'object_ids', idx)
-    else
-        -- list of tensors
+    local indexes = self:get(set_name, 'object_ids', idx)
+    if is_value then
         local out = {}
-        for k, field in ipairs(self.object_fields[set_name]) do
-            table.insert(out, self:get(set_name, field, idx))
+        for i=1, indexes:size(1) do
+            local data = {}
+            for k, field in ipairs(self.object_fields[set_name]) do
+                table.insert(data, self:get(set_name, field, indexes[i][k]))
+            end
+            table.insert(out, data)
         end
         return out
+    else
+        return indexes
     end
 end
 

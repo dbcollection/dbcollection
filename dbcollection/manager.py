@@ -157,7 +157,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
         download(name, data_dir, True, verbose, is_test)
         cache_manager = CacheManager(is_test) # reopen the cache file
 
-    # get task cache file path
+    # check if the task exists inf cache
     if not cache_manager.is_task(name, task):
         process(name, task, verbose, is_test)
         cache_manager = CacheManager(is_test) # reopen the cache file
