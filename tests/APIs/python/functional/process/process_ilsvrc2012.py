@@ -24,6 +24,8 @@ dbc.download(name='ilsvrc2012', data_dir=data_dir, verbose=True, is_test=True)
 # Process dataset
 print('\n==> dbcollection: process()')
 dbc.process(name='ilsvrc2012', task='default', verbose=True, is_test=True)
+dbc.process(name='ilsvrc2012', task='raw256', verbose=True, is_test=True)
+
 
 # print data from the loader
 print('\n==> dbcollection: info()')

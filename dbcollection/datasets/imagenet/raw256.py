@@ -7,7 +7,6 @@ from __future__ import print_function, division
 import os
 import PIL
 from PIL import Image
-import numpy as np
 import progressbar
 
 from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
@@ -15,7 +14,7 @@ from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
 from .classification import Classification
 
 
-class Raw256(Classification):
+class Raw256:
     """ ImageNet ILSVRC 2012 Classification raw256 preprocessing functions """
 
     def __init__(self, data_path, cache_path, verbose=True):
@@ -33,12 +32,25 @@ class Raw256(Classification):
         self.dirnames_val = ['ILSVRC2012_img_val', 'val']
 
 
+    def get_dir_path(self, dirname):
+        """
+        Check if a dir or list of dirs exists
+        """
+        # get correct set paths
+        for name in dirname:
+            train_dir = os.path.join(self.data_path, name)
+            if os.path.isdir(train_dir):
+                return train_dir
+
+        raise Exception('Cannot find dir: {}'.format(dirname))
+
+
     def dir_resize_images(self, new_data_dir, data_dir):
         """
         Resize all images from the dir.
         """
         # fetch all files and folders of the original folder
-        data_dir_ = self.get_dir_path(data_dir),
+        data_dir_ = self.get_dir_path(data_dir)
         data = construct_set_from_dir(data_dir_, self.verbose)
 
         base_size = 256
@@ -55,7 +67,7 @@ class Raw256(Classification):
                 if not os.path.exists(save_dir):
                     os.makedirs(save_dir)
 
-                img_filename = os.path.join(self.data_path, data_dir, cname, fname)
+                img_filename = os.path.join(data_dir_, cname, fname)
                 new_img_filename = os.path.join(save_dir, fname)
 
                 # load img
@@ -65,12 +77,12 @@ class Raw256(Classification):
                 height, width = img.size[0], img.size[1]
                 if height > width:
                     wsize = 256
-                    hsize = height * 256 / width
+                    hsize = int(height * 256 / width)
                 else:
                     hsize = 256
-                    wsize = width * 256 / height
+                    wsize = int(width * 256 / height)
 
-                img = img.resize((wsize, hsize), PIL.Image.ANTIALIAS)
+                img = img.resize((hsize, wsize), PIL.Image.ANTIALIAS)
 
                 # save img
                 img.save(new_img_filename)
