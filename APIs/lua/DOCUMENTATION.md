@@ -120,7 +120,7 @@ dbc.download({name='cifar10', data_dir='<some_dir>', extract_data=false})
 ### process
 
 ```lua
-dbcollection.manager.process(name, task, data_dir, verbose)
+dbcollection.manager.process(name, task, verbose. is_test)
 ```
 
 Processes a dataset's metadata and stores it to file. This metadata is stored in a HDF5 file for each task composing the dataset's tasks. For more information about a dataset's metadata format please check the [list of available datasets](link_list).
@@ -128,13 +128,14 @@ Processes a dataset's metadata and stores it to file. This metadata is stored in
 #### Parameters
 
 - `name`: Name of the dataset. (*type=string*)
+- `task`: Name of the task to process. (*type=string, default='all'*)
 - `verbose`: Displays text information (if true). (*type=boolean, default=true*)
 - `is_test`: Flag used for tests. (*type=boolean, default=false*)
 
 
 #### Usage examples
 
-To (re-)process a dataset's metadata simply do:
+To process (or reprocess) a dataset's metadata simply do:
 
 ```lua
 local dbc = require 'dbcollection.manager'
@@ -143,6 +144,19 @@ dbc.process('cifar10')
 
 > Note: this method allows the user to reset a dataset's metadata format in case of manual or accidental changes to the structure of the data, although most users won't have the need for such functionality on their usage of this package.
 
+```lua
+local dbc = require 'dbcollection.manager'
+dbc.process('cifar10') -- process all tasks
+```
+
+To process only a specific task, you need to specify the task name you want to setup. This is handy when one wants to process only a single task of a bunch of tasks and speed up the processing/loading stage.
+
+```lua
+local dbc = require 'dbcollection.manager'
+dbc.process({name='cifar10', task='default'}) -- process only the 'default' task
+```
+
+> Note: this method allows the user to reset a dataset's metadata format in case of manual or accidental changes to the structure of the data, although most users won't have the need for such functionality on their usage of this package.
 
 <a name="db.manager.add"></a>
 ### add

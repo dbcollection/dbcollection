@@ -208,6 +208,8 @@ function manager.process(options)
             ----------
             name : str
                 Name of the dataset.
+            task : str
+                Name of the task to process.
             verbose : bool
                 Displays text information (if true).
             is_test : bool
@@ -223,6 +225,8 @@ function manager.process(options)
         ]],
         {name="name", type="string",
         help="Name of the dataset."},
+        {name="task", type="string", default='all'
+        help="Name of the dataset."},
         {name="verbose", type="boolean", default=true,
         help="Displays text information (if true).",
         opt = true},
@@ -237,8 +241,9 @@ function manager.process(options)
     assert(args.name, ('Must input a valid dataset name: %s'):format(args.name))
 
     local command = ('import dbcollection.manager as dbc;' ..
-                    'dbc.process(name=\'%s\',verbose=%s,is_test=%s)')
-                    :format(args.name, tostring_py(args.verbose), tostring_py(args.is_test))
+                    'dbc.process(name=\'%s\',task=\'%s\'verbose=%s,is_test=%s)')
+                    :format(args.name, args.task, tostring_py(args.verbose),
+                            tostring_py(args.is_test))
 
     os.execute(('python -c "%s"'):format(command))
 end
