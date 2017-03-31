@@ -225,7 +225,7 @@ function manager.process(options)
         ]],
         {name="name", type="string",
         help="Name of the dataset."},
-        {name="task", type="string", default='all'
+        {name="task", type="string", default='all',
         help="Name of the dataset."},
         {name="verbose", type="boolean", default=true,
         help="Displays text information (if true).",
