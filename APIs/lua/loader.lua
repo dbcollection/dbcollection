@@ -106,6 +106,9 @@ function DataLoader:get(set_name, field_name, idx)
     else
         out = data:all()
     end
+
+    -- check if the field is 'object_ids'.
+    -- If so, add one in order to get the right idx (python uses 0-index)
     if field_name == 'object_ids' then
         return out:add(1)
     else
