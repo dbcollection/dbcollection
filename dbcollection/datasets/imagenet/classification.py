@@ -120,7 +120,7 @@ class Classification:
         # cycle all filenames and assign them the correct class
         set_data = {}
         for i, filename in enumerate(filenames):
-            idx = indexes[i]
+            idx = indexes[i] - 1 # matlab data is 1-indexed
             class_name = annot['synsets'][idx][0][1].tolist()[0]
 
             # add filename and class
@@ -136,7 +136,8 @@ class Classification:
                     prgbar.update(counter)
 
         # force progressbar to 100%
-        prgbar.finish()
+        if self.verbose:
+            prgbar.finish()
 
         return set_data
 
@@ -148,6 +149,7 @@ class Classification:
         for cname in data:
             data[cname].sort()
         return data
+
 
     def load_data(self):
         """
@@ -210,7 +212,7 @@ class Classification:
         prgbar.finish()
 
 
-    def convert_data_to_arrays(self, data):
+    def convert_data_to_arrays(self, data, set_name):
         """
         Convert folders/filenames to arrays.
         """
@@ -232,7 +234,7 @@ class Classification:
             range_ini = len(filenames)
 
             for filename in data[cname]:
-                filenames.append(filename)
+                filenames.append(os.path.join(set_name, cname, filename))
                 object_ids.append([count_fname, class_id])
                 count_fname += 1
 
@@ -243,7 +245,7 @@ class Classification:
         list_image_filenames_per_class = pad_list(list_image_filenames_per_class, -1)
 
         return {
-            "object_fields": str2ascii(['image_filename', 'class_name']),
+            "object_fields": str2ascii(['image_filenames', 'classes']),
             "classes": str2ascii(classes),
             "labels": str2ascii(label_list),
             "descriptions": str2ascii(description_list),
@@ -280,7 +282,7 @@ class Classification:
                 self.store_data_source(fileh5, data[set_name], set_name)
 
                  # add data to the **default** group
-                data_array = self.convert_data_to_arrays(data[set_name])
+                data_array = self.convert_data_to_arrays(data[set_name], set_name)
                 defaultg = fileh5.create_group('default/' + set_name)
                 for field_name in data_array:
                     defaultg.create_dataset(field_name, data=data_array[field_name])

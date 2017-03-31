@@ -32,5 +32,6 @@ class ILSVRC2012(BaseDataset):
             print('***************************************************************************')
             print(' > Please download this dataset from the official source: www.image-net.org')
             print('***************************************************************************')
+            print()
 
         return self.keywords
