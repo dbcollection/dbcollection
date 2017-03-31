@@ -5,7 +5,7 @@ Functions to download/process a dataset using a constructor.
 
 from __future__ import print_function
 import os
-from dbcollection.datasets.list_datasets import datasets
+from .dblist import datasets
 
 
 def fetch_dataset_constructor(name):
@@ -160,7 +160,10 @@ def process(name, task, data_dir, cache_dir, verbose):
         os.makedirs(cache_dir)
 
     # process metadata
-    cache_info, keywords = dataset_loader.process(task)
+    try:
+        cache_info, keywords = dataset_loader.process(task)
+    except KeyError:
+        raise KeyError('The task ::{}:: does not exists for loading/processing.'.format(task))
 
     # return some info to update the cache file
     return {

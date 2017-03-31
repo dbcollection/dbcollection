@@ -8,7 +8,8 @@ import os
 import json
 import shutil
 
-from dbcollection import datasets as dataset
+import dbcollection.datasets.funs as dataset
+from dbcollection.datasets.dblist import available_datasets
 from dbcollection.utils.cache import CacheManager
 from dbcollection.utils.loader import DatasetLoader
 
@@ -158,11 +159,8 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
 
     # get task cache file path
     if not cache_manager.is_task(name, task):
-        if not cache_manager.is_task(name, 'default'):
-            process(name, task, verbose, is_test)
-            cache_manager = CacheManager(is_test) # reopen the cache file
-        else:
-            raise Exception('Dataset name/task not available in cache for load.')
+        process(name, task, verbose, is_test)
+        cache_manager = CacheManager(is_test) # reopen the cache file
 
     # get data + cache dir paths
     dset_paths = cache_manager.get_dataset_storage_paths(name)
@@ -402,7 +400,7 @@ def info(list_datasets=False, is_test=False):
     cache_manager = CacheManager(is_test)
 
     if list_datasets:
-        print('dbcollection available datasets: ', dataset.available_datasets)
+        print('dbcollection available datasets: ', available_datasets)
     else:
         print('Printing contents of {}:\n'.format(cache_manager.cache_fname))
 

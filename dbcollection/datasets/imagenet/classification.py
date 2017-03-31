@@ -61,7 +61,8 @@ class Classification:
         Load ILSVRC2012 annotations (.mat file).
         """
         # load annotation file
-        return load_matlab(self.get_file_path(self.fname_metadata))
+        filename = self.get_file_path(self.fname_metadata)
+        return load_matlab(filename)
 
 
     def get_annotations(self):
@@ -140,13 +141,21 @@ class Classification:
         return set_data
 
 
+    def sort(self, data):
+        """
+        Sort the data's filenames.
+        """
+        for cname in data:
+            data[cname].sort()
+        return data
+
     def load_data(self):
         """
         Load the data from the files.
         """
         # load annotations
         if self.verbose:
-            print('\n==> Fetching annotations...')
+            print('\n==> Fetching annotations + image files...')
         annotations = self.get_annotations()
 
         # get correct set paths
@@ -158,8 +167,6 @@ class Classification:
         # cycle the train and val data
         for set_name in dir_paths:
             data_dir = dir_paths[set_name]
-            if self.verbose:
-                print('\n==> Fetch set {} data from dir: {}'.format(set_name, data_dir))
 
             if set_name is 'train':
                 data = construct_set_from_dir(data_dir, self.verbose)
@@ -169,6 +176,9 @@ class Classification:
                     data = construct_set_from_dir(data_dir, self.verbose)
                 else:
                     data = self.fetch_val_dir_data(data_dir)
+
+            # sort filenames
+            data = self.sort(data)
 
             yield {set_name : data}
 
@@ -185,11 +195,11 @@ class Classification:
         sourceg = handler.create_group('source/' + set_name)
 
         # cycle all classes from the data with the original annotations
-        for cname in data[set_name]:
+        for cname in data:
 
-            images_filenames = [os.path.join(set_name, cname, fname) for fname in data[set_name][cname]]
+            images_filenames = [os.path.join(set_name, cname, fname) for fname in data[cname]]
             images_filenames.sort()
-            sourceg.create_dataset('image_filenames', data=str2ascii(images_filenames), dtype=np.uint8)
+            sourceg.create_dataset(cname + '/' + 'image_filenames', data=str2ascii(images_filenames), dtype=np.uint8)
 
             # update progress bar
             if self.verbose:
@@ -210,16 +220,11 @@ class Classification:
         # intialize lists
         classes = list(data.keys())
         classes.sort()
-        label_list = [annotations[cname]['label'] for cname in classes]
-        description_list = [annotations[cname]['description'] for cname in classes]
+        label_list = [annotations[cname]['label'] for _, cname in enumerate(classes)]
+        description_list = [annotations[cname]['description'] for _, cname in enumerate(classes)]
         object_ids = []
         filenames = []
         list_image_filenames_per_class = []
-
-        # progress bar
-        if self.verbose:
-            progbar = progressbar.ProgressBar(max_value=len(classes)).start()
-            counter = 0
 
         # cycle all classes
         count_fname = 0
@@ -234,17 +239,8 @@ class Classification:
             # organize filenames by class id
             list_image_filenames_per_class.append(list(range(range_ini, len(filenames))))
 
-            # update progress bar
-            if self.verbose:
-                counter += 1
-                progbar.update(counter)
-
-        # force progressbar to 100%
-        if self.verbose:
-            progbar.finish()
-
         # pad list with zeros in order to have all lists of the same size
-        list_image_filenames_per_video = pad_list(list_image_filenames_per_class, -1)
+        list_image_filenames_per_class = pad_list(list_image_filenames_per_class, -1)
 
         return {
             "object_fields": str2ascii(['image_filename', 'class_name']),
@@ -278,10 +274,10 @@ class Classification:
             for set_name in data:
 
                 if self.verbose:
-                    print('Saving set metadata: {}'.format(set_name))
+                    print('\nSaving set metadata: {}'.format(set_name))
 
                 # add data to the **source** group
-                self.store_data_source(fileh5, data, set_name)
+                self.store_data_source(fileh5, data[set_name], set_name)
 
                  # add data to the **default** group
                 data_array = self.convert_data_to_arrays(data[set_name])
