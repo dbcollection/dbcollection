@@ -137,10 +137,10 @@ class Classification:
         #return a dictionary
         return {
             "train" : {
-                "object_fields": ['images', 'classes', 'superclasses'],
+                "object_fields": str2ascii(['images', 'classes', 'superclasses']),
                 "data": train_data,
-                "class_name": self.finer_classes,
-                "coarse_class_name": self.coarse_classes,
+                "class_name": str2ascii(self.finer_classes),
+                "coarse_class_name": str2ascii(self.coarse_classes),
                 "labels": train_labels,
                 "coarse_labels": train_coarse_labels,
                 "object_id_list": train_object_list,
