@@ -282,7 +282,7 @@ function manager.add(options)
                 Name of the task to load.
             data_dir : str
                 Path of the stored data on disk.
-            file_path : bool
+            file_path : str
                 Path to the metadata HDF5 file.
             keywords : table
                 Table of strings of keywords that categorize the dataset.
