@@ -65,7 +65,7 @@ class Detection:
             data = []
 
             if self.verbose:
-                print('Processing set: {}'.format(set_name))
+                print('\n==> Processing metadata for the set: {}'.format(set_name))
 
             # progressbar
             if self.verbose:
@@ -255,6 +255,10 @@ class Detection:
         handler['list_objects_ids_truncated'] = np.array(pad_list(list_objects_ids_truncated, 1), dtype=np.int32)
 
 
+        if self.verbose:
+            print('> Done.')
+
+
     def process_metadata(self):
         """
         Process metadata for the  and store it in a hdf5 file.
@@ -268,9 +272,6 @@ class Detection:
 
         for data in data_gen:
             for set_name in data:
-
-                if self.verbose:
-                    print('Saving set metadata: {}'.format(set_name))
 
                 # add data to the **source** group
                 sourceg = fileh5.create_group('source/' + set_name)
