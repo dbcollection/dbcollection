@@ -65,7 +65,7 @@ class Detection:
             data = []
 
             if self.verbose:
-                print('\n==> Processing metadata for the set: {}'.format(set_name))
+                print('> Loading data files...')
 
             # progressbar
             if self.verbose:
@@ -124,13 +124,12 @@ class Detection:
             file_grp['segmented'] = annotation['annotation']['segmented']
 
             if isinstance(annotation['annotation']['object'], list):
-                for j in range(len(annotation['annotation']['object'])):
-                    object_grp = file_grp.create_group('object/{}/'.format(j))
-                    obj = annotation['annotation']['object'][j]
-                    add_data_hdf5(object_grp, obj)
+                obj_list = annotation['annotation']['object']
             else:
-                object_grp = file_grp.create_group('object/0/')
-                obj = annotation['annotation']['object']
+                obj_list = [annotation['annotation']['object']]
+
+            for j, obj in enumerate(obj_list):
+                object_grp = file_grp.create_group('object/{}/'.format(j))
                 add_data_hdf5(object_grp, obj)
 
             # update progressbar
@@ -146,7 +145,7 @@ class Detection:
         """
         Add data of a set to the default group.
         """
-        object_fields = ['image_filenames', 'classes', 'bboxes', 'sizes', 'difficult', 'truncated']
+        object_fields = ['image_filenames', 'classes', 'boxes', 'sizes', 'difficult', 'truncated']
         image_filenames = []
         size = []
         bbox = []
@@ -155,6 +154,7 @@ class Detection:
         object_id = []
 
         list_image_filenames_per_class = []
+        list_boxes_per_image = []
         list_object_ids_per_image = []
         list_objects_ids_per_class = []
         list_objects_ids_no_difficult = []
@@ -208,52 +208,64 @@ class Detection:
             print('> Processing lists...')
 
         # process lists
-        imgs_per_class = [val[0] for i in range(len(self.classes)) for j, val in enumerate(object_id) if val[1] == i]
-        imgs_per_class = list(set(imgs_per_class)) # get unique values
-        list_image_filenames_per_class.append(imgs_per_class)
+        for i in range(len(self.classes)):
+            imgs_per_class = [val[0] for j, val in enumerate(object_id) if val[1] == i]
+            imgs_per_class = list(set(imgs_per_class)) # get unique values
+            imgs_per_class.sort()
+            list_image_filenames_per_class.append(imgs_per_class)
 
-        objs_per_img = [j for i in range(len(image_filenames)) for j, val in enumerate(object_id) if val[0] == i]
-        objs_per_img.sort()
-        list_object_ids_per_image.append(objs_per_img)
+        for i in range(len(image_filenames)):
+            boxes_per_img = [val[2] for j, val in enumerate(object_id) if val[0] == i]
+            boxes_per_img = list(set(boxes_per_img)) # get unique values
+            boxes_per_img.sort()
+            list_boxes_per_image.append(boxes_per_img)
 
-        objs_per_img = [j for i in range(len(self.classes)) for j, val in enumerate(object_id) if val[1] == i]
-        objs_per_img.sort()
-        list_objects_ids_per_class.append(objs_per_img)
+        for i in range(len(image_filenames)):
+            objs_per_img = [j for j, val in enumerate(object_id) if val[0] == i]
+            objs_per_img = list(set(objs_per_img)) # get unique values
+            objs_per_img.sort()
+            list_object_ids_per_image.append(objs_per_img)
+
+        for i in range(len(self.classes)):
+            objs_per_class = [j for j, val in enumerate(object_id) if val[1] == i]
+            objs_per_class = list(set(objs_per_class)) # get unique values
+            objs_per_class.sort()
+            list_objects_ids_per_class.append(objs_per_class)
 
         objs_no_difficult = [j for j, val in enumerate(object_id) if val[4] == 0]
         objs_no_difficult.sort()
-        list_objects_ids_no_difficult.append(objs_no_difficult)
+        list_objects_ids_no_difficult = objs_no_difficult
 
         objs_difficult = [j for j, val in enumerate(object_id) if val[4] == 1]
         objs_difficult.sort()
-        list_objects_ids_difficult.append(objs_difficult)
+        list_objects_ids_difficult = objs_difficult
 
         objs_no_truncated= [j for j, val in enumerate(object_id) if val[5] == 0]
         objs_no_truncated.sort()
-        list_objects_ids_no_truncated.append(objs_no_truncated)
+        list_objects_ids_no_truncated = objs_no_truncated
 
         objs_truncated = [j for j, val in enumerate(object_id) if val[5] == 1]
         objs_truncated.sort()
-        list_objects_ids_truncated.append(objs_truncated)
+        list_objects_ids_truncated = objs_truncated
 
 
         handler['image_filenames'] = str2ascii(image_filenames)
         handler['sizes'] = np.array(size, dtype=np.int32)
         handler['classes'] = str2ascii(self.classes)
-        handler['bboxes'] = np.array(bbox, dtype=np.float)
+        handler['boxes'] = np.array(bbox, dtype=np.float)
         handler['truncated'] = np.array(truncated, dtype=np.int32)
         handler['difficult'] = np.array(difficult, dtype=np.int32)
         handler['object_ids'] = np.array(object_id, dtype=np.int32)
         handler['object_fields'] = str2ascii(object_fields)
 
-        handler['list_image_filenames_per_class'] = np.array(pad_list(list_image_filenames_per_class, 1), dtype=np.int32)
-        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, 1), dtype=np.int32)
-        handler['list_objects_ids_per_class'] = np.array(pad_list(list_objects_ids_per_class, 1), dtype=np.int32)
-        handler['list_objects_ids_no_difficult'] = np.array(pad_list(list_objects_ids_no_difficult, 1), dtype=np.int32)
-        handler['list_objects_ids_difficult'] = np.array(pad_list(list_objects_ids_difficult, 1), dtype=np.int32)
-        handler['list_objects_ids_no_truncated'] = np.array(pad_list(list_objects_ids_no_truncated, 1), dtype=np.int32)
-        handler['list_objects_ids_truncated'] = np.array(pad_list(list_objects_ids_truncated, 1), dtype=np.int32)
-
+        handler['list_image_filenames_per_class'] = np.array(pad_list(list_image_filenames_per_class, -1), dtype=np.int32)
+        handler['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
+        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
+        handler['list_objects_ids_per_class'] = np.array(pad_list(list_objects_ids_per_class, -1), dtype=np.int32)
+        handler['list_objects_ids_no_difficult'] = np.array(list_objects_ids_no_difficult, dtype=np.int32)
+        handler['list_objects_ids_difficult'] = np.array(list_objects_ids_difficult, dtype=np.int32)
+        handler['list_objects_ids_no_truncated'] = np.array(list_objects_ids_no_truncated, dtype=np.int32)
+        handler['list_objects_ids_truncated'] = np.array(list_objects_ids_truncated, dtype=np.int32)
 
         if self.verbose:
             print('> Done.')
@@ -272,6 +284,10 @@ class Detection:
 
         for data in data_gen:
             for set_name in data:
+
+                if self.verbose:
+                    print('\n==> Processing metadata for the set: {}'.format(set_name))
+
 
                 # add data to the **source** group
                 sourceg = fileh5.create_group('source/' + set_name)
