@@ -37,6 +37,8 @@ function DataLoader:__init(name, task, data_dir, cache_path)
     self.data_dir = data_dir
     self.cache_path = cache_path
 
+    local tic = torch.tic()
+
     -- create a handler for the cache file
     self.file = hdf5.open(self.cache_path, 'r')
     self.root_path = '/default'
