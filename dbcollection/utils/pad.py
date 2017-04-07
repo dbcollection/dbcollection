@@ -2,8 +2,8 @@
 Padding functions.
 """
 
-def pad_list(listA, val=0):
-    """Pad list of lists with 'val' shuch that all lists have the same length.
+def pad_list(listA, val=-1):
+    """Pad list of lists with 'val' such that all lists have the same length.
 
     Parameters
     ----------
@@ -31,3 +31,31 @@ def pad_list(listA, val=0):
     # pad all lists with the a padding value
     return [l + [val]*int(max_size-len(l)) for l in listA]
 
+
+def unpad_list(listA, val=-1):
+    """Unpad list of lists with which has values equal to 'val'.
+
+    Parameters
+    ----------
+    listA : list of lists
+        List of lists of equal sizes.
+    val : number
+        Value to unpad the lists.
+
+    Returns
+    -------
+    list of lists
+        A list of lists without the padding values.
+
+    Raises
+    ------
+        None
+    """
+    # pad list with zeros in order to have all lists of the same size
+    assert isinstance(listA, list), 'Input must be a list. Got {}, espected {}' \
+                                    .format(type(listA), type(list))
+
+    if isinstance(listA[0], list):
+        return [list(filter(lambda x: x != val, l)) for i, l in enumerate(listA)]
+    else:
+        return list(filter(lambda x: x != val, listA))
