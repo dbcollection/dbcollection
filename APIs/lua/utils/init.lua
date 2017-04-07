@@ -1,3 +1,4 @@
 return {
-    string_ascii = require 'dbcollection.utils.string_ascii'
+    string_ascii = require 'dbcollection.utils.string_ascii',
+    pad = require 'dbcollection.utils.pad',
 }
