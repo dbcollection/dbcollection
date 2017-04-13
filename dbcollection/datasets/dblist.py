@@ -9,7 +9,7 @@ All available datasets must be added in this file.
 # List of image processing datasets
 #---------------------------------------------------------
 
-from . import cifar, pascal, mnist, imagenet, ucf
+from . import caltech, cifar, pascal, mnist, imagenet, ucf
 
 object_classification = {
     "cifar10" : cifar.cifar10.Cifar10,
@@ -24,6 +24,11 @@ human_action = {
     "ucfsports" : ucf.ucfsports.UCFSports
 }
 
+pedestrian_detection = {
+    "caltech_pedestrian" : caltech.pedestrian.Pedestrian
+}
+
+
 #---------------------------------------------------------
 # MAIN list
 #---------------------------------------------------------
@@ -31,6 +36,7 @@ human_action = {
 datasets = {}
 datasets.update(object_classification) # object classification
 datasets.update(human_action) # human action
+datasets.update(pedestrian_detection) # pedestrian detection/recognition
 
 # list of all dataset's names
 available_datasets = list(datasets.keys())
