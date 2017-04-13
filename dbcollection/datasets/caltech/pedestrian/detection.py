@@ -115,12 +115,6 @@ class Detection:
                 video_grp = set_grp.create_group(video)
                 video_grp['image_filenames'] = str2ascii(data[set_data][video]['images'])
                 video_grp['annotation_filenames'] = str2ascii(data[set_data][video]['annotations'])
-                #img_fnames = data[set_data][video]['images']
-                #annot_fnames = data[set_data][video]['annotations']
-                #for j in range(0, len(img_fnames)):
-                #    img_annot_grp = video_grp.create_group(str(j))
-                #    img_annot_grp['image_filename'] = img_fnames[j]
-                #    img_annot_grp['annotation_filenames'] = annot_fnames[j]
 
             # update progressbar
             if self.verbose:
@@ -139,8 +133,8 @@ class Detection:
         image_filenames = []
         bbox = [[0, 0, 0, 0]]
         bboxv = [[0, 0, 0, 0]]
-        lbl_id = [[-1]]
-        occlusion = [[-1]]
+        lbl_id = []
+        occlusion = []
         object_id = []
 
         list_image_filenames_per_class = []
@@ -170,6 +164,7 @@ class Detection:
                     # load annotation file
                     annotation = load_json(os.path.join(self.data_path, annot_fnames[j]))
 
+                    obj_per_img = []
                     if any(annotation):
                         for obj in annotation:
                             bbox.append(obj['pos'])
@@ -177,7 +172,10 @@ class Detection:
                                 bboxv.append(obj['posv'])
                             else:
                                 bboxv.append([0, 0, 0, 0])
-                            lbl_id.append(obj['id'])
+                            if isinstance(obj['id'], int):
+                                lbl_id.append(obj['id'])
+                            else:
+                                lbl_id.append(0)
                             occlusion.append(obj['occl'])
                             class_lbl = self.classes.index(obj['lbl'])
 
@@ -185,11 +183,19 @@ class Detection:
                             object_id.append([img_counter, class_lbl, obj_counter,
                                             obj_counter, obj_counter, obj_counter])
 
+                            obj_per_img.append(obj_counter)
+
                             # increment counter
                             obj_counter += 1
+
                     else:
                         # img, class, bbox, bboxv, id, occlusion
                         object_id.append([img_counter, len(self.classes), 0, 0, 0, 0])
+
+                    # add to lists
+                    list_boxes_per_image.append(obj_per_img)
+                    list_boxesv_per_image.append(obj_per_img)
+                    list_object_ids_per_image.append(obj_per_img)
 
                     # increment counter
                     img_counter += 1
@@ -212,45 +218,29 @@ class Detection:
             imgs_per_class.sort()
             list_image_filenames_per_class.append(imgs_per_class)
 
-        for i in range(len(image_filenames)):
-            boxes_per_img = [val[2] for j, val in enumerate(object_id) if val[0] == i]
-            boxes_per_img = list(set(boxes_per_img)) # get unique values
-            boxes_per_img.sort()
-            list_boxes_per_image.append(boxes_per_img)
-
-        for i in range(len(image_filenames)):
-            boxesv_per_img = [val[3] for j, val in enumerate(object_id) if val[0] == i]
-            boxesv_per_img = list(set(boxesv_per_img)) # get unique values
-            boxesv_per_img.sort()
-            list_boxesv_per_image.append(boxesv_per_img)
-
-        for i in range(len(image_filenames)):
-            objs_per_img = [j for j, val in enumerate(object_id) if val[0] == i and val[2] != 0]
-            objs_per_img = list(set(objs_per_img)) # get unique values
-            objs_per_img.sort()
-            list_object_ids_per_image.append(objs_per_img)
-
         for i in range(len(self.classes)):
             objs_per_class = [j for j, val in enumerate(object_id) if val[1] == i]
             objs_per_class = list(set(objs_per_class)) # get unique values
             objs_per_class.sort()
             list_objects_ids_per_class.append(objs_per_class)
 
+        # add data to hdf5 file
+        set_grp = handler.create_group(set_name)
 
-        handler['image_filenames'] = str2ascii(image_filenames)
-        handler['classes'] = str2ascii(self.classes)
-        handler['boxes'] = np.array(bbox, dtype=np.float)
-        handler['boxesv'] = np.array(bboxv, dtype=np.float)
-        handler['id'] = np.array(lbl_id, dtype=np.int32)
-        handler['occlusion'] = np.array(occlusion, dtype=np.float)
-        handler['object_ids'] = np.array(object_id, dtype=np.int32)
-        handler['object_fields'] = str2ascii(object_fields)
+        set_grp['image_filenames'] = str2ascii(image_filenames)
+        set_grp['classes'] = str2ascii(self.classes)
+        set_grp['boxes'] = np.array(bbox, dtype=np.float)
+        set_grp['boxesv'] = np.array(bboxv, dtype=np.float)
+        set_grp['id'] = np.array(lbl_id, dtype=np.int32)
+        set_grp['occlusion'] = np.array(occlusion, dtype=np.float)
+        set_grp['object_ids'] = np.array(object_id, dtype=np.int32)
+        set_grp['object_fields'] = str2ascii(object_fields)
 
-        handler['list_image_filenames_per_class'] = np.array(pad_list(list_image_filenames_per_class, -1), dtype=np.int32)
-        handler['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
-        handler['list_boxesv_per_image'] = np.array(pad_list(list_boxesv_per_image, -1), dtype=np.int32)
-        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
-        handler['list_objects_ids_per_class'] = np.array(pad_list(list_objects_ids_per_class, -1), dtype=np.int32)
+        set_grp['list_image_filenames_per_class'] = np.array(pad_list(list_image_filenames_per_class, -1), dtype=np.int32)
+        set_grp['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
+        set_grp['list_boxesv_per_image'] = np.array(pad_list(list_boxesv_per_image, -1), dtype=np.int32)
+        set_grp['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
+        set_grp['list_objects_ids_per_class'] = np.array(pad_list(list_objects_ids_per_class, -1), dtype=np.int32)
 
         if self.verbose:
             print('> Done.')
