@@ -3,8 +3,6 @@ Test cifar10 hdf5 file contents.
 """
 
 
-import os
-import sys
 import pytest
 import dbcollection.manager as dbc
 from dbcollection.utils.cache import CacheManager
@@ -24,9 +22,9 @@ def test_cifar10__task_classification():
     # check train values
     assert ascii2str(cifar10.get('train', 'classes', 0)) == 'airplane'
     assert set(cifar10.object('train', 0).tolist()) == set([0, 6])
-    assert set(cifar10.list('train')) == set(['classes', 'images', 'object_fields', 'object_ids'])
+    assert set(cifar10.list('train')) == set(['classes', 'images', 'list_images_per_class', 'object_fields', 'object_ids'])
 
     # check test values
     assert ascii2str(cifar10.get('test', 'classes', 0)) == 'airplane'
     assert set(cifar10.object('test', 0).tolist()) == set([0, 3])
-    assert set(cifar10.list('test')) == set(['classes', 'images', 'object_fields', 'object_ids'])
+    assert set(cifar10.list('test')) == set(['classes', 'images', 'list_images_per_class', 'object_fields', 'object_ids'])
