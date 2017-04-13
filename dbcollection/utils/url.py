@@ -176,7 +176,7 @@ def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True
     # download + extract data and remove temporary files
     for i, url in enumerate(urls):
         if verbose:
-            print('Download url ({}/{}): {}'.format(i+1, len(urls), url))
+            print('\nDownload url ({}/{}): {}'.format(i+1, len(urls), url))
 
         # get download save filename
         filename = os.path.join(dir_save, os.path.basename(url))
