@@ -1,0 +1,37 @@
+"""
+Caltech Pedestrian Dataset download/process functions.
+"""
+
+
+from dbcollection.datasets.dbclass import BaseDataset
+from .detection import Detection
+
+
+class Pedestrian(BaseDataset):
+    """ Caltech Pedestrian Dataset preprocessing/downloading functions """
+
+    # download url
+    url = ['http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set00.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set01.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set02.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set03.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set04.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set05.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set06.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set07.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set08.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set09.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/set10.tar',
+           'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/USA/annotations.zip']
+
+    md5_checksum = ''
+
+    # some keywords. These are used to classify datasets for easier
+    # categorization.
+    keywords = ['image_processing', 'detection', 'pedestrian']
+
+    # init tasks
+    tasks = {
+        "detection" : Detection
+    }
+    default_task = 'detection'

@@ -80,10 +80,10 @@ class BaseDataset:
             for i, task in enumerate(self.tasks):
                 if self.verbose:
                     print('Processing ::{}:: task: ({}/{})\n'.format(task, i+1, len(self.tasks)))
-                info_output[task] = self.tasks[task].run()
+                info_output[task], info_output[task + '_raw'] = self.tasks[task].run()
         else:
             if self.verbose:
                 print('Processing ::{}:: task:\n'.format(task))
-            info_output[task] = self.tasks[task].run()
+            info_output[task], info_output[task + '_raw'] = self.tasks[task].run()
 
         return info_output, self.keywords
