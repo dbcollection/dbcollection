@@ -5,7 +5,6 @@ Test dbcollection/utils/loader.py.
 
 import os
 import sys
-from unittest.mock import patch
 import pytest
 from dbcollection.utils.loader import DatasetLoader
 

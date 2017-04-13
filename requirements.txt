@@ -5,3 +5,5 @@ progressbar2
 pytest
 scipy
 xmltodict
+requests
+Pillow
