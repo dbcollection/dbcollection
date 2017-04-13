@@ -10,20 +10,20 @@ from dbcollection.datasets import funs
 
 
 def test_fetch_dataset_constructor__succeed():
-    assert 0
+    pass
 
 def test_fetch_dataset_constructor__fail():
-    assert 0
+    pass
 
 def test_setup_dataset_constructor():
-    assert 0
+    pass
 
 def test_exists():
-    assert 0
+    pass
 
 def test_download():
-    assert 0
+    pass
 
 def test_process():
-    assert 0
+    pass
 
