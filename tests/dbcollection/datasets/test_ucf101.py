@@ -17,19 +17,22 @@ cache_manager = CacheManager(is_test=True)
 def test_ucf101__task_recognition():
     ucf101 = dbc.load(name=name, task='recognition')
 
-    assert set(ucf101.sets) == set(['train', 'test'])
+    assert set(ucf101.sets) == set(['train01', 'test01','train02', 'test02','train03', 'test03'])
 
     # check train01 values
     assert ascii2str(ucf101.get('train01', 'activities', 0)) == 'ApplyEyeMakeup'
     assert ascii2str(ucf101.get('train01', 'videos', 0)) == 'v_ApplyEyeMakeup_g08_c01'
-    assert set(ucf101.list('train01')) == set(['videos', 'video_filenames',
+    assert set(ucf101.list('train01')) == set(['activities', 'image_filenames',
                                                'list_image_filenames_per_video',
-                                               'activities', 'total_frames'])
+                                               'list_videos_per_activity',
+                                               'object_fields', 'object_ids',
+                                               'total_frames', 'video_filenames', 'videos'])
 
     # check test01 values
     assert ascii2str(ucf101.get('test01', 'activities', 0)) == 'ApplyEyeMakeup'
     assert ascii2str(ucf101.get('test01', 'videos', 0)) == 'v_ApplyEyeMakeup_g01_c01'
-    assert set(ucf101.list('test01')) == set(['videos', 'video_filenames',
-                                              'list_image_filenames_per_video',
-                                              'activities', 'total_frames'])
-
+    assert set(ucf101.list('test01')) == set(['activities', 'image_filenames',
+                                               'list_image_filenames_per_video',
+                                               'list_videos_per_activity',
+                                               'object_fields', 'object_ids',
+                                               'total_frames', 'video_filenames', 'videos'])
