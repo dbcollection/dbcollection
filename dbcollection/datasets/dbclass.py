@@ -59,13 +59,16 @@ class BaseDataset:
         Initialize the tasks' class constructor.
         """
         assert any(self.tasks), 'No defined tasks for process. Please insert a task for processing.'
+        tasks_init = {}
         for task in self.tasks:
-            self.tasks[task] = self.tasks[task](self.data_path, self.cache_path, self.verbose)
+            tasks_init[task] = self.tasks[task](self.data_path, self.cache_path, self.verbose)
 
         if self.default_task == '':
             self.default_task = self.fetch_task_key()
-        else:
-            self.tasks['default'] = self.tasks[self.default_task]
+
+        tasks_init['default'] = tasks_init[self.default_task]
+
+        return tasks_init
 
 
     def process(self, task='default'):
@@ -73,17 +76,17 @@ class BaseDataset:
         Process metadata for all tasks
         """
         # init tasks
-        self.init_tasks_constructors()
+        tasks_loader = self.init_tasks_constructors()
 
         info_output = {}
         if task == 'all':
-            for i, task in enumerate(self.tasks):
+            for i, task in enumerate(tasks_loader):
                 if self.verbose:
-                    print('Processing ::{}:: task: ({}/{})\n'.format(task, i+1, len(self.tasks)))
-                info_output[task], info_output[task + '_raw'] = self.tasks[task].run()
+                    print('Processing ::{}:: task: ({}/{})\n'.format(task, i+1, len(tasks_loader)))
+                info_output[task] = tasks_loader[task].run()
         else:
             if self.verbose:
                 print('Processing ::{}:: task:\n'.format(task))
-            info_output[task], info_output[task + '_raw'] = self.tasks[task].run()
+            info_output[task] = tasks_loader[task].run()
 
         return info_output, self.keywords
