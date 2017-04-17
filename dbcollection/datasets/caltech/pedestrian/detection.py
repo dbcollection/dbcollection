@@ -18,8 +18,8 @@ from dbcollection.utils.caltech_pedestrian_extractor.converter import extract_da
 class Detection:
     """ Caltech Pedestrian detection preprocessing functions """
 
-    classes = ['person', 'people', 'person-fa', 'person?', 'empty']
-
+    skip_step = 30
+    file_name = 'detection.h5'
 
     def __init__(self, data_path, cache_path, verbose=True):
         """
@@ -46,6 +46,8 @@ class Detection:
         # extract data
         self.convert_extract_data()
 
+        self.classes = ['person', 'people', 'person-fa', 'person?', 'empty']
+
         sets = {
             "train" : ['set00', 'set01', 'set02', 'set03', 'set04', 'set05'],
             "test" : ['set06', 'set07', 'set08', 'set09', 'set10']
@@ -55,7 +57,7 @@ class Detection:
             data = {set_name : {}}
 
             if self.verbose:
-                print('> Loading data files for the set: {}'.format(set_name))
+                print('\n> Loading data files for the set: {}'.format(set_name))
 
             # progressbar
             if self.verbose:
@@ -76,15 +78,17 @@ class Detection:
                     img_fnames = os.listdir(os.path.join(extracted_data_dir, video, 'images'))
                     img_fnames = [os.path.join('extracted_data', set_data, video, 'images', fname) for fname in img_fnames]
                     img_fnames.sort()
+                    img_fnames_list = [img_fnames[i] for i in range(self.skip_step-1, len(img_fnames), self.skip_step)]
 
                     # fetch all annotations filenames
                     annotation_fnames = os.listdir(os.path.join(extracted_data_dir, video, 'annotations'))
                     annotation_fnames = [os.path.join('extracted_data', set_data, video, 'annotations', fname) for fname in annotation_fnames]
                     annotation_fnames.sort()
+                    annotation_fnames_list = [annotation_fnames[i] for i in range(self.skip_step-1, len(annotation_fnames), self.skip_step)]
 
                     data[set_name][set_data][video] = {
-                        "images" : img_fnames,
-                        "annotations" : annotation_fnames
+                        "images" : img_fnames_list,
+                        "annotations" : annotation_fnames_list
                     }
 
                 # update progressbar
@@ -98,16 +102,16 @@ class Detection:
             yield data
 
 
-    def store_data_raw(self, handler, data, set_name):
+    def store_data_source(self, handler, data, set_name):
         """
-        Add data of a set to the raw file.
+        Add data of a set to the source group.
         """
         if self.verbose:
-            print('> Adding data to the raw file:')
+            print('> Adding data to the source group')
             prgbar = progressbar.ProgressBar(max_value=len(data))
 
         # create set group
-        set_name_grp = handler.create_group(set_name)
+        set_name_grp = handler.create_group('source/' + set_name)
 
         for i, set_data in enumerate(data):
             set_grp = set_name_grp.create_group(set_data)
@@ -225,7 +229,7 @@ class Detection:
             list_objects_ids_per_class.append(objs_per_class)
 
         # add data to hdf5 file
-        set_grp = handler.create_group(set_name)
+        set_grp = handler.create_group('default/' + set_name)
 
         set_grp['image_filenames'] = str2ascii(image_filenames)
         set_grp['classes'] = str2ascii(self.classes)
@@ -251,10 +255,8 @@ class Detection:
         Process metadata and store it in a hdf5 file.
         """
         # create/open hdf5 files with subgroups for train/val/test/etc
-        file_name = os.path.join(self.cache_path, 'detection.h5')
-        file_name_raw = os.path.join(self.cache_path, 'detection_raw.h5')
+        file_name = os.path.join(self.cache_path, self.file_name)
         fileh5 = h5py.File(file_name, 'w', version='latest')
-        fileh5_raw = h5py.File(file_name_raw, 'w', version='latest')
 
         if self.verbose:
             print('\n==> Storing metadata to file: {}'.format(file_name))
@@ -266,20 +268,19 @@ class Detection:
             for set_name in data:
 
                 if self.verbose:
-                    print('\nSaving set metadata: {}'.format(set_name))
+                    print('Saving set metadata: {}'.format(set_name))
 
                 # add data to the **raw** file
-                self.store_data_raw(fileh5_raw, data[set_name], set_name)
+                self.store_data_source(fileh5, data[set_name], set_name)
 
                  # add data to the **default** file
                 self.store_data_default(fileh5, data[set_name], set_name)
 
         # close file
         fileh5.close()
-        fileh5_raw.close()
 
         # return information of the task + cache file
-        return file_name, file_name_raw
+        return file_name
 
 
     def run(self):
