@@ -11,17 +11,23 @@ All available datasets must be added in this file.
 
 from . import caltech, cifar, pascal, mnist, imagenet, ucf
 
+
+human_action = {
+    "ucf101" : ucf.ucf101.UCF101,
+    "ucfsports" : ucf.ucfsports.UCFSports
+}
+
+human_pose = {
+
+}
+
 object_classification = {
     "cifar10" : cifar.cifar10.Cifar10,
     "cifar100" : cifar.cifar100.Cifar100,
     "ilsvrc2012": imagenet.ILSVRC2012,
     'mnist': mnist.MNIST,
     "pascal_voc_2007" : pascal.voc_2007.PascalVOC2007,
-}
-
-human_action = {
-    "ucf101" : ucf.ucf101.UCF101,
-    "ucfsports" : ucf.ucfsports.UCFSports
+    "mscoco" : mscoco.MSCOCO
 }
 
 pedestrian_detection = {
