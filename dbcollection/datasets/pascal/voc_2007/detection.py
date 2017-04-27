@@ -18,8 +18,8 @@ class Detection:
     """ Pascal VOC 2007 object detection task class """
 
     # object classes
-    classes = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car',  \
-               'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',\
+    classes = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car',
+               'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
                'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
 
 
@@ -79,7 +79,7 @@ class Detection:
                 # load annotation
                 annotation = load_xml(annot_filename)
 
-                data.append([image_filename, annotation])
+                data.append([image_filename, annot_filename, annotation])
 
                 # update progressbar
                 if self.verbose:
@@ -97,48 +97,17 @@ class Detection:
         Add data of a set to the source group.
         """
 
-        def add_data_hdf5(handler, object):
-            """Add data to the hdf5 file."""
-            handler['name'] = object['name']
-            handler['pose'] = object['pose']
-            handler['truncated'] = object['truncated']
-            handler['difficult'] = object['difficult']
-            handler['bndbox/xmin'] = object['bndbox']['xmin']
-            handler['bndbox/ymin'] = object['bndbox']['ymin']
-            handler['bndbox/xmax'] = object['bndbox']['xmax']
-            handler['bndbox/ymax'] = object['bndbox']['ymax']
-
         if self.verbose:
             print('> Adding data to source group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data))
 
-        for i, data_ in enumerate(data):
-            image_filename, annotation = data_
+        fnames, anames = [], []
+        for _, data_ in enumerate(data):
+            image_filename, annotation_filename, _ = data_
+            fnames.append(image_filename)
+            anames.append(annotation_filename)
 
-            file_grp = handler.create_group(str(i))
-
-            file_grp['image_filename'] = image_filename
-            file_grp['size/width'] = annotation['annotation']['size']['width']
-            file_grp['size/height'] = annotation['annotation']['size']['height']
-            file_grp['size/depth'] = annotation['annotation']['size']['depth']
-            file_grp['segmented'] = annotation['annotation']['segmented']
-
-            if isinstance(annotation['annotation']['object'], list):
-                obj_list = annotation['annotation']['object']
-            else:
-                obj_list = [annotation['annotation']['object']]
-
-            for j, obj in enumerate(obj_list):
-                object_grp = file_grp.create_group('object/{}/'.format(j))
-                add_data_hdf5(object_grp, obj)
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
+        handler['image_filenames'] = str2ascii(fnames)
+        handler['annotation_filenames'] = str2ascii(anames)
 
 
     def add_data_to_default(self, handler, data):

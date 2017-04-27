@@ -5,7 +5,6 @@ Pascal VOC 2007 download/process functions.
 
 from dbcollection.datasets.dbclass import BaseDataset
 from .detection import Detection
-from .detection_light import DetectionLight
 
 
 class PascalVOC2007(BaseDataset):
@@ -24,8 +23,7 @@ class PascalVOC2007(BaseDataset):
 
     # init tasks
     tasks = {
-        "detection" : Detection,
-        "detection_light" : DetectionLight
+        "detection" : Detection
 
     }
     default_task = 'detection'
