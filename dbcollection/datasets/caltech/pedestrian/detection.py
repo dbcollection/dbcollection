@@ -46,7 +46,7 @@ class Detection:
         # extract data
         self.convert_extract_data()
 
-        self.classes = ['person', 'people', 'person-fa', 'person?', 'empty']
+        self.classes = ['person', 'person-fa', 'people', 'person?']
 
         sets = {
             "train" : ['set00', 'set01', 'set02', 'set03', 'set04', 'set05'],
@@ -113,9 +113,9 @@ class Detection:
         # create set group
         set_name_grp = handler.create_group('source/' + set_name)
 
-        for i, set_data in enumerate(data):
+        for i, set_data in enumerate(sorted(data)):
             set_grp = set_name_grp.create_group(set_data)
-            for video in data[set_data]:
+            for video in sorted(data[set_data]):
                 video_grp = set_grp.create_group(video)
                 video_grp['image_filenames'] = str2ascii(data[set_data][video]['images'])
                 video_grp['annotation_filenames'] = str2ascii(data[set_data][video]['annotations'])
@@ -135,8 +135,8 @@ class Detection:
         """
         object_fields = ['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']
         image_filenames = []
-        bbox = [[0, 0, 0, 0]]
-        bboxv = [[0, 0, 0, 0]]
+        bbox = []
+        bboxv = []
         lbl_id = []
         occlusion = []
         object_id = []
@@ -155,8 +155,8 @@ class Detection:
 
         img_counter = 0
         obj_counter = 0
-        for i, set_data in enumerate(data):
-            for video in data[set_data]:
+        for i, set_data in enumerate(sorted(data)):
+            for video in sorted(data[set_data]):
                 img_fnames = data[set_data][video]["images"]
                 annot_fnames = data[set_data][video]["annotations"]
 
@@ -171,30 +171,37 @@ class Detection:
                     obj_per_img = []
                     if any(annotation):
                         for obj in annotation:
-                            bbox.append(obj['pos'])
-                            if isinstance(obj['posv'], list):
-                                bboxv.append(obj['posv'])
-                            else:
-                                bboxv.append([0, 0, 0, 0])
-                            if isinstance(obj['id'], int):
-                                lbl_id.append(obj['id'])
-                            else:
-                                lbl_id.append(0)
-                            occlusion.append(obj['occl'])
-                            class_lbl = self.classes.index(obj['lbl'])
+                            # convert [x,y,w,h] to [xmin,ymin,xmax,ymax]
+                            if obj['pos'][2] >= 5 and obj['pos'][3] >= 5: # discard any bbox smaller than 5px wide/high
+                                bb_correct_format = [obj['pos'][0],
+                                                     obj['pos'][1],
+                                                     obj['pos'][0] + obj['pos'][2]-1,
+                                                     obj['pos'][1] + obj['pos'][3]-1]
+                                bbox.append(bb_correct_format)
+                                if isinstance(obj['posv'], list):
+                                    # convert [x,y,w,h] to [xmin,ymin,xmax,ymax]
+                                    bbv_correct_format = [obj['posv'][0],
+                                                          obj['posv'][1],
+                                                          obj['posv'][0] + obj['posv'][2]-1,
+                                                          obj['posv'][1] + obj['posv'][3]-1]
+                                    bboxv.append(bbv_correct_format)
+                                else:
+                                    bboxv.append([0, 0, 0, 0])
+                                if isinstance(obj['id'], int):
+                                    lbl_id.append(obj['id'])
+                                else:
+                                    lbl_id.append(0)
+                                occlusion.append(obj['occl'])
+                                class_lbl = self.classes.index(obj['lbl'])
 
-                            # img, class, bbox, bboxv, id, occlusion
-                            object_id.append([img_counter, class_lbl, obj_counter,
-                                            obj_counter, obj_counter, obj_counter])
+                                # img, class, bbox, bboxv, id, occlusion
+                                object_id.append([img_counter, class_lbl, obj_counter,
+                                                  obj_counter, obj_counter, obj_counter])
 
-                            obj_per_img.append(obj_counter)
+                                obj_per_img.append(obj_counter)
 
-                            # increment counter
-                            obj_counter += 1
-
-                    else:
-                        # img, class, bbox, bboxv, id, occlusion
-                        object_id.append([img_counter, len(self.classes), 0, 0, 0, 0])
+                                # increment counter
+                                obj_counter += 1
 
                     # add to lists
                     list_boxes_per_image.append(obj_per_img)

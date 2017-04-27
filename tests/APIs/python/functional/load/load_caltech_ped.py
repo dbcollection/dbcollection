@@ -19,7 +19,7 @@ dbc.config_cache(delete_cache=True, is_test=True)
 
 # download/setup dataset
 print('\n==> dbcollection: load()')
-ped = dbc.load(name='caltech_pedestrian', task='detection_30x', data_dir=data_dir, verbose=True, is_test=True)
+ped = dbc.load(name='caltech_pedestrian', task='detection', data_dir=data_dir, verbose=True, is_test=True)
 
 # print data from the loader
 print('\n==> dbcollection: info()')
