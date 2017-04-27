@@ -79,7 +79,7 @@ class Detection:
                 # load annotation
                 annotation = load_xml(annot_filename)
 
-                data.append([image_filename, annot_filename, annotation])
+                data.append([image_filename, annotation])
 
                 # update progressbar
                 if self.verbose:
@@ -97,17 +97,48 @@ class Detection:
         Add data of a set to the source group.
         """
 
+        def add_data_hdf5(handler, anno):
+            """Add data to the hdf5 file."""
+            handler['name'] = anno['name']
+            handler['pose'] = anno['pose']
+            handler['truncated'] = anno['truncated']
+            handler['difficult'] = anno['difficult']
+            handler['bndbox/xmin'] = anno['bndbox']['xmin']
+            handler['bndbox/ymin'] = anno['bndbox']['ymin']
+            handler['bndbox/xmax'] = anno['bndbox']['xmax']
+            handler['bndbox/ymax'] = anno['bndbox']['ymax']
+
         if self.verbose:
             print('> Adding data to source group:')
+            prgbar = progressbar.ProgressBar(max_value=len(data))
 
-        fnames, anames = [], []
-        for _, data_ in enumerate(data):
-            image_filename, annotation_filename, _ = data_
-            fnames.append(image_filename)
-            anames.append(annotation_filename)
+        for i, data_ in enumerate(data):
+            image_filename, annotation = data_
 
-        handler['image_filenames'] = str2ascii(fnames)
-        handler['annotation_filenames'] = str2ascii(anames)
+            file_grp = handler.create_group(str(i))
+
+            file_grp['image_filename'] = image_filename
+            file_grp['size/width'] = annotation['annotation']['size']['width']
+            file_grp['size/height'] = annotation['annotation']['size']['height']
+            file_grp['size/depth'] = annotation['annotation']['size']['depth']
+            file_grp['segmented'] = annotation['annotation']['segmented']
+
+            if isinstance(annotation['annotation']['object'], list):
+                obj_list = annotation['annotation']['object']
+            else:
+                obj_list = [annotation['annotation']['object']]
+
+            for j, obj in enumerate(obj_list):
+                object_grp = file_grp.create_group('object/{}/'.format(j))
+                add_data_hdf5(object_grp, obj)
+
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
+        # update progressbar
+        if self.verbose:
+            prgbar.finish()
 
 
     def add_data_to_default(self, handler, data):
