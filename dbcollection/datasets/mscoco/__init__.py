@@ -4,7 +4,8 @@ Caltech Pedestrian Dataset download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .detections import Detection
+from .detection2015 import Detection2015
+from .detection2016 import Detection2016
 from .captions import Caption
 from .keypoints import Keypoint
 
@@ -33,9 +34,10 @@ class MSCOCO(BaseDataset):
 
     # init tasks
     tasks = {
-        "detection" : Detection,
-        "caption" : Caption,
-        "keypoint" : Keypoint
+        "detection_2015" : Detection2015,
+        "detection_2016" : Detection2016,
+        "caption_2015" : Caption,
+        "keypoint_2016" : Keypoint
     }
 
-    default_task = 'detection'
+    default_task = 'detection_2016'
