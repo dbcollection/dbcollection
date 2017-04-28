@@ -13,9 +13,24 @@ from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_json
 
+from .load_data_test import load_data_test
+
 
 class Detection2015:
     """ COCO Detection (2015) preprocessing functions """
+
+
+    image_dir_path = {
+        "train" : 'train2014',
+        "val" : 'val2014',
+        "test" : 'test2014'
+    }
+
+    annotation_path = {
+        "train" : os.path.join('annotations', 'instances_train2014.json'),
+        "val" : os.path.join('annotations', 'instances_val2014.json'),
+        "test" : os.path.join('annotations', 'image_info_test2014.json')
+    }
 
 
     def __init__(self, data_path, cache_path, verbose=True):
@@ -27,95 +42,94 @@ class Detection2015:
         self.verbose = verbose
 
 
+    def load_data_trainval(self, set_name, image_dir, annotation_path):
+        """
+        Load train+val data
+        """
+        data = {}
+
+        # load annotations file
+        annotations = load_json(annotation_path)
+
+        # progressbar
+        if self.verbose:
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
+
+        # parse annotations
+        # images
+        images = {}
+        for i, annot in enumerate(annotations['images']):
+            images[annot['id']] = {
+                "width" : annot['width'],
+                "height" : annot['height'],
+                "file_name" : os.path.join(image_dir, annot['file_name'])
+            }
+
+        # categories
+        categories = {}
+        category_list, supercategory_list = [], []
+        for i, annot in enumerate(annotations['categories']):
+            categories[annot['id']] = {
+                "name" : annot['name'],
+                "supercategory" : annot['supercategory']
+            }
+            category_list[i] = annot['name']
+            supercategory_list[i] = annot['supercategory']
+        supercategory_list = list(set(supercategory_list))
+
+        for i, annot in enumerate(annotations['annotations']):
+            img_id = annot['image_id']
+            category_annot = categories[annot['category_id']]
+
+            obj = {
+                "category" : category_annot['name'],
+                "supercategory" : category_annot['supercategory'],
+                "area" : annot['area'],
+                "iscrowd" : annot['iscrowd'],
+                "segmentation" : annot['segmentation'],
+                "bbox" : annot['bbox']
+            }
+
+            if img_id in data.keys():
+                data[img_id]['object'].append(obj)
+            else:
+                img_annotation = images[img_id]
+                data[img_id] = {
+                    "filename" : img_annotation['file_name'],
+                    "width" : img_annotation['width'],
+                    "height" : img_annotation['height'],
+                    "object" : obj
+                }
+
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
+        # reset progressbar
+        if self.verbose:
+            prgbar.finish()
+
+        return {set_name : [data, category_list, supercategory_list]}
+
+
     def load_data(self):
         """
         Load data of the dataset (create a generator).
         """
-        # get correct set paths
-        image_dir_path = {
-            "train" : 'train2014',
-            "val" : 'val2014',
-            "test" : 'test2014'
-        }
-
-        annotation_path = {
-            "train" : os.path.join(self.data_path, 'annotations', 'instances_train2014.json'),
-            "val" : os.path.join(self.data_path, 'annotations', 'instances_val2014.json'),
-            "test" : os.path.join(self.data_path, 'annotations', 'image_info_test2014.json')
-        }
-
-        for set_name in image_dir_path:
+        for set_name in self.image_dir_path:
             if self.verbose:
                 print('> Loading data files...')
 
-
             # image dir
-            image_dir = image_dir_path[set_name]
+            image_dir = self.image_dir_path[set_name]
 
-            # load annotation file
-            annotations = load_json(annotation_path[set_name])
+            # annotation file path
+            annot_filepath = os.path.join(self.data_path, self.annotation_path[set_name])
 
-            # progressbar
-            if self.verbose:
-                prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
-
-            # parse annotations
-            # images
-            images = {}
-            for i, annot in enumerate(annotations['images']):
-                images[annot['id']] = {
-                    "width" : annot['width'],
-                    "height" : annot['height'],
-                    "file_name" : os.path.join(image_dir, annot['file_name'])
-                }
-
-            # categories
-            categories = {}
-            category_list, supercategory_list = [], []
-            for i, annot in enumerate(annotations['categories']):
-                categories[annot['id']] = {
-                    "name" : annot['name'],
-                    "supercategory" : annot['supercategory']
-                }
-                category_list[i] = annot['name']
-                supercategory_list[i] = annot['supercategory']
-            supercategory_list = list(set(supercategory_list))
-
-            data = {}
-            for i, annot in enumerate(annotations['annotations']):
-
-                img_id = annot['image_id']
-                category_annot = categories[annot['category_id']]
-
-                obj = {
-                    "category" : category_annot['name'],
-                    "supercategory" : category_annot['supercategory'],
-                    "area" : annot['area'],
-                    "iscrowd" : annot['iscrowd'],
-                    "segmentation" : annot['segmentation'],
-                    "bbox" : annot['bbox']
-                }
-
-                if img_id in data.keys():
-                    data[img_id]['object'].append(obj)
-                else:
-                    img_annotation = images[img_id]
-                    data[img_id] = {
-                        "filename" : img_annotation['file_name'],
-                        "width" : img_annotation['width'],
-                        "height" : img_annotation['height'],
-                        "object" : obj
-                    }
-
-                # update progressbar
-                if self.verbose:
-                    prgbar.update(i)
-
-            # reset progressbar
-            if self.verbose:
-                prgbar.finish()
-
-            yield {set_name : [data, category_list, supercategory_list]}
+            if 'test' in set_name:
+                yield load_data_test(set_name, image_dir, annot_filepath)
+            else:
+                yield self.load_data_trainval(set_name, image_dir, annot_filepath)
 
 
     def add_data_to_source(self, handler, data):
@@ -165,7 +179,7 @@ class Detection2015:
         segmentation = []
         bbox = []
         object_id = []
-        object_fields = ["filename", "category", "supercategory", "bbox",
+        object_fields = ["image_filenames", "category", "supercategory", "boxes",
                          "area", "segmentation", "iscrowd", "width", "height"]
 
         list_image_filenames_per_category = []
@@ -246,14 +260,14 @@ class Detection2015:
 
 
         handler['image_filenames'] = str2ascii(image_filenames)
-        handler['width'] = np.array(width, dtype=np.int32)
-        handler['height'] = np.array(height, dtype=np.int32)
         handler['category'] = str2ascii(category)
         handler['supercategory'] = str2ascii(supercategory)
         handler['boxes'] = np.array(bbox, dtype=np.float)
         handler['iscrowd'] = np.array(iscrowd, dtype=np.uint8)
         handler['segmentation'] = np.array(pad_list(segmentation), dtype=np.int32)
         handler['area'] = np.array(area, dtype=np.int32)
+        handler['width'] = np.array(width, dtype=np.int32)
+        handler['height'] = np.array(height, dtype=np.int32)
         handler['object_ids'] = np.array(object_id, dtype=np.int32)
         handler['object_fields'] = str2ascii(object_fields)
 
