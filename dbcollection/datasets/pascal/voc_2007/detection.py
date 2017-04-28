@@ -17,6 +17,9 @@ from dbcollection.utils.pad import pad_list
 class Detection:
     """ Pascal VOC 2007 object detection task class """
 
+    # metadata filename
+    filename_h5 = 'detection'
+
     # object classes
     classes = ['aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car',
                'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
@@ -276,7 +279,7 @@ class Detection:
         Process metadata for the  and store it in a hdf5 file.
         """
         # create/open hdf5 file with subgroups for train/val/test
-        file_name = os.path.join(self.cache_path, 'detection.h5')
+        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
         fileh5 = h5py.File(file_name, 'w', version='latest')
 
         # setup data generator
@@ -309,3 +312,16 @@ class Detection:
         Run task processing.
         """
         return self.process_metadata()
+
+
+class DetectionNoSourceGrp(Detection):
+    """ Pascal VOC 2007 object detection (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'detection_d.h5'
+
+    def add_data_to_source(self):
+        """
+        Dummy method
+        """
+        # do nothing
