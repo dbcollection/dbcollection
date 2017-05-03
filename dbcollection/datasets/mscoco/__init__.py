@@ -3,11 +3,14 @@ Caltech Pedestrian Dataset download/process functions.
 """
 
 
+import os
+import sys
+
 from dbcollection.datasets.dbclass import BaseDataset
-from .detection2015 import Detection2015
-from .detection2016 import Detection2016
-from .captions import Caption
-from .keypoints import Keypoint
+from .detection2015 import Detection2015, Detection2015NoSourceGrp
+from .detection2016 import Detection2016, Detection2016NoSourceGrp
+#from .captions import Caption
+#from .keypoints import Keypoint
 
 
 class MSCOCO(BaseDataset):
@@ -30,14 +33,16 @@ class MSCOCO(BaseDataset):
 
     # some keywords. These are used to classify datasets for easier
     # categorization.
-    keywords = ['image_processing', 'detection', 'keypoint', 'captions']
+    keywords = ['image_processing', 'detection', 'keypoint', 'captions', 'human', 'pose']
 
     # init tasks
     tasks = {
         "detection_2015" : Detection2015,
+        "detection_2015_d" : Detection2015NoSourceGrp,
         "detection_2016" : Detection2016,
-        "caption_2015" : Caption,
-        "keypoint_2016" : Keypoint
+        "detection_2016_d" : Detection2016NoSourceGrp,
+        #"caption_2015" : Caption,
+        #"keypoint_2016" : Keypoint
     }
 
-    default_task = 'detection_2016'
+    default_task = 'detection_2015'
