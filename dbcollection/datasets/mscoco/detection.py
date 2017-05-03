@@ -1,5 +1,5 @@
 """
-COCO Detection 2015 process functions.
+COCO Detection 2015/2016 process functions.
 """
 
 
@@ -208,8 +208,8 @@ class Detection2015:
         area = []
         iscrowd = [0, 1]
         segmentation = []
-        segmentation_t1 = [[[0]]]
-        segmentation_t2 = [[0]]
+        segmentation_t1 = [[[]]]
+        segmentation_t2 = [[]]
         bbox = []
         object_id = []
 
@@ -246,7 +246,7 @@ class Detection2015:
                 list_object_ids_per_image.append([i])
             else:
                 boxes_per_image = []
-                for j, obj in enumerate(annotation["object"]):
+                for obj in annotation["object"]:
                     area.append(obj["area"])
                     bbox.append(obj["bbox"])
 
@@ -265,8 +265,8 @@ class Detection2015:
                     # [filename, category, supercategory, bbox, area, segmentation 1, segmentation 2, iscrowd, width, height]
                     object_id.append([i, category.index(obj["category"]),
                                       supercategory.index(obj["supercategory"]),
-                                      j, j, segmentation_t1_id, segmentation_t2_id,
-                                      j, i, i])
+                                      counter, counter, segmentation_t1_id, segmentation_t2_id,
+                                      counter, i, i])
 
                     boxes_per_image.append(counter)
 
@@ -387,6 +387,45 @@ class Detection2015NoSourceGrp(Detection2015):
 
     # metadata filename
     filename_h5 = 'detection_2015_d'
+
+    def add_data_to_source(self, handler, data):
+        """
+        Dummy method
+        """
+        # do nothing
+
+
+#---------------------------------------------------------
+# Detection 2016
+#---------------------------------------------------------
+
+
+class Detection2016(Detection2015):
+    """ COCO Detection (2015) preprocessing functions """
+
+    # metadata filename
+    filename_h5 = 'detection_2016'
+
+    image_dir_path = {
+        "train" : 'train2014',
+        "val" : 'val2014',
+        "test" : 'test2014',
+        "test-dev" : "test2015"
+    }
+
+    annotation_path = {
+        "train" : os.path.join('annotations', 'instances_train2014.json'),
+        "val" : os.path.join('annotations', 'instances_val2014.json'),
+        "test" : os.path.join('annotations', 'image_info_test2015.json'),
+        "test-dev" : os.path.join('annotations', 'image_info_test-dev2015.json')
+    }
+
+
+class Detection2016NoSourceGrp(Detection2016):
+    """ COCO Detection (2016) (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'detection_2016_d'
 
     def add_data_to_source(self, handler, data):
         """
