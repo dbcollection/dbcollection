@@ -78,7 +78,7 @@ class Caption2015:
             img_id = annot['image_id']
             img_annotation = images[img_id]
 
-            caption = {"caption" : annot["caption"]}
+            caption = annot["caption"]
 
             if img_id in data.keys():
                 data[img_id]['captions'].append(caption)
@@ -99,7 +99,7 @@ class Caption2015:
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : data}
+        return {set_name : [data]}
 
 
     def load_data(self):
@@ -126,18 +126,19 @@ class Caption2015:
         """
         Store classes + filenames as a nested tree.
         """
+        data_ = data[0]
 
         if self.verbose:
             print('> Adding data to source group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data))
+            prgbar = progressbar.ProgressBar(max_value=len(data_))
 
-        for i, key in enumerate(data):
+        for i, key in enumerate(data_):
             file_grp = handler.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(data[key]["filename"])
-            file_grp['width'] = np.array(data[key]["width"], dtype=np.int32)
-            file_grp['height'] = np.array(data[key]["height"], dtype=np.int32)
-            if 'captions' in data[key]:
-                file_grp['captions'] = str2ascii(data[key]["captions"])
+            file_grp['image_filename'] = str2ascii(data_[key]["filename"])
+            file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
+            file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
+            if 'captions' in data_[key]:
+                file_grp['captions'] = str2ascii(data_[key]["captions"])
 
             # update progressbar
             if self.verbose:
@@ -148,14 +149,16 @@ class Caption2015:
             prgbar.finish()
 
 
-    def add_data_to_default(self, handler, data):
+    def add_data_to_default(self, handler, data, set_name):
         """
         Add data of a set to the default group.
         """
-        if "captions" in data[0].keys():
+        if "test" in set_name:
             is_test = True
+            data_, category, supercategory = data
         else:
             is_test = False
+            data_ = data[0]
 
         image_filenames = []
         width = []
@@ -173,11 +176,11 @@ class Caption2015:
 
         if self.verbose:
             print('> Adding data to default group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data[0]))
+            prgbar = progressbar.ProgressBar(max_value=len(data_))
 
         counter = 0
-        for i, key in enumerate(data):
-            annotation = data[key]
+        for i, key in enumerate(data_):
+            annotation = data_[key]
             image_filenames.append(annotation["filename"])
             width.append(annotation["width"])
             height.append(annotation["height"])
@@ -223,7 +226,9 @@ class Caption2015:
             handler['captions'] = str2ascii(caption)
 
             handler['list_captions_per_image'] = np.array(pad_list(list_captions_per_image, -1), dtype=np.int32)
-
+        else:
+            handler['category'] = str2ascii(category)
+            handler['supercategory'] = str2ascii(supercategory)
 
     def process_metadata(self):
         """
@@ -252,7 +257,7 @@ class Caption2015:
 
                 # add data to the **default** group
                 defaultg = fileh5.create_group('default/' + set_name)
-                self.add_data_to_default(defaultg, data[set_name])
+                self.add_data_to_default(defaultg, data[set_name], set_name)
 
         # close file
         fileh5.close()

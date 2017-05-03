@@ -178,9 +178,9 @@ class Detection2015:
                     obj_grp['iscrowd'] = np.array(obj["iscrowd"], dtype=np.int32)
                     obj_grp['bbox'] = np.array(obj["bbox"], dtype=np.float)
                     if obj["segmentation_type"] == 0:
-                        obj_grp['segmentation'] = np.array(pad_list(obj["segmentation"], -1), dtype=np.int32)
+                        obj_grp['segmentation'] = np.array(pad_list(obj["segmentation"], -1), dtype=np.float)
                     else:
-                        obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.float)
+                        obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.int32)
                     obj_grp['segmentation_type'] = obj["segmentation_type"]
 
             # update progressbar
@@ -409,7 +409,7 @@ class Detection2016(Detection2015):
     image_dir_path = {
         "train" : 'train2014',
         "val" : 'val2014',
-        "test" : 'test2014',
+        "test" : 'test2015',
         "test-dev" : "test2015"
     }
 
