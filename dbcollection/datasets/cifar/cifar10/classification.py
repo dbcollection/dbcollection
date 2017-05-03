@@ -16,6 +16,9 @@ from dbcollection.utils.pad import pad_list
 class Classification:
     """ Cifar10 Classification preprocessing functions """
 
+    # metadata filename
+    filename_h5 = 'classification'
+
     # extracted file names
     data_files = [
         "batches.meta",
@@ -146,7 +149,7 @@ class Classification:
         data = self.load_data()
 
         # create/open hdf5 file with subgroups for train/val/test
-        file_name = os.path.join(self.cache_path, 'classification.h5')
+        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
         fileh5 = h5py.File(file_name, 'w', version='latest')
 
         # add data to the **source** group

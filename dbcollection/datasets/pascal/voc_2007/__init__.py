@@ -4,8 +4,7 @@ Pascal VOC 2007 download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .detection import Detection
-from .detection_no_source import DetectionNoSourceGrp
+from .detection import Detection, DetectionNoSourceGrp
 
 
 class PascalVOC2007(BaseDataset):

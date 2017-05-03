@@ -17,6 +17,9 @@ from .classification import Classification
 class Raw256:
     """ ImageNet ILSVRC 2012 Classification raw256 preprocessing functions """
 
+    # metadata filename
+    filename_h5 = 'raw256'
+
     def __init__(self, data_path, cache_path, verbose=True):
         """
         Initialize class.
@@ -133,4 +136,4 @@ class Raw256:
         Classification(self.data_path, self.cache_path, self.verbose, [self.new_dir_train, self.new_dir_val])
 
         # use the classification task to fetch data from the new dirs
-        return Classification.run('raw256.h5')
+        return Classification.run(self.filename_h5 + '.h5')

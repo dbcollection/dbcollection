@@ -9,7 +9,7 @@ All available datasets must be added in this file.
 # List of image processing datasets
 #---------------------------------------------------------
 
-from . import caltech, cifar, pascal, mnist, imagenet, ucf
+from . import caltech, cifar, pascal, mnist, imagenet, ucf, mscoco
 
 
 human_action = {

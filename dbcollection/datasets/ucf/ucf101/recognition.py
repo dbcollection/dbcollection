@@ -19,6 +19,8 @@ from .extract_frames import extract_video_frames
 class Recognition:
     """ UCF101 action recognition preprocessing functions """
 
+    # metadata filename
+    filename_h5 = 'recognition'
 
     def __init__(self, data_path, cache_path, verbose=True):
         """
@@ -223,7 +225,7 @@ class Recognition:
         data = self.load_data()
 
         # create/open hdf5 file with subgroups for train/test
-        file_name = os.path.join(self.cache_path, 'recognition.h5')
+        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
         fileh5 = h5py.File(file_name, 'w', version='latest')
 
         if self.verbose:

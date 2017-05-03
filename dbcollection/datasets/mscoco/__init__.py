@@ -9,7 +9,7 @@ import sys
 from dbcollection.datasets.dbclass import BaseDataset
 from .detection import Detection2015, Detection2015NoSourceGrp, Detection2016, Detection2016NoSourceGrp
 from .captions import Caption2015, Caption2015NoSourceGrp, Caption2016, Caption2016NoSourceGrp
-#from .keypoints import Keypoint
+from .keypoints import Keypoints2016, Keypoints2016NoSourceGrp
 
 
 class MSCOCO(BaseDataset):
@@ -36,11 +36,16 @@ class MSCOCO(BaseDataset):
 
     # init tasks
     tasks = {
+        "detection" : Detection2016,
         "detection_2015" : Detection2015, "detection_2015_d" : Detection2015NoSourceGrp,
         "detection_2016" : Detection2016, "detection_2016_d" : Detection2016NoSourceGrp,
+
+        "caption" : Caption2015,
         "caption_2015" : Caption2015, "caption_2015_d" : Caption2015NoSourceGrp,
         "caption_2016" : Caption2016, "caption_2016_d" : Caption2016NoSourceGrp,
-        #"keypoint_2016" : Keypoint
+
+        "keypoint" : Keypoints2016,
+        "keypoint_2016" : Keypoints2016, "keypoint_2016_d" : Keypoints2016NoSourceGrp
     }
 
-    default_task = 'detection_2015'
+    default_task = 'detection'

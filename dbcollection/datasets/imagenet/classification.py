@@ -18,6 +18,9 @@ from dbcollection.utils.pad import pad_list
 class Classification:
     """ ImageNet ILSVRC 2012 Classification preprocessing functions """
 
+    # metadata filename
+    filename_h5 = 'classification'
+
     def __init__(self, data_path, cache_path, verbose=True, paths=None):
         """
         Initialize class.
@@ -263,7 +266,7 @@ class Classification:
         if save_name:
             file_name = os.path.join(self.cache_path, save_name)
         else:
-            file_name = os.path.join(self.cache_path, 'classification.h5')
+            file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
         fileh5 = h5py.File(file_name, 'w', version='latest')
 
         if self.verbose:

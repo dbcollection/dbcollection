@@ -18,6 +18,8 @@ from dbcollection.utils.pad import pad_list
 class Recognition:
     """ UCF-Sports action recognition preprocessing functions """
 
+    # metadata filename
+    filename_h5 = 'detection'
 
     classes = ["diving", "golf_swing", "kicking", "lifting", "riding_horse",
                "running", "skateboarding", "swing_bench", "swing_side", "walking"]
@@ -272,7 +274,7 @@ class Recognition:
         Process metadata and store it in a hdf5 file.
         """
         # create/open hdf5 file with subgroups for train/test
-        file_name = os.path.join(self.cache_path, 'recognition.h5')
+        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
         fileh5 = h5py.File(file_name, 'w', version='latest')
 
         if self.verbose:
