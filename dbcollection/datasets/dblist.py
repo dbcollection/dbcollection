@@ -9,7 +9,7 @@ All available datasets must be added in this file.
 # List of image processing datasets
 #---------------------------------------------------------
 
-from . import caltech, cifar, pascal, mnist, imagenet, ucf, mscoco
+from . import caltech, cifar, pascal, mnist, imagenet, ucf, mscoco, inria
 
 
 human_action = {
@@ -31,7 +31,8 @@ object_classification = {
 }
 
 pedestrian_detection = {
-    "caltech_pedestrian" : caltech.pedestrian.Pedestrian
+    "caltech_pedestrian" : caltech.pedestrian.Pedestrian,
+    "inria_pedestrian" : inria.Pedestrian
 }
 
 

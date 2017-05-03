@@ -23,6 +23,13 @@ class Detection:
 
     skip_step = 30
 
+    classes = ['person', 'person-fa', 'people', 'person?']
+
+    sets = {
+        "train" : ['set00', 'set01', 'set02', 'set03', 'set04', 'set05'],
+        "test" : ['set06', 'set07', 'set08', 'set09', 'set10']
+    }
+
     def __init__(self, data_path, cache_path, verbose=True):
         """
         Initialize class.
@@ -38,7 +45,9 @@ class Detection:
         Extract + convert .jpg + .json files from the .seq and .vbb files.
         """
         if not os.path.exists(self.extracted_data_path):
-            extract_data(self.data_path, self.extracted_data_path)
+            sets = [val for l in self.sets.values() for val in l]
+            sets.sort()
+            extract_data(self.data_path, self.extracted_data_path, sets)
 
 
     def load_data(self):
@@ -48,14 +57,7 @@ class Detection:
         # extract data
         self.convert_extract_data()
 
-        self.classes = ['person', 'person-fa', 'people', 'person?']
-
-        sets = {
-            "train" : ['set00', 'set01', 'set02', 'set03', 'set04', 'set05'],
-            "test" : ['set06', 'set07', 'set08', 'set09', 'set10']
-        }
-
-        for set_name in sets:
+        for set_name in self.sets:
             data = {set_name : {}}
 
             if self.verbose:
@@ -63,10 +65,10 @@ class Detection:
 
             # progressbar
             if self.verbose:
-                prgbar = progressbar.ProgressBar(max_value=len(sets[set_name]))
+                prgbar = progressbar.ProgressBar(max_value=len(self.sets[set_name]))
 
 
-            for i, set_data in enumerate(sets[set_name]):
+            for i, set_data in enumerate(self.sets[set_name]):
                 data[set_name][set_data] = {}
 
                 extracted_data_dir = os.path.join(self.extracted_data_path, set_data)
@@ -107,8 +109,6 @@ class Detection:
     def store_data_source(self, handler, data, set_name):
         """
         Add data of a set to the source group.
-
-        TODO: refactor to use groups by set, video and file+annot
         """
         if self.verbose:
             print('> Adding data to the source group')
