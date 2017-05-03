@@ -4,9 +4,7 @@ Caltech Pedestrian Dataset download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .detection import Detection
-from .detection_10x import Detection10x
-from .detection_30x import Detection30x
+from .detection import Detection, Detection10x, Detection30x, DetectionNoSourceGrp, Detection10xNoSourceGrp, Detection30xNoSourceGrp
 
 
 class Pedestrian(BaseDataset):
@@ -36,6 +34,9 @@ class Pedestrian(BaseDataset):
     tasks = {
         "detection" : Detection,
         "detection_10x" : Detection10x,
-        "detection_30x" : Detection30x
+        "detection_30x" : Detection30x,
+        "detection_d" : DetectionNoSourceGrp,
+        "detection_10x_d" : Detection10xNoSourceGrp,
+        "detection_30x_d" : Detection30xNoSourceGrp
     }
     default_task = 'detection'

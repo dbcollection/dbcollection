@@ -18,8 +18,10 @@ from dbcollection.utils.caltech_pedestrian_extractor.converter import extract_da
 class Detection:
     """ Caltech Pedestrian detection preprocessing functions """
 
+    # metadata filename
+    filename_h5 = 'detection'
+
     skip_step = 30
-    file_name = 'detection.h5'
 
     def __init__(self, data_path, cache_path, verbose=True):
         """
@@ -105,6 +107,8 @@ class Detection:
     def store_data_source(self, handler, data, set_name):
         """
         Add data of a set to the source group.
+
+        TODO: refactor to use groups by set, video and file+annot
         """
         if self.verbose:
             print('> Adding data to the source group')
@@ -117,8 +121,10 @@ class Detection:
             set_grp = set_name_grp.create_group(set_data)
             for video in sorted(data[set_data]):
                 video_grp = set_grp.create_group(video)
-                video_grp['image_filenames'] = str2ascii(data[set_data][video]['images'])
-                video_grp['annotation_filenames'] = str2ascii(data[set_data][video]['annotations'])
+                for j in range(len(data[set_data][video]['images'])):
+                    file_grp = video_grp.create_group(str(j))
+                    file_grp['image_filenames'] = str2ascii(data[set_data][video]['images'][j])
+                    file_grp['annotation_filenames'] = str2ascii(data[set_data][video]['annotations'][j])
 
             # update progressbar
             if self.verbose:
@@ -262,7 +268,7 @@ class Detection:
         Process metadata and store it in a hdf5 file.
         """
         # create/open hdf5 files with subgroups for train/val/test/etc
-        file_name = os.path.join(self.cache_path, self.file_name)
+        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
         fileh5 = h5py.File(file_name, 'w', version='latest')
 
         if self.verbose:
@@ -295,3 +301,66 @@ class Detection:
         Run task processing.
         """
         return self.process_metadata()
+
+
+class DetectionNoSourceGrp(Detection):
+    """ Caltech Pedestrian detection (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'detection_d'
+
+    def add_data_to_source(self):
+        """
+        Dummy method
+        """
+        # do nothing
+
+
+#---------------------------------------------------------
+# Caltech 10x
+#---------------------------------------------------------
+
+
+class Detection10x(Detection):
+    """ Caltech Pedestrian detection (10x data) preprocessing functions """
+
+    skip_step = 3
+    filename_h5 = 'detection_10x'
+
+
+class Detection10xNoSourceGrp(Detection10x):
+    """ Caltech Pedestrian detection (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'detection_10x_d'
+
+    def add_data_to_source(self):
+        """
+        Dummy method
+        """
+        # do nothing
+
+
+#---------------------------------------------------------
+# Caltech 30x
+#---------------------------------------------------------
+
+
+class Detection30x(Detection):
+    """ Caltech Pedestrian detection (30x data) preprocessing functions """
+
+    skip_step = 1
+    filename_h5 = 'detection_30x'
+
+
+class Detection30xNoSourceGrp(Detection30x):
+    """ Caltech Pedestrian detection (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'detection_30x_d'
+
+    def add_data_to_source(self):
+        """
+        Dummy method
+        """
+        # do nothing
