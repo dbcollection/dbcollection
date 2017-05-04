@@ -68,6 +68,7 @@ class Detection:
             data = []
 
             if self.verbose:
+                print('\n==> Processing metadata for the set: {}'.format(set_name))
                 print('> Loading data files...')
 
             # progressbar
@@ -288,10 +289,6 @@ class Detection:
         for data in data_gen:
             for set_name in data:
 
-                if self.verbose:
-                    print('\n==> Processing metadata for the set: {}'.format(set_name))
-
-
                 # add data to the **source** group
                 sourceg = fileh5.create_group('source/' + set_name)
                 self.add_data_to_source(sourceg, data[set_name])
@@ -320,7 +317,7 @@ class DetectionNoSourceGrp(Detection):
     # metadata filename
     filename_h5 = 'detection_d.h5'
 
-    def add_data_to_source(self):
+    def add_data_to_source(self, handler, data):
         """
         Dummy method
         """
