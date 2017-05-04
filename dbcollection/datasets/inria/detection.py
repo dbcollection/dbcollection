@@ -7,7 +7,7 @@ from dbcollection.datasets.caltech.pedestrian.detection import Detection as Calt
 
 
 class Detection(CaltechDetection):
-    """ Caltech Pedestrian detection preprocessing functions """
+    """ Inria Pedestrian detection preprocessing functions """
 
     # metadata filename
     filename_h5 = 'detection'
