@@ -83,7 +83,7 @@ class Detection:
                 # load annotation
                 annotation = load_xml(annot_filename)
 
-                data.append([image_filename, annotation])
+                data.append([image_filename, int(fileid), annotation])
 
                 # update progressbar
                 if self.verbose:
@@ -103,6 +103,7 @@ class Detection:
 
         def add_data_hdf5(handler, anno):
             """Add data to the hdf5 file."""
+            handler['category_id'] = self.classes.index(anno['name'])
             handler['name'] = anno['name']
             handler['pose'] = anno['pose']
             handler['truncated'] = anno['truncated']
@@ -117,11 +118,12 @@ class Detection:
             prgbar = progressbar.ProgressBar(max_value=len(data))
 
         for i, data_ in enumerate(data):
-            image_filename, annotation = data_
+            image_filename, fileid, annotation = data_
 
             file_grp = handler.create_group(str(i))
 
             file_grp['image_filename'] = image_filename
+            file_grp['id'] = fileid
             file_grp['size/width'] = annotation['annotation']['size']['width']
             file_grp['size/height'] = annotation['annotation']['size']['height']
             file_grp['size/depth'] = annotation['annotation']['size']['depth']
@@ -157,6 +159,10 @@ class Detection:
         difficult = [0, 1]
         object_id = []
 
+        obj_id = []  # for mscoco
+        image_id = [] # for mscoco
+        category_id = list(range(1, len(self.classes)+1)) # for mscoco
+
         list_image_filenames_per_class = []
         list_boxes_per_image = []
         list_object_ids_per_image = []
@@ -174,9 +180,10 @@ class Detection:
         # cycle all data files/annotations
         obj_counter = 0
         for i, data_ in enumerate(data):
-            image_filename, annotation = data_
+            image_filename, fileid, annotation = data_
 
             image_filenames.append(image_filename)
+            image_id.append(fileid)
 
             width = annotation['annotation']['size']['width']
             height = annotation['annotation']['size']['height']
@@ -190,11 +197,13 @@ class Detection:
 
             # cycle all objects
             for _, obj in enumerate(obj_list):
+                class_id = self.classes.index(obj['name'])
+                obj_id.append(obj_counter)
                 bbox.append([obj['bndbox']['xmin'], obj['bndbox']['ymin'],
                              obj['bndbox']['xmax'], obj['bndbox']['ymax']])
 
-                object_id.append([i, self.classes.index(obj['name']), obj_counter,
-                                  i, difficult.index(int(obj['difficult'])),
+                object_id.append([i, class_id, obj_counter, i,
+                                  difficult.index(int(obj['difficult'])),
                                   difficult.index(int(obj['truncated']))])
 
                 # increment counter
@@ -254,6 +263,9 @@ class Detection:
 
 
         handler['image_filenames'] = str2ascii(image_filenames)
+        handler['id'] = np.array(obj_id, dtype=np.int32)
+        handler['image_id'] = np.array(image_id, dtype=np.int32)
+        handler['category_id'] = np.array(category_id, dtype=np.int32)
         handler['sizes'] = np.array(size, dtype=np.int32)
         handler['classes'] = str2ascii(self.classes)
         handler['boxes'] = np.array(bbox, dtype=np.float)

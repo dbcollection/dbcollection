@@ -64,23 +64,26 @@ class Detection2015:
         if self.verbose:
             print('  > Processing image annotations... ')
         images = {}
+        image_id = []
         for i, annot in enumerate(annotations['images']):
             images[annot['id']] = {
                 "width" : annot['width'],
                 "height" : annot['height'],
                 "file_name" : os.path.join(image_dir, annot['file_name'])
             }
+            image_id.append(annot['id'])
 
         # categories
         if self.verbose:
             print('  > Processing category annotations... ')
         categories = {}
-        category_list, supercategory_list = [], []
+        category_list, supercategory_list, category_id = [], [], []
         for i, annot in enumerate(annotations['categories']):
             categories[annot['id']] = {
                 "name" : annot['name'],
                 "supercategory" : annot['supercategory']
             }
+            category_id.append(annot['id'])
             category_list.append(annot['name'])
             supercategory_list.append(annot['supercategory'])
         supercategory_list = list(set(supercategory_list))
@@ -108,7 +111,10 @@ class Detection2015:
                 "iscrowd" : annot['iscrowd'],
                 "segmentation" : segmentation, #annot['segmentation'],
                 "segmentation_type" : segmentation_type,
-                "bbox" : annot['bbox']
+                "bbox" : annot['bbox'],
+                "image_id": annot['image_id'],
+                "category_id": annot['category_id'],
+                "id" : annot["id"]
             }
 
             if img_id in data.keys():
@@ -130,7 +136,7 @@ class Detection2015:
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : [data, category_list, supercategory_list]}
+        return {set_name : [data, category_list, supercategory_list, image_id, category_id]}
 
 
     def load_data(self):
@@ -172,6 +178,9 @@ class Detection2015:
             if 'object' in data_[key]:
                 for j, obj in enumerate(data_[key]["object"]):
                     obj_grp = file_grp.create_group(str(j))
+                    obj_grp['id'] = str2ascii(obj["id"])
+                    obj_grp['image_id'] = str2ascii(obj["image_id"])
+                    obj_grp['category_id'] = str2ascii(obj["category_id"])
                     obj_grp['category'] = str2ascii(obj["category"])
                     obj_grp['supercategory'] = str2ascii(obj["supercategory"])
                     obj_grp['area'] = np.array(obj["area"], dtype=np.int32)
@@ -198,12 +207,16 @@ class Detection2015:
         """
         if 'test' in  set_name:
             is_test = True
+            data_, category, supercategory = data
         else:
             is_test = False
+            data_, category, supercategory, image_id, category_id = data
 
         image_filenames = []
         width = []
         height = []
+
+        obj_id = []
 
         area = []
         iscrowd = [0, 1]
@@ -216,9 +229,8 @@ class Detection2015:
         if is_test:
             object_fields = ["image_filenames", "width", "height"]
         else:
-            object_fields = ["image_filenames", "category", "supercategory",
-                             "boxes", "area", "segmentation", "segmentation_type", "iscrowd",
-                             "width", "height"]
+            object_fields = ["image_filenames", "width", "height", "category", "supercategory",
+                             "boxes", "area", "segmentation", "segmentation_type", "iscrowd"]
 
         list_image_filenames_per_category = []
         list_image_filenames_per_supercategory = []
@@ -230,8 +242,6 @@ class Detection2015:
         if self.verbose:
             print('> Adding data to default group:')
             prgbar = progressbar.ProgressBar(max_value=len(data[0]))
-
-        data_, category, supercategory = data
 
         counter = 0
         segmentation_t1_counter, segmentation_t2_counter = 0, 0
@@ -249,6 +259,7 @@ class Detection2015:
                 for obj in annotation["object"]:
                     area.append(obj["area"])
                     bbox.append(obj["bbox"])
+                    obj_id.append(obj["id"])
 
                     if obj["segmentation_type"] == 0:
                         segmentation_t1.append(obj["segmentation"])
@@ -263,10 +274,10 @@ class Detection2015:
 
                     # object_id
                     # [filename, category, supercategory, bbox, area, segmentation 1, segmentation 2, iscrowd, width, height]
-                    object_id.append([i, category.index(obj["category"]),
+                    object_id.append([i, i, i, category.index(obj["category"]),
                                       supercategory.index(obj["supercategory"]),
                                       counter, counter, segmentation_t1_id, segmentation_t2_id,
-                                      counter, i, i])
+                                      counter])
 
                     boxes_per_image.append(counter)
 
@@ -326,6 +337,9 @@ class Detection2015:
         handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
 
         if not is_test:
+            handler['id'] = np.array(obj_id, dtype=np.int32)
+            handler['image_id'] = np.array(image_id, dtype=np.int32)
+            handler['category_id'] = np.array(category_id, dtype=np.int32)
             handler['boxes'] = np.array(bbox, dtype=np.float)
             handler['iscrowd'] = np.array(iscrowd, dtype=np.uint8)
             handler['segmentation1'] = np.array(pad_list2(segmentation_t1, -1), dtype=np.float)
