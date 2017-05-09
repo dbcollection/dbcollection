@@ -82,11 +82,11 @@ class BaseDataset:
         if task == 'all':
             for i, task in enumerate(tasks_loader):
                 if self.verbose:
-                    print('Processing ::{}:: task: ({}/{})\n'.format(task, i+1, len(tasks_loader)))
+                    print('\nProcessing ::{}:: task: ({}/{})'.format(task, i+1, len(tasks_loader)))
                 info_output[task] = tasks_loader[task].run()
         else:
             if self.verbose:
-                print('Processing ::{}:: task:\n'.format(task))
+                print('\nProcessing ::{}:: task:'.format(task))
             info_output[task] = tasks_loader[task].run()
 
         return info_output, self.keywords
