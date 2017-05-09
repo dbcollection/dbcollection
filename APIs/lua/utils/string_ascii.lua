@@ -4,6 +4,7 @@
 
 local ffi = require 'ffi'
 
+------------------------------------------------------------------------------------------------------------
 
 local function get_str_maxmimum_lenght(input_table)
     local max_l = 0
@@ -14,6 +15,7 @@ local function get_str_maxmimum_lenght(input_table)
     return max_l
 end
 
+------------------------------------------------------------------------------------------------------------
 
 local function convert_str_to_ascii(input)
 -- Convert a string to a torch.CharTensor
@@ -41,6 +43,7 @@ local function convert_str_to_ascii(input)
     return ascii_tensor
 end
 
+------------------------------------------------------------------------------------------------------------
 
 local function convert_ascii_to_str(input)
 -- convert torch.CharTensor to a table of strings
@@ -52,6 +55,7 @@ local function convert_ascii_to_str(input)
     return out
 end
 
+------------------------------------------------------------------------------------------------------------
 
 return {
     convert_str_to_ascii = convert_str_to_ascii,

@@ -11,6 +11,7 @@ local function convert_to_table_of_tables(inputA)
     return out
 end
 
+------------------------------------------------------------------------------------------------------------
 
 local function pad_table(tableA, val)
     -- get maximum size of all tables
@@ -36,6 +37,7 @@ local function pad_table(tableA, val)
     return out
 end
 
+------------------------------------------------------------------------------------------------------------
 
 local function pad_list(inputA, val)
 -- pad a table of tables or a table of tensors into a table of tables with a value
@@ -57,6 +59,7 @@ local function pad_list(inputA, val)
     end
 end
 
+------------------------------------------------------------------------------------------------------------
 
 local function unpad_table(tableA, val)
     local out = {}
@@ -80,6 +83,7 @@ local function unpad_table(tableA, val)
     return out
 end
 
+------------------------------------------------------------------------------------------------------------
 
 local function unpad_list(inputA, val)
 -- unpad a table of tables or table of tensors with a
@@ -102,6 +106,7 @@ local function unpad_list(inputA, val)
     end
 end
 
+------------------------------------------------------------------------------------------------------------
 
 return {
     pad_list = pad_list,

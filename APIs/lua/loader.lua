@@ -5,9 +5,9 @@
 local hdf5 = require 'hdf5'
 local string_ascii = require 'dbcollection.utils.string_ascii'
 
-
 local DataLoader = torch.class('DatasetLoader')
 
+------------------------------------------------------------------------------------------------------------
 
 function DataLoader:__init(name, task, data_dir, cache_path)
 --[[
@@ -57,6 +57,7 @@ function DataLoader:__init(name, task, data_dir, cache_path)
     end
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function DataLoader:get(set_name, field_name, idx)
 --[[
@@ -118,6 +119,7 @@ function DataLoader:get(set_name, field_name, idx)
     end
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function DataLoader:object(set_name, idx, is_value)
 --[[
@@ -170,6 +172,7 @@ function DataLoader:object(set_name, idx, is_value)
     end
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function DataLoader:size(set_name, field_name)
 --[[
@@ -201,6 +204,7 @@ function DataLoader:size(set_name, field_name)
     return data:dataspaceSize()
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function DataLoader:list(set_name)
 --[[
@@ -231,6 +235,7 @@ function DataLoader:list(set_name)
     return list_fields
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function DataLoader:object_field_id(set_name, field_name)
 --[[

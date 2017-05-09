@@ -23,7 +23,8 @@ local function get_cache_file_path(options)
     end
 end
 
--- parse all booleans to strings in python format
+
+--[[ parse all booleans to strings in python format ]]
 local function tostring_py(input)
     assert(type(input)=='boolean')
     if input then
@@ -33,7 +34,8 @@ local function tostring_py(input)
     end
 end
 
--- convert to string if it does not match "None"
+
+--[[ convert to string if it does not match "None" ]]
 local function tostring_none(input)
     if string.match(input, "None") then
         return input
@@ -42,12 +44,14 @@ local function tostring_none(input)
     end
 end
 
--- get the dataset's data and cache paths
+
+--[[ get the dataset's data and cache paths ]]
 local function get_dataset_paths(cache, name, task)
     local data_dir = cache['dataset'][name]['data_dir']
     local cache_path = cache['dataset'][name]['tasks'][task]
     return data_dir, cache_path
 end
+
 
 -- check if the task exists in the cache
 local function exists_task(cache, name, task)
@@ -133,7 +137,7 @@ function manager.load(options)
 
     -- check if the task exists in the cache
     if not exists_task(cache, args.name, args.task) then
-        manager.process({name=args.name, task=args.task, verbose=args.verbose, 
+        manager.process({name=args.name, task=args.task, verbose=args.verbose,
                          is_test=args.is_test})
         cache = json.load(home_path) -- reload the cache file
     end
@@ -152,6 +156,7 @@ function manager.load(options)
     return loader
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function manager.download(options)
     local initcheck = argcheck{
@@ -213,6 +218,7 @@ function manager.download(options)
     os.execute(('python -c "%s"'):format(command))
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function manager.process(options)
     local initcheck = argcheck{
@@ -267,6 +273,7 @@ function manager.process(options)
     os.execute(('python -c "%s"'):format(command))
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function manager.add(options)
     local initcheck = argcheck{
@@ -342,6 +349,7 @@ function manager.add(options)
     os.execute(('python -c "%s"'):format(command))
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function manager.remove(options)
     local initcheck = argcheck{
@@ -392,6 +400,7 @@ function manager.remove(options)
     os.execute(('python -c "%s"'):format(command))
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function manager.config_cache(options)
     local initcheck = argcheck{
@@ -477,6 +486,7 @@ function manager.config_cache(options)
     os.execute(('python -c "%s"'):format(command))
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function manager.query(options)
     local initcheck = argcheck{
@@ -519,6 +529,7 @@ function manager.query(options)
     os.execute(('python -c "%s"'):format(command))
 end
 
+------------------------------------------------------------------------------------------------------------
 
 function manager.info(options)
     local initcheck = argcheck{
