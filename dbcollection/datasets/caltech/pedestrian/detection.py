@@ -309,7 +309,7 @@ class DetectionNoSourceGrp(Detection):
     # metadata filename
     filename_h5 = 'detection_d'
 
-    def add_data_to_source(self, handler, data, set_name):
+    def store_data_source(self, handler, data, set_name):
         """
         Dummy method
         """
@@ -334,7 +334,7 @@ class Detection10xNoSourceGrp(Detection10x):
     # metadata filename
     filename_h5 = 'detection_10x_d'
 
-    def add_data_to_source(self, handler, data, set_name):
+    def store_data_source(self, handler, data, set_name):
         """
         Dummy method
         """
@@ -359,7 +359,7 @@ class Detection30xNoSourceGrp(Detection30x):
     # metadata filename
     filename_h5 = 'detection_30x_d'
 
-    def add_data_to_source(self, handler, data, set_name):
+    def store_data_source(self, handler, data, set_name):
         """
         Dummy method
         """
