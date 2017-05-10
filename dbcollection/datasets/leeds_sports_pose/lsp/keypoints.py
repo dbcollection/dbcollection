@@ -45,11 +45,21 @@ class Keypoints:
         self.verbose = verbose
 
 
+    def fetch_annotations_images_paths(self):
+        """
+        Returns the paths of the annotation file and images folder.
+        """
+        annot_filepath = annot_filepath = os.path.join(self.data_path, 'lsp_dataset', 'joints.mat')
+        images_dir = os.path.join(self.data_path, 'lsp_dataset', 'images')
+
+        return annot_filepath, images_dir
+
+
     def load_annotations(self):
         """
         Load annotations from file and split them to train and test sets.
         """
-        annot_filepath = os.path.join(self.data_path, 'lsp_dataset', 'joints.mat')
+        annot_filepath, images_dir = self.fetch_annotations_images_paths()
 
         # load annotations file
         annotations = load_matlab(annot_filepath)
@@ -59,7 +69,7 @@ class Keypoints:
             "test" : []
         }
 
-        image_filenames = os.listdir(os.path.join(self.data_path, 'lsp_dataset', 'images'))
+        image_filenames = os.listdir(images_dir)
         image_filenames.sort()
 
         for i in range(0, 2000):
@@ -205,6 +215,36 @@ class KeypointsNoSourceGrp(Keypoints):
 
     # metadata filename
     filename_h5 = 'keypoint_d'
+
+    def add_data_to_source(self, handler, data):
+        """
+        Dummy method
+        """
+        # do nothing
+
+
+
+class KeypointsOriginal(Keypoints):
+    """ LSP Keypoints full images size (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'keypoint_original'
+
+    def fetch_annotations_images_paths(self):
+        """
+        Returns the paths of the annotation file and images folder.
+        """
+        annot_filepath = annot_filepath = os.path.join(self.data_path, 'joints.mat')
+        images_dir = os.path.join(self.data_path, 'images')
+
+        return annot_filepath, images_dir
+
+
+class KeypointsOriginalNoSourceGrp(KeypointsOriginal):
+    """ LSP Keypoints (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'keypoint_original_d'
 
     def add_data_to_source(self, handler, data):
         """

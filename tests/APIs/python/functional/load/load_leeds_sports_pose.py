@@ -19,7 +19,7 @@ dbc.config_cache(delete_cache=True, is_test=True)
 
 # download/setup dataset
 print('\n==> dbcollection: load()')
-lsp = dbc.load(name='leeds_sports_pose', task='keypoints', data_dir=data_dir, verbose=True, is_test=True)
+lsp = dbc.load(name='leeds_sports_pose', task='keypoints_original', data_dir=data_dir, verbose=True, is_test=True)
 
 # print data from the loader
 print('\n==> dbcollection: info()')

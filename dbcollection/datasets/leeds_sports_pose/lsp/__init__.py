@@ -4,7 +4,7 @@ Leeds Sports Pose (LSP) Dataset download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .keypoints import Keypoints, KeypointsNoSourceGrp
+from .keypoints import Keypoints, KeypointsNoSourceGrp, KeypointsOriginal, KeypointsOriginalNoSourceGrp
 
 
 class LSP(BaseDataset):
@@ -24,7 +24,7 @@ class LSP(BaseDataset):
     tasks = {
         "keypoints" : Keypoints,
         "keypoints_d" : KeypointsNoSourceGrp,
-        # "keypoints_original" : KeypointsOriginal,
-        # "keypoints_original_d" : KeypointsOriginalNoSourceGrp,
+        "keypoints_original" : KeypointsOriginal,
+        "keypoints_original_d" : KeypointsOriginalNoSourceGrp,
     }
     default_task = 'keypoints'
