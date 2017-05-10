@@ -219,6 +219,7 @@ class Keypoints:
         handler['object_fields'] = str2ascii(object_fields)
         handler['torso_boxes'] = np.array(torso_boxes, dtype=np.float)
         handler['keypoints'] = np.array(keypoints, dtype=np.float)
+        handler['keypoint_names'] = str2ascii(self.keypoints_labels)
 
         handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
 
