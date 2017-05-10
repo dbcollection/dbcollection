@@ -11,7 +11,7 @@ All available datasets must be added in this file.
 
 from . import cifar, pascal, mnist, imagenet, mscoco
 from . import caltech, inria
-from . import flic
+from . import flic, leeds_sports_pose
 from . import ucf
 
 
@@ -21,7 +21,9 @@ human_action = {
 }
 
 human_pose = {
-    "flic" : flic.Flic
+    "flic" : flic.Flic,
+    "leeds_sports_pose" : leeds_sports_pose.lsp.LSP,
+    "leeds_sports_pose_extended" : leeds_sports_pose.lsp_extended.LSPe
 }
 
 object_classification = {
