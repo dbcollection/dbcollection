@@ -137,6 +137,71 @@ def download_url(url, dir_path, fname_save, verbose=False):
         download_url_nodisplay(url, file_save_name)
 
 
+def download_url_google_drive(file_id, dir_path, fname_save, verbose=False):
+    """Download a single url from google drive into a file.
+
+    Parameters
+    ----------
+    file_id : str
+        File ID.
+    dir_path : str
+        Directory path to store the file.
+    fname_save : str
+        File name + path.
+    verbose : bool
+        Display messages + progress bar on screen when downloading the file.
+
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    """
+
+    def get_confirm_token(response):
+        """Get confirmation token."""
+        for key, value in response.cookies.items():
+            if key.startswith('download_warning'):
+                return value
+
+        return None
+
+    def save_response_content(response, destination):
+        """Save to file."""
+        CHUNK_SIZE = 32768
+
+        with open(destination, "wb") as f:
+            for chunk in response.iter_content(CHUNK_SIZE):
+                if chunk: # filter out keep-alive new chunks
+                    f.write(chunk)
+
+    # save file
+    file_save_name = fname_save
+
+    # check if the filename already exists
+    if os.path.exists(file_save_name):
+        return True
+
+    # check if the path exists
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
+
+    URL = "https://docs.google.com/uc?export=download"
+
+    session = requests.Session()
+
+    response = session.get(URL, params={'id' : file_id}, stream=True)
+    token = get_confirm_token(response)
+
+    if token:
+        params = {'id' : file_id, 'confirm' : token}
+        response = session.get(URL, params=params, stream=True)
+
+    save_response_content(response, file_save_name)
+
 
 def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True):
     """Download urls + extract files to disk.
@@ -178,13 +243,24 @@ def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True
         if verbose:
             print('\nDownload url ({}/{}): {}'.format(i+1, len(urls), url))
 
-        # get download save filename
-        filename = os.path.join(dir_save, os.path.basename(url))
-
         # download file
-        if download_url(url, dir_save, filename, verbose) and verbose:
-            print('File already exists, skip downloading this url.')
-            continue
+        if isinstance(url, str):
+            # get download save filename
+            filename = os.path.join(dir_save, os.path.basename(url))
+
+            if download_url(url, dir_save, filename, verbose) and verbose:
+                print('File already exists, skip downloading this url.')
+                continue
+        elif isinstance(url, list):
+            # get download save filename
+            filename = os.path.join(dir_save, url[-1])
+
+            if url[0] is 'googledrive':
+                if download_url_google_drive(url[1], dir_save, filename, verbose) and verbose:
+                    print('File already exists, skip downloading this url.')
+                    continue
+            else:
+                raise KeyError('Undefined key: {}. Valid keys: googledrive.'.format(url[0]))
 
         # check md5 sum (if available)
         if any(md5sum):

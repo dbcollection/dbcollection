@@ -9,7 +9,10 @@ All available datasets must be added in this file.
 # List of image processing datasets
 #---------------------------------------------------------
 
-from . import caltech, cifar, pascal, mnist, imagenet, ucf, mscoco, inria
+from . import cifar, pascal, mnist, imagenet, mscoco
+from . import caltech, inria
+from . import flic
+from . import ucf
 
 
 human_action = {
@@ -18,7 +21,7 @@ human_action = {
 }
 
 human_pose = {
-
+    "flic" : flic.Flic
 }
 
 object_classification = {
@@ -44,6 +47,7 @@ datasets = {}
 datasets.update(object_classification) # object classification
 datasets.update(human_action) # human action
 datasets.update(pedestrian_detection) # pedestrian detection/recognition
+datasets.update(human_pose) # human pose
 
 # list of all dataset's names
 available_datasets = list(datasets.keys())
