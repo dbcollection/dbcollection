@@ -20,3 +20,16 @@ class Detection(CaltechDetection):
         "train" : ['set00'],
         "test" : ['set01']
     }
+
+
+class DetectionNoSourceGrp(Detection):
+    """ Inria Pedestrian detection (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'keypoint_d'
+
+    def add_data_to_source(self, handler, data):
+        """
+        Dummy method
+        """
+        # do nothing

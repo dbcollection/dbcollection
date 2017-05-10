@@ -4,7 +4,7 @@ Inria Pedestrian Dataset download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .detection import Detection
+from .detection import Detection, DetectionNoSourceGrp
 
 
 class Pedestrian(BaseDataset):
@@ -24,5 +24,6 @@ class Pedestrian(BaseDataset):
     # init tasks
     tasks = {
         "detection" : Detection,
+        "detection_d" : DetectionNoSourceGrp
     }
     default_task = 'detection'
