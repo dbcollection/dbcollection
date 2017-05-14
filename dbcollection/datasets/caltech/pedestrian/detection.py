@@ -6,8 +6,9 @@ Caltech Pedestrian detection process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
-import h5py
 import progressbar
+
+from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.file_load import load_json
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -15,7 +16,7 @@ from dbcollection.utils.pad import pad_list
 from dbcollection.utils.caltech_pedestrian_extractor.converter import extract_data
 
 
-class Detection:
+class Detection(BaseTask):
     """ Caltech Pedestrian detection preprocessing functions """
 
     # metadata filename
@@ -29,15 +30,6 @@ class Detection:
         "train" : ['set00', 'set01', 'set02', 'set03', 'set04', 'set05'],
         "test" : ['set06', 'set07', 'set08', 'set09', 'set10']
     }
-
-    def __init__(self, data_path, cache_path, verbose=True):
-        """
-        Initialize class.
-        """
-        self.cache_path = cache_path
-        self.data_path = data_path
-        self.verbose = verbose
-        self.extracted_data_path = os.path.join(data_path, 'extracted_data')
 
 
     def convert_extract_data(self):
@@ -54,6 +46,8 @@ class Detection:
         """
         Load the data from the dataset's files.
         """
+        self.extracted_data_path = os.path.join(self.data_path, 'extracted_data')
+
         # extract data
         self.convert_extract_data()
 
@@ -106,7 +100,7 @@ class Detection:
             yield data
 
 
-    def store_data_source(self, handler, data, set_name):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Add data of a set to the source group.
         """
@@ -135,7 +129,7 @@ class Detection:
             prgbar.finish()
 
 
-    def store_data_default(self, handler, data, set_name):
+    def add_data_to_default(self, handler, data, set_name):
         """
         Add data of a set to the default file.
         """
@@ -263,53 +257,13 @@ class Detection:
             print('> Done.')
 
 
-    def process_metadata(self):
-        """
-        Process metadata and store it in a hdf5 file.
-        """
-        # create/open hdf5 files with subgroups for train/val/test/etc
-        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
-        fileh5 = h5py.File(file_name, 'w', version='latest')
-
-        if self.verbose:
-            print('\n==> Storing metadata to file: {}'.format(file_name))
-
-        # setup data generator
-        data_gen = self.load_data()
-
-        for data in data_gen:
-            for set_name in data:
-
-                if self.verbose:
-                    print('Saving set metadata: {}'.format(set_name))
-
-                # add data to the **raw** file
-                self.store_data_source(fileh5, data[set_name], set_name)
-
-                 # add data to the **default** file
-                self.store_data_default(fileh5, data[set_name], set_name)
-
-        # close file
-        fileh5.close()
-
-        # return information of the task + cache file
-        return file_name
-
-
-    def run(self):
-        """
-        Run task processing.
-        """
-        return self.process_metadata()
-
-
 class DetectionNoSourceGrp(Detection):
     """ Caltech Pedestrian detection (default grp only - no source group) task class """
 
     # metadata filename
     filename_h5 = 'detection_d'
 
-    def store_data_source(self, handler, data, set_name):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Dummy method
         """
@@ -334,7 +288,7 @@ class Detection10xNoSourceGrp(Detection10x):
     # metadata filename
     filename_h5 = 'detection_10x_d'
 
-    def store_data_source(self, handler, data, set_name):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Dummy method
         """
@@ -359,7 +313,7 @@ class Detection30xNoSourceGrp(Detection30x):
     # metadata filename
     filename_h5 = 'detection_30x_d'
 
-    def store_data_source(self, handler, data, set_name):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Dummy method
         """
