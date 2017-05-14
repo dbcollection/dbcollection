@@ -6,14 +6,15 @@ Cifar100 classification process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
-import h5py
+
+from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 
 
-class Classification:
+class Classification(BaseTask):
     """ Cifar100 Classification preprocessing functions """
 
     # metadata filename
@@ -74,15 +75,6 @@ class Classification:
     ]
 
 
-    def __init__(self, data_path, cache_path, verbose=True):
-        """
-        Initialize class.
-        """
-        self.cache_path = cache_path
-        self.data_path = data_path
-        self.verbose = verbose
-
-
     def get_object_list(self, data, fine_labels, coarse_labels):
         """
         Groups the data + labels info in a 'list' of indexes.
@@ -95,15 +87,22 @@ class Classification:
         return object_id
 
 
-    def load_data(self):
+    def get_class_names(self, path):
         """
-        Load the data from the files.
+        Returns the class names/labels.
+        """
+        return load_pickle(os.path.join(path, self.data_files[0]))
+
+
+    def load_data_train(self):
+        """
+        Load train data.
         """
         # merge the path with the extracted folder name
         data_path_ = os.path.join(self.data_path, 'cifar-100-python')
 
         # load classes name file
-        class_names = load_pickle(os.path.join(data_path_, self.data_files[0]))
+        class_names = self.get_class_names(data_path_)
 
         # load train data files
         train_batch = load_pickle(os.path.join(data_path_, self.data_files[1]))
@@ -121,6 +120,28 @@ class Classification:
             images_idx = np.where(train_labels == label)[0].tolist()
             train_images_per_class.append(images_idx)
 
+        return {
+            "object_fields": str2ascii(['images', 'classes', 'superclasses']),
+            "data": train_data,
+            "class_name": str2ascii(self.finer_classes),
+            "coarse_class_name": str2ascii(self.coarse_classes),
+            "labels": train_labels,
+            "coarse_labels": train_coarse_labels,
+            "object_id_list": train_object_list,
+            "list_images_per_class": np.array(pad_list(train_images_per_class, 1), dtype=np.int32)
+        }
+
+
+    def load_data_test(self):
+        """
+        Load test data.
+        """
+        # merge the path with the extracted folder name
+        data_path_ = os.path.join(self.data_path, 'cifar-100-python')
+
+        # load classes name file
+        class_names = self.get_class_names(data_path_)
+
         # load test data file
         test_batch = load_pickle(os.path.join(data_path_, self.data_files[2]))
 
@@ -137,71 +158,51 @@ class Classification:
             images_idx = np.where(test_labels == label)[0].tolist()
             test_images_per_class.append(images_idx)
 
-        #return a dictionary
         return {
-            "train" : {
-                "object_fields": str2ascii(['images', 'classes', 'superclasses']),
-                "data": train_data,
-                "class_name": str2ascii(self.finer_classes),
-                "coarse_class_name": str2ascii(self.coarse_classes),
-                "labels": train_labels,
-                "coarse_labels": train_coarse_labels,
-                "object_id_list": train_object_list,
-                "list_images_per_class": np.array(pad_list(train_images_per_class, 1), dtype=np.int32)
-            },
-            "test" : {
-                "object_fields": str2ascii(['images', 'classes', 'superclasses']),
-                "data": test_data,
-                "class_name": str2ascii(self.finer_classes),
-                "coarse_class_name": str2ascii(self.coarse_classes),
-                "labels": test_labels,
-                "coarse_labels": test_coarse_labels,
-                "object_id_list": test_object_list,
-                "list_images_per_class": np.array(pad_list(test_images_per_class, 1), dtype=np.int32)
-            }
+            "object_fields": str2ascii(['images', 'classes', 'superclasses']),
+            "data": test_data,
+            "class_name": str2ascii(self.finer_classes),
+            "coarse_class_name": str2ascii(self.coarse_classes),
+            "labels": test_labels,
+            "coarse_labels": test_coarse_labels,
+            "object_id_list": test_object_list,
+            "list_images_per_class": np.array(pad_list(test_images_per_class, 1), dtype=np.int32)
         }
 
 
-    def process_metadata(self):
+    def load_data(self):
         """
-        Process metadata and store it in a hdf5 file.
+        Load the data from the files.
         """
+        # train set
+        yield self.load_data_train()
 
-        # load data to memory
-        data = self.load_data()
-
-        # create/open hdf5 file with subgroups for train/val/test
-        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
-        fileh5 = h5py.File(file_name, 'w', version='latest')
-
-        # add data to the **source** group
-        for set_name in ['train', 'test']:
-            sourceg = fileh5.create_group('source/' + set_name)
-            sourceg.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
-            sourceg.create_dataset('superclasses', data=data[set_name]["coarse_class_name"], dtype=np.uint8)
-            sourceg.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
-            sourceg.create_dataset('labels', data=data[set_name]["labels"], dtype=np.uint8)
-            sourceg.create_dataset('coarse_labels', data=data[set_name]["coarse_labels"], dtype=np.uint8)
-
-        # add data to the **default** group
-        for set_name in ['train', 'test']:
-            defaultg = fileh5.create_group('default/' + set_name)
-            defaultg.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
-            defaultg.create_dataset('superclasses', data=data[set_name]["coarse_class_name"], dtype=np.uint8)
-            defaultg.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
-            defaultg.create_dataset('object_ids', data=data[set_name]["object_id_list"], dtype=np.int32)
-            defaultg.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.uint8)
-            defaultg.create_dataset('list_images_per_class', data=data[set_name]["list_images_per_class"], dtype=np.uint8)
-
-        # close file
-        fileh5.close()
-
-        # return information of the task + cache file
-        return file_name
+        # test set
+        yield self.load_data_test()
 
 
-    def run(self):
+    def add_data_to_source(self, handler, data, set_name=None):
         """
-        Run task processing.
+        Store data annotations in a nested tree fashion.
+
+        It closely follows the tree structure of the data.
         """
-        return self.process_metadata()
+        handler.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
+        handler.create_dataset('superclasses', data=data[set_name]["coarse_class_name"], dtype=np.uint8)
+        handler.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
+        handler.create_dataset('labels', data=data[set_name]["labels"], dtype=np.uint8)
+        handler.create_dataset('coarse_labels', data=data[set_name]["coarse_labels"], dtype=np.uint8)
+
+
+    def add_data_to_default(self, handler, data, set_name=None):
+        """
+        Add data of a set to the default group.
+
+        For each field, the data is organized into a single big matrix.
+        """
+        handler.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
+        handler.create_dataset('superclasses', data=data[set_name]["coarse_class_name"], dtype=np.uint8)
+        handler.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
+        handler.create_dataset('object_ids', data=data[set_name]["object_id_list"], dtype=np.int32)
+        handler.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.uint8)
+        handler.create_dataset('list_images_per_class', data=data[set_name]["list_images_per_class"], dtype=np.uint8)
