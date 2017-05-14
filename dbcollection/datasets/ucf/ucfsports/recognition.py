@@ -8,14 +8,15 @@ import os
 import random
 import subprocess
 import numpy as np
-import h5py
 import progressbar
+
+from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 
 
-class Recognition:
+class Recognition(BaseTask):
     """ UCF-Sports action recognition preprocessing functions """
 
     # metadata filename
@@ -23,18 +24,6 @@ class Recognition:
 
     classes = ["diving", "golf_swing", "kicking", "lifting", "riding_horse",
                "running", "skateboarding", "swing_bench", "swing_side", "walking"]
-
-
-    def __init__(self, data_path, cache_path, verbose=True):
-        """
-        Initialize class.
-        """
-        self.cache_path = cache_path
-        self.data_path = data_path
-        self.verbose = verbose
-
-        self.activities_dir = os.path.join('ucf_sports_actions', 'ucf action')
-        self.root_dir_imgs = os.path.join(self.data_path, self.activities_dir)
 
 
     def get_activity_name(self, cname):
@@ -83,6 +72,9 @@ class Recognition:
         """
         Load activities, videos and filenames paths from the data directory.
         """
+        self.activities_dir = os.path.join('ucf_sports_actions', 'ucf action')
+        self.root_dir_imgs = os.path.join(self.data_path, self.activities_dir)
+
         if self.verbose:
             print(' > Fetch videos and images paths from dir: {}'
                   .format(self.root_dir_imgs))
@@ -269,51 +261,41 @@ class Recognition:
         }
 
 
-    def process_metadata(self):
+    def add_data_to_source(self, handler, data, set_name=None):
         """
-        Process metadata and store it in a hdf5 file.
+        Store data annotations in a nested tree fashion.
+
+        It closely follows the tree structure of the data.
         """
-        # create/open hdf5 file with subgroups for train/test
-        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
-        fileh5 = h5py.File(file_name, 'w', version='latest')
-
-        if self.verbose:
-            print('\n==> Storing metadata to file: {}'.format(file_name))
-
-        # setup data generator
-        data_gen = self.load_data()
-
-        for data in data_gen:
-            for set_name in data:
-
-                if self.verbose:
-                    print('Saving set metadata: {}'.format(set_name))
-
-                # add data to the **source** group
-                sourceg = fileh5.create_group('source/' + set_name)
-                for activity in data[set_name]:
-                    activity_grp = sourceg.create_group(activity)
-                    for video_name in data[set_name][activity]:
-                        video_grp = activity_grp.create_group(video_name)
-                        set_data = data[set_name][activity][video_name]
-                        video_grp.create_dataset('image_filenames', data=str2ascii(set_data['image_filenames']), dtype=np.uint8)
-                        video_grp.create_dataset('video_filename', data=str2ascii(set_data['video_filename']), dtype=np.uint8)
-
-                # add data to the **default** group
-                data_array = self.convert_data_to_arrays(data[set_name])
-                defaultg = fileh5.create_group('default/' + set_name)
-                for field_name in data_array:
-                    defaultg.create_dataset(field_name, data=data_array[field_name])
-
-        # close file
-        fileh5.close()
-
-        # return information of the task + cache file
-        return file_name
+        for activity in data:
+            activity_grp = handler.create_group(activity)
+            for video_name in data[activity]:
+                video_grp = activity_grp.create_group(video_name)
+                set_data = data[activity][video_name]
+                video_grp.create_dataset('image_filenames', data=str2ascii(set_data['image_filenames']), dtype=np.uint8)
+                video_grp.create_dataset('video_filename', data=str2ascii(set_data['video_filename']), dtype=np.uint8)
 
 
-    def run(self):
+    def add_data_to_default(self, handler, data, set_name=None):
         """
-        Run task processing.
+        Add data of a set to the default group.
+
+        For each field, the data is organized into a single big matrix.
         """
-        return self.process_metadata()
+        data_array = self.convert_data_to_arrays(data)
+        for field_name in data_array:
+            handler.create_dataset(field_name, data=data_array[field_name])
+
+
+class RecognitionNoSourceGrp(Recognition):
+    """ UCF-Sports action detection preprocessing functions """
+
+    # metadata filename
+    filename_h5 = 'detection_d'
+
+    def add_data_to_source(self, handler, data, set_name):
+        """
+        Dummy method
+        """
+        # do nothing
+        pass

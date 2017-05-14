@@ -6,8 +6,9 @@ UCF101 action recognition process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
-import h5py
 import progressbar
+
+from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.file_load import load_txt
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -16,19 +17,11 @@ from dbcollection.utils.pad import pad_list
 from .extract_frames import extract_video_frames
 
 
-class Recognition:
+class Recognition(BaseTask):
     """ UCF101 action recognition preprocessing functions """
 
     # metadata filename
     filename_h5 = 'recognition'
-
-    def __init__(self, data_path, cache_path, verbose=True):
-        """
-        Initialize class.
-        """
-        self.cache_path = cache_path
-        self.data_path = data_path
-        self.verbose = verbose
 
 
     def load_classes(self):
@@ -214,57 +207,48 @@ class Recognition:
             print('==> Processing train/set data splits:')
         set_splits_data = self.get_set_data(set_splits_vids, class_list)
 
-        return set_splits_data
+        yield set_splits_data
 
 
-    def process_metadata(self):
+    def add_data_to_source(self, handler, data, set_name=None):
         """
-        Process metadata and store it in a hdf5 file.
+        Store data annotations in a nested tree fashion.
+
+        It closely follows the tree structure of the data.
         """
-        # load data to memory
-        data = self.load_data()
-
-        # create/open hdf5 file with subgroups for train/test
-        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
-        fileh5 = h5py.File(file_name, 'w', version='latest')
-
-        if self.verbose:
-            print('\n\n==> Storing metadata to file: {}'.format(file_name))
-            print('Saving data ...')
-
-        # add data to the **source** group
-        for set_name in data:
-            sourceg = fileh5.create_group('source/' + set_name)
-            for category in data[set_name]['source_data']:
-                #category_grp = sourceg.create_group(data[set_name]['source_data'][category])
-                category_grp = sourceg.create_group(category)
-                for video_name in data[set_name]['source_data'][category]:
-                    video_grp = category_grp.create_group(video_name)
-                    video_grp.create_dataset('images_path', data=data[set_name]['source_data'][category][video_name]['images'])
-                    video_grp.create_dataset('video_path', data=data[set_name]['source_data'][category][video_name]['video'])
-
-        # add data to the **default** group
-        for set_name in data:
-            defaultg = fileh5.create_group('default/' + set_name)
-            defaultg.create_dataset('activities', data=data[set_name]["activities"], dtype=np.uint8)
-            defaultg.create_dataset('videos', data=data[set_name]["videos"], dtype=np.uint8)
-            defaultg.create_dataset('video_filenames', data=data[set_name]["video_filenames"], dtype=np.uint8)
-            defaultg.create_dataset('image_filenames', data=data[set_name]["image_filenames"], dtype=np.uint8)
-            defaultg.create_dataset('total_frames', data=data[set_name]["total_frames"], dtype=np.int32)
-            defaultg.create_dataset('list_videos_per_activity', data=data[set_name]["list_videos_per_activity"], dtype=np.int32)
-            defaultg.create_dataset('list_image_filenames_per_video', data=data[set_name]["list_image_filenames_per_video"], dtype=np.int32)
-            defaultg.create_dataset('object_ids', data=data[set_name]["object_ids"], dtype=np.int32)
-            defaultg.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.int32)
-
-        # close file
-        fileh5.close()
-
-        # return information of the task + cache file
-        return file_name
+        for category in data['source_data']:
+            category_grp = handler.create_group(category)
+            for video_name in data[set_name]['source_data'][category]:
+                video_grp = category_grp.create_group(video_name)
+                video_grp.create_dataset('images_path', data=data['source_data'][category][video_name]['images'])
+                video_grp.create_dataset('video_path', data=data['source_data'][category][video_name]['video'])
 
 
-    def run(self):
+    def add_data_to_default(self, handler, data, set_name=None):
         """
-        Run task processing.
+        Add data of a set to the default group.
+
+        For each field, the data is organized into a single big matrix.
         """
-        return self.process_metadata()
+        handler.create_dataset('videos', data=data["videos"], dtype=np.uint8)
+        handler.create_dataset('video_filenames', data=data["video_filenames"], dtype=np.uint8)
+        handler.create_dataset('image_filenames', data=data["image_filenames"], dtype=np.uint8)
+        handler.create_dataset('total_frames', data=data["total_frames"], dtype=np.int32)
+        handler.create_dataset('list_videos_per_activity', data=data["list_videos_per_activity"], dtype=np.int32)
+        handler.create_dataset('list_image_filenames_per_video', data=data["list_image_filenames_per_video"], dtype=np.int32)
+        handler.create_dataset('object_ids', data=data["object_ids"], dtype=np.int32)
+        handler.create_dataset('object_fields', data=data["object_fields"], dtype=np.int32)
+
+
+class RecognitionNoSourceGrp(Recognition):
+    """ UCF101 action recognition preprocessing functions """
+
+    # metadata filename
+    filename_h5 = 'recognition_d'
+
+    def add_data_to_source(self, handler, data, set_name):
+        """
+        Dummy method
+        """
+        # do nothing
+        pass
