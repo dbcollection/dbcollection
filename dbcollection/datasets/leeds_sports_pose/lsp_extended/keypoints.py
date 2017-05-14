@@ -88,7 +88,7 @@ class KeypointsNoSourceGrp(Keypoints):
     # metadata filename
     filename_h5 = 'keypoint_d'
 
-    def add_data_to_source(self, handler, data):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Dummy method
         """
