@@ -6,8 +6,9 @@ COCO Captions 2015/2016 process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
-import h5py
 import progressbar
+
+from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
@@ -16,7 +17,7 @@ from dbcollection.utils.file_load import load_json
 from .load_data_test import load_data_test
 
 
-class Caption2015:
+class Caption2015(BaseTask):
     """ COCO Captions (2015) preprocessing functions """
 
     # metadata filename
@@ -33,15 +34,6 @@ class Caption2015:
         "val" : os.path.join('annotations', 'captions_val2014.json'),
         "test" : os.path.join('annotations', 'image_info_test2014.json')
     }
-
-
-    def __init__(self, data_path, cache_path, verbose=True):
-        """
-        Initialize class.
-        """
-        self.cache_path = cache_path
-        self.data_path = data_path
-        self.verbose = verbose
 
 
     def load_data_trainval(self, set_name, image_dir, annotation_path):
@@ -122,7 +114,7 @@ class Caption2015:
                 yield self.load_data_trainval(set_name, image_dir, annot_filepath)
 
 
-    def add_data_to_source(self, handler, data):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Store classes + filenames as a nested tree.
         """
@@ -230,49 +222,6 @@ class Caption2015:
             handler['category'] = str2ascii(category)
             handler['supercategory'] = str2ascii(supercategory)
 
-    def process_metadata(self):
-        """
-        Process metadata and store it in a hdf5 file.
-        """
-
-        # create/open hdf5 file with subgroups for train/val/test
-        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
-        fileh5 = h5py.File(file_name, 'w', version='latest')
-
-        if self.verbose:
-            print('\n==> Storing metadata to file: {}'.format(file_name))
-
-        # setup data generator
-        data_gen = self.load_data()
-
-        for data in data_gen:
-            for set_name in data:
-
-                if self.verbose:
-                    print('\nSaving set metadata: {}'.format(set_name))
-
-                # add data to the **source** group
-                sourceg = fileh5.create_group('source/' + set_name)
-                self.add_data_to_source(sourceg, data[set_name])
-
-                # add data to the **default** group
-                defaultg = fileh5.create_group('default/' + set_name)
-                self.add_data_to_default(defaultg, data[set_name], set_name)
-
-        # close file
-        fileh5.close()
-
-        # return information of the task + cache file
-        return file_name
-
-
-    def run(self):
-        """
-        Run task processing.
-        """
-        return self.process_metadata()
-
-
 
 class Caption2015NoSourceGrp(Caption2015):
     """ COCO Caption (2015) (default grp only - no source group) task class """
@@ -280,7 +229,7 @@ class Caption2015NoSourceGrp(Caption2015):
     # metadata filename
     filename_h5 = 'caption_2015_d'
 
-    def add_data_to_source(self, handler, data):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Dummy method
         """
