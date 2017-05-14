@@ -5,8 +5,7 @@ ImageNet ILSVRC 2012 download/process functions.
 
 from __future__ import print_function
 from dbcollection.datasets.dbclass import BaseDataset
-from .classification import Classification
-from .raw256 import Raw256
+from .classification import Classification, ClassificationNoSourceGrp, Raw256, Raw256NoSourceGrp
 
 
 class ILSVRC2012(BaseDataset):
@@ -19,7 +18,9 @@ class ILSVRC2012(BaseDataset):
     # init tasks
     tasks = {
         "classification" : Classification,
-        "raw256" : Raw256
+        "classification_d" : ClassificationNoSourceGrp,
+        "raw256" : Raw256,
+        "raw256_d" : Raw256NoSourceGrp
     }
     default_task = 'classification'
 

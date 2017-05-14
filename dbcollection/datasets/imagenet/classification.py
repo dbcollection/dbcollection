@@ -6,8 +6,11 @@ ImageNet ILSVRC 2012 classification process functions.
 from __future__ import print_function, division
 import os
 import numpy as np
-import h5py
+import PIL
+from PIL import Image
 import progressbar
+
+from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.file_load import load_txt, load_matlab
 from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
@@ -15,30 +18,14 @@ from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 
 
-class Classification:
+class Classification(BaseTask):
     """ ImageNet ILSVRC 2012 Classification preprocessing functions """
 
     # metadata filename
     filename_h5 = 'classification'
 
-    def __init__(self, data_path, cache_path, verbose=True, paths=None):
-        """
-        Initialize class.
-        """
-        self.cache_path = cache_path
-        self.data_path = data_path
-        self.verbose = verbose
-
-        self.fname_val_groundtruth_idx = 'ILSVRC2012_validation_ground_truth.txt'
-        self.fname_metadata = 'meta.mat'
-        if paths:
-            assert os.path.isdir(paths[0]), 'Train directory does not exist: {}'.format(paths[0])
-            assert os.path.isdir(paths[0]), 'Validation directory does not exist: {}'.format(paths[1])
-            self.dirnames_train = [paths[0]]
-            self.dirnames_val = [paths[1]]
-        else:
-            self.dirnames_train = ['ILSVRC2012_img_train', 'train']
-            self.dirnames_val = ['ILSVRC2012_img_val', 'val']
+    dirnames_train = ['ILSVRC2012_img_train', 'train']
+    dirnames_val = ['ILSVRC2012_img_val', 'val']
 
 
     def get_file_path(self, fname):
@@ -56,7 +43,7 @@ class Classification:
         """
         Load ILSVRC2012 ground truth indexes.
         """
-        return load_txt(self.get_file_path(self.fname_val_groundtruth_idx))
+        return load_txt(self.get_file_path('ILSVRC2012_validation_ground_truth.txt'))
 
 
     def load_annotations_mat(self):
@@ -64,7 +51,7 @@ class Classification:
         Load ILSVRC2012 annotations (.mat file).
         """
         # load annotation file
-        filename = self.get_file_path(self.fname_metadata)
+        filename = self.get_file_path('meta.mat')
         return load_matlab(filename)
 
 
@@ -154,10 +141,20 @@ class Classification:
         return data
 
 
+    def setup_dirs(self):
+        """
+        Resize all images in a directory.
+        """
+        # do nothing
+
+
     def load_data(self):
         """
         Load the data from the files.
         """
+        # setup dirs (used only for raw256)
+        self.setup_dirs()
+
         # load annotations
         if self.verbose:
             print('\n==> Fetching annotations + image files...')
@@ -201,7 +198,6 @@ class Classification:
 
         # cycle all classes from the data with the original annotations
         for cname in data:
-
             images_filenames = [os.path.join(set_name, cname, fname) for fname in data[cname]]
             images_filenames.sort()
             sourceg.create_dataset(cname + '/' + 'image_filenames', data=str2ascii(images_filenames), dtype=np.uint8)
@@ -212,7 +208,8 @@ class Classification:
                 prgbar.update(counter)
 
         # force progressbar to 100%
-        prgbar.finish()
+        if self.verbose:
+            prgbar.finish()
 
 
     def convert_data_to_arrays(self, data, set_name):
@@ -258,47 +255,144 @@ class Classification:
         }
 
 
-    def process_metadata(self, save_name):
+    def add_data_to_source(self, handler, data, set_name=None):
         """
-        Process metadata and store it in a hdf5 file.
-        """
-        # create/open hdf5 file with subgroups for train/val/test
-        if save_name:
-            file_name = os.path.join(self.cache_path, save_name)
-        else:
-            file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
-        fileh5 = h5py.File(file_name, 'w', version='latest')
+        Store data annotations in a nested tree fashion.
 
+        It closely follows the tree structure of the data.
+        """
+        self.store_data_source(handler, data, set_name)
+
+
+    def add_data_to_default(self, handler, data, set_name=None):
+        """
+        Add data of a set to the default group.
+
+        For each field, the data is organized into a single big matrix.
+        """
+        data_array = self.convert_data_to_arrays(data, set_name)
+        for field_name in data_array:
+            handler.create_dataset(field_name, data=data_array[field_name])
+
+
+class ClassificationNoSourceGrp(Classification):
+    """ ImageNet ILSVRC 2012 Classification (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'keypoint_d'
+
+    def add_data_to_source(self, handler, data, set_name):
+        """
+        Dummy method
+        """
+        # do nothing
+
+
+#---------------------------------------------------------
+# Resized images to 256px
+#---------------------------------------------------------
+
+class Raw256(Classification):
+    """ ImageNet ILSVRC 2012 Classification raw256 preprocessing functions """
+
+    # metadata filename
+    filename_h5 = 'raw256'
+
+    new_dir_train = 'train256'
+    new_dir_val = 'val256'
+
+    dirnames_train = ['ILSVRC2012_img_train', 'train']
+    dirnames_val = ['ILSVRC2012_img_val', 'val']
+
+
+    def dir_resize_images(self, new_data_dir, data_dir):
+        """
+        Resize all images from the dir.
+        """
+        # fetch all files and folders of the original folder
+        data_dir_ = self.get_dir_path(data_dir)
+        data = construct_set_from_dir(data_dir_, self.verbose)
+
+        base_size = 256
+
+        # progress bar
         if self.verbose:
-            print('\n==> Storing metadata to file: {}'.format(file_name))
+            progbar = progressbar.ProgressBar(max_value=len(data)).start()
+            counter = 0
 
-        # setup data generator
-        data_gen = self.load_data()
+        # cycle all folders and files + resize images + store to the new directory
+        for cname in data:
+            for fname in data[cname]:
+                save_dir = os.path.join(new_data_dir, cname)
+                if not os.path.exists(save_dir):
+                    os.makedirs(save_dir)
 
-        for data in data_gen:
-            for set_name in data:
+                img_filename = os.path.join(data_dir_, cname, fname)
+                new_img_filename = os.path.join(save_dir, fname)
 
-                if self.verbose:
-                    print('\nSaving set metadata: {}'.format(set_name))
+                # load img
+                img = Image.open(img_filename)
 
-                # add data to the **source** group
-                self.store_data_source(fileh5, data[set_name], set_name)
+                # resize img
+                height, width = img.size[0], img.size[1]
+                if height > width:
+                    wsize = 256
+                    hsize = int(height * 256 / width)
+                else:
+                    hsize = 256
+                    wsize = int(width * 256 / height)
 
-                 # add data to the **default** group
-                data_array = self.convert_data_to_arrays(data[set_name], set_name)
-                defaultg = fileh5.create_group('default/' + set_name)
-                for field_name in data_array:
-                    defaultg.create_dataset(field_name, data=data_array[field_name])
+                img = img.resize((hsize, wsize), PIL.Image.ANTIALIAS)
 
-        # close file
-        fileh5.close()
+                # save img
+                img.save(new_img_filename)
 
-        # return information of the task + cache file
-        return file_name
+            # update progress bar
+            if self.verbose:
+                counter += 1
+                progbar.update(counter)
+
+        # force progressbar to 100%
+        if self.verbose:
+            progbar.finish()
+            print('')
 
 
-    def run(self, save_name=None):
+    def setup_dirs(self):
         """
-        Run task processing.
+        Setup new train/val directories and resize all images.
         """
-        return self.process_metadata(save_name)
+        if self.verbose:
+            print('==> Setup resized data dirs + images:')
+
+        sets = {
+            "train" : [self.new_dir_train, self.dirnames_train],
+            "val" : [self.new_dir_val, self.dirnames_val]
+        }
+
+        for set_name in sets:
+            # setup new directory
+            new_data_dir = os.path.join(self.data_path, sets[set_name][0])
+            if not os.path.exists(new_data_dir):
+                os.makedirs(new_data_dir)
+            else:
+                continue # skip this set
+
+            # resize all images and save into the new directory
+            if self.verbose:
+                print(' > Resizing images for the set: {}'.format(set_name))
+            self.dir_resize_images(new_data_dir, sets[set_name][1])
+
+
+
+class Raw256NoSourceGrp(Raw256):
+    """ ImageNet ILSVRC 2012 Classification raw256 (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'keypoint_d'
+
+    def add_data_to_source(self, handler, data, set_name):
+        """
+        Dummy method
+        """
+        # do nothing
