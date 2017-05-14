@@ -175,10 +175,10 @@ class Classification(BaseTask):
         Load the data from the files.
         """
         # train set
-        yield self.load_data_train()
+        yield {"train" : self.load_data_train()}
 
         # test set
-        yield self.load_data_test()
+        yield {"test" : self.load_data_test()}
 
 
     def add_data_to_source(self, handler, data, set_name=None):
