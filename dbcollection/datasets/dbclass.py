@@ -4,8 +4,15 @@ Base class for download/processing a dataset.
 
 
 from __future__ import print_function
+import os
+import h5py
+
 from dbcollection.utils.url import download_extract_all
 
+
+#---------------------------------------------------------
+# Dataset setup
+#---------------------------------------------------------
 
 class BaseDataset:
     """ Base class for download/processing a dataset. """
@@ -90,3 +97,94 @@ class BaseDataset:
             info_output[task] = tasks_loader[task].run()
 
         return info_output, self.keywords
+
+
+#---------------------------------------------------------
+# Task setup
+#---------------------------------------------------------
+
+class BaseTask:
+    """ Base class for processing a task of a dataset. """
+
+    # name of the task file
+    filename_h5 = 'task'
+
+
+    def __init__(self, data_path, cache_path, verbose=True):
+        """
+        Initialize class.
+        """
+        self.cache_path = cache_path
+        self.data_path = data_path
+        self.verbose = verbose
+
+
+    def load_data(self):
+        """
+        Load data of the dataset (create a generator).
+
+        Load data from annnotations and split it to corresponding
+        sets (train, val, test, etc.)
+        """
+        pass
+
+
+    def add_data_to_source(self, handler, data, set_name=None):
+        """
+        Store data annotations in a nested tree fashion.
+
+        It closely follows the tree structure of the data.
+        """
+        pass
+
+
+    def add_data_to_default(self, handler, data, set_name=None):
+        """
+        Add data of a set to the default group.
+
+        For each field, the data is organized into a single big matrix.
+        """
+        pass
+
+
+    def process_metadata(self):
+        """
+        Process metadata and store it in a hdf5 file.
+        """
+
+        # create/open hdf5 file with subgroups for train/val/test
+        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
+        fileh5 = h5py.File(file_name, 'w', version='latest')
+
+        if self.verbose:
+            print('\n==> Storing metadata to file: {}'.format(file_name))
+
+        # setup data generator
+        data_gen = self.load_data()
+
+        for data in data_gen:
+            for set_name in data:
+
+                if self.verbose:
+                    print('\nSaving set metadata: {}'.format(set_name))
+
+                # add data to the **source** group
+                sourceg = fileh5.create_group('source/' + set_name)
+                self.add_data_to_source(sourceg, data[set_name], set_name)
+
+                # add data to the **default** group
+                defaultg = fileh5.create_group('default/' + set_name)
+                self.add_data_to_default(defaultg, data[set_name], set_name)
+
+        # close file
+        fileh5.close()
+
+        # return information of the task + cache file
+        return file_name
+
+
+    def run(self):
+        """
+        Run task processing.
+        """
+        return self.process_metadata()
