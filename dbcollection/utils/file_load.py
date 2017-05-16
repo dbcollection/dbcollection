@@ -55,7 +55,7 @@ def load_txt(fname, mode='r'):
     ------
         None
     """
-    with open(fname, mode) as f:
+    with open(fname, mode, encoding="utf-8") as f:
         data = f.read()
 
     return data.split('\n')
