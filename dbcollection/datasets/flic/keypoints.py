@@ -62,17 +62,18 @@ class Keypoints(BaseTask):
             filename = os.path.join('FLIC', 'images', annot[3][0])
             torso_box = annot[6][0].tolist(),  # [x1,y1,x2,y2]
             parts = [
-                [annot[2][0][0], annot[2][1][0]],    #-- 1, Left_Shoulder
-                [annot[2][0][1], annot[2][1][1]],    #-- 2, Left_Elbow
-                [annot[2][0][2], annot[2][1][2]],    #-- 3, Left_Wrist
-                [annot[2][0][3], annot[2][1][3]],    #-- 4, Right_Shoulder
-                [annot[2][0][4], annot[2][1][4]],    #-- 5, Right_Elbow
-                [annot[2][0][5], annot[2][1][5]],    #-- 6, Right_Wrist
-                [annot[2][0][6], annot[2][1][6]],    #-- 7, Left_Hip
-                [annot[2][0][9], annot[2][1][9]],    #-- 8, Right_Hip
-                [annot[2][0][12], annot[2][1][12]],  #-- 9, Left_Eye
-                [annot[2][0][13], annot[2][1][13]],  #-- 10, Right_Eye
-                [annot[2][0][16], annot[2][1][16]]   #-- 11, Nose
+                # [x, y, is_visible]
+                [annot[2][0][0], annot[2][1][0], 1],    #-- 1, Left_Shoulder
+                [annot[2][0][1], annot[2][1][1], 1],    #-- 2, Left_Elbow
+                [annot[2][0][2], annot[2][1][2], 1],    #-- 3, Left_Wrist
+                [annot[2][0][3], annot[2][1][3], 1],    #-- 4, Right_Shoulder
+                [annot[2][0][4], annot[2][1][4], 1],    #-- 5, Right_Elbow
+                [annot[2][0][5], annot[2][1][5], 1],    #-- 6, Right_Wrist
+                [annot[2][0][6], annot[2][1][6], 1],    #-- 7, Left_Hip
+                [annot[2][0][9], annot[2][1][9], 1],    #-- 8, Right_Hip
+                [annot[2][0][12], annot[2][1][12], 1],  #-- 9, Left_Eye
+                [annot[2][0][13], annot[2][1][13], 1],  #-- 10, Right_Eye
+                [annot[2][0][16], annot[2][1][16], 1]   #-- 11, Nose
             ]
 
             if filename in data[set_name]:
@@ -109,7 +110,7 @@ class Keypoints(BaseTask):
             yield {set_name : annotations[set_name]}
 
 
-    def add_data_to_source(self, handler, data):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Store classes + filenames as a nested tree.
         """
@@ -143,7 +144,7 @@ class Keypoints(BaseTask):
             prgbar.finish()
 
 
-    def add_data_to_default(self, handler, data):
+    def add_data_to_default(self, handler, data, set_name):
         """
         Add data of a set to the default group.
         """
@@ -223,7 +224,7 @@ class KeypointsNoSourceGrp(Keypoints):
     # metadata filename
     filename_h5 = 'keypoint_d'
 
-    def add_data_to_source(self, handler, data):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Dummy method
         """
