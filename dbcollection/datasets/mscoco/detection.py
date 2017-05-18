@@ -170,9 +170,9 @@ class Detection2015(BaseTask):
             if 'object' in data_[key]:
                 for j, obj in enumerate(data_[key]["object"]):
                     obj_grp = file_grp.create_group(str(j))
-                    obj_grp['id'] = str2ascii(obj["id"])
-                    obj_grp['image_id'] = str2ascii(obj["image_id"])
-                    obj_grp['category_id'] = str2ascii(obj["category_id"])
+                    obj_grp['id'] = np.array(obj["id"], dtype=np.int32)
+                    obj_grp['image_id'] = np.array(obj["image_id"], dtype=np.int32)
+                    obj_grp['category_id'] = np.array(obj["category_id"], dtype=np.int32)
                     obj_grp['category'] = str2ascii(obj["category"])
                     obj_grp['supercategory'] = str2ascii(obj["supercategory"])
                     obj_grp['area'] = np.array(obj["area"], dtype=np.int32)
