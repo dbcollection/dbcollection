@@ -34,6 +34,7 @@ object_classification = {
     "ilsvrc2012": imagenet.ILSVRC2012,
     'mnist': mnist.MNIST,
     "pascal_voc_2007" : pascal.voc_2007.PascalVOC2007,
+    "pascal_voc_2012" : pascal.voc_2012.PascalVOC2012,
     "mscoco" : mscoco.MSCOCO
 }
 
