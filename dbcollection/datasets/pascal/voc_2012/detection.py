@@ -36,12 +36,14 @@ class Detection(BaseTask):
         Return the train/val/test/trainval set filenames.
         """
         from .set_indexes import test as test_fnames
+        test_fnames.sort()
 
-        annotation_filenames = os.listdir(self.annotations_path)
-        fnames = [os.path.splitext(fname) for fname in annotation_filenames]
+        image_filenames = os.listdir(os.path.join(self.data_path, self.images_path))
+        fnames = [os.path.splitext(fname)[0] for fname in image_filenames]
         fnames.sort()
 
-        if any([fname in test_fnames for fname in fnames]):
+        #if any([fname in test_fnames for fname in fnames]):
+        if test_fnames[0] in fnames:
             # test set detected.
             trainval_fnames = [fname for fname in fnames if not fname in test_fnames]
             trainval_ids = [i for i, fname in enumerate(fnames) if fname in trainval_fnames]
@@ -120,6 +122,15 @@ class Detection(BaseTask):
                 # load annotation
                 try:
                     annotation = load_xml(annot_filename)
+
+                    if set_name != 'test':
+                        if isinstance(annotation['annotation']['object'], list):
+                            for j in range(len(annotation['annotation']['object'])):
+                                if 'truncated' not in annotation['annotation']['object'][j]:
+                                    annotation['annotation']['object'][j]['truncated'] = 0
+                        else:
+                            if 'truncated' not in annotation['annotation']['object']:
+                                annotation['annotation']['object']['truncated'] = 0
                 except OSError:
                     annotation = {}
 
@@ -240,9 +251,9 @@ class Detection(BaseTask):
             image_filename, fileid, annotation = data_
 
             image_filenames.append(image_filename)
-            image_id.append(fileid[i])
+            image_id.append(fileid)
 
-            if any(annotation):
+            if any(annotation) and set_name != 'test':
                 width = annotation['annotation']['size']['width']
                 height = annotation['annotation']['size']['height']
                 depth = annotation['annotation']['size']['depth']
@@ -274,9 +285,12 @@ class Detection(BaseTask):
                     #        part_group['bndbox/xmax'] = part['bndbox']['xmax']
                     #        part_group['bndbox/ymax'] = part['bndbox']['ymax']
 
-                    object_id.append([i, class_id, obj_counter, i,
-                                    difficult.index(int(obj['difficult'])),
-                                    difficult.index(int(obj['truncated']))])
+                    if set_name != 'test':
+                        object_id.append([i, class_id, obj_counter, i,
+                                          difficult.index(int(obj['difficult'])),
+                                          difficult.index(int(obj['truncated']))])
+                    #else:
+                    #    object_id.append([i, class_id, obj_counter, i])
 
                     # increment counter
                     obj_counter += 1
@@ -371,7 +385,7 @@ class DetectionNoSourceGrp(Detection):
     """ Pascal VOC 2007 object detection (default grp only - no source group) task class """
 
     # metadata filename
-    filename_h5 = 'detection_d.h5'
+    filename_h5 = 'detection_d'
 
     def add_data_to_source(self, handler, data, set_name):
         """
