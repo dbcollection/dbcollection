@@ -11,7 +11,6 @@ import progressbar
 from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
-from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_matlab
 
 
@@ -46,12 +45,11 @@ class Keypoints(BaseTask):
         annotations = load_matlab(annot_filepath)
 
         data = {
-            "train" : {},
-            "test" : {}
+            "train" : [],
+            "test" : []
         }
 
-
-        for annot in annotations['examples'][0]:
+        for i, annot in enumerate(annotations['examples'][0]):
             if annot[-1][0][0] == 0:
                 set_name = 'train'
             else:
@@ -76,22 +74,14 @@ class Keypoints(BaseTask):
                 [annot[2][0][16], annot[2][1][16], 1]   #-- 11, Nose
             ]
 
-            if filename in data[set_name]:
-                data[set_name][filename]["object"].append({
-                    "torso_box" : torso_box,
-                    "parts" : parts
-                })
-            else:
-                d = {
-                    "width" : width,
-                    "height" : height,
-                    "moviename" : moviename,
-                    "object" : [{
-                        "torso_box" : torso_box,
-                        "parts" : parts
-                    }]
-                }
-                data[set_name].update({filename : d})
+            data[set_name].append({
+                "filename" : filename,
+                "width" : width,
+                "height" : height,
+                "moviename" : moviename,
+                "torso_box" : torso_box,
+                "parts" : parts
+            })
 
         return data
 
@@ -114,26 +104,21 @@ class Keypoints(BaseTask):
         """
         Store classes + filenames as a nested tree.
         """
-
         if self.verbose:
             print('> Adding data to source group:')
             prgbar = progressbar.ProgressBar(max_value=len(data))
 
         keypoint_names = str2ascii(self.keypoints_labels)
 
-        for i, fname in enumerate(data):
+        for i, annot in enumerate(data):
             file_grp = handler.create_group(str(i))
-            annot = data[fname]
-            file_grp['image_filename'] = str2ascii(fname)
+            file_grp['image_filename'] = str2ascii(annot["filename"])
             file_grp['moviename'] = str2ascii(annot["moviename"])
             file_grp['width'] = np.array(annot["width"], dtype=np.int32)
             file_grp['height'] = np.array(annot["height"], dtype=np.int32)
             file_grp['keypoint_names'] = keypoint_names
-
-            for j, obj in enumerate(annot["object"]):
-                obj_grp = file_grp.create_group(str(j))
-                obj_grp['torso_box'] = np.array(obj["torso_box"], dtype=np.float)
-                obj_grp['keypoints'] = np.array(obj["parts"], dtype=np.float)
+            file_grp['torso_box'] = np.array(annot["torso_box"], dtype=np.float)
+            file_grp['keypoints'] = np.array(annot["parts"], dtype=np.float)
 
             # update progressbar
             if self.verbose:
@@ -156,45 +141,23 @@ class Keypoints(BaseTask):
         keypoints = []
         object_id = []
 
-        object_fields = ["image_filenames", "movienames", "torso_boxes",
+        object_fields = ["image_filenames", "torso_boxes",
                          "keypoints", "width", "height"]
-
-        list_object_ids_per_image = []
 
         if self.verbose:
             print('> Adding data to default group:')
             prgbar = progressbar.ProgressBar(max_value=len(data))
 
 
-        for i, fname in enumerate(data):
-            annotation = data[fname]
-            movienames.append(annotation["moviename"])
+        for i, annot in enumerate(data):
+            image_filenames.append(annot["filename"])
+            movienames.append(annot["moviename"])
+            width.append(annot["width"])
+            height.append(annot["height"])
+            torso_boxes.append(annot["torso_box"])
+            keypoints.append(annot["parts"])
 
-        # remove duplicated entries
-        movienames = list(set(movienames))
-
-        obj_per_img_counter = 0
-        for i, fname in enumerate(data):
-            annotation = data[fname]
-            image_filenames.append(fname)
-            width.append(annotation["width"])
-            height.append(annotation["height"])
-
-            objs_per_image = []
-            for obj in annotation["object"]:
-                torso_boxes.append(obj["torso_box"])
-                keypoints.append(obj["parts"])
-
-                object_id.append([i, movienames.index(annotation["moviename"]),
-                                  obj_per_img_counter, obj_per_img_counter, i, i])
-
-                # add object_id to the list
-                objs_per_image.append(obj_per_img_counter)
-
-                # update counter
-                obj_per_img_counter += 1
-
-            list_object_ids_per_image.append(objs_per_image)
+            object_id.append([i, i, i, i, i])
 
             # update progressbar
             if self.verbose:
@@ -203,7 +166,6 @@ class Keypoints(BaseTask):
         # update progressbar
         if self.verbose:
             prgbar.finish()
-
 
         handler['image_filenames'] = str2ascii(image_filenames)
         handler['movienames'] = str2ascii(movienames)
@@ -214,8 +176,6 @@ class Keypoints(BaseTask):
         handler['torso_boxes'] = np.array(torso_boxes, dtype=np.float)
         handler['keypoints'] = np.array(keypoints, dtype=np.float)
         handler['keypoint_names'] = str2ascii(self.keypoints_labels)
-
-        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
 
 
 class KeypointsNoSourceGrp(Keypoints):
