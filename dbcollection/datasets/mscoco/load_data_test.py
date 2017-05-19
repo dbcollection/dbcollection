@@ -18,10 +18,12 @@ def load_data_test(set_name, image_dir, annotation_path, verbose=True):
     if verbose:
         print('> Processing image annotations... ')
     for i, annot in enumerate(annotations['images']):
-        data[annot['id']] = {
+        data[annot['file_name']] = {
+            "file_name" : os.path.join(image_dir, annot['file_name']),
             "width" : annot['width'],
             "height" : annot['height'],
-            "filename" : os.path.join(image_dir, annot['file_name'])
+            "id" : annot['id'],
+            "coco_url" : annot['coco_url'],
         }
 
     # categories
@@ -32,10 +34,11 @@ def load_data_test(set_name, image_dir, annotation_path, verbose=True):
     for i, annot in enumerate(annotations['categories']):
         categories[annot['id']] = {
             "name" : annot['name'],
-            "supercategory" : annot['supercategory']
+            "supercategory" : annot['supercategory'],
+            "id" : annot['id']
         }
         category_list.append(annot['name'])
         supercategory_list.append(annot['supercategory'])
     supercategory_list = list(set(supercategory_list))
 
-    return {set_name : [data, category_list, supercategory_list]}
+    return {set_name : [sorted(data), annotations, category_list, supercategory_list]}
