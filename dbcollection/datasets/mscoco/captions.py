@@ -91,7 +91,7 @@ class Caption2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : [data]}
+        return {set_name : [data, annotations]}
 
 
     def load_data(self):
@@ -119,13 +119,37 @@ class Caption2015(BaseTask):
         Store classes + filenames as a nested tree.
         """
         data_ = data[0]
+        annotations = data[1]
+        image_dir = self.image_dir_path[set_name]
 
         if self.verbose:
             print('> Adding data to source group:')
             prgbar = progressbar.ProgressBar(max_value=len(data_))
 
+        # images - original
+        image_grp = handler.create_group('images')
+        for i, annot in enumerate(annotations['images']):
+            file_grp = image_grp.create_group(str(i))
+            file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
+            file_grp['coco_url'] = str2ascii(annot["coco_url"])
+            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
+            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
+            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+
+
+        # annotations - original
+        if set_name != 'test':
+            annot_grp = handler.create_group('annotations')
+            for i, annot in enumerate(annotations['annotations']):
+                file_grp = annot_grp.create_group(str(i))
+                file_grp['caption'] = str2ascii(annot["iscrowd"])
+                file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+                file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
+
+        # grouped/combined data - parsed by me
+        grouped_grp = handler.create_group('grouped')
         for i, key in enumerate(data_):
-            file_grp = handler.create_group(str(i))
+            file_grp = grouped_grp.create_group(str(i))
             file_grp['image_filename'] = str2ascii(data_[key]["filename"])
             file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
             file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)

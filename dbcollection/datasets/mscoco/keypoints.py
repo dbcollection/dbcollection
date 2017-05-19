@@ -118,7 +118,7 @@ class Keypoints2016(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : [data, category, supercategory, skeleton, keypoints]}
+        return {set_name : [data, annotations, category, supercategory, skeleton, keypoints]}
 
 
     def load_data(self):
@@ -145,22 +145,67 @@ class Keypoints2016(BaseTask):
         """
         Store classes + filenames as a nested tree.
         """
+        data_ = data[0]
+        annotations = data[1]
+        image_dir = self.image_dir_path[set_name]
+
         if len(data) > 3:
-            data_, category, supercategory, skeleton, keypoints = data
+            category = data[2]
+            supercategory = data[3]
+            skeleton = data[4]
+            keypoints = data[5]
 
             category_ = str2ascii(category)
             supercategory_ = str2ascii(supercategory)
             keypoints_ = str2ascii(keypoints)
             skeleton_ = np.array(pad_list(skeleton, -1), dtype=np.uint8)
-        else:
-            data_ = data[0]
 
         if self.verbose:
             print('> Adding data to source group:')
             prgbar = progressbar.ProgressBar(max_value=len(data_))
 
+
+        # images - original
+        image_grp = handler.create_group('images')
+        for i, annot in enumerate(annotations['images']):
+            file_grp = image_grp.create_group(str(i))
+            file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
+            file_grp['coco_url'] = str2ascii(annot["coco_url"])
+            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
+            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
+            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+
+        # categories - original
+        cat_grp = handler.create_group('categories')
+        for i, annot in enumerate(annotations['categories']):
+            file_grp = cat_grp.create_group(str(i))
+            file_grp['supercategory'] = str2ascii(annot["supercategory"])
+            file_grp['name'] = str2ascii(annot["name"])
+            file_grp['keypoints'] = str2ascii(annot["keypoints"])
+            file_grp['skeleton'] = np.array(annot["skeleton"], dtype=np.uint8)
+            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+
+
+        # annotations - original
+        if set_name != 'test':
+            annot_grp = handler.create_group('annotations')
+            for i, annot in enumerate(annotations['annotations']):
+                file_grp = annot_grp.create_group(str(i))
+                file_grp['iscrowd'] = np.array(annot["iscrowd"], dtype=np.int32)
+                file_grp['area'] = np.array(annot["area"], dtype=np.float)
+                file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+                file_grp['category_id'] = np.array(annot["category_id"], dtype=np.int32)
+                file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
+                file_grp['bbox'] = np.array(annot["bbox"], dtype=np.float)
+                file_grp['segmentation'] = np.array(annot["segmentation"], dtype=np.float)
+                file_grp['keypoints'] = np.array(annot["keypoints"], dtype=np.int32)
+                file_grp['num_keypoints'] = np.array(annot["num_keypoints"], dtype=np.uint8)
+
+
+        # grouped/combined data - parsed by me
+        grouped_grp = handler.create_group('grouped')
         for i, key in enumerate(data_):
-            file_grp = handler.create_group(str(i))
+            file_grp = grouped_grp.create_group(str(i))
             file_grp['image_filename'] = str2ascii(data_[key]["filename"])
             file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
             file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
