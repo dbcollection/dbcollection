@@ -7,6 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 import progressbar
+from collections import OrderedDict
 
 from dbcollection.datasets.dbclass import BaseTask
 
@@ -24,9 +25,9 @@ class Detection2015(BaseTask):
     filename_h5 = 'detection_2015'
 
     image_dir_path = {
-        "train" : 'train2014',
+        #"train" : 'train2014',
         "val" : 'val2014',
-        "test" : 'test2014'
+        #"test" : 'test2014'
     }
 
     annotation_path = {
@@ -117,7 +118,7 @@ class Detection2015(BaseTask):
             print('  > Processing object annotations... ')
         # group annotations by file name
         annotation_id_dict = {}
-        for i, annot in enumerate(annotations['categories']):
+        for i, annot in enumerate(annotations['annotations']):
             filename = images_fname_by_id[annot['image_id']]
             category_annot = categories[annot['category_id']]
             obj_id = annot["id"]
@@ -162,7 +163,7 @@ class Detection2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : [sorted(images_annot_by_fname),
+        return {set_name : [OrderedDict(sorted(images_annot_by_fname.items())),
                             annotations,
                             annotation_id_dict,
                             category_list,
@@ -201,8 +202,11 @@ class Detection2015(BaseTask):
         image_dir = self.image_dir_path[set_name]
 
         if self.verbose:
-            print('> Adding data to source group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data_))
+            print('> Adding data to source group...')
+
+        if self.verbose:
+            print('>>> Adding data to group: images')
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
 
         # images - original
         image_grp = handler.create_group('images')
@@ -214,6 +218,15 @@ class Detection2015(BaseTask):
             file_grp['height'] = np.array(annot["height"], dtype=np.int32)
             file_grp['id'] = np.array(annot["id"], dtype=np.int32)
 
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
+        if self.verbose:
+            prgbar.finish()
+            print('>>> Adding data to group: categories')
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['categories']))
+
         # categories - original
         cat_grp = handler.create_group('categories')
         for i, annot in enumerate(annotations['categories']):
@@ -222,8 +235,17 @@ class Detection2015(BaseTask):
             file_grp['name'] = str2ascii(annot["name"])
             file_grp['id'] = np.array(annot["id"], dtype=np.int32)
 
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
         # annotations - original
         if set_name != 'test':
+            if self.verbose:
+                prgbar.finish()
+                print('>>> Adding data to group: annotations')
+                prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
+
             annot_grp = handler.create_group('annotations')
             for i, annot in enumerate(annotations['annotations']):
                 file_grp = annot_grp.create_group(str(i))
@@ -233,8 +255,26 @@ class Detection2015(BaseTask):
                 file_grp['category_id'] = np.array(annot["category_id"], dtype=np.int32)
                 file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
                 file_grp['bbox'] = np.array(annot["bbox"], dtype=np.float)
-                file_grp['segmentation'] = np.array(annot["segmentation"], dtype=np.float)
+                if isinstance(annot["segmentation"], list):
+                    segmentation_type = 0
+                    segmentation = pad_list(annot["segmentation"], -1)
+                elif isinstance(annot["segmentation"]['counts'], list):
+                    segmentation_type = 1
+                    segmentation = annot["segmentation"]["counts"]
+                else:
+                    segmentation_type = 2
+                    segmentation = annot["segmentation"]
+                file_grp['segmentation'] = np.array(segmentation, dtype=np.float)
+                file_grp['segmentation_type'] = np.array(segmentation_type, dtype=np.uint8)
 
+                # update progressbar
+                if self.verbose:
+                    prgbar.update(i)
+
+        if self.verbose:
+            prgbar.finish()
+            print('>>> Adding data to group: grouped')
+            prgbar = progressbar.ProgressBar(max_value=len(data_))
 
         # grouped/combined data - parsed by me
         grouped_grp = handler.create_group('grouped')
@@ -247,8 +287,9 @@ class Detection2015(BaseTask):
             file_grp['id'] = np.array(data_[key]["id"], dtype=np.int32)
 
             if 'object' in data_[key]:
-                for j, obj in sorted(data_[key]["object"]):
+                for j, obj_id in enumerate(data_[key]["object"]):
                     obj_grp = file_grp.create_group(str(j))
+                    obj = data_[key]["object"][obj_id]
                     obj_grp['id'] = np.array(obj["id"], dtype=np.int32)
                     obj_grp['image_id'] = np.array(obj["image_id"], dtype=np.int32)
                     obj_grp['category_id'] = np.array(obj["category_id"], dtype=np.int32)
