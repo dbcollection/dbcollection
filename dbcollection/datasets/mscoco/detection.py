@@ -25,9 +25,9 @@ class Detection2015(BaseTask):
     filename_h5 = 'detection_2015'
 
     image_dir_path = {
-        #"train" : 'train2014',
+        "train" : 'train2014',
         "val" : 'val2014',
-        #"test" : 'test2014'
+        "test" : 'test2014'
     }
 
     annotation_path = {
@@ -120,6 +120,10 @@ class Detection2015(BaseTask):
         annotation_id_dict = {}
         for i, annot in enumerate(annotations['annotations']):
             filename = images_fname_by_id[annot['image_id']]
+            if filename == 'COCO_val2014_000000003799.jpg':
+                aqui = 1
+            if annot['image_id'] == 3799:
+                aqui = 1
             category_annot = categories[annot['category_id']]
             obj_id = annot["id"]
             annotation_id_dict[obj_id] = i
@@ -320,14 +324,19 @@ class Detection2015(BaseTask):
         image_dir = self.image_dir_path[set_name]
         if 'test' in set_name:
             is_test = True
-            data_, annotations, category, supercategory = data
+            data_ = data[0]
+            filename_ids = data[1]
+            annotations = data[2]
+            category = data[3]
+            supercategory = data[4]
+            category_id = data[5]
         else:
             is_test = False
             data_ = data[0]
             annotations = data[1]
             annotation_id_dict = data[2]
-            category_list = data[3]
-            supercategory_list = data[4]
+            category = data[3]
+            supercategory = data[4]
             category_id = data[5]
             filename_ids = data[6]
             images_fname_by_id = data[7]
@@ -341,7 +350,7 @@ class Detection2015(BaseTask):
 
         #category_id = []
 
-        obj_id = []
+        #obj_id = []
         annotation_id = []
         area = []
         iscrowd = [0, 1]
@@ -382,9 +391,9 @@ class Detection2015(BaseTask):
         segmentation_t1_counter, segmentation_t2_counter = 0, 0
         tmp_coco_annotations_ids = {}
 
-        for i, key in enumerate(data_):
+        for i, fname_idx in enumerate(data_):
             # fetch annotation
-            annotation = data_[key]
+            annotation = data_[fname_idx]
 
             # add fields
             image_filenames.append(annotation["file_name"])
@@ -398,25 +407,58 @@ class Detection2015(BaseTask):
                 list_object_ids_per_image.append([i])
             else:
                 boxes_per_image = []
-                for obj in annotation["object"]:
-                    area.append(obj["area"])
-                    bbox.append(obj["bbox"])
-                    obj_id.append(obj["id"])
-                    annotation_id.append(obj["id"])
+
+                if "object" in annotation:
+                    for j, obj_idx in enumerate(annotation["object"]):
+                        obj = annotation["object"][obj_idx]
+                        area.append(obj["area"])
+                        bbox.append(obj["bbox"])
+                        #obj_id.append(obj["id"])
+                        annotation_id.append(obj["id"])
+
+                        if obj["segmentation_type"] == 0:
+                            segmentation_t1.append(obj["segmentation"])
+                            segmentation_t1_counter += 1
+                            segmentation_t2_id = 0
+                            segmentation_t1_id = segmentation_t1_counter
+                        else:
+                            segmentation_t2.append(obj["segmentation"])
+                            segmentation_t2_counter += 1
+                            segmentation_t1_id = 0
+                            segmentation_t2_id = segmentation_t1_counter
 
 
-                    if obj["segmentation_type"] == 0:
-                        segmentation_t1.append(obj["segmentation"])
-                        segmentation_t1_counter += 1
-                        segmentation_t2_id = 0
-                        segmentation_t1_id = segmentation_t1_counter
-                    else:
-                        segmentation_t2.append(obj["segmentation"])
-                        segmentation_t2_counter += 1
-                        segmentation_t1_id = 0
-                        segmentation_t2_id = segmentation_t1_counter
+                        # *** object_id ***
+                        # [filename, coco_url, width, height,
+                        # category, supercategory,
+                        # bbox, area, iscrowd,
+                        # segmentation_1, segmentation_2,
+                        # "image_id", "category_id", "annotation_id"]
+                        object_id.append([i, i, i, i,
+                                          category.index(obj["category"]), supercategory.index(obj["supercategory"]),
+                                          counter, counter, obj["iscrowd"],
+                                          segmentation_t1_id, segmentation_t2_id,
+                                          i, category.index(obj["category"]), counter])
 
+                        boxes_per_image.append(counter)
 
+                        # temporary var
+                        tmp_coco_annotations_ids[obj["id"]] = counter
+                        #tmp_coco_annotations_ids[obj["id"]] = {
+                        #    "is_crowd_id" : obj["iscrowd"],
+                        #    "bbox_id" : counter,
+                        #    "area_id" : counter,
+                        #    "segmentation_t1_id" : segmentation_t1_id,
+                        #    "segmentation_t2_id" :segmentation_t2_id,
+                        #    "category_id" : obj["category_id"],
+                        #    "image_id" : annotation["id"],
+                        #    "id" : obj["id"]
+                        #}
+
+                    # update counter
+                    counter += 1
+
+                else:
                     # *** object_id ***
                     # [filename, coco_url, width, height,
                     # category, supercategory,
@@ -424,27 +466,11 @@ class Detection2015(BaseTask):
                     # segmentation_1, segmentation_2,
                     # "image_id", "category_id", "annotation_id"]
                     object_id.append([i, i, i, i,
-                                      category.index(obj["category"]), supercategory.index(obj["supercategory"]),
-                                      counter, counter, obj["is_crowd"],
-                                      segmentation_t1_id, segmentation_t2_id,
-                                      i, category.index(obj["category"]), counter])
+                                      -1, -1,
+                                      -1, -1, -1,
+                                      -1, -1,
+                                      i, -1, -1])
 
-                    boxes_per_image.append(counter)
-
-                    # temporary var
-                    tmp_coco_annotations_ids[obj["id"]] = {
-                        "is_crowd_id" : obj["is_crowd"],
-                        "bbox_id" : counter,
-                        "area_id" : counter,
-                        "segmentation_t1_id" : segmentation_t1_id,
-                        "segmentation_t2_id" :segmentation_t2_id,
-                        "category_id" : obj["category_id"],
-                        "image_id" : annotation["id"],
-                        "id" : obj["id"]
-                    }
-
-                    # update counter
-                    counter += 1
 
                 list_boxes_per_image.append(boxes_per_image)
                 list_object_ids_per_image.append(boxes_per_image)
@@ -457,7 +483,24 @@ class Detection2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
+        if self.verbose:
+            print('> Processing coco lists:')
+            prgbar = progressbar.ProgressBar(max_value=len(data[0]))
 
+
+        # set coco id lists
+        for i, annot in enumerate(annotations['images']):
+            fname_id = filename_ids[annot['file_name']]
+            coco_images_ids.append(fname_id)
+
+        coco_categories_ids = list(range(len(category)))
+
+        if not is_test:
+            for i, annot in enumerate(annotations['annotations']):
+                annot_id = tmp_coco_annotations_ids[annot['id']]
+                coco_annotations_ids.append(annot_id)
+
+        """
         # set coco id lists
         for i, annot in enumerate(annotations['images']):
             fname_id = filename_ids[annot['file_name']]
@@ -478,27 +521,32 @@ class Detection2015(BaseTask):
 
 
         if not is_test:
-            for i, annot in enumerate(annotations['categories']):
-                annot_id = annotation_id_dict[annot['id']]
-                cat_id = tmp_coco_annotations_ids[annot_id]["category_id"]
-                img_id = tmp_coco_annotations_ids[annot_id]["image_id"]
-                annot_id = tmp_coco_annotations_ids[annot_id]["id"]
+            for i, annot in enumerate(annotations['annotations']):
 
-                coco_img_id = filename_ids[images_fname_by_id[img_id]]
-                coco_cat_id = category_id.index(cat_id)
-                coco_annot_id = annotation_id.index(annot_id)
+                coco_img_id = filename_ids[images_fname_by_id[annot["image_id"]]]
+                coco_cat_id = category_id.index(annot["category_id"])
+                coco_annot_id = annotation_id.index(annot["id"])
 
-                iscrowd_id = tmp_coco_annotations_ids[annot_id]["is_crowd_id"]
-                area_id = tmp_coco_annotations_ids[annot_id]["area_id"]
-                bbox_id = tmp_coco_annotations_ids[annot_id]["bbox_id"]
-                segmentation_t1_id = tmp_coco_annotations_ids[annot_id]["segmentation_t1_id"]
-                segmentation_t2_id = tmp_coco_annotations_ids[annot_id]["segmentation_t2_id"]
+                iscrowd_id = tmp_coco_annotations_ids[annot['id']]["is_crowd_id"]
+                area_id = tmp_coco_annotations_ids[annot['id']]["area_id"]
+                bbox_id = tmp_coco_annotations_ids[annot['id']]["bbox_id"]
+                segmentation_t1_id = tmp_coco_annotations_ids[annot['id']]["segmentation_t1_id"]
+                segmentation_t2_id = tmp_coco_annotations_ids[annot['id']]["segmentation_t2_id"]
 
                 # [iscrowd, area, bbox, segmentation_t1, segmentation_t2, coco_images_ids,
                 # coco_categories_ids, annotation_id]
                 coco_annotations_ids.append([iscrowd_id, area_id, bbox_id,
                                              segmentation_t1_id, segmentation_t2_id,
                                              coco_img_id, coco_cat_id, coco_annot_id])
+
+                # update progressbar
+                if self.verbose:
+                    prgbar.update(i)
+
+            # update progressbar
+            if self.verbose:
+                prgbar.finish()
+        """
 
 
         # process lists
@@ -548,10 +596,10 @@ class Detection2015(BaseTask):
         handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
 
         if not is_test:
+            #handler['id'] = np.array(obj_id, dtype=np.int32)
+            #handler['image_id'] = np.array(image_id, dtype=np.int32)
+            #handler['category_id'] = np.array(category_id, dtype=np.int32)
             handler['annotation_id'] = np.array(category_id, dtype=np.int32)
-            handler['id'] = np.array(obj_id, dtype=np.int32)
-            handler['image_id'] = np.array(image_id, dtype=np.int32)
-            handler['category_id'] = np.array(category_id, dtype=np.int32)
             handler['boxes'] = np.array(bbox, dtype=np.float)
             handler['iscrowd'] = np.array(iscrowd, dtype=np.uint8)
             handler['segmentation1'] = np.array(pad_list2(segmentation_t1, -1), dtype=np.float)
