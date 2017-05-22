@@ -120,10 +120,6 @@ class Detection2015(BaseTask):
         annotation_id_dict = {}
         for i, annot in enumerate(annotations['annotations']):
             filename = images_fname_by_id[annot['image_id']]
-            if filename == 'COCO_val2014_000000003799.jpg':
-                aqui = 1
-            if annot['image_id'] == 3799:
-                aqui = 1
             category_annot = categories[annot['category_id']]
             obj_id = annot["id"]
             annotation_id_dict[obj_id] = i
@@ -348,9 +344,6 @@ class Detection2015(BaseTask):
         height = []
         image_id = []
 
-        #category_id = []
-
-        #obj_id = []
         annotation_id = []
         area = []
         iscrowd = [0, 1]
@@ -373,7 +366,7 @@ class Detection2015(BaseTask):
         else:
             object_fields = ["image_filenames", "coco_urls", "width", "height",
                              "category", "supercategory", "boxes", "area",
-                             "is_crowd", "segmentation", "segmentation_type",
+                             "iscrowd", "segmentation_t1", "segmentation_t2",
                              "image_id", "category_id", "annotation_id"]
 
         list_image_filenames_per_category = []
@@ -413,7 +406,6 @@ class Detection2015(BaseTask):
                         obj = annotation["object"][obj_idx]
                         area.append(obj["area"])
                         bbox.append(obj["bbox"])
-                        #obj_id.append(obj["id"])
                         annotation_id.append(obj["id"])
 
                         if obj["segmentation_type"] == 0:
@@ -490,7 +482,7 @@ class Detection2015(BaseTask):
 
         # set coco id lists
         for i, annot in enumerate(annotations['images']):
-            fname_id = filename_ids[annot['file_name']]
+            fname_id = image_filenames.index(os.path.join(image_dir, annot['file_name']))
             coco_images_ids.append(fname_id)
 
         coco_categories_ids = list(range(len(category)))
@@ -499,55 +491,6 @@ class Detection2015(BaseTask):
             for i, annot in enumerate(annotations['annotations']):
                 annot_id = tmp_coco_annotations_ids[annot['id']]
                 coco_annotations_ids.append(annot_id)
-
-        """
-        # set coco id lists
-        for i, annot in enumerate(annotations['images']):
-            fname_id = filename_ids[annot['file_name']]
-            coco_url_id = fname_id
-            img_id = fname_id
-            height_id = fname_id
-            width_id = fname_id
-
-            # [image_filenames, coco_urls, image_id, height, width]
-            coco_images_ids.append([fname_id, coco_url_id, img_id, height_id, width_id])
-
-        for i, annot in enumerate(annotations['categories']):
-            cat_id = category.index(annot['name'])
-            supercat_id = supercategory.index(annot['supercategory'])
-
-            # [category, supercategory, category_id]
-            coco_categories_ids.append([cat_id, supercat_id, category_id[i]])
-
-
-        if not is_test:
-            for i, annot in enumerate(annotations['annotations']):
-
-                coco_img_id = filename_ids[images_fname_by_id[annot["image_id"]]]
-                coco_cat_id = category_id.index(annot["category_id"])
-                coco_annot_id = annotation_id.index(annot["id"])
-
-                iscrowd_id = tmp_coco_annotations_ids[annot['id']]["is_crowd_id"]
-                area_id = tmp_coco_annotations_ids[annot['id']]["area_id"]
-                bbox_id = tmp_coco_annotations_ids[annot['id']]["bbox_id"]
-                segmentation_t1_id = tmp_coco_annotations_ids[annot['id']]["segmentation_t1_id"]
-                segmentation_t2_id = tmp_coco_annotations_ids[annot['id']]["segmentation_t2_id"]
-
-                # [iscrowd, area, bbox, segmentation_t1, segmentation_t2, coco_images_ids,
-                # coco_categories_ids, annotation_id]
-                coco_annotations_ids.append([iscrowd_id, area_id, bbox_id,
-                                             segmentation_t1_id, segmentation_t2_id,
-                                             coco_img_id, coco_cat_id, coco_annot_id])
-
-                # update progressbar
-                if self.verbose:
-                    prgbar.update(i)
-
-            # update progressbar
-            if self.verbose:
-                prgbar.finish()
-        """
-
 
         # process lists
         if not is_test:
@@ -593,21 +536,19 @@ class Detection2015(BaseTask):
         handler['object_ids'] = np.array(object_id, dtype=np.int32)
         handler['object_fields'] = str2ascii(object_fields)
 
+        handler['coco_images_ids'] = np.array(coco_images_ids, dtype=np.int32)
+        handler['coco_categories_ids'] = np.array(coco_categories_ids, dtype=np.int32)
+
         handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
 
         if not is_test:
-            #handler['id'] = np.array(obj_id, dtype=np.int32)
-            #handler['image_id'] = np.array(image_id, dtype=np.int32)
-            #handler['category_id'] = np.array(category_id, dtype=np.int32)
-            handler['annotation_id'] = np.array(category_id, dtype=np.int32)
+            handler['annotation_id'] = np.array(annotation_id, dtype=np.int32)
             handler['boxes'] = np.array(bbox, dtype=np.float)
             handler['iscrowd'] = np.array(iscrowd, dtype=np.uint8)
-            handler['segmentation1'] = np.array(pad_list2(segmentation_t1, -1), dtype=np.float)
-            handler['segmentation2'] = np.array(pad_list(segmentation_t2, -1), dtype=np.int32)
+            handler['segmentation_t1'] = np.array(pad_list2(segmentation_t1, -1), dtype=np.float)
+            handler['segmentation_t2'] = np.array(pad_list(segmentation_t2, -1), dtype=np.int32)
             handler['area'] = np.array(area, dtype=np.int32)
 
-            handler['coco_images_ids'] = np.array(coco_images_ids, dtype=np.int32)
-            handler['coco_categories_ids'] = np.array(coco_categories_ids, dtype=np.int32)
             handler['coco_annotations_ids'] = np.array(coco_annotations_ids, dtype=np.int32)
 
             handler['list_image_filenames_per_category'] = np.array(pad_list(list_image_filenames_per_category, -1), dtype=np.int32)
