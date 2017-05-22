@@ -1,4 +1,6 @@
 import os
+from collections import OrderedDict
+
 from dbcollection.utils.file_load import load_json
 
 
@@ -26,19 +28,26 @@ def load_data_test(set_name, image_dir, annotation_path, verbose=True):
             "coco_url" : annot['coco_url'],
         }
 
+    filename_ids = {}
+    for i, annot in enumerate(annotations['images']):
+        filename_ids[annot['file_name']] = i
+
     # categories
     if verbose:
         print('> Processing category annotations... ')
     categories = {}
-    category_list, supercategory_list = [], []
+    category_list, supercategory_list, category_id = [], [], []
     for i, annot in enumerate(annotations['categories']):
         categories[annot['id']] = {
             "name" : annot['name'],
             "supercategory" : annot['supercategory'],
             "id" : annot['id']
         }
+        category_id.append(annot['id'])
         category_list.append(annot['name'])
         supercategory_list.append(annot['supercategory'])
     supercategory_list = list(set(supercategory_list))
 
-    return {set_name : [sorted(data), annotations, category_list, supercategory_list]}
+    return {set_name : [OrderedDict(sorted(data.items())), filename_ids,
+                        annotations, category_list, supercategory_list,
+                        category_id]}
