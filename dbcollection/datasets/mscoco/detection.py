@@ -396,7 +396,9 @@ class Detection2015(BaseTask):
             image_id.append(annotation["id"])
 
             if is_test:
-                object_id.append([i, i, i])
+                # *** object_id ***
+                # [filename, coco_url, width, height]
+                object_id.append([i, i, i, i])
                 list_object_ids_per_image.append([i])
             else:
                 boxes_per_image = []
