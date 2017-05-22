@@ -35,7 +35,8 @@ class Detection(BaseTask):
         """
         Return the train/val/test/trainval set filenames.
         """
-        from .set_indexes import test as test_fnames
+        #from .set_indexes import test as test_fnames
+        from dbcollection.datasets.pascal.voc_2012.test_filenames import test as test_fnames
         test_fnames.sort()
 
         image_filenames = os.listdir(os.path.join(self.data_path, self.images_path))
