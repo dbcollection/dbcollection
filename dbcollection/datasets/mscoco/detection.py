@@ -449,21 +449,21 @@ class Detection2015(BaseTask):
                         #    "id" : obj["id"]
                         #}
 
-                    # update counter
-                    counter += 1
+                        # update counter
+                        counter += 1
 
-                else:
-                    # *** object_id ***
-                    # [filename, coco_url, width, height,
-                    # category, supercategory,
-                    # bbox, area, iscrowd,
-                    # segmentation_1, segmentation_2,
-                    # "image_id", "category_id", "annotation_id"]
-                    object_id.append([i, i, i, i,
-                                      -1, -1,
-                                      -1, -1, -1,
-                                      -1, -1,
-                                      i, -1, -1])
+                #else:
+                #    # *** object_id ***
+                #    # [filename, coco_url, width, height,
+                #    # category, supercategory,
+                #    # bbox, area, iscrowd,
+                #    # segmentation_1, segmentation_2,
+                #    # "image_id", "category_id", "annotation_id"]
+                #    object_id.append([i, i, i, i,
+                #                      -1, -1,
+                #                      -1, -1, -1,
+                #                      -1, -1,
+                #                      i, -1, -1])
 
 
                 list_boxes_per_image.append(boxes_per_image)
