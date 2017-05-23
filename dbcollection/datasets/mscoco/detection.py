@@ -134,6 +134,11 @@ class Detection2015(BaseTask):
                 segmentation_type = 2
                 segmentation = annot["segmentation"]
 
+            bbox = [annot['bbox'][0], #xmin
+                    annot['bbox'][1], #ymin
+                    annot['bbox'][0] + annot['bbox'][2] -1, #ymax
+                    annot['bbox'][1] + annot['bbox'][3] -1] #ymax
+
             obj = {
                 "category" : category_annot['name'],
                 "supercategory" : category_annot['supercategory'],
@@ -141,7 +146,7 @@ class Detection2015(BaseTask):
                 "iscrowd" : annot['iscrowd'],
                 "segmentation" : segmentation, #annot['segmentation'],
                 "segmentation_type" : segmentation_type,
-                "bbox" : annot['bbox'],
+                "bbox" : bbox,
                 "image_id": annot['image_id'],
                 "category_id": annot['category_id'],
                 "id" : annot["id"],
@@ -153,7 +158,6 @@ class Detection2015(BaseTask):
                 images_annot_by_fname[filename]["object"].update({obj_id : obj})
             except KeyError:
                 images_annot_by_fname[filename]["object"] = {obj_id : obj}
-
 
             # update progressbar
             if self.verbose:
@@ -336,7 +340,6 @@ class Detection2015(BaseTask):
             category_id = data[5]
             filename_ids = data[6]
             images_fname_by_id = data[7]
-            #data_, category, supercategory, image_id, category_id = data
 
         image_filenames = []
         coco_urls = []
@@ -355,7 +358,7 @@ class Detection2015(BaseTask):
 
         # coco id lists
         # These are order by entry like in the annotation files.
-        # I.e., coco_images_ids[0] has the same file_name, id, height, width, coco_url info
+        # I.e., coco_images_ids[0] has the object_id with the file_name, id, height, etc.
         # as coco_annotation_file[set_name]["images"][0]
         coco_images_ids = []
         coco_categories_ids = []
@@ -438,32 +441,9 @@ class Detection2015(BaseTask):
 
                         # temporary var
                         tmp_coco_annotations_ids[obj["id"]] = counter
-                        #tmp_coco_annotations_ids[obj["id"]] = {
-                        #    "is_crowd_id" : obj["iscrowd"],
-                        #    "bbox_id" : counter,
-                        #    "area_id" : counter,
-                        #    "segmentation_t1_id" : segmentation_t1_id,
-                        #    "segmentation_t2_id" :segmentation_t2_id,
-                        #    "category_id" : obj["category_id"],
-                        #    "image_id" : annotation["id"],
-                        #    "id" : obj["id"]
-                        #}
 
                         # update counter
                         counter += 1
-
-                #else:
-                #    # *** object_id ***
-                #    # [filename, coco_url, width, height,
-                #    # category, supercategory,
-                #    # bbox, area, iscrowd,
-                #    # segmentation_1, segmentation_2,
-                #    # "image_id", "category_id", "annotation_id"]
-                #    object_id.append([i, i, i, i,
-                #                      -1, -1,
-                #                      -1, -1, -1,
-                #                      -1, -1,
-                #                      i, -1, -1])
 
 
                 list_boxes_per_image.append(boxes_per_image)
@@ -477,22 +457,41 @@ class Detection2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
+
         if self.verbose:
             print('> Processing coco lists:')
-            prgbar = progressbar.ProgressBar(max_value=len(data[0]))
-
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
 
         # set coco id lists
         for i, annot in enumerate(annotations['images']):
             fname_id = image_filenames.index(os.path.join(image_dir, annot['file_name']))
             coco_images_ids.append(fname_id)
 
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
+        # update progressbar
+        if self.verbose:
+            prgbar.finish()
+
         coco_categories_ids = list(range(len(category)))
 
         if not is_test:
+            if self.verbose:
+                prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
             for i, annot in enumerate(annotations['annotations']):
                 annot_id = tmp_coco_annotations_ids[annot['id']]
                 coco_annotations_ids.append(annot_id)
+
+                # update progressbar
+                if self.verbose:
+                    prgbar.update(i)
+
+            # update progressbar
+            if self.verbose:
+                prgbar.finish()
+
 
         # process lists
         if not is_test:
