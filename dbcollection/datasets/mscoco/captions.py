@@ -58,9 +58,11 @@ class Caption2015(BaseTask):
         images = {}
         for i, annot in enumerate(annotations['images']):
             images[annot['id']] = {
+                "file_name" : os.path.join(image_dir, annot['file_name']),
                 "width" : annot['width'],
                 "height" : annot['height'],
-                "file_name" : os.path.join(image_dir, annot['file_name'])
+                "id" : annot['id'],
+                "coco_url" : annot['coco_url']
             }
 
 
@@ -77,9 +79,11 @@ class Caption2015(BaseTask):
             else:
                 img_annotation = images[img_id]
                 data[img_id] = {
-                    "filename" : img_annotation['file_name'],
+                    "file_name" : img_annotation['file_name'],
                     "width" : img_annotation['width'],
                     "height" : img_annotation['height'],
+                    "id" : img_annotation['id'],
+                    "coco_url" : img_annotation['coco_url'],
                     "captions" : [caption]
                 }
 
@@ -150,9 +154,11 @@ class Caption2015(BaseTask):
         grouped_grp = handler.create_group('grouped')
         for i, key in enumerate(data_):
             file_grp = grouped_grp.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(data_[key]["filename"])
+            file_grp['image_filename'] = str2ascii(data_[key]["file_name"])
             file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
             file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
+            file_grp['id'] = np.array(data_[key]["id"], dtype=np.int32)
+            file_grp['coco_url'] = str2ascii(data_[key]["coco_url"])
             if 'captions' in data_[key]:
                 file_grp['captions'] = str2ascii(data_[key]["captions"])
 
@@ -169,23 +175,39 @@ class Caption2015(BaseTask):
         """
         Add data of a set to the default group.
         """
+        image_dir = self.image_dir_path[set_name]
         if "test" in set_name:
             is_test = True
-            data_, category, supercategory = data
+            data_ = data[0]
+            filename_ids = data[1]
+            annotations = data[2]
+            category = data[3]
+            supercategory = data[4]
+            category_id = data[5]
         else:
             is_test = False
             data_ = data[0]
+            annotations = data[1]
 
         image_filenames = []
         width = []
         height = []
+        coco_urls = []
+        image_id = []
         caption = []
         object_id = []
 
+        # coco id lists
+        # These are order by entry like in the annotation files.
+        # I.e., coco_images_ids[0] has the object_id with the file_name, id, height, etc.
+        # as coco_annotation_file[set_name]["images"][0]
+        coco_images_ids = []
+        coco_categories_ids = []
+
         if is_test:
-            object_fields = ["image_filenames", "width", "height"]
+            object_fields = ["image_filenames", "coco_urls", "width", "height"]
         else:
-            object_fields = ["image_filenames", "captions", "width", "height"]
+            object_fields = ["image_filenames", "coco_urls", "width", "height", "captions"]
 
         list_captions_per_image = []
         list_object_ids_per_image = []
@@ -197,12 +219,14 @@ class Caption2015(BaseTask):
         counter = 0
         for i, key in enumerate(data_):
             annotation = data_[key]
-            image_filenames.append(annotation["filename"])
+            image_filenames.append(annotation["file_name"])
             width.append(annotation["width"])
             height.append(annotation["height"])
+            coco_urls.append(annotation["coco_url"])
+            image_id.append(annotation["id"])
 
             if is_test:
-                object_id.append([i, i, i])
+                object_id.append([i, i, i, i])
                 list_object_ids_per_image.append([i])
             else:
                 captions_per_image = []
@@ -211,7 +235,7 @@ class Caption2015(BaseTask):
 
                     # object_id
                     # [filename, caption, width, height]
-                    object_id.append([i, counter, i, i])
+                    object_id.append([i, i, i, i, counter])
 
                     captions_per_image.append(counter)
 
@@ -229,10 +253,26 @@ class Caption2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
+        # set coco id lists
+        if self.verbose:
+            print('> Processing coco lists:')
+
+        for i, annot in enumerate(annotations['images']):
+            fname_id = image_filenames.index(os.path.join(image_dir, annot['file_name']))
+            coco_images_ids.append(fname_id)
+
+        if is_test:
+            coco_categories_ids = list(range(len(category)))
+
 
         handler['image_filenames'] = str2ascii(image_filenames)
+        handler['coco_urls'] = str2ascii(coco_urls)
         handler['width'] = np.array(width, dtype=np.int32)
         handler['height'] = np.array(height, dtype=np.int32)
+        handler['image_id'] = np.array(image_id, dtype=np.int32)
+
+        handler['coco_images_ids'] = np.array(coco_images_ids, dtype=np.int32)
+
         handler['object_ids'] = np.array(object_id, dtype=np.int32)
         handler['object_fields'] = str2ascii(object_fields)
 
@@ -245,6 +285,8 @@ class Caption2015(BaseTask):
         else:
             handler['category'] = str2ascii(category)
             handler['supercategory'] = str2ascii(supercategory)
+
+            handler['coco_categories_ids'] = np.array(coco_categories_ids, dtype=np.int32)
 
 
 class Caption2015NoSourceGrp(Caption2015):
