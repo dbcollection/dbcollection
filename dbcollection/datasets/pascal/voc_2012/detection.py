@@ -31,63 +31,27 @@ class Detection(BaseTask):
     parts = ['head', 'hand', 'foot']
 
 
-    def sets_fnames(self):
+    def get_set_fnames_fids(self):
         """
-        Return the train/val/test/trainval set filenames.
+        Return the train/val/trainval/test set filenames + fileids.
         """
-        #from .set_indexes import test as test_fnames
-        from dbcollection.datasets.pascal.voc_2012.test_filenames import test as test_fnames
-        test_fnames.sort()
+        from .train_filenames import filenames as train_fnames
+        from .val_filenames import filenames as val_fnames
+        from .trainval_filenames import filenames as trainval_fnames
+        from .test_filenames import filenames as test_fnames
 
-        image_filenames = os.listdir(os.path.join(self.data_path, self.images_path))
-        fnames = [os.path.splitext(fname)[0] for fname in image_filenames]
-        fnames.sort()
+        # get ids for each file (this is required for the coco API)
+        train_ids = [i for i, name in enumerate(trainval_fnames) if name in train_fnames]
+        val_ids = [i for i, name in enumerate(trainval_fnames) if name in val_fnames]
+        trainval_ids = list(range(len(trainval_fnames)))
+        test_ids = list(range(len(test_fnames)))
 
-        #if any([fname in test_fnames for fname in fnames]):
-        if test_fnames[0] in fnames:
-            # test set detected.
-            trainval_fnames = [fname for fname in fnames if not fname in test_fnames]
-            trainval_ids = [i for i, fname in enumerate(fnames) if fname in trainval_fnames]
-
-            # split trainval into train + val (50-50 split)
-            train_np, val_np = train_test_split(np.array(trainval_fnames), test_size=0.5)
-            train_np.sort()
-            val_np.sort()
-
-            train_fnames = train_np.tolist()
-            val_fnames = val_np.tolist()
-
-            train_ids = [i for i, fname in enumerate(fnames) if fname in train_fnames]
-            val_ids = [i for i, fname in enumerate(fnames) if fname in val_fnames]
-            test_ids = [i for i, fname in enumerate(fnames) if fname in test_fnames]
-
-            return {
-                "train" : [train_fnames, train_ids],
-                "val" : [val_fnames, val_ids],
-                "trainval" : [trainval_fnames, trainval_ids],
-                "test" : [test_fnames, test_ids]
-            }
-        else:
-            # test set not available
-            trainval_fnames = fnames
-            trainval_ids = list(range(len(trainval_fnames)))
-
-            # split trainval into train + val (50-50 split)
-            train_np, val_np = train_test_split(np.array(trainval_fnames), test_size=0.5)
-            train_np.sort()
-            val_np.sort()
-
-            train_fnames = train_np.tolist()
-            val_fnames = val_np.tolist()
-
-            train_ids = [i for i, fname in enumerate(fnames) if fname in train_fnames]
-            val_ids = [i for i, fname in enumerate(fnames) if fname in val_fnames]
-
-            return {
-                "train" : [train_fnames, train_ids],
-                "val" : [val_fnames, val_ids],
-                "trainval" : [trainval_fnames, trainval_ids],
-            }
+        return {
+            'train' : [train_fnames, train_ids],
+            'val' : [val_fnames, val_ids],
+            'trainval' : [trainval_fnames, trainval_ids],
+            'test' : [test_fnames, test_ids]
+        }
 
 
     def load_data(self):
@@ -98,7 +62,7 @@ class Detection(BaseTask):
         self.images_path = os.path.join('VOCdevkit', 'VOC2012', 'JPEGImages')
 
         # set id list
-        set_filenames_ids = self.sets_fnames()
+        set_filenames_ids = self.get_set_fnames_fids()
 
         for set_name in set_filenames_ids:
 
