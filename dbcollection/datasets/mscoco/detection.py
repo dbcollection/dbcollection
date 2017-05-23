@@ -134,6 +134,7 @@ class Detection2015(BaseTask):
                 segmentation_type = 2
                 segmentation = annot["segmentation"]
 
+            # convert from [x,y,w,h] to [xmin,ymin,xmax,ymax]
             bbox = [annot['bbox'][0], #xmin
                     annot['bbox'][1], #ymin
                     annot['bbox'][0] + annot['bbox'][2] -1, #ymax
