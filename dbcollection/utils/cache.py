@@ -61,7 +61,7 @@ class CacheManager:
         if is_test:
             home_dir = os.path.join(home_dir, 'tmp')
 
-        self.default_cache_dir = os.path.join(home_dir,  'dbcollection')
+        self.default_cache_dir = os.path.join(home_dir, 'dbcollection')
         self.cache_fname = os.path.join(home_dir, 'dbcollection.json')
 
 
@@ -298,7 +298,7 @@ class CacheManager:
             None
         """
         for keyword in self.data['category']:
-            if name in keyword:
+            if name in self.data['category'][keyword]:
                 self.data['category'][keyword].remove(name)
                 if not any(self.data['category'][keyword]):
                     self.data['category'].pop(keyword)
