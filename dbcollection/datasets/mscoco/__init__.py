@@ -36,19 +36,22 @@ class MSCOCO(BaseDataset):
 
     # init tasks
     tasks = {
-        "detection" : Detection2016,
+        "detection" : Detection2015,
+        "detection_d" : Detection2015NoSourceGrp,
         "detection_2015" : Detection2015,
         "detection_2015_d" : Detection2015NoSourceGrp,
         "detection_2016" : Detection2016,
         "detection_2016_d" : Detection2016NoSourceGrp,
 
         "caption" : Caption2015,
+        "caption_d" : Caption2015NoSourceGrp,
         "caption_2015" : Caption2015,
         "caption_2015_d" : Caption2015NoSourceGrp,
         "caption_2016" : Caption2016,
         "caption_2016_d" : Caption2016NoSourceGrp,
 
         "keypoint" : Keypoints2016,
+        "keypoint_d" : Keypoints2016NoSourceGrp,
         "keypoint_2016" : Keypoints2016,
         "keypoint_2016_d" : Keypoints2016NoSourceGrp
     }
