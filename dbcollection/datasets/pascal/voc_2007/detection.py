@@ -27,17 +27,20 @@ class Detection(BaseTask):
                'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
 
 
-    def sets_ids(self):
+    def get_set_filenames(self):
         """
         Return the train/val/test/trainval set id lists.
         """
-        from .set_indexes import train_ids, val_ids, trainval_ids, test_ids
+        from .train_filenames import filenames as train_fnames
+        from .val_filenames import filenames as val_fnames
+        from .trainval_filenames import filenames as trainval_fnames
+        from .test_filenames import filenames as test_fnames
 
         return {
-            'train' : train_ids,
-            'val' : val_ids,
-            'trainval' : trainval_ids,
-            'test' : test_ids
+            'train' : train_fnames,
+            'val' : val_fnames,
+            'trainval' : trainval_fnames,
+            'test' : test_fnames
         }
 
 
@@ -49,12 +52,12 @@ class Detection(BaseTask):
         self.images_path = os.path.join('VOCdevkit', 'VOC2007', 'JPEGImages')
 
         # set id list
-        set_indexes = self.sets_ids()
+        set_filenames = self.get_set_filenames()
 
-        for set_name in set_indexes:
+        for set_name in set_filenames:
 
             # index list
-            id_list = set_indexes[set_name]
+            filename_list = set_filenames[set_name]
 
             data = []
 
@@ -64,17 +67,17 @@ class Detection(BaseTask):
 
             # progressbar
             if self.verbose:
-                prgbar = progressbar.ProgressBar(max_value=len(id_list))
+                prgbar = progressbar.ProgressBar(max_value=len(filename_list))
 
-            for i, fileid in enumerate(id_list):
+            for i, filename in enumerate(filename_list):
                 # setup file names
-                annot_filename = os.path.join(self.annotations_path, fileid + '.xml')
-                image_filename = os.path.join(self.images_path, fileid + '.jpg')
+                annot_filename = os.path.join(self.annotations_path, filename + '.xml')
+                image_filename = os.path.join(self.images_path, filename + '.jpg')
 
                 # load annotation
                 annotation = load_xml(annot_filename)
 
-                data.append([image_filename, int(fileid), annotation])
+                data.append([image_filename, int(filename), annotation])
 
                 # update progressbar
                 if self.verbose:
