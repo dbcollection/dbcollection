@@ -53,6 +53,7 @@ function DataLoader:__init(name, task, data_dir, cache_path)
 
         -- fetch list of field names that compose the object list.
         local data = self.file:read(('%s/%s/object_fields'):format(self.root_path, k)):all()
+        if data:dim()==1 then data = data:view(1,-1) end
         self.object_fields[k] = string_ascii.convert_ascii_to_str(data)
     end
 end
