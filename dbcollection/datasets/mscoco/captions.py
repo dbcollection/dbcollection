@@ -7,6 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 import progressbar
+from collections import OrderedDict
 
 from dbcollection.datasets.dbclass import BaseTask
 
@@ -95,7 +96,8 @@ class Caption2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : [data, annotations]}
+        return {set_name : [OrderedDict(sorted(data.items())),
+                            annotations]}
 
 
     def load_data(self):
@@ -256,10 +258,19 @@ class Caption2015(BaseTask):
         # set coco id lists
         if self.verbose:
             print('> Processing coco lists:')
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
 
         for i, annot in enumerate(annotations['images']):
             fname_id = image_filenames.index(os.path.join(image_dir, annot['file_name']))
             coco_images_ids.append(fname_id)
+
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
+        # update progressbar
+        if self.verbose:
+            prgbar.finish()
 
         if is_test:
             coco_categories_ids = list(range(len(category)))
