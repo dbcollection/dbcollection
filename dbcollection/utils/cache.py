@@ -295,6 +295,33 @@ class CacheManager:
                     self.data['category'].pop(keyword)
 
 
+    def delete_task(self, name, task):
+        """Delete a task of a dataset in cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the task
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """
+        try:
+            self.data['dataset'][name]['tasks'].pop(task)
+
+            # update cache file
+            self.write_data_cache(self.data)
+        except KeyError:
+            print('Task \'{}\' not found in cache for {}.'.format(task, name))
+
+
     def delete_dataset_cache(self, name):
         """Delete the cache data from disk of a dataset.
 
