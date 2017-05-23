@@ -99,7 +99,7 @@ def process(name, task='all', verbose=True, is_test=False):
     ------
         None
     """
-    assert name, 'Must input a vlid dataset name: {}'.format(name)
+    assert name, 'Must input a valid dataset name: {}'.format(name)
 
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
