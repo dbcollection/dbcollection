@@ -158,7 +158,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
         cache_manager = CacheManager(is_test) # reopen the cache file
 
     # check if the task exists inf cache
-    if not cache_manager.is_task(name, task):
+    if not cache_manager.exists_task(name, task):
         process(name, task, verbose, is_test)
         cache_manager = CacheManager(is_test) # reopen the cache file
 
@@ -213,17 +213,24 @@ def add(name=None, task=None, data_dir=None, file_path=None, keywords=[], is_tes
     cache_manager.update(name, data_dir, {task: file_path}, keywords, True)
 
 
-def remove(name, delete_data=False, is_test=False):
-    """Remove/delete a dataset from the cache.
+def remove(name, task=None, delete_data=False, is_test=False):
+    """Remove/delete a dataset and/or task from the cache.
 
     Removes the datasets cache information from the dbcollection.json file.
     The dataset's data files remain on disk if 'delete_data' is set to False,
     otherwise it removes also the data files.
 
+    Also, instead of deleting the entire dataset, removing a specific task
+    from disk is also possible by specifying which task to delete. This removes
+    the task entry for the dataset and removes the corresponding hdf5 file from
+    disk.
+
     Parameters
     ----------
     name : str
         Name of the dataset to delete.
+    task : str
+        Name of the task to delete.
     delete_data : bool
         Delete all data files from disk for this dataset if True.
     is_test : bool
@@ -242,12 +249,18 @@ def remove(name, delete_data=False, is_test=False):
 
     # check if dataset exists in the cache file
     if cache_manager.exists_dataset(name):
-        if delete_data:
-            cache_manager.delete_dataset(name, True)
-        else:
-            cache_manager.delete_dataset(name, False)
+        if task is None:
+            if delete_data:
+                cache_manager.delete_dataset(name, True)
+            else:
+                cache_manager.delete_dataset(name, False)
 
-        print('Removed dataset {}: cache=True, disk={}'.format(name, delete_data))
+            print('Removed dataset {}: cache=True, disk={}'.format(name, delete_data))
+        else:
+            if cache_manager.delete_task(name, task):
+                print('Removed task {} from the dataset {}: cache=True'.format(task, name))
+            else:
+                print('Do nothing.')
     else:
         print('Dataset \'{}\' does not exist.'.format(name))
 
