@@ -448,30 +448,6 @@ class CacheManager:
         return any(self.data['dataset'])
 
 
-    def is_task(self, name, task):
-        """Check if the task exists for the dataset.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        task : str
-            Name of the classification.
-
-        Returns
-        -------
-            None
-
-        Raises
-        ------
-            None
-        """
-        try:
-            return task in self.data['dataset'][name]['tasks']
-        except KeyError:
-            return False
-
-
     def exists_dataset(self, name):
         """Check if a dataset exists for loading.
 
@@ -513,7 +489,7 @@ class CacheManager:
             None
         """
         try:
-            return task in self.data['dataset'][name]['tasks'].keys()
+            return task in self.data['dataset'][name]['tasks']
         except KeyError:
             return False
 
