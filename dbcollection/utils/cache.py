@@ -269,7 +269,10 @@ class CacheManager:
         ------
             None
         """
-        self.data['dataset'].pop(name)
+        try:
+            self.data['dataset'].pop(name)
+        except KeyError:
+            print('Dataset \'{}\' not found in cache.'.format(name))
 
 
     def delete_category_entry(self, name):
