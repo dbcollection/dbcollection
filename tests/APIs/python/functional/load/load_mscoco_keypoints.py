@@ -19,7 +19,7 @@ dbc.config_cache(delete_cache=True, is_test=True)
 
 # download/setup dataset
 print('\n==> dbcollection: load()')
-coco = dbc.load(name='mscoco', task='keypoint_2016', data_dir=data_dir, verbose=True, is_test=True)
+coco = dbc.load(name='mscoco', task='keypoint_2016_d', data_dir=data_dir, verbose=True, is_test=True)
 
 # print data from the loader
 print('\n==> dbcollection: info()')
