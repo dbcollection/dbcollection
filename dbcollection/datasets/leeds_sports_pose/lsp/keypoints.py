@@ -68,15 +68,15 @@ class Keypoints(BaseTask):
 
         for i in range(0, 2000):
             if i >= 1000:
-                set_name = 'train'
-            else:
                 set_name = 'test'
+            else:
+                set_name = 'train'
 
             filename = image_filenames[i]
 
             joints = []
             for j in range(0, 14):
-                joints.append([annotations['joints'][0][j][i], # x
+                joints.append([annotations['joints'][0][j][i],  # x
                                annotations['joints'][1][j][i],  # y
                                annotations['joints'][2][j][i]]) # is_visible (0 - visible,
                                                                 #             1 - hidden)

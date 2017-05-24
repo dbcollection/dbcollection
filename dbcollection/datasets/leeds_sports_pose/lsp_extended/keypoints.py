@@ -43,9 +43,9 @@ class Keypoints(LspKeypoints):
 
         for i in range(0, 2000):
             if i >= 1000:
-                set_name = 'train'
-            else:
                 set_name = 'test'
+            else:
+                set_name = 'train'
 
             filename = image_filenames_lsp[i]
 
