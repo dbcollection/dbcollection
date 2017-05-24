@@ -288,10 +288,10 @@ class Keypoints(BaseTask):
         video_idx = []
         #single_person_id_list = []
         category_name, activity_name, activity_id = [], [], []
-        scale = [-1]
-        objpos = [[-1, -1]] # [x, y]
-        head_bbox = [[-1, -1, -1, -1]]
-        keypoints = [[[-1, -1, -1]] * 16]
+        scale = []
+        objpos = [] # [x, y]
+        head_bbox = []
+        keypoints = []
 
         object_id = []
 
@@ -328,9 +328,9 @@ class Keypoints(BaseTask):
             single_person_per_image = []
             if not any(annot["poses_annotations"]):
                 if is_train:
-                    object_id.append([i, 0, 0, 0, 0, i, i])
+                    object_id.append([i, -1, -1, -1, -1, i, i])
                 else:
-                    object_id.append([i, 0, 0])
+                    object_id.append([i, -1, -1])
 
                 # add object_id to the list
                 objs_per_image.append(obj_per_img_counter)
