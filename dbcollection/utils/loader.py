@@ -131,13 +131,17 @@ class DatasetLoader:
             # iterate over all ids and build an output list
             output = []
             for idx_ in idx:
-                # fetch list od indexes for the current id
+                # fetch list of indexes for the current id
                 ids = self.file[field_path][idx_]
 
                 # fetch data for each element of the list
                 data = []
                 for i, field_name in enumerate(fields):
-                    data.append(self.file[dir_path + field_name][ids[i]])
+                    field_id = ids[i]
+                    if field_id >= 0:
+                        data.append(self.file[dir_path + field_name][field_id])
+                    else:
+                        data.append([])
                 output.append(data)
 
             # output data
