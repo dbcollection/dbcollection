@@ -1,7 +1,11 @@
-# dbcollection: Easily manage your datasets 
-[![CircleCI](https://circleci.com/bb/coiso/dbclt_teste.svg?style=svg)](https://circleci.com/bb/coiso/dbclt_teste)
+# dbcollection: Easily manage your datasets
 
 dbcollection is a python module for loading/managing datasets with a very simple set of commands with cross-platform and cross-language support in mind and it is distributed under a MIT license.
+
+# ***WARNING***
+
+This code is under refactoring, so some links/features may not be working properly. This should be cleared soon.
+
 
 ## Why does this project exist
 
