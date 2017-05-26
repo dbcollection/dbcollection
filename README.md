@@ -49,30 +49,15 @@ The **dbcollection** manager API creates a folder in your home dir named `~/dbco
 - simplified user experience by providing data management (download + processing) for many popular datasets in computer vision.
 
 # Package installation
-## requirements
 
-This package requires:
-
-- Python (>=2.7 or >=3.4)
-- Numpy
-- h5py
-- wget
-- xmltodict
-- progressbar2
-
-> Note: earlier versions will probably work as well, but I've only tested these ones.
-
-
-## installation
-
-### From PyPi
+## From PyPi
 
 Simple do the following command to install this package:
 ```
 pip install dbcollection
 ```
 
-### From source
+## From source
 
 To install **dbcollection** from source you need to do the following setps:
 
@@ -130,7 +115,7 @@ A more detailed tutorial on using the **dbcollection** module main APIs for data
 # Supported languages
 
 For now, these are currently the supported languages by this package:
-- Python
+- Python (>=2.7 or >=3.4)
 - Lua/[Torch7](https://github.com/torch/torch7)
 - Matlab (comming soon)
 
