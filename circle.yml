@@ -2,6 +2,12 @@ machine:
   python:
     version: 3.5.1
 
+checkout:
+    post:
+        # since circleci does a shallow fetch
+        # we need to populate our tags
+        - git fetch --depth=1000
+
 dependencies:
   override:
     - pip install --upgrade pip
