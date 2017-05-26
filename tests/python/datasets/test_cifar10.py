@@ -12,7 +12,7 @@ name = 'cifar10'
 cache_manager = CacheManager(is_test=True)
 
 
-@pytest.mark.skiptif(not cache_manager.is_task(name, 'classification'),
+@pytest.mark.skiptif(not cache_manager.exists_task(name, 'classification'),
                      reason='Dataset is not available for testing: {}'.format(name))
 def test_cifar10__task_classification():
     cifar10 = dbc.load(name='cifar10', task='classification')

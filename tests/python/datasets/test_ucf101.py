@@ -12,7 +12,7 @@ name = 'ucf101'
 cache_manager = CacheManager(is_test=True)
 
 
-@pytest.mark.skiptif(not cache_manager.is_task(name, 'recognition'),
+@pytest.mark.skiptif(not cache_manager.exists_task(name, 'recognition'),
                      reason='Dataset is not available for testing: {}'.format(name))
 def test_ucf101__task_recognition():
     ucf101 = dbc.load(name=name, task='recognition')
