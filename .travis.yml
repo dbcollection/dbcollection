@@ -1,9 +1,15 @@
+sudo: false
+
 language: python
 python:
     - "3.5"
 
 os:
     - linux
+
+git:
+    # for cloning
+    depth: 1000
 
 # command to install dependencies
 install:
@@ -14,6 +20,7 @@ install:
 
 # command to run tests
 script: tox
+
 
 # specify branches to use
 branches:
