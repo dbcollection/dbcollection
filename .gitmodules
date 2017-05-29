@@ -1,3 +1,0 @@
-[submodule "dbcollection/utils/caltech_pedestrian_extractor"]
-	path = dbcollection/utils/caltech_pedestrian_extractor
-	url = https://github.com/farrajota/caltech_pedestrian_extractor
