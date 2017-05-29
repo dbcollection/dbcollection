@@ -3,10 +3,9 @@ machine:
     version: 3.5.1
 
 checkout:
-    post:
-        # since circleci does a shallow fetch
-        # we need to populate our tags
-        - git fetch --depth=1000
+  post:
+    - git submodule sync
+    - git submodule update --init
 
 dependencies:
   override:
