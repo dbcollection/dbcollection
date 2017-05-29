@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 
 
-import os
-import codecs
 from setuptools import setup, find_packages
 
 
-long_description="""dbcollection is a cross-platform (windows, MacOS, Linux), 
-cross-language (Python, Lua/Torch7, Matlab) API that easily manages datasets 
+long_description="""dbcollection is a cross-platform (Windows, MacOS, Linux),
+cross-language (Python, Lua/Torch7, Matlab) API to easily manage datasets'
 metadata by using the standard HDF5 file format.
 """
 
@@ -23,7 +21,7 @@ setup(
     version='0.1.0',
     author='Miguel Farrajota',
     url='https://github.com/farrajota/dbcollection',
-    description='Cross-platform, cross-language dataset manager for machine learning',
+    description='Cross-platform, cross-language dataset metadata manager for machine learning',
     long_description=long_description,
     license=license_mit,
     classifiers=[
@@ -39,7 +37,6 @@ setup(
         'Operating System :: POSIX :: Linux',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
