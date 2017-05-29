@@ -1,0 +1,3 @@
+name: dbcollection
+type: sphinx
+base: docs/source
