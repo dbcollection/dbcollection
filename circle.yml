@@ -19,9 +19,3 @@ dependencies:
 test:
   override:
     - tox
-
-general:
-  branches:
-    only:
-      - master
-      - add_travis_build

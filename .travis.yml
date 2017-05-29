@@ -16,10 +16,3 @@ install:
 
 # command to run tests
 script: tox
-
-
-# specify branches to use
-branches:
-    only:
-        - master
-        - add_travis_build
