@@ -11,20 +11,11 @@ Contents:
 .. toctree::
    :maxdepth: 1
 
-   introduction
-   usage
+   intro
+   install
+   tutorial/index
+   reference/index
+   datasets/index
    contributing
-   Installation
-   documentation
-   list of datasets
    license
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
