@@ -28,7 +28,7 @@ class CacheManager:
         # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
             print('Generating the dbcollection\'s package cache file on disk: {}'.format(self.cache_fname))
-            self.create_cache_file_disk(self.cache_fname)
+            self.write_data_cache(self.empty_data(), self.cache_fname)
 
         # load cache data file
         self.data = self.read_data_cache()
@@ -41,7 +41,7 @@ class CacheManager:
         and the filepath for the dbcollection.json file where the metadata for all datasets
         is stored.
 
-        This paths were designed to work on windows, linx, mac, etc.
+        This paths were designed to work on windows, linux, mac, etc.
 
         Parameters
         ----------
@@ -63,6 +63,11 @@ class CacheManager:
 
         self.default_cache_dir = os.path.join(home_dir, 'dbcollection')
         self.cache_fname = os.path.join(home_dir, 'dbcollection.json')
+
+        # create dir
+        if not os.path.exists(self.default_cache_dir):
+            print('Create cache dir: {}'.format(self.default_cache_dir))
+            os.makedirs(self.default_cache_dir)
 
 
     def create_root_dir(self):
@@ -175,11 +180,8 @@ class CacheManager:
             If the file cannot be opened.
         """
         filename = fname or self.cache_fname
-        try:
-            with open(filename, 'w') as file_cache:
-                json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
-        except IOError:
-            raise IOError('Unable to open file: ' + filename)
+        with open(filename, 'w') as file_cache:
+            json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
 
 
     def empty_data(self):
@@ -205,25 +207,6 @@ class CacheManager:
             "dataset": {},
             "category": {}
         }
-
-
-    def create_cache_file_disk(self, fname=None):
-        """Initialize the dbcollection cache file with empty data.
-
-        Parameters
-        ----------
-        fname : str
-            File name+path on disk.
-
-        Returns
-        -------
-            None
-
-        Raises
-        ------
-            None
-        """
-        self.write_data_cache(self.empty_data(), fname)
 
 
     def os_remove(self, fname):
