@@ -1,6 +1,8 @@
 # dbcollection: Easily manage your datasets
 
+[![Build Status](https://travis-ci.org/farrajota/dbcollection.svg?branch=master)](https://travis-ci.org/farrajota/dbcollection)
 [![CircleCI](https://circleci.com/gh/farrajota/dbcollection/tree/master.svg?style=svg)](https://circleci.com/gh/farrajota/dbcollection/tree/master)
+
 
 dbcollection is a python module for loading/managing datasets with a very simple set of commands with cross-platform and cross-language support in mind and it is distributed under a MIT license.
 

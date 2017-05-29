@@ -2,6 +2,11 @@ machine:
   python:
     version: 3.5.1
 
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init
+
 dependencies:
   override:
     - pip install --upgrade pip

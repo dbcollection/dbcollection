@@ -8,8 +8,6 @@ import os
 import numpy as np
 import progressbar
 
-from sklearn.model_selection import train_test_split
-
 from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.file_load import load_xml
