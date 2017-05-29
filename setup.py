@@ -10,7 +10,7 @@ metadata by using the standard HDF5 file format.
 """
 
 
-with open('LICENSE') as f:
+with open('LICENSE.txt') as f:
     license_mit = f.read()
 
 with open('requirements.txt') as f:
