@@ -1,6 +1,9 @@
 # vscode project
 /.vscode/
 
+# temporary code
+tmp/
+
 # Lua API
 APIs/lua/build.luarocks/
 
