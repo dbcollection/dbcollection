@@ -1,4 +1,4 @@
-# Easily manage your datasets
+# Easily manage your dataset's data
 
 [![Build Status](https://travis-ci.org/farrajota/dbcollection.svg?branch=master)](https://travis-ci.org/farrajota/dbcollection)
 [![CircleCI](https://circleci.com/gh/farrajota/dbcollection/tree/master.svg?style=svg)](https://circleci.com/gh/farrajota/dbcollection/tree/master)
@@ -39,7 +39,7 @@ Using the module is pretty straight-forward. To import it just do:
 import dbcollection as dbc
 ```
 
-To load a dataset, you need to use `dbc.manager` API `load()` method. 
+To load a dataset, you need to use `dbc.manager` API `load()` method.
 
 > Note: by default, the `MNIST` dataset is already included in the package, so loading it does not need to download/setup any data. However, this may not be valid for most datasets.
 
