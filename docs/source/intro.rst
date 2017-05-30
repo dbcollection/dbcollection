@@ -50,12 +50,13 @@ Main features
 
 - cross-platform (Windows, Linux, MacOs).
 - cross-language (python, lua/torch7, matlab).
-- simple API for dataset load/setup/management.
-- setup the data only once.
-- avoids RAM memory usage by storing/loading all metadata on/from disk.
-- concurrent/parallel data access.
-- increasing list of available datasets.
-- simplified user experience by providing data management (download + processing) for many popular datasets in computer vision.
+- simple API to load/download/setup/manage datasets
+- simple API to fetch (meta)data of a dataset
+- datasets only need to be set once
+- all data is stored on disk, therefore the impact on RAM is reduced (handy for large datasets)
+- desined with concurrent/parallel data access in mind
+- a diverse (and growing) list of popular datasets are available to the end user
+- allows the user to focus on more important tasks on their research instead of managing datasets (it always takes alot more time than expected, trust me!)
 
 
 Roadmap
