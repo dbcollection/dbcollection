@@ -1,6 +1,1 @@
-.. _cifar10:
-
-Cifar 10
-========
-
-TODO
+.. include:: ../../../dbcollection/datasets/cifar/cifar10/README.rst

@@ -1,0 +1,1 @@
+.. include:: ../../../dbcollection/datasets/pascal/voc_2007/README.rst
