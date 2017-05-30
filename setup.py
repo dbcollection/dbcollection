@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 
+import os
 from setuptools import setup, find_packages
 
 
@@ -14,7 +15,7 @@ with open('LICENSE') as f:
     license_mit = f.read()
 
 with open('requirements.txt') as f:
-    requirements = f.read()
+    requirements = f.read().splitlines()
 
 setup(
     name='dbcollection',
