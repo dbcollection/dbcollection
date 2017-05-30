@@ -3,7 +3,6 @@
 Introduction
 =============
 
-<<<<<<< HEAD
 What it is
 ----------
 
@@ -64,13 +63,3 @@ Roadmap
 -------
 
 TODO
-=======
-TODO
-
-## What it is
-## Why does this project exist
-## What problems does it solve
-## How does it work
-## Main features
-## roadmap
->>>>>>> doc: Add empty files to structure the documentation
