@@ -15,10 +15,10 @@ with open('requirements.txt') as f:
 
 setup(
     name='dbcollection',
-    version='0.1.2',
+    version='0.1.3',
     author='Miguel Farrajota',
     url='https://github.com/farrajota/dbcollection',
-    download_url='https://github.com/farrajota/dbcollection/archive/0.1.2.tar.gz',
+    download_url='https://github.com/farrajota/dbcollection/archive/0.1.3.tar.gz',
     description='Cross-platform, cross-language dataset metadata manager for machine learning',
     long_description=long_description,
     license='MIT License',
