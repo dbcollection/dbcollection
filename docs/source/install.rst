@@ -1,5 +1,6 @@
 .. _install:
 
+<<<<<<< HEAD
 Install Guide
 =============
 
@@ -28,3 +29,9 @@ To install ``dbcollection`` from source you need to do the following steps:
     $ python setup.py install
 
 and voilá, the package is installed on your system.
+=======
+Install
+=======
+
+TODO
+>>>>>>> doc: Add empty files to structure the documentation
