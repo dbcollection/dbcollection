@@ -2,7 +2,9 @@
 
 [![Build Status](https://travis-ci.org/farrajota/dbcollection.svg?branch=master)](https://travis-ci.org/farrajota/dbcollection)
 [![CircleCI](https://circleci.com/gh/farrajota/dbcollection/tree/master.svg?style=svg)](https://circleci.com/gh/farrajota/dbcollection/tree/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/rwrp7q1j9ytebkps/branch/master?svg=true)](https://ci.appveyor.com/project/farrajota/dbcollection/branch/master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PyPI version](https://badge.fury.io/py/dbcollection.svg)](https://badge.fury.io/py/dbcollection)
 
 
 dbcollection is a python module for loading/managing datasets with a very simple set of commands with cross-platform and cross-language support in mind and it is distributed under a MIT license.
