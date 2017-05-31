@@ -1,5 +1,8 @@
 # include the license file
-include LICENSE
+include LICENSE.txt
+
+# include the requirements file
+include requirements.txt
 
 # include the docs
 

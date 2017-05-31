@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 
+import os
 from setuptools import setup, find_packages
 
 
@@ -9,21 +10,18 @@ cross-language (Python, Lua/Torch7, Matlab) API to easily manage datasets'
 metadata by using the standard HDF5 file format.
 """
 
-
-with open('LICENSE.txt') as f:
-    license_mit = f.read()
-
 with open('requirements.txt') as f:
-    requirements = f.read()
+    requirements = f.read().splitlines()
 
 setup(
     name='dbcollection',
-    version='0.1.0',
+    version='0.1.3',
     author='Miguel Farrajota',
     url='https://github.com/farrajota/dbcollection',
+    download_url='https://github.com/farrajota/dbcollection/archive/0.1.3.tar.gz',
     description='Cross-platform, cross-language dataset metadata manager for machine learning',
     long_description=long_description,
-    license=license_mit,
+    license='MIT License',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: MacOS X',
@@ -35,6 +33,8 @@ setup(
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
         'Operating System :: POSIX :: Linux',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
