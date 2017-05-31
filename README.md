@@ -38,18 +38,18 @@ python setup.py install
 Using the module is pretty straight-forward. To import it just do:
 
 ```python
-import dbcollection as dbc
+import dbcollection.manager as dbc
 ```
 
-To load a dataset, you need to use `dbc.manager` API `load()` method.
+To load a dataset, you need to use `dbc` API `load()` method.
 
 > Note: by default, the `MNIST` dataset is already included in the package, so loading it does not need to download/setup any data. However, this may not be valid for most datasets.
 
 ```python
-mnist = dbc.manager.load('mnist')
+mnist = dbc.load('mnist')
 ```
 
-This returns a loader API class which contains information about the dataset's name, task, data and cache paths, sets, the HDF5 file handler and four methods to retrieve data from the HDF5 file: `get()`, `size()`, `object()` and `list()`.
+This returns a loader API class which contains information about the dataset's name, task, data and cache paths, sets, the HDF5 file handler and four methods to retrieve data from the file: `get()`, `size()`, `object()` and `list()`.
 
 Finally, to retrieve data from the `MNIST` data loader and display it you can do the following:
 
