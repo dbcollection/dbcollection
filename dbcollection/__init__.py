@@ -14,5 +14,6 @@ dataset every time.
 <TODO: finish the header file explanation>
 """
 
-
 #from dbcollection import manager, utils
+
+__version__ = '0.1.3'
