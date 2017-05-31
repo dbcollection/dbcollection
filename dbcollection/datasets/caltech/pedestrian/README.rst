@@ -1,4 +1,4 @@
-.. _cifar_100_readme:
+.. _caltech_ped_readme:
 
 Caltech Pedestrian
 ==================
