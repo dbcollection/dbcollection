@@ -15,6 +15,7 @@ Following these guidelines is a great way to effectively contribute to the proje
    :maxdepth: 1
 
    how_to
-   coding_guidelines
    submitting_bugs
    code_organization
+   coding_guidelines
+   testing_guidelines
