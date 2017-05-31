@@ -22,7 +22,7 @@ Also, since it has been developed with community in mind,
 this encourages the users to write and share their scripts for downloading/parsing other datasets with the community.
 
 
-The code is open source (**MIT license**) and is available on `Github <https://github.com/farrajota/dbcollection/>`_.
+The code is open source (**MIT license**) and is available on `GitHub <https://github.com/farrajota/dbcollection/>`_.
 
 
 Contents:
