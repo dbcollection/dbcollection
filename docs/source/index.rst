@@ -36,6 +36,6 @@ Contents:
    tutorial/index
    reference/index
    available_datasets
-   contributing
+   contributing/index
    license
 
