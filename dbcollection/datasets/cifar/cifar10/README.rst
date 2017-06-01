@@ -15,6 +15,13 @@ batches contain exactly 5000 images from each class.
 Here are the classes in the dataset, as well as 10 random images from each:
 
 
++------------+-----------------+
++ Classes    + Sample images   +
++============+=================+
++ airplane   +                 +
++------------+-----------------+
++ automobile +                 +
++------------+-----------------+
 
 airplane    |airplane1| |airplane2| |airplane3| |airplane4| |airplane5| |airplane6| |airplane7| |airplane8| |airplane9| |airplane10|
 
@@ -35,6 +42,16 @@ horse
 ship
 
 truck
+
+
+
+Features
+--------
+
+- classification
+- 10 classes
+- Sets: ``train`` and ``test``
+- 60000 32x32 colour images
 
 
 Name
