@@ -14,6 +14,12 @@ $ pip install dbcollection
 This will install the latest version of the ``dbcollection`` package on your system.
 
 
+Install dbcollection via conda
+------------------------------
+
+TODO
+
+
 Install dbcollection from source
 --------------------------------
 
