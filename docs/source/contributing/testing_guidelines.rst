@@ -35,6 +35,8 @@ that they aren't introducing errors in your code.
 Also, strive to fully test your code, but don't get too obsess over the coverage score.
 
 
+.. _unit_tests:
+
 Unit Tests
 ----------
 
@@ -58,6 +60,8 @@ Besides the conventions required by ``pytest``, use these general testing guidel
 - Should be fast, but a slow test is better than no test.
 - All tests must pass. Moreover, don't let incomplete tests pass.
 
+
+.. _functional_tests:
 
 Functional Tests
 ----------------
