@@ -10,7 +10,9 @@ matrix:
 
 environment:
   binstar_token:
-    secure: zWZZJNCB566Xew9fYGHRW0BL+SbkfEIsKik+ZENVxIA=
+    secure: gHtcizHsO5u1E8fEIcbjNt/eAKvQOOmw2fwdcN2dqdc=
+  PYPI_PASSWORD:
+    secure: Xg0KUIs8b6Xm7UTDwd5KcukTgPAg+SBWLOZlcYzAcT0=
 
   global:
     # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
@@ -19,31 +21,32 @@ environment:
     CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\ci\\appveyor\\run_with_env.cmd"
     clone_folder: C:\projects\dbcollection
 
+
   matrix:
 
-    #- CONDA_ROOT: "C:\\Miniconda3_64"
-    #  PYTHON_VERSION: "3.5"
-    #  PYTHON_ARCH: "64"
-    #  CONDA_PY: "35"
-    #  CONDA_NPY: "18"
+    - CONDA_ROOT: "C:\\Miniconda3_64"
+      PYTHON_VERSION: "3.5"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "35"
+      CONDA_NPY: "112"
 
     - CONDA_ROOT: "C:\\Miniconda3_32"
       PYTHON_VERSION: "3.5"
       PYTHON_ARCH: "32"
       CONDA_PY: "35"
-      CONDA_NPY: "18"
+      CONDA_NPY: "112"
 
-    #- CONDA_ROOT: "C:\\Miniconda3_64"
-    #  PYTHON_VERSION: "2.7"
-    #  PYTHON_ARCH: "64"
-    #  CONDA_PY: "27"
-    #  CONDA_NPY: "18"
+    - CONDA_ROOT: "C:\\Miniconda3_64"
+      PYTHON_VERSION: "2.7"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "27"
+      CONDA_NPY: "110"
 
 
 # We always use a 64-bit machine, but can build x86 distributions
 # with the PYTHON_ARCH variable (which is used by CMD_IN_ENV).
-#platform:
-#  - x64
+platform:
+  - x64
 
 
 # all our python builds have to happen in tests_script...
@@ -88,3 +91,53 @@ test_script:
   # tests
   - cmd: activate dbcollection
   - pytest tests\
+
+
+after_test:
+  - ECHO "DONE!"
+  - ECHO "BUILDING WHEELS..."
+  - "%PYTHON%/python setup.py sdist bdist_wheel --plat-name=%PLAT_NAME% --python-tag=%PY_TAG%"
+  - ECHO "BUILDING CONDA PACKAGE..."
+  - set BK_PATH=%PATH%
+
+  # try conda thing
+  - SET PATH=%CONDA%;%CONDA%/Scripts;%CONDA%/Library/bin;%PATH%
+
+  # Update to a known good conda, found from https://github.com/numba/numba/blob/master/appveyor.yml
+  - cmd: conda install -q -y conda=4.3.14
+  - cmd: conda install -q -y conda-build anaconda-client numpy wheel six pytest
+  - cmd: conda build appveyor -q --no-anaconda-upload
+  - ps: ls $env:CONDA_BUILDS
+  - ps: mv $env:CONDA_BUILDS ./
+  - ps: rm dist/*.egg
+  - SET PATH=%BK_PATH%
+
+
+artifacts:
+  - path: dist\*
+    name: pypiartifacts
+
+  - path: 'win-*\*.tar.bz2'
+    name: condaartifacts
+
+
+deploy_script:
+  - echo "Starting Artifact Deployment"
+  # populate pypirc file for twine
+  - echo [distutils]                                  > %USERPROFILE%\\.pypirc
+  - echo index-servers =                             >> %USERPROFILE%\\.pypirc
+  - echo     pypi                                    >> %USERPROFILE%\\.pypirc
+  - echo [pypi]                                      >> %USERPROFILE%\\.pypirc
+  - echo repository=https://pypi.python.org/pypi     >> %USERPROFILE%\\.pypirc
+  - echo username=farrajota                          >> %USERPROFILE%\\.pypirc
+  - echo password=%PYPI_PASSWORD%                    >> %USERPROFILE%\\.pypirc
+  # upload to pypi for windows
+  - set PATH=%BK_PATH%
+  - set HOME=%USERPROFILE%
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { Invoke-Expression "twine upload -r pypi --skip-existing dist/*" 2>$null } Else { write-output "Not on a tag on master, won't deploy to pypi"}
+  # upload conda builds to conda cloud
+  - cmd: set PATH=%CONDA%;%CONDA%/Scripts;%CONDA%/Library/bin;%PATH%
+  # because appveyor prints to stderror, we will run it in command mode by doing a check firs
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { $env:conda_upload = 'true' } Else { write-output "Not on a tag on master, won't deploy to anaconda" }
+  - cmd: IF "%conda_upload%"=="true" anaconda -t %BINSTAR_TOKEN% upload .\win-*\*.tar.bz2 -u andrewannex --no-progress --force
+  - echo "Finished Artifact Deployment"
