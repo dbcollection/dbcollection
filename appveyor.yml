@@ -13,7 +13,7 @@ environment:
     # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
     # /E:ON and /V:ON options are not enabled in the batch script intepreter
     # See: http://stackoverflow.com/a/13751649/163740
-    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\ci\\appveyor\\run_with_env.cmd"
+    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\continuous-integration\\appveyor\\run_with_env.cmd"
     clone_folder: C:\projects\dbcollection
 
   matrix:
@@ -48,7 +48,7 @@ init:
 install:
   # this installs the appropriate Miniconda (Py2/Py3, 32/64 bit)
   # updates conda & installs: conda-build jinja2 anaconda-client
-  - powershell .\ci\appveyor\install.ps1
+  - powershell .\continuous-integration\appveyor\install.ps1
   - SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\Scripts;%PATH%
 
   # install our build environment
@@ -62,7 +62,7 @@ install:
   # create our env
   - cmd: conda create -n dbcollection python=%PYTHON_VERSION% pytest pytest-xdist
   - cmd: activate dbcollection
-  - SET REQ=ci\requirements.txt
+  - SET REQ=requirements.txt
   - cmd: echo "installing requirements from %REQ%"
   - cmd: conda install -n dbcollection --file=%REQ%
   - cmd: conda list -n dbcollection
