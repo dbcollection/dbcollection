@@ -69,6 +69,9 @@ install:
   - cmd: echo "installing requirements from %REQ% - done"
   - cmd: pip install patool xmltodict
 
+  # recursively clone all submodules
+  - cmd: git submodule update --init --recursive
+
   # build em using the local source checkout in the correct windows env
   - cmd: '%CMD_IN_ENV% python setup.py install'
 
