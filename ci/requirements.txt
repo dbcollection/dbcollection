@@ -1,8 +1,9 @@
+pytest
+pytest-cov
 h5py
 numpy
 patool
 progressbar2
-pytest
 scipy
 xmltodict
 requests
