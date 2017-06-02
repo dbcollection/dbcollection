@@ -1,0 +1,8 @@
+pytest
+pytest-cov
+h5py
+numpy
+progressbar2
+scipy
+requests
+Pillow
