@@ -42,14 +42,14 @@ build: false
 
 
 init:
-  - "ECHO %PYTHON_VERSION% %MINICONDA%"
+  - cmd: ECHO %PYTHON_VERSION% %MINICONDA%
 
 
 install:
   # this installs the appropriate Miniconda (Py2/Py3, 32/64 bit)
   # updates conda & installs: conda-build jinja2 anaconda-client
   - cmd: powershell .\\ci\\install.ps1
-  - "SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\\Scripts;%PATH%"
+  - cmd: SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\Scripts;%PATH%
 
   # install our build environment
   - cmd: conda config --set show_channel_urls true --set always_yes true --set changeps1 false
@@ -63,10 +63,11 @@ install:
   - cmd: conda create -n dbcollection python=%PYTHON_VERSION% pytest
   - cmd: activate dbcollection
   - SET REQ=requirements.txt
-  - cmd: echo "installing requirements from %REQ%"
-  - cmd: conda install -n dbcollection --file=%REQ%
+  #- cmd: echo "installing requirements from %REQ%"
+  #- cmd: conda install -n dbcollection --file=%REQ%
   - cmd: conda list -n dbcollection
   - cmd: echo "installing requirements from %REQ% - done"
+  - cmd: pip install -r requirements.txt
 
   # build em using the local source checkout in the correct windows env
   - cmd: '%CMD_IN_ENV% python setup.py build_ext --inplace'
