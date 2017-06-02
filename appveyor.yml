@@ -33,8 +33,8 @@ environment:
 
 # We always use a 64-bit machine, but can build x86 distributions
 # with the PYTHON_ARCH variable (which is used by CMD_IN_ENV).
-platform:
-  - x64
+#platform:
+#  - x64
 
 
 # all our python builds have to happen in tests_script...
