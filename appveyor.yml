@@ -22,13 +22,13 @@ environment:
       PYTHON_VERSION: "3.5"
       PYTHON_ARCH: "64"
       CONDA_PY: "35"
-      CONDA_NPY: "112"
+      CONDA_NPY: "18"
 
     - CONDA_ROOT: "C:\\Miniconda3_64"
       PYTHON_VERSION: "2.7"
       PYTHON_ARCH: "64"
       CONDA_PY: "27"
-      CONDA_NPY: "110"
+      CONDA_NPY: "18"
 
 
 # We always use a 64-bit machine, but can build x86 distributions
@@ -48,8 +48,8 @@ init:
 install:
   # this installs the appropriate Miniconda (Py2/Py3, 32/64 bit)
   # updates conda & installs: conda-build jinja2 anaconda-client
-  - powershell .\continuous-integration\appveyor\install.ps1
-  - SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\Scripts;%PATH%
+  - powershell .\\continuous-integration\\appveyor\\install.ps1
+  - "SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\\Scripts;%PATH%"
 
   # install our build environment
   - cmd: conda config --set show_channel_urls true --set always_yes true --set changeps1 false
