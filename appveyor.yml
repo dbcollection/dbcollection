@@ -49,7 +49,7 @@ install:
   # this installs the appropriate Miniconda (Py2/Py3, 32/64 bit)
   # updates conda & installs: conda-build jinja2 anaconda-client
   - powershell .\\ci\\install.ps1
-  - "SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\Scripts;%PATH%"
+  - SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\Scripts;%PATH%
 
   # install our build environment
   - cmd: conda config --set show_channel_urls true --set always_yes true --set changeps1 false
@@ -62,7 +62,7 @@ install:
   # create our env
   - cmd: conda create -n dbcollection python=%PYTHON_VERSION% pytest pytest-xdist
   - cmd: activate dbcollection
-  - "SET REQ=requirements.txt"
+  - SET REQ=ci\requirements.txt
   - cmd: echo "installing requirements from %REQ%"
   - cmd: conda install -n dbcollection --file=%REQ%
   - cmd: conda list -n dbcollection
