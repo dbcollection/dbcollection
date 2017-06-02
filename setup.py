@@ -10,7 +10,7 @@ cross-language (Python, Lua/Torch7, Matlab) API to easily manage datasets'
 metadata by using the standard HDF5 file format.
 """
 
-with open('ci/requirements.txt') as f:
+with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setup(
