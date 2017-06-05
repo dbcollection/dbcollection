@@ -45,9 +45,11 @@ install:
     - echo "install start"
     - ci/travis/install.sh
     - echo "install done"
+    - python setup.py install
 
 # command to run tests
 script:
+    - source activate dbcollection
     - pytest --cov=dbcollection tests
 
 #after_success:

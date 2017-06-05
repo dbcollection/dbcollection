@@ -99,7 +99,7 @@ install:
 test_script:
   # tests
   - cmd: activate dbcollection
-  - pytest tests\
+  - pytest --cov=dbcollection tests\
 
 
 after_test:
@@ -118,7 +118,7 @@ after_test:
   - cmd: conda install -q -y anaconda-client wheel six pytest
   - cmd: conda build appveyor -q --no-anaconda-upload
   - ps: ls $env:CONDA_BUILDS
-  - ps: mv $env:CONDA_BUILDS ./
+  #- ps: mv $env:CONDA_BUILDS ./
   - ps: rm dist/*.egg
   - SET PATH=%BK_PATH%
 
