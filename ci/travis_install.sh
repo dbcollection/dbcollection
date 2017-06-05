@@ -76,7 +76,7 @@ echo
 echo "[create env]"
 
 # create our environment
-REQ="ci/travis/requirements.txt"
+REQ="ci/requirements.txt"
 echo "installing requirements from %REQ%"
 time conda create -n dbcollection --file=${REQ} || exit 1
 
@@ -101,13 +101,13 @@ fi
 # we may have additional pip installs
 echo
 echo "[pip installs]"
-REQ="ci/travis/requirements_pip.txt"
+REQ="ci/requirements_pip.txt"
 if [ -e ${REQ} ]; then
    pip install -r $REQ
 fi
 
 echo
-echo "build/install source code"
+echo "[build/install source code]"
 time python setup.py install || exit 1
 
 
