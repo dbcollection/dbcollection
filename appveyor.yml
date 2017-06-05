@@ -78,7 +78,7 @@ install:
   - cmd: conda info -a
 
   # create our env
-  - cmd: conda create -n dbcollection python=%PYTHON_VERSION% pytest
+  - cmd: conda create -n dbcollection python=%PYTHON_VERSION% pytest pytest-cov
   - cmd: activate dbcollection
   - SET REQ=ci\appveyor\requirements.run
   - cmd: echo "installing requirements from %REQ%"

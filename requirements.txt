@@ -1,5 +1,3 @@
-pytest
-pytest-cov
 h5py
 numpy
 patool
