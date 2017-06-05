@@ -20,11 +20,19 @@ environment:
     # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
     # /E:ON and /V:ON options are not enabled in the batch script intepreter
     # See: http://stackoverflow.com/a/13751649/163740
-    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\ci\\appveyor\\run_with_env.cmd"
+    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\ci\\run_with_env.cmd"
     clone_folder: C:\projects\dbcollection
 
 
   matrix:
+
+    - CONDA_ROOT: "C:\\Miniconda3_64"
+      PYTHON_VERSION: "3.6"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "36"
+      CONDA_NPY: "112"
+      PLAT_NAME: "win-amd64"
+      PY_TAG: "cp36"
 
     - CONDA_ROOT: "C:\\Miniconda3_64"
       PYTHON_VERSION: "3.5"
@@ -34,11 +42,13 @@ environment:
       PLAT_NAME: "win-amd64"
       PY_TAG: "cp35"
 
-    #- CONDA_ROOT: "C:\\Miniconda3_32"
-    #  PYTHON_VERSION: "3.5"
-    #  PYTHON_ARCH: "32"
-    #  CONDA_PY: "35"
-    #  CONDA_NPY: "112"
+    - CONDA_ROOT: "C:\\Miniconda3_64"
+      PYTHON_VERSION: "3.4"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "34"
+      CONDA_NPY: "112"
+      PLAT_NAME: "win-amd64"
+      PY_TAG: "cp34"
 
     - CONDA_ROOT: "C:\\Miniconda3_64"
       PYTHON_VERSION: "2.7"
@@ -47,6 +57,13 @@ environment:
       CONDA_NPY: "110"
       PLAT_NAME: "win-amd64"
       PY_TAG: "cp27"
+
+    #- CONDA_ROOT: "C:\\Miniconda3_32"
+    #  PYTHON_VERSION: "3.5"
+    #  PYTHON_ARCH: "32"
+    #  CONDA_PY: "35"
+    #  CONDA_NPY: "112"
+
 
 
 # We always use a 64-bit machine, but can build x86 distributions
@@ -66,7 +83,7 @@ init:
 install:
   # this installs the appropriate Miniconda (Py2/Py3, 32/64 bit)
   # updates conda & installs: conda-build jinja2 anaconda-client
-  - cmd: powershell .\ci\appveyor\install.ps1
+  - cmd: powershell .\ci\appveyor_install.ps1
   - SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\Scripts;%PATH%
 
   # install our build environment
@@ -80,12 +97,12 @@ install:
   # create our env
   - cmd: conda create -n dbcollection python=%PYTHON_VERSION% pytest pytest-cov
   - cmd: activate dbcollection
-  - SET REQ=ci\appveyor\requirements.run
+  - SET REQ=ci\requirements.txt
   - cmd: echo "installing requirements from %REQ%"
   - cmd: conda install -n dbcollection --file=%REQ%
   - cmd: conda list -n dbcollection
   - cmd: echo "installing requirements from %REQ% - done"
-  - SET REQ=ci\appveyor\requirements_pip.txt
+  - SET REQ=ci\requirements_pip.txt
   - cmd: echo "installing additional requirements (pip) from %REQ%"
   - cmd: pip install -r %REQ%
   - cmd: echo "installing additional requirements (pip) from %REQ% - done"
@@ -115,7 +132,7 @@ after_test:
   # Update to a known good conda, found from https://github.com/numba/numba/blob/master/appveyor.yml
   #- cmd: conda install -q -y conda=4.3.14
   #- cmd: conda install conda-build
-  - cmd: conda install -q -y anaconda-client wheel six pytest
+  - cmd: conda install -q -y anaconda-client wheel six
   - cmd: conda build appveyor -q --no-anaconda-upload
   - ps: ls $env:CONDA_BUILDS
   #- ps: mv $env:CONDA_BUILDS ./
