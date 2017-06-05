@@ -16,4 +16,4 @@ dataset every time.
 
 
 #from dbcollection import manager, utils
-from .version import __version__
+from .version import VERSION
