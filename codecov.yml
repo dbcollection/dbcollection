@@ -1,6 +1,9 @@
 codecov:
   branch: master
 
+ignore:
+    - "dbcollection/datasets"  # ignore folders and all its contents
+
 coverage:
   status:
     project:
