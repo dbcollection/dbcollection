@@ -40,6 +40,9 @@ before_install:
     - git --version
     - git tag
 
+before_script:
+    - chmod +x ci/travis/install.sh
+
 install:
     - echo "install start"
     - ci/travis/install.sh
