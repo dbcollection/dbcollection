@@ -1,14 +1,11 @@
 codecov:
   branch: master
 
-ignore:
-    - "dbcollection/datasets"  # ignore folders and all its contents
-
 coverage:
   status:
     project:
       default:
-        target: '50'
+        target: auto
     patch:
       default:
       target: '20'
