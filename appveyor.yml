@@ -85,7 +85,10 @@ install:
   - cmd: conda install -n dbcollection --file=%REQ%
   - cmd: conda list -n dbcollection
   - cmd: echo "installing requirements from %REQ% - done"
-  - cmd: pip install patool xmltodict
+  - SET REQ=ci\appveyor\requirements_pip.txt
+  - cmd: echo "installing additional requirements (pip) from %REQ%"
+  - cmd: pip install -r %REQ%
+  - cmd: echo "installing additional requirements (pip) from %REQ% - done"
 
   # recursively clone all submodules
   - cmd: git submodule update --init --recursive
@@ -102,7 +105,7 @@ test_script:
 after_test:
   - ECHO "DONE!"
   - ECHO "BUILDING WHEELS..."
-  - "%PYTHON%/python setup.py sdist bdist_wheel --plat-name=%PLAT_NAME% --python-tag=%PY_TAG%"
+  - cmd: python setup.py sdist bdist_wheel --plat-name=%PLAT_NAME% --python-tag=%PY_TAG%
   - ECHO "BUILDING CONDA PACKAGE..."
   - set BK_PATH=%PATH%
 
