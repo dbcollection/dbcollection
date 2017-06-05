@@ -48,8 +48,11 @@ install:
 # command to run tests
 script:
     - activate dbcollection
-    - pytest tests/
+    - pytest tests/ --cov=dbcollection
 
 
 #after_success:
 #- ci/upload_coverage.sh
+after_success:
+- ls -lha
+- bash <(curl -s https://codecov.io/bash)
