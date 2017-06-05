@@ -39,8 +39,6 @@ before_install:
     - uname -a
     - git --version
     - git tag
-
-before_script:
     - chmod +x ci/travis/install.sh
 
 install:
