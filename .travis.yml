@@ -42,9 +42,7 @@ before_install:
 
 install:
     - echo "install start"
-    - ci/prep_cython_cache.sh
-    - ci/install_travis.sh
-    - ci/submit_cython_cache.sh
+    - ci/travis/install.sh
     - echo "install done"
 
 # command to run tests
