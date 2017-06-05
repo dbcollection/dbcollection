@@ -3,12 +3,15 @@
 
 import os
 from setuptools import setup, find_packages
-from importlib.machinery import SourceFileLoader
 
 
 # avoid loading the package before requirements are installed:
-version_obj = SourceFileLoader('version', 'dbcollection/version.py').load_module()
-VERSION = str(version_obj.VERSION)
+#from importlib.machinery import SourceFileLoader
+#version_obj = SourceFileLoader('version', 'dbcollection/version.py').load_module()
+#VERSION = str(version_obj.VERSION)
+
+from dbcollection.version import VERSION
+VERSION = str(VERSION)
 ISRELEASED = True
 
 
