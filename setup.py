@@ -7,7 +7,8 @@ from importlib.machinery import SourceFileLoader
 
 
 # avoid loading the package before requirements are installed:
-VERSION = SourceFileLoader('version', 'dbcollection/version.py').load_module()
+version_obj = SourceFileLoader('version', 'dbcollection/version.py').load_module()
+VERSION = str(version_obj.VERSION)
 ISRELEASED = True
 
 
