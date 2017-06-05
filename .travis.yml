@@ -43,7 +43,7 @@ before_install:
 
 install:
     - echo "install start"
-    - ci/travis/install.sh
+    - ci/travis_install.sh
     - echo "install done"
 
 # command to run tests
