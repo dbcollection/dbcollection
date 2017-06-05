@@ -1,18 +1,57 @@
 sudo: false
-
 language: python
-python:
-    - "3.5"
+python: 3.5
 
-os:
-    - linux
+matrix:
+    fast_finish: true
+    include:
+        - os: linux
+          dist: trusty
+          python: 2.7
+        - os: linux
+          dist: trusty
+          python: 3.4
+        - os: linux
+          dist: trusty
+          python: 3.5
+        #- os: linux
+        #  dist: trusty
+        #  python: 3.6
+#
+        #- os: osx
+        #  language: generic
+        #  env: PYVERSION='2.7.13'
+        #- os: osx
+        #  language: generic
+        #  env: PYVERSION='3.4.0'
+        #- os: osx
+        #  language: generic
+        #  env: PYVERSION='3.5.0'
+        #- os: osx
+        #  language: generic
+        #  env: PYVERSION='3.6.0'
 
-# command to install dependencies
+before_install:
+    - echo "before_install"
+    - export PATH="$HOME/miniconda3/bin:$PATH"
+    - df -h
+    - pwd
+    - uname -a
+    - git --version
+    - git tag
+
 install:
-    - pip install --upgrade pip
-    - pip install -U tox
-    - pip --version
-    - tox --version
+    - echo "install start"
+    - ci/prep_cython_cache.sh
+    - ci/install_travis.sh
+    - ci/submit_cython_cache.sh
+    - echo "install done"
 
 # command to run tests
-script: tox
+script:
+    - activate dbcollection
+    - pytest tests/
+
+
+#after_success:
+#- ci/upload_coverage.sh
