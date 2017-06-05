@@ -45,7 +45,6 @@ install:
     - echo "install start"
     - ci/travis/install.sh
     - echo "install done"
-    - python setup.py install
 
 # command to run tests
 script:

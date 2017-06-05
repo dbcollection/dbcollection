@@ -106,6 +106,10 @@ if [ -e ${REQ} ]; then
    pip install -r $REQ
 fi
 
+echo
+echo "build/install source code"
+time python setup.py install || exit 1
+
 
 echo
 echo "[show dbcollection]"
