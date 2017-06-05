@@ -48,8 +48,7 @@ install:
 # command to run tests
 script:
     - activate dbcollection
-    - pytest tests/ --cov=dbcollection
-
+    - pytest --cov=dbcollection tests
 
 #after_success:
 #- ci/upload_coverage.sh
