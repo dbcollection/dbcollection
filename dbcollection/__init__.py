@@ -16,4 +16,7 @@ dataset every time.
 
 
 #from dbcollection import manager, utils
+
+# get version
 from .version import VERSION
+__version__ = str(VERSION)
