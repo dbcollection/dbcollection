@@ -5,22 +5,44 @@ import os
 from setuptools import setup, find_packages
 
 
-long_description="""dbcollection is a cross-platform (Windows, MacOS, Linux),
-cross-language (Python, Lua/Torch7, Matlab) API to easily manage datasets'
-metadata by using the standard HDF5 file format.
-"""
+# avoid loading the package before requirements are installed:
+#from importlib.machinery import SourceFileLoader
+#version_obj = SourceFileLoader('version', 'dbcollection/version.py').load_module()
+#VERSION = str(version_obj.VERSION)
 
+from dbcollection.version import VERSION
+VERSION = str(VERSION)
+ISRELEASED = True
+
+
+# Dynamically set the conda package version
+try:
+    if os.environ['CONDA_BUILD']:
+        with open('__conda_version__.txt', 'w') as f:
+            if ISRELEASED:
+                f.write(VERSION)
+            else:
+                f.write(VERSION + '.dev')
+except KeyError:
+    pass
+
+
+# Load requirements
 with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
+
 setup(
     name='dbcollection',
-    version='0.1.3',
-    author='Miguel Farrajota',
+    version=VERSION,
+    author='M. Farrajota',
     url='https://github.com/farrajota/dbcollection',
-    download_url='https://github.com/farrajota/dbcollection/archive/0.1.3.tar.gz',
+    download_url='https://github.com/farrajota/dbcollection/archive/' + VERSION + '.tar.gz',
     description='Cross-platform, cross-language dataset metadata manager for machine learning',
-    long_description=long_description,
+    long_description="""dbcollection is a cross-platform (Windows, MacOS, Linux),
+        cross-language (Python, Lua/Torch7, Matlab) API to easily manage datasets'
+        metadata by using the standard HDF5 file format.
+        """,
     license='MIT License',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -40,6 +62,6 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
     ],
-    packages=find_packages(exclude=['test', 'APIs', '.vscode']),
+    packages=find_packages(exclude=['tests', 'APIs', 'docs']),
     install_requires=requirements
 )
