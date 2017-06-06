@@ -56,9 +56,11 @@ after_success:
     - bash <(curl -s https://codecov.io/bash)
 
     - echo $TRAVIS_TAG
-    - if [[ "$TRAVIS_BRANCH" == "master"]] && [[ -n "TRAVIS_TAG" ]]; then
-        conda install conda-build anaconda-client wheel six pytest;
-        bash ci/conda_upload.sh;
+    - if [[ "$TRAVIS_BRANCH" == "master"]]; then
+        if [[ "$TRAVIS_TAG" != "" ]]; then
+          conda install conda-build anaconda-client wheel six pytest;
+          bash ci/conda_upload.sh;
+        fi
       fi
 
 deploy:
