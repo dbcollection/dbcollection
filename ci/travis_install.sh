@@ -100,6 +100,15 @@ if [ -z "$BUILD_TEST" ]; then
 
 fi
 
+echo
+echo ${TRAVIS_BRANCH}
+echo ${TRAVIS_TAG}
+if [ "${TRAVIS_BRANCH}" == "master" ] && [ "${TRAVIS_TAG}" != "" ]; then
+    # install building dependencies
+    echo "[install building dependencies]"
+    conda install conda-build anaconda-client wheel six pytest
+fi
+
 # we may have additional pip installs
 echo
 echo "[pip installs]"
