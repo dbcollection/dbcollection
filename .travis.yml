@@ -39,10 +39,10 @@ before_install:
     - uname -a
     - git --version
     - git tag
-    - chmod +x ci/travis_install.sh
 
 install:
     - echo "install start"
+    - chmod +x ci/travis_install.sh
     - ci/travis_install.sh
     - echo "install done"
 
@@ -55,8 +55,8 @@ after_success:
     - ls -lha
     - bash < (curl -s https://codecov.io/bash)
 
-    - if [ "$TRAVIS_BRANCH" == "master"] then conda install conda-build anaconda-client wheel six pytest; fi
-    - if [ "$TRAVIS_BRANCH" == "master"] then if [ -n "TRAVIS_TAG" ]; then bash ci/conda_upload.sh; fi; fi
+    - if [ "$TRAVIS_BRANCH" == "master"]; then conda install conda-build anaconda-client wheel six pytest; fi
+    - if [ "$TRAVIS_BRANCH" == "master"] && [ -n "TRAVIS_TAG" ]; then bash ci/conda_upload.sh; fi
 
 deploy:
     provider: pypi
