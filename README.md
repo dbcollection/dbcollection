@@ -1,8 +1,8 @@
 # Easily manage your dataset's data
 
-[![Build Status](https://travis-ci.org/farrajota/dbcollection.svg?branch=add_appveyor_support)](https://travis-ci.org/farrajota/dbcollection)
+[![Build Status](https://travis-ci.org/farrajota/dbcollection.svg?branch=master)](https://travis-ci.org/farrajota/dbcollection)
 [![CircleCI](https://circleci.com/gh/farrajota/dbcollection/tree/master.svg?style=svg)](https://circleci.com/gh/farrajota/dbcollection/tree/master)
-[![Build status](https://ci.appveyor.com/api/projects/status/rwrp7q1j9ytebkps?svg=true)](https://ci.appveyor.com/project/farrajota/dbcollection)
+[![Build status](https://ci.appveyor.com/api/projects/status/rwrp7q1j9ytebkps/branch/master?svg=true)](https://ci.appveyor.com/project/farrajota/dbcollection/branch/master)
 [![codecov](https://codecov.io/gh/farrajota/dbcollection/branch/master/graph/badge.svg)](https://codecov.io/gh/farrajota/dbcollection)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation Status](https://readthedocs.org/projects/dbcollection/badge/?version=latest)](http://dbcollection.readthedocs.io/en/latest/?badge=latest)
