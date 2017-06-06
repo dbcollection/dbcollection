@@ -17,7 +17,13 @@ This will install the latest version of the ``dbcollection`` package on your sys
 Install dbcollection via conda
 ------------------------------
 
-TODO
+You can also install ``dbcollection`` via anaconda::
+
+$ conda install -c farrajota dbcollection
+
+.. warning::
+
+    Only Conda packages with Python >= 2.7 and >=3.4 are supported for Linux/MacOS/Windows.
 
 
 Install dbcollection from source
