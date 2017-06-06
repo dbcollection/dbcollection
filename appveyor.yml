@@ -1,0 +1,152 @@
+# This file is based on the following resources:
+# http://tjelvarolsson.com/blog/how-to-continuously-test-your-python-code-on-windows-using-appveyor/
+# https://packaging.python.org/en/latest/appveyor/
+# https://github.com/rmcgibbo/python-appveyor-conda-example
+# https://github.com/pandas-dev/pandas/blob/master/appveyor.yml
+
+matrix:
+  fast_finish: true     # immediately finish build once one of the jobs fails.
+
+
+environment:
+  BINSTAR_USER: farrajota
+  BINSTAR_TOKEN:
+    secure: gHtcizHsO5u1E8fEIcbjNt/eAKvQOOmw2fwdcN2dqdc=
+  PYPI_USER: farrajota
+  PYPI_PASSWORD:
+    secure: Xg0KUIs8b6Xm7UTDwd5KcukTgPAg+SBWLOZlcYzAcT0=
+
+  global:
+    # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
+    # /E:ON and /V:ON options are not enabled in the batch script intepreter
+    # See: http://stackoverflow.com/a/13751649/163740
+    CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\ci\\run_with_env.cmd"
+    clone_folder: C:\projects\dbcollection
+
+
+  matrix:
+
+    - CONDA_ROOT: "C:\\Miniconda3_64"
+      PYTHON_VERSION: "3.6"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "36"
+      CONDA_NPY: "112"
+      PLAT_NAME: "win-amd64"
+      PY_TAG: "cp36"
+
+    - CONDA_ROOT: "C:\\Miniconda3_64"
+      PYTHON_VERSION: "3.5"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "35"
+      CONDA_NPY: "112"
+      PLAT_NAME: "win-amd64"
+      PY_TAG: "cp35"
+
+    - CONDA_ROOT: "C:\\Miniconda3_64"
+      PYTHON_VERSION: "3.4"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "34"
+      CONDA_NPY: "112"
+      PLAT_NAME: "win-amd64"
+      PY_TAG: "cp34"
+
+    - CONDA_ROOT: "C:\\Miniconda3_64"
+      PYTHON_VERSION: "2.7"
+      PYTHON_ARCH: "64"
+      CONDA_PY: "27"
+      CONDA_NPY: "110"
+      PLAT_NAME: "win-amd64"
+      PY_TAG: "cp27"
+
+
+# We always use a 64-bit machine, but can build x86 distributions
+# with the PYTHON_ARCH variable (which is used by CMD_IN_ENV).
+platform:
+  - x64
+
+
+# all our python builds have to happen in tests_script...
+build: false
+
+
+init:
+  - cmd: echo %PYTHON_VERSION% %MINICONDA%
+
+
+install:
+  # this installs the appropriate Miniconda (Py2/Py3, 32/64 bit)
+  # updates conda & installs: conda-build jinja2 anaconda-client
+  - cmd: powershell .\ci\appveyor_install.ps1
+  - SET PATH=%CONDA_ROOT%;%CONDA_ROOT%\Scripts;%PATH%
+
+  # install our build environment
+  - cmd: conda config --set show_channel_urls true --set always_yes true --set changeps1 false
+  - cmd: conda update -q conda
+  - cmd: conda config --set ssl_verify false
+
+  # this is now the downloaded conda...
+  - cmd: conda info -a
+
+  # create our env
+  - cmd: conda create -n dbcollection python=%PYTHON_VERSION% pytest pytest-cov
+  - cmd: activate dbcollection
+  - SET REQ=ci\requirements.txt
+  - cmd: echo "installing requirements from %REQ%"
+  - cmd: conda install -n dbcollection --file=%REQ%
+  - cmd: conda list -n dbcollection
+  - cmd: echo "installing requirements from %REQ% - done"
+  - SET REQ=ci\requirements_pip.txt
+  - cmd: echo "installing additional requirements (pip) from %REQ%"
+  - cmd: pip install -r %REQ%
+  - cmd: echo "installing additional requirements (pip) from %REQ% - done"
+
+  # recursively clone all submodules
+  - cmd: git submodule update --init --recursive
+
+  # build em using the local source checkout in the correct windows env
+  - cmd: '%CMD_IN_ENV% python setup.py install'
+
+
+test_script:
+  # tests
+  - cmd: activate dbcollection
+  - pytest --cov=dbcollection tests\
+
+
+after_test:
+  - ECHO "DONE!"
+  - ECHO "BUILDING WHEELS..."
+  - cmd: python setup.py sdist bdist_wheel --plat-name=%PLAT_NAME% --python-tag=%PY_TAG%
+  - ECHO "BUILDING CONDA PACKAGE..."
+  - set BK_PATH=%PATH%
+
+  # try conda thing
+  - SET PATH=%CONDA%;%CONDA%/Scripts;%CONDA%/Library/bin;%PATH%
+
+  # Update to a known good conda, found from https://github.com/numba/numba/blob/master/appveyor.yml
+  #- cmd: conda install -q -y conda=4.3.14
+  #- cmd: conda install conda-build
+  - cmd: conda install -q -y anaconda-client wheel six
+  - cmd: conda build appveyor -q --no-anaconda-upload
+  - ps: ls $env:CONDA_BUILDS
+  #- ps: mv $env:CONDA_BUILDS ./
+  - ps: rm dist/*.egg
+  - SET PATH=%BK_PATH%
+
+
+artifacts:
+  - path: dist\*
+    name: pypiartifacts
+
+  - path: 'win-*\*.tar.bz2'
+    name: condaartifacts
+
+
+deploy_script:
+  - echo "Starting Artifact Deployment"
+  # upload conda builds to conda cloud
+  - cmd: set PATH=%CONDA%;%CONDA%/Scripts;%CONDA%/Library/bin;%PATH%
+  # because appveyor prints to stderror, we will run it in command mode by doing a check firs
+  - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -And $env:APPVEYOR_REPO_BRANCH -eq "master") { $env:conda_upload = 'true' } Else { write-output "Not on a tag on master, won't deploy to anaconda" }
+  - cmd: IF "%conda_upload%"=="true" anaconda -t %BINSTAR_TOKEN% upload .\win-*\*.tar.bz2 -u %BINSTAR_USER% --no-progress --force
+  - echo "Finished Artifact Deployment"
