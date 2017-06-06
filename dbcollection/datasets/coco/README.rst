@@ -21,6 +21,6 @@ Data structure
 Disclaimer
 ----------
 
-All rights reserved to the original creators of ``CIFAR-100``.
+All rights reserved to the original creators of ``MS COCO``.
 
 For information about this dataset and its terms of use, please see the `original website <http://mscoco.org/>`_.
