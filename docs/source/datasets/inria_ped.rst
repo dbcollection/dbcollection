@@ -1,0 +1,1 @@
+.. include:: ../../../dbcollection/datasets/inria/README.rst

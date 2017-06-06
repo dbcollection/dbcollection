@@ -1,0 +1,1 @@
+.. include:: ../../../dbcollection/datasets/ucf/ucfsports/README.rst

@@ -1,0 +1,1 @@
+.. include:: ../../../dbcollection/datasets/flic/README.rst

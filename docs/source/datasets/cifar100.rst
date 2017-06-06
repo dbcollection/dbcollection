@@ -1,0 +1,1 @@
+.. include:: ../../../dbcollection/datasets/cifar/cifar100/README.rst

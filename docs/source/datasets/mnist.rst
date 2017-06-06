@@ -1,0 +1,1 @@
+.. include:: ../../../dbcollection/datasets/mnist/README.rst

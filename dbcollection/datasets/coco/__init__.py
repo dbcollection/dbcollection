@@ -12,7 +12,7 @@ from .captions import Caption2015, Caption2015NoSourceGrp, Caption2016, Caption2
 from .keypoints import Keypoints2016, Keypoints2016NoSourceGrp
 
 
-class MSCOCO(BaseDataset):
+class COCO(BaseDataset):
     """ Microsoft COCO Dataset preprocessing/downloading functions """
 
     # download url
