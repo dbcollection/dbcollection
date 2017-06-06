@@ -20,16 +20,16 @@ matrix:
 
         - os: osx
           language: generic
-          python: 2.7
+          env: PYVERSION='2.7.13'
         - os: osx
           language: generic
-          python: 3.4
+          env: PYVERSION='3.4.0'
         - os: osx
           language: generic
-          python: 3.5
+          env: PYVERSION='3.5.0'
         - os: osx
           language: generic
-          python: 3.6
+          env: PYVERSION='3.6.0'
 
 before_install:
     - echo "before_install"
