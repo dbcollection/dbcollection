@@ -9,7 +9,7 @@ All available datasets must be added in this file.
 # List of image processing datasets
 #---------------------------------------------------------
 
-from . import mscoco
+from . import coco
 from . import cifar, pascal, mnist, imagenet
 from . import caltech, inria
 from . import flic, leeds_sports_pose, mpii_pose
@@ -17,30 +17,30 @@ from . import ucf
 
 
 human_action = {
-    "ucf101" : ucf.ucf101.UCF101,
-    "ucfsports" : ucf.ucfsports.UCFSports
+    "ucf101": ucf.ucf101.UCF101,
+    "ucfsports": ucf.ucfsports.UCFSports
 }
 
 human_pose = {
-    "flic" : flic.Flic,
-    "leeds_sports_pose" : leeds_sports_pose.lsp.LSP,
-    "leeds_sports_pose_extended" : leeds_sports_pose.lsp_extended.LSPe,
-    "mpii_pose" : mpii_pose.MPIIPose
+    "flic": flic.Flic,
+    "leeds_sports_pose": leeds_sports_pose.lsp.LSP,
+    "leeds_sports_pose_extended": leeds_sports_pose.lsp_extended.LSPe,
+    "mpii_pose": mpii_pose.MPIIPose
 }
 
 object_classification = {
-    "cifar10" : cifar.cifar10.Cifar10,
-    "cifar100" : cifar.cifar100.Cifar100,
-    "ilsvrc2012": imagenet.ILSVRC2012,
+    "cifar10": cifar.cifar10.Cifar10,
+    "cifar100": cifar.cifar100.Cifar100,
+    "ilsvrc2012": imagenet.ilsvrc2012.ILSVRC2012,
     'mnist': mnist.MNIST,
-    "pascal_voc_2007" : pascal.voc_2007.PascalVOC2007,
-    "pascal_voc_2012" : pascal.voc_2012.PascalVOC2012,
-    "mscoco" : mscoco.MSCOCO
+    "pascal_voc_2007": pascal.voc_2007.PascalVOC2007,
+    "pascal_voc_2012": pascal.voc_2012.PascalVOC2012,
+    "mscoco": coco.COCO
 }
 
 pedestrian_detection = {
-    "caltech_pedestrian" : caltech.pedestrian.Pedestrian,
-    "inria_pedestrian" : inria.Pedestrian
+    "caltech_pedestrian": caltech.pedestrian.Pedestrian,
+    "inria_pedestrian": inria.pedestrian.Pedestrian
 }
 
 
