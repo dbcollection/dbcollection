@@ -1,3 +1,6 @@
 name: dbcollection
 type: sphinx
 base: docs/source
+python:
+  version: 3
+  setup_py_install: true
