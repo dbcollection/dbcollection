@@ -76,18 +76,20 @@ echo
 echo "[create env]"
 
 # create our environment
+if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
+    PYTHON_VERSION=$PYVERSION
+else
+    PYTHON_VERSION=$TRAVIS_PYTHON_VERSION
+fi
+echo "set up a conda environment with the right Python version: $PYTHON_VERSION"
 REQ="ci/requirements.txt"
-echo "installing requirements from %REQ%"
-time conda create -n dbcollection --file=${REQ} || exit 1
+echo "installing requirements from $REQ"
+time conda create -n dbcollection python=$PYTHON_VERSION --file=${REQ} || exit 1
 
 source activate dbcollection
 
-time conda install -n pytest
+time conda install pytest pytest-cov
 time pip install pytest-xdist
-
-if [ "$COVERAGE" ]; then
-    pip install coverage pytest-cov
-fi
 
 echo
 if [ -z "$BUILD_TEST" ]; then
@@ -96,6 +98,15 @@ if [ -z "$BUILD_TEST" ]; then
     echo "[build em]"
     time python setup.py build_ext --inplace || exit 1
 
+fi
+
+echo
+echo ${TRAVIS_BRANCH}
+echo ${TRAVIS_TAG}
+if [ "${TRAVIS_BRANCH}" == "master" ] && [ "${TRAVIS_TAG}" != "" ]; then
+    # install building dependencies
+    echo "[install building dependencies]"
+    conda install conda-build anaconda-client wheel six pytest
 fi
 
 # we may have additional pip installs
