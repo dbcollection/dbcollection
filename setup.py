@@ -5,11 +5,7 @@ import os
 from setuptools import setup, find_packages
 
 
-# avoid loading the package before requirements are installed:
-#from importlib.machinery import SourceFileLoader
-#version_obj = SourceFileLoader('version', 'dbcollection/version.py').load_module()
-#VERSION = str(version_obj.VERSION)
-
+# Get version
 from dbcollection.version import VERSION
 VERSION = str(VERSION)
 ISRELEASED = True
@@ -61,6 +57,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
     ],
     packages=find_packages(exclude=['tests', 'APIs', 'docs']),
     install_requires=requirements
