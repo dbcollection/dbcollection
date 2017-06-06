@@ -76,19 +76,16 @@ echo
 echo "[create env]"
 
 # create our environment
-if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-    PYTHON_VERSION=$PYVERSION
-else
-    PYTHON_VERSION=$TRAVIS_PYTHON_VERSION
-fi
-echo "set up a conda environment with the right Python version: $PYTHON_VERSION"
+echo $TRAVIS_PYTHON_VERSION
+echo $PYTHON_VERSION
+echo "set up a conda environment with the right Python version: $TRAVIS_PYTHON_VERSION"
 REQ="ci/requirements.txt"
-echo "installing requirements from %REQ%"
-time conda create -n dbcollection python=$PYTHON_VERSION --file=${REQ} || exit 1
+echo "installing requirements from $REQ"
+time conda create -n dbcollection python=$TRAVIS_PYTHON_VERSION --file=${REQ} || exit 1
 
 source activate dbcollection
 
-time conda install -n pytest
+time conda install pytest
 time pip install pytest-xdist
 
 if [ "$COVERAGE" ]; then

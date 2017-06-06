@@ -20,16 +20,16 @@ matrix:
 
         - os: osx
           language: generic
-          env: PYVERSION='2.7.13'
+          python: 2.7
         - os: osx
           language: generic
-          env: PYVERSION='3.4.0'
+          python: 3.4
         - os: osx
           language: generic
-          env: PYVERSION='3.5.0'
+          python: 3.5
         - os: osx
           language: generic
-          env: PYVERSION='3.6.0'
+          python: 3.6
 
 before_install:
     - echo "before_install"
@@ -48,15 +48,17 @@ install:
 
 # command to run tests
 script:
-    - source activate dbcollection
     - pytest --cov=dbcollection tests
 
 after_success:
     - ls -lha
-    - bash < (curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash)
 
-    - if [ "$TRAVIS_BRANCH" == "master"]; then conda install conda-build anaconda-client wheel six pytest; fi
-    - if [ "$TRAVIS_BRANCH" == "master"] && [ -n "TRAVIS_TAG" ]; then bash ci/conda_upload.sh; fi
+    - echo $TRAVIS_TAG
+    - if [[ "$TRAVIS_BRANCH" == "master"]] && [[ -n "TRAVIS_TAG" ]]; then
+        conda install conda-build anaconda-client wheel six pytest;
+        bash ci/conda_upload.sh;
+      fi
 
 deploy:
     provider: pypi
