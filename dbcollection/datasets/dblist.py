@@ -35,7 +35,7 @@ object_classification = {
     'mnist': mnist.MNIST,
     "pascal_voc_2007": pascal.voc_2007.PascalVOC2007,
     "pascal_voc_2012": pascal.voc_2012.PascalVOC2012,
-    "mscoco": coco.COCO
+    "coco": coco.COCO
 }
 
 pedestrian_detection = {
