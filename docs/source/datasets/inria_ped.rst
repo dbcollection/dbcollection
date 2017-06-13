@@ -1,1 +1,1 @@
-.. include:: ../../../dbcollection/datasets/inria/README.rst
+.. include:: ../../../dbcollection/datasets/inria/pedestrian/README.rst

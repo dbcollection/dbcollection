@@ -16,7 +16,17 @@ Following these guidelines is a great way to effectively contribute to the proje
 
    how_to
    submitting_bugs
-   feedback_channels
    code_organization
    coding_guidelines
    testing_guidelines
+
+..
+    .. toctree::
+    :maxdepth: 1
+
+    how_to
+    submitting_bugs
+    .. feedback_channels
+    code_organization
+    coding_guidelines
+    testing_guidelines

@@ -1,1 +1,1 @@
-.. include:: ../../../dbcollection/datasets/mscoco/README.rst
+.. include:: ../../../dbcollection/datasets/coco/README.rst

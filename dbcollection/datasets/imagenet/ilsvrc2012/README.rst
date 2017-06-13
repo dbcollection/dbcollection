@@ -1,7 +1,7 @@
 .. _imagenet_readme:
 
-ImageNet
-========
+ImageNet ILSVRC2012
+===================
 
 
 Tasks

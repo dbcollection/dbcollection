@@ -1,1 +1,1 @@
-.. include:: ../../../dbcollection/datasets/imagenet/README.rst
+.. include:: ../../../dbcollection/datasets/imagenet/ilsvrc2012/README.rst
