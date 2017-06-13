@@ -1,4 +1,4 @@
-# Easily manage your dataset's data
+# dbcollection
 
 [![Build Status](https://travis-ci.org/farrajota/dbcollection.svg?branch=master)](https://travis-ci.org/farrajota/dbcollection)
 [![CircleCI](https://circleci.com/gh/farrajota/dbcollection/tree/master.svg?style=svg)](https://circleci.com/gh/farrajota/dbcollection/tree/master)
@@ -12,16 +12,16 @@
 dbcollection is a python module for loading/managing datasets with a very simple set of commands with cross-platform and cross-language support in mind and it is distributed under a MIT license.
 
 
-# Package installation
+## Package installation
 
-## From PyPi
+### From PyPi
 
 Simple do the following command to install this package:
 ```
 pip install dbcollection
 ```
 
-## From source
+### From source
 
 To install **dbcollection** from source you need to do the following setps:
 
@@ -34,7 +34,7 @@ git clone https://github.com/farrajota/dbcollection
 python setup.py install
 ```
 
-# Usage
+## Usage
 
 Using the module is pretty straight-forward. To import it just do:
 
@@ -71,12 +71,12 @@ plt.show()
 
 > Note: For a more detailed overview of how to use this module check the next section.
 
-## Tutorial
+### Tutorial
 
 A more detailed tutorial on using the **dbcollection** module main APIs for dataset managing and data loading is provided as a python notebook format [here](todo).
 
 
-# Supported languages
+## Supported languages
 
 
 - Python (>=2.7 or >=3.4)
@@ -86,23 +86,23 @@ A more detailed tutorial on using the **dbcollection** module main APIs for data
 > Note: If you would like to see additional languages being supported, please consider contributing to the project.
 
 
-# Documentation
+## Documentation
 
 The package documentation is hosted on [Read The Docs](http://dbcollection.readthedocs.io/en/latest/).
 
 The documentation should provide a good starting point for learning how to use the library.
 
 
-# Contributing
+## Contributing
 
 All contributions, bug reports, bug fixes, documentation improvements, enhancements and ideas are welcome.
 
 If you are interested in fixing issues and contributing directly to the code base, please see the document [How to Contribute](https://github.com/farrajota/dbcollection/wiki/How-to-Contribute).
 
-# Feedback
+## Feedback
 
 For now, use the [Github issues](https://github.com/farrajota/dbcollection/issues) for requests/bug issues.
 
-# License
+## License
 
 MIT license (see the `LICENSE` file)
