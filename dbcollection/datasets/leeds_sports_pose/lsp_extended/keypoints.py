@@ -47,7 +47,7 @@ class Keypoints(LspKeypoints):
             else:
                 set_name = 'train'
 
-            filename = image_filenames_lsp[i]
+            filename = os.path.join('lsp_dataset', 'images', image_filenames_lsp[i])
 
             joints = []
             for j in range(0, 14):
@@ -68,7 +68,7 @@ class Keypoints(LspKeypoints):
 
         set_name = 'train'
         for i in range(0, 10000):
-            filename = image_filenames_lspe[i]
+            filename = os.path.join('images', image_filenames_lspe[i])
 
             joints = []
             for j in range(0, 14):
