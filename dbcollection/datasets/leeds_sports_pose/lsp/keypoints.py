@@ -72,7 +72,7 @@ class Keypoints(BaseTask):
             else:
                 set_name = 'train'
 
-            filename = image_filenames[i]
+            filename = os.path.join('images', image_filenames[i])
 
             joints = []
             for j in range(0, 14):
