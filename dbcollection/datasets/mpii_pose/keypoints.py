@@ -113,7 +113,7 @@ class Keypoints(BaseTask):
                     "activity" : act,
                     "single_person" : single_person
                 })
-                continue # skip rest
+                continue  # skip rest
 
             # parse keypoints
             poses_annots = []
@@ -121,20 +121,28 @@ class Keypoints(BaseTask):
                 for i in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0])):
                     try:
                         keypoints = [[0, 0, 0]] * 16  # [x, y, is_visible]
-                        vnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0].dtype.names
-                        for j in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0])):
-                            x = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0][j][vnames.index('x')][0][0])
-                            y = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0][j][vnames.index('y')][0][0])
-                            idx = int(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0][j][vnames.index('id')][0][0])
+                        annot = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0]
+                        vnames = annot.dtype.names
+                        for j in range(len(annot)):
+                            x = float(annot[j][vnames.index('x')][0][0])
+                            y = float(annot[j][vnames.index('y')][0][0])
+                            idx = int(annot[j][vnames.index('id')][0][0])
 
                             try:
-                                is_visible = int(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0][j][vnames.index('is_visible')][0])
-                            except (ValueError):
+                                is_visible = int(annot[j][vnames.index('is_visible')][0])
+                            except (ValueError, IndexError):
                                 is_visible = -1
 
-                            keypoints[idx] = [x, y, is_visible]
+                            try:
+                                keypoints[idx] = [x, y, is_visible]
+                            except IndexError as k:
+                                if set_name == 'test' or self.is_full:
+                                    print('Error: ', str(k))
+                                    keypoints[idx] = [0, 0, 0]
+                                else:
+                                    continue  # skip this annotation
                     except (AttributeError, IndexError):
-                         keypoints = [[0, 0, 0]] * 16 # [x, y, is_visible]
+                        keypoints = [[0, 0, 0]] * 16  # [x, y, is_visible]
 
                     try:
                         x1 = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('x1')][0][0])
@@ -142,7 +150,10 @@ class Keypoints(BaseTask):
                         x2 = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('x2')][0][0])
                         y2 = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('y2')][0][0])
                     except ValueError:
-                        x1, y1, x2, y2 = -1, -1, -1, -1
+                        if set_name == 'test' or self.is_full:
+                            x1, y1, x2, y2 = -1, -1, -1, -1
+                        else:
+                            continue  # skip this annotation
 
                     try:
                         objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0].dtype.names
@@ -152,8 +163,11 @@ class Keypoints(BaseTask):
                             "y" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('y')][0][0])
                         }
                     except (ValueError, IndexError):
-                        scale = -1
-                        objpos = {"x" : -1, "y" : -1}
+                        if set_name == 'test' or self.is_full:
+                            scale = -1
+                            objpos = {"x" : -1, "y" : -1}
+                        else:
+                            continue  # skip this annotation
 
                     poses_annots.append({
                         "x1" : x1,
@@ -165,22 +179,25 @@ class Keypoints(BaseTask):
                         "objpos" : objpos
                     })
             else:
-                for i in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0])):
-                    try:
-                        objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0].dtype.names
-                        scale = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('scale')][0][0])
-                        objpos = {
-                            "x" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('x')][0][0]),
-                            "y" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('y')][0][0])
-                        }
-                    except (IndexError, ValueError, AttributeError):
-                        scale = -1
-                        objpos = {"x" : -1, "y" : -1}
+                if set_name == 'test' or self.is_full:
+                    for i in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0])):
+                        try:
+                            objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0].dtype.names
+                            scale = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('scale')][0][0])
+                            objpos = {
+                                "x" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('x')][0][0]),
+                                "y" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('y')][0][0])
+                            }
+                        except (IndexError, ValueError, AttributeError):
+                            scale = -1
+                            objpos = {"x" : -1, "y" : -1}
 
-                    poses_annots.append({
-                        "scale" : scale,
-                        "objpos" : objpos
-                    })
+                        poses_annots.append({
+                            "scale" : scale,
+                            "objpos" : objpos
+                        })
+                else:
+                    continue  # skip this annotation
 
             # add fields to data
             data[set_name].append({
@@ -262,7 +279,6 @@ class Keypoints(BaseTask):
                         pose_grp["x2"] = np.array(annot["poses_annotations"][j]["x2"], dtype=np.float)
                         pose_grp["y2"] = np.array(annot["poses_annotations"][j]["y2"], dtype=np.float)
                         pose_grp["keypoints"] = np.array(annot["poses_annotations"][j]["keypoints"], dtype=np.float)
-
 
             # update progressbar
             if self.verbose:
