@@ -220,7 +220,7 @@ class Keypoints(BaseTask):
             yield {set_name : [annotations[set_name], videonames]}
 
 
-    def add_data_to_source(self, handler, data):
+    def add_data_to_source(self, handler, data, set_name):
         """
         Store classes + filenames as a nested tree.
         """
