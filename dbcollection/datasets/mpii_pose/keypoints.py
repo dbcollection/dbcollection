@@ -21,6 +21,8 @@ class Keypoints(BaseTask):
     # metadata filename
     filename_h5 = 'keypoint'
 
+    is_full = False
+
     keypoints_labels = [
         'right ankle',      #-- 1
         'right knee',       #-- 2
@@ -328,15 +330,14 @@ class Keypoints(BaseTask):
             single_person_per_image = []
             if not any(annot["poses_annotations"]):
                 if is_train:
-                    object_id.append([i, -1, -1, -1, -1, i, i])
+                    if self.is_full:
+                        object_id.append([i, -1, -1, -1, -1, i, i])
+                        objs_per_image.append(obj_per_img_counter)  # add object_id to the list
+                        obj_per_img_counter += 1  # update counter
                 else:
                     object_id.append([i, -1, -1])
-
-                # add object_id to the list
-                objs_per_image.append(obj_per_img_counter)
-
-                # update counter
-                obj_per_img_counter += 1
+                    objs_per_image.append(obj_per_img_counter)  # add object_id to the list
+                    obj_per_img_counter += 1  # update counter
             else:
                 for j, pose_annot in enumerate(annot["poses_annotations"]):
                     scale.append(pose_annot["scale"])
@@ -405,10 +406,40 @@ class Keypoints(BaseTask):
 
 
 class KeypointsNoSourceGrp(Keypoints):
-    """ FLIC Keypoints (default grp only - no source group) task class """
+    """ MPII Keypoints (default grp only - no source group) task class """
 
     # metadata filename
     filename_h5 = 'keypoint_d'
+
+    def add_data_to_source(self, handler, data, set_name):
+        """
+        Dummy method
+        """
+        # do nothing
+
+
+class KeypointsFull(Keypoints):
+    """ MPII Keypoints (FULL original annotations) task class """
+
+    # metadata filename
+    filename_h5 = 'keypoint_full'
+
+    is_full = True
+
+    def add_data_to_source(self, handler, data, set_name):
+        """
+        Dummy method
+        """
+        # do nothing
+
+
+class KeypointsFullNoSourceGrp(Keypoints):
+    """ MPII Keypoints (FULL original annotations, default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'keypoint_ful_d'
+
+    is_full = True
 
     def add_data_to_source(self, handler, data, set_name):
         """
