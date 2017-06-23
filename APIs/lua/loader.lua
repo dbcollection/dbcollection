@@ -97,7 +97,8 @@ function DataLoader:get(set_name, field_name, idx)
             assert(#idx>=1 and #idx<=2, 'Invalid range. Must have at most one or two entries: (idx_ini, idx_end).')
             if #idx == 1 then idx[2]=idx[1] end
         elseif type(idx)=='number' then
-            assert(idx>=1 and idx<=size[1], ('Invalid range. \'%s\' size: (1, %d).'):format(field_name, size[1]))
+            assert(idx>=1 and idx<=size[1], string.format('Invalid \'%s\' value: %d. Valid range: (1, %d);',
+                                                          field_name, idx, size[1]))
             idx = {idx, idx}
         else
             error('Invalid index type: %s. Must be either a \'number\' or a \'table\'.')
