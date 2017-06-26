@@ -48,6 +48,9 @@ def load_data_test(set_name, image_dir, annotation_path, verbose=True):
         supercategory_list.append(annot['supercategory'])
     supercategory_list = list(set(supercategory_list))
 
-    return {set_name : [OrderedDict(sorted(data.items())), filename_ids,
-                        annotations, category_list, supercategory_list,
+    return {set_name : [OrderedDict(sorted(data.items())),
+                        filename_ids,
+                        annotations,
+                        category_list,
+                        supercategory_list,
                         category_id]}
