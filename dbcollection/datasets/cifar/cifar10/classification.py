@@ -162,9 +162,9 @@ class Classification(BaseTask):
 
         It closely follows the tree structure of the data.
         """
-        handler.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
-        handler.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
-        handler.create_dataset('labels', data=data[set_name]["labels"], dtype=np.uint8)
+        handler.create_dataset('classes', data=data["class_name"], dtype=np.uint8)
+        handler.create_dataset('images', data=data["data"], dtype=np.uint8)
+        handler.create_dataset('labels', data=data["labels"], dtype=np.uint8)
 
 
     def add_data_to_default(self, handler, data, set_name=None):
@@ -173,8 +173,8 @@ class Classification(BaseTask):
 
         For each field, the data is organized into a single big matrix.
         """
-        handler.create_dataset('classes', data=data[set_name]["class_name"], dtype=np.uint8)
-        handler.create_dataset('images', data=data[set_name]["data"], dtype=np.uint8)
-        handler.create_dataset('object_ids', data=data[set_name]["object_ids"], dtype=np.int32)
-        handler.create_dataset('object_fields', data=data[set_name]["object_fields"], dtype=np.int32)
-        handler.create_dataset('list_images_per_class', data=data[set_name]["list_images_per_class"], dtype=np.int32)
+        handler.create_dataset('classes', data=data["class_name"], dtype=np.uint8)
+        handler.create_dataset('images', data=data["data"], dtype=np.uint8)
+        handler.create_dataset('object_ids', data=data["object_ids"], dtype=np.int32)
+        handler.create_dataset('object_fields', data=data["object_fields"], dtype=np.int32)
+        handler.create_dataset('list_images_per_class', data=data["list_images_per_class"], dtype=np.int32)
