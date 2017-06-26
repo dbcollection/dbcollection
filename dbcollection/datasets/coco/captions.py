@@ -124,13 +124,20 @@ class Caption2015(BaseTask):
         """
         Store classes + filenames as a nested tree.
         """
-        data_ = data[0]
-        annotations = data[1]
         image_dir = self.image_dir_path[set_name]
+        if 'test' in set_name:
+            data_ = data[0]
+            annotations = data[2]
+        else:
+            data_ = data[0]
+            annotations = data[1]
 
         if self.verbose:
-            print('> Adding data to source group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data_))
+            print('> Adding data to source group...')
+
+        if self.verbose:
+            print('>>> Adding data to group: images')
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
 
         # images - original
         image_grp = handler.create_group('images')
@@ -142,15 +149,32 @@ class Caption2015(BaseTask):
             file_grp['height'] = np.array(annot["height"], dtype=np.int32)
             file_grp['id'] = np.array(annot["id"], dtype=np.int32)
 
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
+        if self.verbose:
+            prgbar.finish()
+            print('>>> Adding data to group: annotations')
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
 
         # annotations - original
         if set_name != 'test':
             annot_grp = handler.create_group('annotations')
             for i, annot in enumerate(annotations['annotations']):
                 file_grp = annot_grp.create_group(str(i))
-                file_grp['caption'] = str2ascii(annot["iscrowd"])
+                file_grp['caption'] = str2ascii(annot["caption"])
                 file_grp['id'] = np.array(annot["id"], dtype=np.int32)
                 file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
+
+                # update progressbar
+                if self.verbose:
+                    prgbar.update(i)
+
+        if self.verbose:
+            prgbar.finish()
+            print('>>> Adding data to group: grouped')
+            prgbar = progressbar.ProgressBar(max_value=len(data_))
 
         # grouped/combined data - parsed by me
         grouped_grp = handler.create_group('grouped')
