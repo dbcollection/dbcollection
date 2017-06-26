@@ -50,10 +50,10 @@ class COCO(BaseDataset):
         "caption_2016" : Caption2016,
         "caption_2016_d" : Caption2016NoSourceGrp,
 
-        "keypoint" : Keypoints2016,
-        "keypoint_d" : Keypoints2016NoSourceGrp,
-        "keypoint_2016" : Keypoints2016,
-        "keypoint_2016_d" : Keypoints2016NoSourceGrp
+        "keypoints" : Keypoints2016,
+        "keypoints_d" : Keypoints2016NoSourceGrp,
+        "keypoints_2016" : Keypoints2016,
+        "keypoints_2016_d" : Keypoints2016NoSourceGrp
     }
 
     default_task = 'detection'
