@@ -30,9 +30,8 @@ class ILSVRC2012(BaseDataset):
         Download and extract files to disk.
         """
         if self.verbose:
-            print('***************************************************************************')
-            print(' > Please download this dataset from the official source: www.image-net.org')
-            print('***************************************************************************')
-            print()
+            print('\n***************************************************************************')
+            print(' Please download this dataset from the official source: www.image-net.org')
+            print('***************************************************************************\n')
 
         return self.keywords
