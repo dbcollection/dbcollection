@@ -97,6 +97,9 @@ class TestBaseDB:
             self.download()
 
         elif mode is 'process':
+            # download dataset
+            self.download()
+
             # process dataset task
             self.process()
 
