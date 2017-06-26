@@ -121,4 +121,4 @@ For now, use the [Github issues](https://github.com/farrajota/dbcollection/issue
 
 ## License
 
-MIT license (see the `LICENSE` file)
+MIT license (see the `LICENSE.txt` file)
