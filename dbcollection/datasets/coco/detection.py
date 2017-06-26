@@ -202,9 +202,13 @@ class Detection2015(BaseTask):
         """
         Store classes + filenames as a nested tree.
         """
-        data_ = data[0]
-        annotations = data[1]
         image_dir = self.image_dir_path[set_name]
+        if 'test' in set_name:
+            data_ = data[0]
+            annotations = data[2]
+        else:
+            data_ = data[0]
+            annotations = data[1]
 
         if self.verbose:
             print('> Adding data to source group...')
