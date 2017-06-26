@@ -16,20 +16,33 @@ dbcollection is a python module for loading/managing datasets with a very simple
 
 ### From PyPi
 
-Simple do the following command to install this package:
+Installing `dbcollection` using pip is simple. For that purpose, simply do the following command:
+
 ```
 pip install dbcollection
 ```
+
+### From Conda
+
+You can also install `dbcollection` via anaconda:
+
+```
+conda install -c farrajota dbcollection
+```
+
 
 ### From source
 
 To install **dbcollection** from source you need to do the following setps:
 
 - Clone the repo to your hard drive:
+
 ```
 git clone https://github.com/farrajota/dbcollection
 ```
+
 - `cd ` to the dbcollection folder and do the command
+
 ```
 python setup.py install
 ```
@@ -71,6 +84,7 @@ plt.show()
 
 > Note: For a more detailed overview of how to use this module check the next section.
 
+
 ### Tutorial
 
 A more detailed tutorial on using the **dbcollection** module main APIs for dataset managing and data loading is provided as a python notebook format [here](todo).
@@ -99,9 +113,11 @@ All contributions, bug reports, bug fixes, documentation improvements, enhanceme
 
 If you are interested in fixing issues and contributing directly to the code base, please see the document [How to Contribute](https://github.com/farrajota/dbcollection/wiki/How-to-Contribute).
 
+
 ## Feedback
 
 For now, use the [Github issues](https://github.com/farrajota/dbcollection/issues) for requests/bug issues.
+
 
 ## License
 
