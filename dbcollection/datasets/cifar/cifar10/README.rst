@@ -3,7 +3,7 @@
 CIFAR-10
 ========
 
-The CIFAR-10 dataset consists of 60000 32x32 colour images in 10 classes,
+The **CIFAR-10** dataset consists of 60000 32x32 colour images in 10 classes,
 with 6000 images per class. There are 50000 training images and 10000 test images.
 
 The dataset is divided into five training batches and one test batch, each with 10000
@@ -12,8 +12,12 @@ The training batches contain the remaining images in random order, but some trai
 batches may contain more images from one class than another. Between them, the training
 batches contain exactly 5000 images from each class.
 
-Here are the classes in the dataset, as well as 10 random images from each:
 
+
+Example images
+--------------
+
+Here are the classes in the dataset, as well as 10 random images from each:
 
 airplane___ |airplane1| |airplane2| |airplane3| |airplane4| |airplane5| |airplane6| |airplane7| |airplane8| |airplane9| |airplane10|
 
@@ -37,38 +41,59 @@ truck______ |truck1| |truck2| |truck3| |truck4| |truck5| |truck6| |truck7| |truc
 
 
 
-Features
---------
+Properties
+----------
 
-- classification
-- 10 classes
-- Sets: ``train`` and ``test``
-- 60000 32x32 colour images
-
-
-Name
-----
-
-String to load the dataset: ``cifar10``
-
-Tasks
------
-
-The following tasks are available for this dataset:
-
-- classification: (``default task``)
-- classification_d:
+- ``name``: cifar10
+- ``tasks``:
+    - **classification**: Contains image + label data for image classification tasks.
+- ``keywords``:
+    - **image_processing**
+    - **classification**
+- ``dataset size``: 170,5 MB
+- ``metadata size``: 369,4 MB
+- ``has annotations``: yes
+    - ``which``:
+        - labels for each image class/category.
+- ``is downloadable``: yes
 
 
-Data structure
---------------
+Metadata structure (HDF5)
+-------------------------
+
+::
+
+    /
+    ├── source/
+    │   ├── test/
+    │   │   ├── classes   # dtype=numpy.uint8, shape=(10,11)  (note: string in ASCII format)
+    │   │   ├── images    # dtype=numpy.uint8, shape=(10000,32,32,3)
+    │   │   └── labels    # dtype=numpy.uint8, shape=(10000,)
+    │   └── train/
+    │       ├── classes   # dtype=numpy.uint8, shape=(10,11)  (note: string in ASCII format)
+    │       ├── images    # dtype=numpy.uint8, shape=(50000,32,32,3)
+    │       └── labels    # dtype=numpy.uint8, shape=(50000,)
+    └── default/
+        ├── test/
+        │   ├── classes        # dtype=numpy.uint8, shape=(10,11)  (note: string in ASCII format)
+        │   ├── images         # dtype=numpy.uint8, shape=(10000,32,32,3)
+        │   ├── object_fields  # dtype=numpy.uint8, shape=(2,8)    (note: string in ASCII format)
+        │   ├── object_ids     # dtype=numpy.uint8, shape=(10000,2)
+        │   └── list_images_per_class    # dtype=numpy.int32, shape=(10,1000))
+        └── train/
+            ├── classes        # dtype=numpy.uint8, shape=(10,11)  (note: string in ASCII format)
+            ├── images         # dtype=numpy.uint8, shape=(50000,32,32,3)
+            ├── object_fields  # dtype=numpy.uint8, shape=(2,8)    (note: string in ASCII format)
+            ├── object_ids     # dtype=numpy.uint8, shape=(50000,2)
+            └── list_images_per_class    # dtype=numpy.int32, shape=(10,5000))
+
 
 
 
 Disclaimer
 ----------
 
-All rights reserved to the original creators of ``CIFAR-10``.
+All rights reserved to the original creators of **CIFAR-10**.
 
 For information about the dataset and its terms of use, please see the `original website <https://www.cs.toronto.edu/~kriz/cifar.html/>`_.
 
