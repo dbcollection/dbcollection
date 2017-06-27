@@ -14,9 +14,9 @@ datasets with a very simple set of commands with
 cross-platform and cross-language support in mind and it
 is distributed under a MIT license. With this package,
 you'll have access (in a quick and simple way) to a
-collection of a variety of datasets for tasks such as
-object classification, detection, human pose estimation
-or NPL.
+collection of datasets for a variety of tasks such as
+object classification, detection, human pose estimation,
+captioning or NLP.
 
 ## Package installation
 
