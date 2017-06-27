@@ -154,11 +154,11 @@ class Detection2015(BaseTask):
                 "annotation_id": i
             }
 
-            ## add annotation to the data
+            # add annotations to the image data
             try:
-                images_annot_by_fname[filename]["object"].update({obj_id : obj})
+                images_annot_by_fname[filename]["object"].update({obj_id: obj})
             except KeyError:
-                images_annot_by_fname[filename]["object"] = {obj_id : obj}
+                images_annot_by_fname[filename]["object"] = {obj_id: obj}
 
             # update progressbar
             if self.verbose:
