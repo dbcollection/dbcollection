@@ -25,15 +25,15 @@ class Detection2015(BaseTask):
     filename_h5 = 'detection_2015'
 
     image_dir_path = {
-        "train" : 'train2014',
-        "val" : 'val2014',
-        "test" : 'test2014'
+        "train": 'train2014',
+        "val": 'val2014',
+        "test": 'test2014'
     }
 
     annotation_path = {
-        "train" : os.path.join('annotations', 'instances_train2014.json'),
-        "val" : os.path.join('annotations', 'instances_val2014.json'),
-        "test" : os.path.join('annotations', 'image_info_test2014.json')
+        "train": os.path.join('annotations', 'instances_train2014.json'),
+        "val": os.path.join('annotations', 'instances_val2014.json'),
+        "test": os.path.join('annotations', 'image_info_test2014.json')
     }
 
 
@@ -49,11 +49,11 @@ class Detection2015(BaseTask):
         images_annot_by_fname = {}
         for i, annot in enumerate(annotations['images']):
             images_annot_by_fname[annot['file_name']] = {
-                "file_name" : os.path.join(image_dir, annot['file_name']),
-                "width" : annot['width'],
-                "height" : annot['height'],
-                "id" : annot['id'],
-                "coco_url" : annot['coco_url'],
+                "file_name": os.path.join(image_dir, annot['file_name']),
+                "width": annot['width'],
+                "height": annot['height'],
+                "id": annot['id'],
+                "coco_url": annot['coco_url'],
             }
         # order image data by file id
         images_fname_by_id = {}
@@ -71,9 +71,9 @@ class Detection2015(BaseTask):
         category_list, supercategory_list, category_id = [], [], []
         for i, annot in enumerate(annotations['categories']):
             categories[annot['id']] = {
-                "name" : annot['name'],
-                "supercategory" : annot['supercategory'],
-                "id" : annot['id']
+                "name": annot['name'],
+                "supercategory": annot['supercategory'],
+                "id": annot['id']
             }
             category_id.append(annot['id'])
             category_list.append(annot['name'])
@@ -141,17 +141,17 @@ class Detection2015(BaseTask):
                     annot['bbox'][1] + annot['bbox'][3] -1] #ymax
 
             obj = {
-                "category" : category_annot['name'],
-                "supercategory" : category_annot['supercategory'],
-                "area" : annot['area'],
-                "iscrowd" : annot['iscrowd'],
-                "segmentation" : segmentation, #annot['segmentation'],
-                "segmentation_type" : segmentation_type,
-                "bbox" : bbox,
+                "category": category_annot['name'],
+                "supercategory": category_annot['supercategory'],
+                "area": annot['area'],
+                "iscrowd": annot['iscrowd'],
+                "segmentation": segmentation, #annot['segmentation'],
+                "segmentation_type": segmentation_type,
+                "bbox": bbox,
                 "image_id": annot['image_id'],
                 "category_id": annot['category_id'],
-                "id" : annot["id"],
-                "annotation_id" : i
+                "id": annot["id"],
+                "annotation_id": i
             }
 
             ## add annotation to the data
@@ -204,9 +204,11 @@ class Detection2015(BaseTask):
         """
         image_dir = self.image_dir_path[set_name]
         if 'test' in set_name:
+            is_test = True
             data_ = data[0]
             annotations = data[2]
         else:
+            is_test = False
             data_ = data[0]
             annotations = data[1]
 
@@ -249,7 +251,7 @@ class Detection2015(BaseTask):
                 prgbar.update(i)
 
         # annotations - original
-        if set_name != 'test':
+        if not is_test:
             if self.verbose:
                 prgbar.finish()
                 print('>>> Adding data to group: annotations')

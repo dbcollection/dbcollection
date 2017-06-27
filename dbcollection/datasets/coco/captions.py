@@ -25,15 +25,15 @@ class Caption2015(BaseTask):
     filename_h5 = 'caption_2015'
 
     image_dir_path = {
-        "train" : 'train2014',
-        "val" : 'val2014',
-        "test" : 'test2014'
+        "train": 'train2014',
+        "val": 'val2014',
+        "test": 'test2014'
     }
 
     annotation_path = {
-        "train" : os.path.join('annotations', 'captions_train2014.json'),
-        "val" : os.path.join('annotations', 'captions_val2014.json'),
-        "test" : os.path.join('annotations', 'image_info_test2014.json')
+        "train": os.path.join('annotations', 'captions_train2014.json'),
+        "val": os.path.join('annotations', 'captions_val2014.json'),
+        "test": os.path.join('annotations', 'image_info_test2014.json')
     }
 
 
@@ -59,11 +59,11 @@ class Caption2015(BaseTask):
         images = {}
         for i, annot in enumerate(annotations['images']):
             images[annot['id']] = {
-                "file_name" : os.path.join(image_dir, annot['file_name']),
-                "width" : annot['width'],
-                "height" : annot['height'],
-                "id" : annot['id'],
-                "coco_url" : annot['coco_url']
+                "file_name": os.path.join(image_dir, annot['file_name']),
+                "width": annot['width'],
+                "height": annot['height'],
+                "id": annot['id'],
+                "coco_url": annot['coco_url']
             }
 
 
@@ -80,12 +80,12 @@ class Caption2015(BaseTask):
             else:
                 img_annotation = images[img_id]
                 data[img_id] = {
-                    "file_name" : img_annotation['file_name'],
-                    "width" : img_annotation['width'],
-                    "height" : img_annotation['height'],
-                    "id" : img_annotation['id'],
-                    "coco_url" : img_annotation['coco_url'],
-                    "captions" : [caption]
+                    "file_name": img_annotation['file_name'],
+                    "width": img_annotation['width'],
+                    "height": img_annotation['height'],
+                    "id": img_annotation['id'],
+                    "coco_url": img_annotation['coco_url'],
+                    "captions": [caption]
                 }
 
             # update progressbar
@@ -96,8 +96,8 @@ class Caption2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : [OrderedDict(sorted(data.items())),
-                            annotations]}
+        return {set_name: [OrderedDict(sorted(data.items())),
+                           annotations]}
 
 
     def load_data(self):
@@ -126,9 +126,11 @@ class Caption2015(BaseTask):
         """
         image_dir = self.image_dir_path[set_name]
         if 'test' in set_name:
+            is_test = True
             data_ = data[0]
             annotations = data[2]
         else:
+            is_test = False
             data_ = data[0]
             annotations = data[1]
 
@@ -159,7 +161,7 @@ class Caption2015(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
 
         # annotations - original
-        if set_name != 'test':
+        if not is_test:
             annot_grp = handler.create_group('annotations')
             for i, annot in enumerate(annotations['annotations']):
                 file_grp = annot_grp.create_group(str(i))
