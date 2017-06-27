@@ -164,7 +164,7 @@ function DataLoader:object(set_name, idx, is_value)
         for i=1, indexes:size(1) do
             local data = {}
             for k, field in ipairs(self.object_fields[set_name]) do
-                if indexes[i][k] >= 0 then
+                if indexes[i][k] > 0 then
                     table.insert(data, self:get(set_name, field, indexes[i][k]))
                 else
                     table.insert(data, {})
