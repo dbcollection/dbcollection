@@ -358,8 +358,8 @@ class Detection2015(BaseTask):
         area = []
         iscrowd = [0, 1]
         segmentation = []
-        segmentation_t1 = [[[]]]
-        segmentation_t2 = [[]]
+        segmentation_t1 = []
+        segmentation_t2 = []
         bbox = []
         object_id = []
 
@@ -422,14 +422,14 @@ class Detection2015(BaseTask):
 
                         if obj["segmentation_type"] == 0:
                             segmentation_t1.append(obj["segmentation"])
-                            segmentation_t1_counter += 1
-                            segmentation_t2_id = 0
+                            segmentation_t2_id = -1
                             segmentation_t1_id = segmentation_t1_counter
+                            segmentation_t1_counter += 1
                         else:
                             segmentation_t2.append(obj["segmentation"])
+                            segmentation_t1_id = -1
+                            segmentation_t2_id = segmentation_t2_counter
                             segmentation_t2_counter += 1
-                            segmentation_t1_id = 0
-                            segmentation_t2_id = segmentation_t1_counter
 
 
                         # *** object_id ***
