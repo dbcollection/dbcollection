@@ -9,14 +9,21 @@
 [![PyPI version](https://badge.fury.io/py/dbcollection.svg)](https://badge.fury.io/py/dbcollection)
 
 
-dbcollection is a python module for loading/managing datasets with a very simple set of commands with cross-platform and cross-language support in mind and it is distributed under a MIT license.
-
+dbcollection is a python module for loading/managing
+datasets with a very simple set of commands with
+cross-platform and cross-language support in mind and it
+is distributed under a MIT license. With this package,
+you'll have access (in a quick and simple way) to a
+collection of a variety of datasets for tasks such as
+object classification, detection, human pose estimation
+or NPL.
 
 ## Package installation
 
 ### From PyPi
 
-Installing `dbcollection` using pip is simple. For that purpose, simply do the following command:
+Installing `dbcollection` using pip is simple. For that
+purpose, simply do the following command:
 
 ```
 pip install dbcollection
@@ -33,7 +40,8 @@ conda install -c farrajota dbcollection
 
 ### From source
 
-To install **dbcollection** from source you need to do the following setps:
+To install **dbcollection** from source you need to do
+the following setps:
 
 - Clone the repo to your hard drive:
 
@@ -57,15 +65,22 @@ import dbcollection.manager as dbc
 
 To load a dataset, you need to use `dbc` API `load()` method.
 
-> Note: by default, the `MNIST` dataset is already included in the package, so loading it does not need to download/setup any data. However, this may not be valid for most datasets.
+> Note: by default, the `MNIST` dataset is already
+included in the package, so loading it does not need to
+download/setup any data. However, this may not be valid
+for most datasets.
 
 ```python
 mnist = dbc.load('mnist')
 ```
 
-This returns a loader API class which contains information about the dataset's name, task, data and cache paths, sets, the HDF5 file handler and four methods to retrieve data from the file: `get()`, `size()`, `object()` and `list()`.
+This returns a loader API class which contains information
+about the dataset's name, task, data and cache paths, sets,
+the HDF5 file handler and four methods to retrieve data
+from the file: `get()`, `size()`, `object()` and `list()`.
 
-Finally, to retrieve data from the `MNIST` data loader and display it you can do the following:
+Finally, to retrieve data from the `MNIST` data loader and
+display it you can do the following:
 
 ```python
 # display mnist's data info
@@ -82,12 +97,15 @@ plt.imshow(mnist.get("train", "data", 0))
 plt.show()
 ```
 
-> Note: For a more detailed overview of how to use this module check the next section.
+> Note: For a more detailed overview of how to use this
+module check the next section.
 
 
 ### Tutorial
 
-A more detailed tutorial on using the **dbcollection** module main APIs for dataset managing and data loading is provided as a python notebook format [here](todo).
+A more detailed tutorial on using the **dbcollection**
+module main APIs for dataset managing and data loading is
+provided as a python notebook format [here](todo).
 
 
 ## Supported languages
@@ -97,21 +115,26 @@ A more detailed tutorial on using the **dbcollection** module main APIs for data
 - Lua/[Torch7](https://github.com/torch/torch7)
 - Matlab (comming soon)
 
-> Note: If you would like to see additional languages being supported, please consider contributing to the project.
+> Note: If you would like to see additional languages
+being supported, please consider contributing to the
+project.
 
 
 ## Documentation
 
 The package documentation is hosted on [Read The Docs](http://dbcollection.readthedocs.io/en/latest/).
 
-The documentation should provide a good starting point for learning how to use the library.
+The documentation should provide a good starting point for
+learning how to use the library.
 
 
 ## Contributing
 
-All contributions, bug reports, bug fixes, documentation improvements, enhancements and ideas are welcome.
+All contributions, bug reports, bug fixes, documentation
+improvements, enhancements and ideas are welcome.
 
-If you are interested in fixing issues and contributing directly to the code base, please see the document [How to Contribute](https://github.com/farrajota/dbcollection/wiki/How-to-Contribute).
+If you are interested in fixing issues and contributing
+directly to the code base, please see the document [How to Contribute](https://github.com/farrajota/dbcollection/wiki/How-to-Contribute).
 
 
 ## Feedback
