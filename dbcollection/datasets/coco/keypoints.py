@@ -24,17 +24,17 @@ class Keypoints2016(BaseTask):
     filename_h5 = 'keypoint_2016'
 
     image_dir_path = {
-        "train" : 'train2014',
-        "val" : 'val2014',
-        "test" : 'test2015',
-        "test-dev" : 'test2015'
+        "train": 'train2014',
+        "val": 'val2014',
+        "test": 'test2015',
+        "test-dev": 'test2015'
     }
 
     annotation_path = {
-        "train" : os.path.join('annotations', 'person_keypoints_train2014.json'),
-        "val" : os.path.join('annotations', 'person_keypoints_val2014.json'),
-        "test" : os.path.join('annotations', 'image_info_test2015.json'),
-        "test-dev" : os.path.join('annotations', 'image_info_test-dev2015.json')
+        "train": os.path.join('annotations', 'person_keypoints_train2014.json'),
+        "val": os.path.join('annotations', 'person_keypoints_val2014.json'),
+        "test": os.path.join('annotations', 'image_info_test2015.json'),
+        "test-dev": os.path.join('annotations', 'image_info_test-dev2015.json')
     }
 
 
@@ -60,9 +60,9 @@ class Keypoints2016(BaseTask):
         images = {}
         for i, annot in enumerate(annotations['images']):
             images[annot['id']] = {
-                "width" : annot['width'],
-                "height" : annot['height'],
-                "file_name" : os.path.join(image_dir, annot['file_name'])
+                "width": annot['width'],
+                "height": annot['height'],
+                "file_name": os.path.join(image_dir, annot['file_name'])
             }
 
         # categories
@@ -88,15 +88,15 @@ class Keypoints2016(BaseTask):
                 segmentation = annot["segmentation"]
 
             obj = {
-                "category" : category,
-                "supercategory" : supercategory,
-                "area" : annot['area'],
-                "iscrowd" : annot['iscrowd'],
-                "segmentation" : segmentation,
-                "segmentation_type" : segmentation_type,
-                "bbox" : annot['bbox'],
-                "num_keypoints" : annot['num_keypoints'],
-                "keypoints" : annot['keypoints'],
+                "category": category,
+                "supercategory": supercategory,
+                "area": annot['area'],
+                "iscrowd": annot['iscrowd'],
+                "segmentation": segmentation,
+                "segmentation_type": segmentation_type,
+                "bbox": annot['bbox'],
+                "num_keypoints": annot['num_keypoints'],
+                "keypoints": annot['keypoints'],
             }
 
             if img_id in data.keys():
@@ -104,10 +104,10 @@ class Keypoints2016(BaseTask):
             else:
                 img_annotation = images[img_id]
                 data[img_id] = {
-                    "filename" : img_annotation['file_name'],
-                    "width" : img_annotation['width'],
-                    "height" : img_annotation['height'],
-                    "object" : [obj]
+                    "file_name": img_annotation['file_name'],
+                    "width": img_annotation['width'],
+                    "height": img_annotation['height'],
+                    "object": [obj]
                 }
 
             # update progressbar
@@ -118,7 +118,12 @@ class Keypoints2016(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : [data, annotations, category, supercategory, skeleton, keypoints]}
+        return {set_name: [data,
+                           annotations,
+                           category,
+                           supercategory,
+                           skeleton,
+                           keypoints]}
 
 
     def load_data(self):
@@ -145,11 +150,22 @@ class Keypoints2016(BaseTask):
         """
         Store classes + filenames as a nested tree.
         """
-        data_ = data[0]
-        annotations = data[1]
         image_dir = self.image_dir_path[set_name]
+        if 'test' in set_name:
+            is_test = True
+            data_ = data[0]
+            annotations = data[2]
 
-        if len(data) > 3:
+            category = data[3]
+            supercategory = data[4]
+
+            category_ = str2ascii(category)
+            supercategory_ = str2ascii(supercategory)
+        else:
+            is_test = False
+            data_ = data[0]
+            annotations = data[1]
+
             category = data[2]
             supercategory = data[3]
             skeleton = data[4]
@@ -162,7 +178,10 @@ class Keypoints2016(BaseTask):
 
         if self.verbose:
             print('> Adding data to source group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data_))
+
+        if self.verbose:
+            print('>>> Adding data to group: images')
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
 
 
         # images - original
@@ -175,19 +194,39 @@ class Keypoints2016(BaseTask):
             file_grp['height'] = np.array(annot["height"], dtype=np.int32)
             file_grp['id'] = np.array(annot["id"], dtype=np.int32)
 
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
+        if self.verbose:
+            prgbar.finish()
+            print('>>> Adding data to group: categories')
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['categories']))
+
         # categories - original
         cat_grp = handler.create_group('categories')
         for i, annot in enumerate(annotations['categories']):
             file_grp = cat_grp.create_group(str(i))
             file_grp['supercategory'] = str2ascii(annot["supercategory"])
             file_grp['name'] = str2ascii(annot["name"])
-            file_grp['keypoints'] = str2ascii(annot["keypoints"])
-            file_grp['skeleton'] = np.array(annot["skeleton"], dtype=np.uint8)
             file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+            if not is_test:
+                file_grp['keypoints'] = str2ascii(annot["keypoints"])
+                file_grp['skeleton'] = np.array(annot["skeleton"], dtype=np.uint8)
 
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
 
         # annotations - original
-        if set_name != 'test':
+        if not is_test:
+            if self.verbose:
+                prgbar.finish()
+                print('>>> Adding data to group: annotations')
+                prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
+
+        # annotations - original
+        if not is_test:
             annot_grp = handler.create_group('annotations')
             for i, annot in enumerate(annotations['annotations']):
                 file_grp = annot_grp.create_group(str(i))
@@ -197,16 +236,34 @@ class Keypoints2016(BaseTask):
                 file_grp['category_id'] = np.array(annot["category_id"], dtype=np.int32)
                 file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
                 file_grp['bbox'] = np.array(annot["bbox"], dtype=np.float)
-                file_grp['segmentation'] = np.array(annot["segmentation"], dtype=np.float)
+                if isinstance(annot["segmentation"], list):
+                    segmentation_type = 0
+                    segmentation = pad_list(annot["segmentation"], -1)
+                elif isinstance(annot["segmentation"]['counts'], list):
+                    segmentation_type = 1
+                    segmentation = annot["segmentation"]["counts"]
+                else:
+                    segmentation_type = 2
+                    segmentation = annot["segmentation"]
+                file_grp['segmentation'] = np.array(segmentation, dtype=np.float)
+                file_grp['segmentation_type'] = np.array(segmentation_type, dtype=np.uint8)
                 file_grp['keypoints'] = np.array(annot["keypoints"], dtype=np.int32)
                 file_grp['num_keypoints'] = np.array(annot["num_keypoints"], dtype=np.uint8)
 
+                # update progressbar
+                if self.verbose:
+                    prgbar.update(i)
+
+        if self.verbose:
+            prgbar.finish()
+            print('>>> Adding data to group: grouped')
+            prgbar = progressbar.ProgressBar(max_value=len(data_))
 
         # grouped/combined data - parsed by me
         grouped_grp = handler.create_group('grouped')
         for i, key in enumerate(data_):
             file_grp = grouped_grp.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(data_[key]["filename"])
+            file_grp['image_filename'] = str2ascii(data_[key]["file_name"])
             file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
             file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
 
@@ -243,12 +300,19 @@ class Keypoints2016(BaseTask):
         """
         if 'test' in  set_name:
             is_test = True
-            data_, category, supercategory = data
+            data_ = data[0]
+            category = data[3]
+            supercategory = data[4]
+
             category_ = str2ascii(category)
             supercategory_ = str2ascii(supercategory)
         else:
             is_test = False
-            data_, category, supercategory, skeleton, keypoints = data
+            data_ = data[0]
+            category = data[2]
+            supercategory = data[3]
+            skeleton = data[4]
+            keypoints = data[5]
 
             category_ = str2ascii(category)
             supercategory_ = str2ascii(supercategory)
@@ -292,7 +356,7 @@ class Keypoints2016(BaseTask):
         segmentation_t1_counter, segmentation_t2_counter = 0, 0
         for i, key in enumerate(data_):
             annotation = data_[key]
-            image_filenames.append(annotation["filename"])
+            image_filenames.append(annotation["file_name"])
             width.append(annotation["width"])
             height.append(annotation["height"])
 
