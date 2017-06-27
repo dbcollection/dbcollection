@@ -258,7 +258,7 @@ def remove(name, task=None, delete_data=False, is_test=False):
             print('Removed dataset {}: cache=True, disk={}'.format(name, delete_data))
         else:
             if cache_manager.delete_task(name, task):
-                print('Removed task {} from the dataset {}: cache=True'.format(task, name))
+                print('Removed the task \'{}\' from the \'{}\' dataset; cache=True'.format(task, name))
             else:
                 print('Do nothing.')
     else:
