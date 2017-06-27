@@ -7,6 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 import progressbar
+from collections import OrderedDict
 
 from dbcollection.datasets.dbclass import BaseTask
 
@@ -38,6 +39,52 @@ class Keypoints2016(BaseTask):
     }
 
 
+    def parse_image_annotations(self, image_dir, annotations):
+        """
+        Parse image annotations data to a dictionary and  lists
+        """
+        filename_ids = {}
+        for i, annot in enumerate(annotations['images']):
+            filename_ids[annot['file_name']] = i
+
+        # order image data by file name
+        images_annot_by_fname = {}
+        for i, annot in enumerate(annotations['images']):
+            images_annot_by_fname[annot['file_name']] = {
+                "file_name": os.path.join(image_dir, annot['file_name']),
+                "width": annot['width'],
+                "height": annot['height'],
+                "id": annot['id'],
+                "coco_url": annot['coco_url'],
+            }
+        # order image data by file id
+        images_fname_by_id = {}
+        for i, annot in enumerate(annotations['images']):
+            images_fname_by_id[annot['id']] = annot['file_name']
+
+        return filename_ids, images_annot_by_fname, images_fname_by_id
+
+
+    def parse_category_annotations(self, annotations):
+        """
+        Parse category annotations data to a dictionary and  lists
+        """
+        categories = {}
+        category_list, supercategory_list, category_id = [], [], []
+        for i, annot in enumerate(annotations['categories']):
+            categories[annot['id']] = {
+                "name": annot['name'],
+                "supercategory": annot['supercategory'],
+                "id": annot['id']
+            }
+            category_id.append(annot['id'])
+            category_list.append(annot['name'])
+            supercategory_list.append(annot['supercategory'])
+        supercategory_list = list(set(supercategory_list))
+
+        return categories, category_list, supercategory_list, category_id
+
+
     def load_data_trainval(self, set_name, image_dir, annotation_path):
         """
         Load train+val data
@@ -57,25 +104,25 @@ class Keypoints2016(BaseTask):
         # images
         if self.verbose:
             print('  > Processing image annotations... ')
-        images = {}
-        for i, annot in enumerate(annotations['images']):
-            images[annot['id']] = {
-                "width": annot['width'],
-                "height": annot['height'],
-                "file_name": os.path.join(image_dir, annot['file_name'])
-            }
+        # get all image filenames + ids into a list
+        filename_ids, images_annot_by_fname, images_fname_by_id = self.parse_image_annotations(image_dir, annotations)
 
-        # categories
-        category = annotations['categories'][0]['name']
-        supercategory = annotations['categories'][0]['supercategory']
+        if self.verbose:
+            print('  > Processing category annotations... ')
+        categories, category_list, supercategory_list, category_id = self.parse_category_annotations(annotations)
         skeleton = annotations['categories'][0]['skeleton']
         keypoints = annotations['categories'][0]['keypoints']
 
 
         if self.verbose:
             print('  > Processing data annotations... ')
+        # group annotations by file name
+        annotation_id_dict = {}
         for i, annot in enumerate(annotations['annotations']):
-            img_id = annot['image_id']
+            filename = images_fname_by_id[annot['image_id']]
+            category_annot = categories[annot['category_id']]
+            obj_id = annot["id"]
+            annotation_id_dict[obj_id] = i
 
             if isinstance(annot["segmentation"], list):
                 segmentation_type = 0
@@ -87,41 +134,52 @@ class Keypoints2016(BaseTask):
                 segmentation_type = 2
                 segmentation = annot["segmentation"]
 
+            # convert from [x,y,w,h] to [xmin,ymin,xmax,ymax]
+            bbox = [annot['bbox'][0], #xmin
+                    annot['bbox'][1], #ymin
+                    annot['bbox'][0] + annot['bbox'][2] -1, #ymax
+                    annot['bbox'][1] + annot['bbox'][3] -1] #ymax
+
             obj = {
-                "category": category,
-                "supercategory": supercategory,
+                "category": category_annot['name'],
+                "supercategory": category_annot['supercategory'],
                 "area": annot['area'],
                 "iscrowd": annot['iscrowd'],
-                "segmentation": segmentation,
+                "segmentation": segmentation, #annot['segmentation'],
                 "segmentation_type": segmentation_type,
-                "bbox": annot['bbox'],
+                "bbox": bbox,
                 "num_keypoints": annot['num_keypoints'],
                 "keypoints": annot['keypoints'],
+
+                "image_id": annot['image_id'],
+                "category_id": annot['category_id'],
+                "id": annot["id"],
+                "annotation_id": i
             }
 
-            if img_id in data.keys():
-                data[img_id]['object'].append(obj)
-            else:
-                img_annotation = images[img_id]
-                data[img_id] = {
-                    "file_name": img_annotation['file_name'],
-                    "width": img_annotation['width'],
-                    "height": img_annotation['height'],
-                    "object": [obj]
-                }
+            # add annotations to the image data
+            try:
+                images_annot_by_fname[filename]["object"].update({obj_id: obj})
+            except KeyError:
+                images_annot_by_fname[filename]["object"] = {obj_id: obj}
 
             # update progressbar
             if self.verbose:
                 prgbar.update(i)
 
+
         # reset progressbar
         if self.verbose:
             prgbar.finish()
 
-        return {set_name: [data,
+        return {set_name: [OrderedDict(sorted(images_annot_by_fname.items())),
                            annotations,
-                           category,
-                           supercategory,
+                           annotation_id_dict,
+                           category_list,
+                           supercategory_list,
+                           category_id,
+                           filename_ids,
+                           images_fname_by_id,
                            skeleton,
                            keypoints]}
 
@@ -166,10 +224,10 @@ class Keypoints2016(BaseTask):
             data_ = data[0]
             annotations = data[1]
 
-            category = data[2]
-            supercategory = data[3]
-            skeleton = data[4]
-            keypoints = data[5]
+            category = data[3]
+            supercategory = data[4]
+            skeleton = data[8]
+            keypoints = data[9]
 
             category_ = str2ascii(category)
             supercategory_ = str2ascii(supercategory)
@@ -298,48 +356,66 @@ class Keypoints2016(BaseTask):
         """
         Add data of a set to the default group.
         """
+        image_dir = self.image_dir_path[set_name]
         if 'test' in  set_name:
             is_test = True
             data_ = data[0]
+            filename_ids = data[1]
+            annotations = data[2]
             category = data[3]
             supercategory = data[4]
-
-            category_ = str2ascii(category)
-            supercategory_ = str2ascii(supercategory)
+            category_id = data[5]
         else:
             is_test = False
             data_ = data[0]
-            category = data[2]
-            supercategory = data[3]
-            skeleton = data[4]
-            keypoints = data[5]
+            annotations = data[1]
+            annotation_id_dict = data[2]
+            category = data[3]
+            supercategory = data[4]
+            category_id = data[5]
+            filename_ids = data[6]
+            images_fname_by_id = data[7]
+            skeleton = data[8]
+            keypoints = data[9]
 
-            category_ = str2ascii(category)
-            supercategory_ = str2ascii(supercategory)
             keypoints_ = str2ascii(keypoints)
             skeleton_ = np.array(pad_list(skeleton, -1), dtype=np.uint8)
 
+        category_ = str2ascii(category)
+        supercategory_ = str2ascii(supercategory)
 
         image_filenames = []
+        coco_urls = []
         width = []
         height = []
+        image_id = []
 
+        annotation_id = []
         area = []
         iscrowd = [0, 1]
-        segmentation_t1 = [[[]]]
-        segmentation_t2 = [[]]
+        segmentation_t1 = []
+        segmentation_t2 = []
         num_keypoints = list(range(0, 17+1))
         keypoints_list = []
         bbox = []
         object_id = []
 
+        # coco id lists
+        # These are order by entry like in the annotation files.
+        # I.e., coco_images_ids[0] has the object_id with the file_name, id, height, etc.
+        # as coco_annotation_file[set_name]["images"][0]
+        coco_images_ids = []
+        coco_categories_ids = []
+        coco_annotations_ids = []
+
         if is_test:
-            object_fields = ["image_filenames", "width", "height"]
+            object_fields = ["image_filenames", "coco_urls", "width", "height"]
         else:
-            object_fields = ["image_filenames", "category", "supercategory",
-                             "boxes", "area", "segmentation", "segmentation_type",
-                             "iscrowd", "num_keypoints", "keypoints",
-                             "width", "height"]
+            object_fields = ["image_filenames", "coco_urls", "width", "height",
+                             "category", "supercategory", "boxes", "area",
+                             "iscrowd", "segmentation_t1", "segmentation_t2",
+                             "image_id", "category_id", "annotation_id",
+                             "num_keypoints", "keypoints"]
 
         list_boxes_per_image = []
         list_keypoints_per_image = []
@@ -354,45 +430,64 @@ class Keypoints2016(BaseTask):
 
         counter = 0
         segmentation_t1_counter, segmentation_t2_counter = 0, 0
+        tmp_coco_annotations_ids = {}
+
         for i, key in enumerate(data_):
             annotation = data_[key]
             image_filenames.append(annotation["file_name"])
             width.append(annotation["width"])
             height.append(annotation["height"])
+            coco_urls.append(annotation["coco_url"])
+            image_id.append(annotation["id"])
 
             if is_test:
-                object_id.append([i, i, i])
+                # *** object_id ***
+                # [filename, coco_url, width, height]
+                object_id.append([i, i, i, i])
                 list_object_ids_per_image.append([i])
             else:
                 boxes_per_image = []
-                for obj in annotation["object"]:
-                    area.append(obj["area"])
-                    bbox.append(obj["bbox"])
-                    keypoints_list.append(obj["keypoints"])
 
-                    if obj["segmentation_type"] == 0:
-                        segmentation_t1.append(obj["segmentation"])
-                        segmentation_t1_counter += 1
-                        segmentation_t2_id = 0
-                        segmentation_t1_id = segmentation_t1_counter
-                    else:
-                        segmentation_t2.append(obj["segmentation"])
-                        segmentation_t2_counter += 1
-                        segmentation_t1_id = 0
-                        segmentation_t2_id = segmentation_t1_counter
+                if "object" in annotation:
+                    for j, obj_idx in enumerate(annotation["object"]):
+                        obj = annotation["object"][obj_idx]
+                        area.append(obj["area"])
+                        bbox.append(obj["bbox"])
+                        annotation_id.append(obj["id"])
+                        keypoints_list.append(obj["keypoints"])
 
-                    # object_id
-                    # [filename, category, supercategory, bbox, area, segmentation 1,
-                    # segmentation 2, iscrowd, num_keypoints, keypoints, width, height]
-                    object_id.append([i, category.index(obj["category"]),
-                                      supercategory.index(obj["supercategory"]),
-                                      counter, counter, segmentation_t1_id, segmentation_t2_id,
-                                      counter, obj["num_keypoints"], counter, i, i])
+                        if obj["segmentation_type"] == 0:
+                            segmentation_t1.append(obj["segmentation"])
+                            segmentation_t2_id = -1
+                            segmentation_t1_id = segmentation_t1_counter
+                            segmentation_t1_counter += 1
+                        else:
+                            segmentation_t2.append(obj["segmentation"])
+                            segmentation_t1_id = -1
+                            segmentation_t2_id = segmentation_t2_counter
+                            segmentation_t2_counter += 1
 
-                    boxes_per_image.append(counter)
+                        # *** object_id ***
+                        # [filename, coco_url, width, height,
+                        # category, supercategory,
+                        # bbox, area, iscrowd,
+                        # segmentation_1, segmentation_2,
+                        # "image_id", "category_id", "annotation_id"
+                        # "num_keypoints", "keypoints"]
+                        object_id.append([i, i, i, i,
+                                        category.index(obj["category"]), supercategory.index(obj["supercategory"]),
+                                        counter, counter, obj["iscrowd"],
+                                        segmentation_t1_id, segmentation_t2_id,
+                                        i, category.index(obj["category"]), counter,
+                                        obj["num_keypoints"], counter])
 
-                    # update counter
-                    counter += 1
+                        boxes_per_image.append(counter)
+
+                        # temporary var
+                        tmp_coco_annotations_ids[obj["id"]] = counter
+
+                        # update counter
+                        counter += 1
 
                 list_boxes_per_image.append(boxes_per_image)
                 list_keypoints_per_image.append(boxes_per_image)
@@ -405,6 +500,41 @@ class Keypoints2016(BaseTask):
         # update progressbar
         if self.verbose:
             prgbar.finish()
+
+
+        if self.verbose:
+            print('> Processing coco lists:')
+            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
+
+        # set coco id lists
+        for i, annot in enumerate(annotations['images']):
+            fname_id = image_filenames.index(os.path.join(image_dir, annot['file_name']))
+            coco_images_ids.append(fname_id)
+
+            # update progressbar
+            if self.verbose:
+                prgbar.update(i)
+
+        # update progressbar
+        if self.verbose:
+            prgbar.finish()
+
+        coco_categories_ids = list(range(len(category)))
+
+        if not is_test:
+            if self.verbose:
+                prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
+            for i, annot in enumerate(annotations['annotations']):
+                annot_id = tmp_coco_annotations_ids[annot['id']]
+                coco_annotations_ids.append(annot_id)
+
+                # update progressbar
+                if self.verbose:
+                    prgbar.update(i)
+
+            # update progressbar
+            if self.verbose:
+                prgbar.finish()
 
 
         # process lists
@@ -426,25 +556,37 @@ class Keypoints2016(BaseTask):
 
 
         handler['image_filenames'] = str2ascii(image_filenames)
-        handler['category'] = category_
-        handler['supercategory'] = supercategory_
+        handler['coco_urls'] = str2ascii(coco_urls)
         handler['width'] = np.array(width, dtype=np.int32)
         handler['height'] = np.array(height, dtype=np.int32)
+
+        handler['category'] = category_
+        handler['supercategory'] = supercategory_
+
+        handler['image_id'] = np.array(image_id, dtype=np.int32)
+        handler['category_id'] = np.array(category_id, dtype=np.int32)
+
         handler['object_ids'] = np.array(object_id, dtype=np.int32)
         handler['object_fields'] = str2ascii(object_fields)
+
+        handler['coco_images_ids'] = np.array(coco_images_ids, dtype=np.int32)
+        handler['coco_categories_ids'] = np.array(coco_categories_ids, dtype=np.int32)
 
         handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
 
         if not is_test:
+            handler['annotation_id'] = np.array(annotation_id, dtype=np.int32)
             handler['keypoint_names'] = keypoints_
             handler['skeleton'] = skeleton_
             handler['boxes'] = np.array(bbox, dtype=np.float)
             handler['iscrowd'] = np.array(iscrowd, dtype=np.uint8)
-            handler['segmentation1'] = np.array(pad_list2(segmentation_t1, -1), dtype=np.float)
-            handler['segmentation2'] = np.array(pad_list(segmentation_t2, -1), dtype=np.int32)
+            handler['segmentation_t1'] = np.array(pad_list2(segmentation_t1, -1), dtype=np.float)
+            handler['segmentation_t2'] = np.array(pad_list(segmentation_t2, -1), dtype=np.int32)
             handler['area'] = np.array(area, dtype=np.int32)
             handler['num_keypoints'] = np.array(num_keypoints, dtype=np.uint8)
             handler['keypoints'] = np.array(keypoints_list, dtype=np.int32)
+
+            handler['coco_annotations_ids'] = np.array(coco_annotations_ids, dtype=np.int32)
 
             handler['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
             handler['list_keypoints_per_image'] = np.array(pad_list(list_keypoints_per_image, -1), dtype=np.int32)
