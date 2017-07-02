@@ -98,6 +98,10 @@ function manager.load(options)
             -------
             DatasetLoader
                 Data loader class.
+
+            Raises
+            ------
+                None
         ]],
         {name="name", type="string",
         help="Name of the dataset."},
