@@ -32,6 +32,7 @@ classdef dbcollection_DatasetLoader
         file            % Handler for the HDF5 file
         root_path       % HDF5 default group path
         sets            % Names of the dataset splits (e.g. train/val/test/etc.)
+        object_fields   % List of field names per set
     end
 
     methods
