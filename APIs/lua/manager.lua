@@ -87,12 +87,16 @@ function manager.load(options)
                 Name of the dataset.
             task : str
                 Name of the task to load.
+                (optional, default='default')
             data_dir : str
                 Directory path to store the downloaded data.
+                (optional, default='')
             verbose : bool
                 Displays text information (if true).
+                (optional, default=true)
             is_test : bool
                 Flag used for tests.
+                (optional, default=false)
 
             Returns
             -------
@@ -178,12 +182,16 @@ function manager.download(options)
                 Name of the dataset.
             data_dir : str
                 Directory path to store the downloaded data.
+                (optional, default='None')
             extract_data : bool
                 Extracts/unpacks the data files (if true).
+                (optional, default=true)
             verbose : bool
                 Displays text information (if true).
+                (optional, default=true)
             is_test : bool
                 Flag used for tests.
+                (optional, default=false)
 
             Returns
             -------
@@ -238,10 +246,13 @@ function manager.process(options)
                 Name of the dataset.
             task : str
                 Name of the task to process.
+                (optional, default='all')
             verbose : bool
                 Displays text information (if true).
+                (optional, default=true)
             is_test : bool
                 Flag used for tests.
+                (optional, default=false)
 
             Returns
             -------
@@ -297,8 +308,10 @@ function manager.add(options)
                 Path to the metadata HDF5 file.
             keywords : table
                 Table of strings of keywords that categorize the dataset.
+                (optional, default={})
             is_test : bool
                 Flag used for tests.
+                (optional, default=false)
 
             Returns
             -------
@@ -371,8 +384,10 @@ function manager.remove(options)
                 Name of the dataset to delete.
             delete_data : bool
                 Delete all data files from disk for this dataset if True.
+                (optional, default=false)
             is_test : bool
                 Flag used for tests.
+                (optional, default=false)
 
             Returns
             -------
@@ -431,18 +446,25 @@ function manager.config_cache(options)
             ----------
             field : str
                 Name of the field to update/modify in the cache file.
+                (optional, default='None')
             value : str, list, table
                 Value to update the field.
+                (optional, default='None')
             delete_cache : bool
                 Delete/remove the dbcollection cache file + directory.
+                (optional, default=false)
             delete_cache_dir : bool
                 Delete/remove the dbcollection cache directory.
+                (optional, default=false)
             delete_cache_file : bool
                 Delete/remove the dbcollection.json cache file.
+                (optional, default=false)
             reset_cache : bool
                 Reset the cache file.
+                (optional, default=false)
             is_test : bool
                 Flag used for tests.
+                (optional, default=false)
 
             Returns
             -------
@@ -504,8 +526,10 @@ function manager.query(options)
             -----------
             pattern : str
                 Field name used to search for a matching pattern in cache data.
+                (optional, default='info')
             is_test : bool
                 Flag used for tests.
+                (optional, default=false)
 
             Returns
             -------
@@ -547,8 +571,10 @@ function manager.info(options)
             ----------
             list_datasets : bool
                 Print available datasets in the dbcollection package.
+                (optional, default=false)
             is_test : bool
                 Flag used for tests.
+                (optional, default=false)
 
             Returns
             -------
