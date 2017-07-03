@@ -1,7 +1,7 @@
 classdef dbcollection_DatasetLoader
     % Dataset loader (HDF5 data loading) class
     %
-    % dbcollection_DatasetLoader.m is a API for loading and
+    % dbcollection_DatasetLoader.m is an API for loading and
     % managing metadata of a parsed dataset on
     % disk in the HDF5 format. It contains information
     % about the dataset (name, task, dir_path,
@@ -54,31 +54,31 @@ classdef dbcollection_DatasetLoader
             assert(~(~exist('task', 'var') || isempty(task)), 'Missing input arg: task')
             assert(~(~exist('data_dir', 'var') || isempty(data_dir)), 'Missing input arg: data_dir')
             assert(~(~exist('cache_path', 'var') || isempty(cache_path)), 'Missing input arg: cache_path')
-            
+
             % store information of the dataset
             loader.name = name;
             loader.task = task;
             loader.data_dir = data_dir;
             loader.cache_path = cache_path;
-            
+
             hinfo = hdf5info(cache_path);
 
             loader.root_path = '/default';
             loader.sets = {};
             loader.object_fields = {};
-                     
+
             for i=1:1:size(hinfo.GroupHierarchy.Groups, 2)
                 if isequal(hinfo.GroupHierarchy.Groups(1,i),loader.root_path)
                     for j=1:1:size(hinfo.GroupHierarchy.Groups(1,i).Groups, 2)
-                        loader.sets{j} = {hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name};                       
+                        loader.sets{j} = {hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name};
                         num_fields = size(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets, 2);
                         field_names = cell(1, num_fields);
                         for s=1:1:num_fields
-                            [~,field_name,~] = fileparts(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets(1,s).Name);                           
+                            [~,field_name,~] = fileparts(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets(1,s).Name);
                             field_names{s} = field_name;
-                        end                        
+                        end
                     end
-                    loader.object_fields{j} = field_names;                    
+                    loader.object_fields{j} = field_names;
                 end
             end
         end
@@ -97,6 +97,7 @@ classdef dbcollection_DatasetLoader
             % idx : number/table
             %     Index number of the field. If the input is a table, it uses it as a range
             %     of indexes and returns the data for that range.
+            %     (optional, default=[])
             %
             % Returns
             % -------
@@ -107,7 +108,12 @@ classdef dbcollection_DatasetLoader
             % ------
             %     None
 
-            %% TODO
+            assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
+            assert(~(~exist('field_name', 'var') || isempty(field_name)), 'Missing input arg: field_name')
+
+            if ~exist('name', 'var') || isempty(name)
+                idx = [];
+            end
         end
 
         function out = object(obj, set_name, idx, is_value)
@@ -127,6 +133,7 @@ classdef dbcollection_DatasetLoader
             % is_value : bool
             %    Outputs a tensor of indexes (if false)
             %    or a table of tensors/values (if true).
+            %    (optional, default=false)
             %
             % Returns:
             % --------
@@ -137,7 +144,13 @@ classdef dbcollection_DatasetLoader
             % ------
             %     None
 
-            %% TODO
+            assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
+            if ~exist('idx', 'var') || isempty(idx)
+                idx = [];
+            end
+            if ~exist('is_value', 'var') || isempty(is_value)
+                is_value = false;
+            end
         end
 
         function size = size(obj, set_name, field_name)
@@ -151,6 +164,7 @@ classdef dbcollection_DatasetLoader
             %     Name of the set.
             % field_name : str
             %     Name of the data field.
+            %     (optional, default='object_ids')
             %
             % Returns:
             % --------
@@ -161,7 +175,10 @@ classdef dbcollection_DatasetLoader
             % ------
             %     None
 
-            %% TODO
+            assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
+            if ~exist('field_name', 'var') || isempty(field_name)
+                field_name = 'object_ids';
+            end
         end
 
         function out = list(obj, set_name)
@@ -181,7 +198,7 @@ classdef dbcollection_DatasetLoader
             % ------
             %     None
 
-            %% TODO
+            assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
         end
 
         function out = object_field_id(obj, set_name, field_name)
@@ -204,7 +221,8 @@ classdef dbcollection_DatasetLoader
             % error
             %     If field_name does not exist on the 'object_fields' list.
 
-            %% TODO
+            assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
+            assert(~(~exist('field_name', 'var') || isempty(field_name)), 'Missing input arg: field_name')
         end
     end
 
