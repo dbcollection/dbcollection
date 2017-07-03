@@ -7,10 +7,10 @@ classdef dbcollection
 
     methods
         function obj = dbcollection()
-            obj.utils = dbcollection_utils
+            obj.utils = dbcollection_utils;
         end
 
-        function loader = load(obj, options)
+        function loader = load(obj, name, task, data_dir, verbose, is_test)
             % Returns a data loader of a dataset.
             %
             % Returns a loader with the necessary functions to manage the selected dataset.
@@ -33,7 +33,8 @@ classdef dbcollection
             % dbcollection_DatasetLoader
             %     Data loader class.
 
-            %% TODO
+            assert(~(~exist('name', 'var') || isempty(name)), 'Missing input arg: name')
+            
         end
 
         function download(obj, options)
