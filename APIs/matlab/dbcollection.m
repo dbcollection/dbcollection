@@ -1,5 +1,29 @@
 classdef dbcollection
     % dbcollection wrapper for Matlab.
+    %
+    % dbcollection.m is an API for loading/managing
+    % datasets. It contains simple methods for loading,
+    % downloading, processing, configurating and listing
+    % datasets from a varied list of available datasets.
+    % Also, it contains useful utility methods like ASCII
+    % to string conversions at the disposal of the user.
+    %
+    % This code follows closely the main package
+    % written in Python. For more information, please
+    % check out the DOCUMENTATION.md file.
+    %
+    % The following API function are defined:
+    %   load          - Returns a data loader of a dataset.
+    %   download      - Download a dataset data to disk.
+    %   process       - Process a dataset's metadata and stores it to file.
+    %   add           - Add a dataset/task to the list of available datasets for loading.
+    %   remove        - Remove/delete a dataset from the cache.
+    %   config_cache  - Configure the cache file.
+    %   query         - Do simple queries to the cache.
+    %   info          - Prints the cache contents.
+    %
+    % For more information about the methods, check out
+    % the dbcollection package documentation.
 
     properties
         utils
@@ -21,12 +45,16 @@ classdef dbcollection
             %     Name of the dataset.
             % task : str
             %     Name of the task to load.
+            %     (optional, default='default')
             % data_dir : str
             %     Directory path to store the downloaded data.
+            %     (optional, default='')
             % verbose : bool
             %     Displays text information (if true).
+            %     (optional, default=true)
             % is_test : bool
             %     Flag used for tests.
+            %     (optional, default=false)
             %
             % Returns
             % -------
@@ -34,10 +62,54 @@ classdef dbcollection
             %     Data loader class.
 
             assert(~(~exist('name', 'var') || isempty(name)), 'Missing input arg: name')
-            
+            if ~exist('task', 'var') || isempty(task)
+                task = 'default';
+            end
+            if ~exist('data_dir', 'var') || isempty(data_dir)
+                data_dir = '';
+            end
+            if ~exist('verbose', 'var') || isempty(verbose)
+                verbose = true;
+            end
+            if ~exist('is_test', 'var') || isempty(is_test)
+                is_test = false;
+            end
+
+            home_path = get_cache_file_path(is_test);
+
+            % check if the .json cache has been initialized
+            if exist(home_path, 'file') != 2
+                config_cache(obj, [], [], [], [], [], [], is_test);  % creates the cache file on disk if it doesn't exist
+            end
+
+            % read the cache file (dbcollection.json)
+            cache = loadjson(home_path);
+
+            % check if the dataset exists in the cache
+            if ~isfield(cache.dataset, 'name')
+                download(obj, name, data_dir, true, verbose, is_test)
+                cache = loadjson(home_path);  % reload the cache file
+            end
+
+            % check if the task exists in the cache
+            if ~exists_task(cache, name, task)
+                process(obj, name, task, verbose, is_test)
+                cache = loadjson(home_path);  % reload the cache file
+            end
+
+            % load check if task exists
+            if ~exists_task(cache, name, task)
+                error('Dataset name/task not available in cache for load.')
+            end
+
+            % get dataset paths (data + cache)
+            [data_dir, cache_path] = get_dataset_paths(cache, args.name, args.task);
+
+            % Get dataset loader
+            loader = dbcollection_DatasetLoader(name, task, data_dir, cache_path);
         end
 
-        function download(obj, options)
+        function download(obj, name, data_dir, extract_data, verbose, is_test)
             % Download a dataset data to disk.
             %
             % This method will download a dataset's data files to disk. After download,
@@ -50,21 +122,46 @@ classdef dbcollection
             %     Name of the dataset.
             % data_dir : str
             %     Directory path to store the downloaded data.
+            %     (optional, default='None')
             % extract_data : bool
             %     Extracts/unpacks the data files (if true).
+            %     (optional, default=true)
             % verbose : bool
             %     Displays text information (if true).
+            %     (optional, default=true)
             % is_test : bool
             %     Flag used for tests.
+            %     (optional, default=false)
             %
             % Returns
             % -------
             %     None
 
-            %% TODO
+            assert(~(~exist('name', 'var') || isempty(name)), 'Missing input arg: name')
+            if ~exist('data_dir', 'var') || isempty(data_dir)
+                data_dir = 'None';
+            end
+            if ~exist('extract_data', 'var') || isempty(extract_data)
+                extract_data = true;
+            end
+            if ~exist('verbose', 'var') || isempty(verbose)
+                verbose = true;
+            end
+            if ~exist('is_test', 'var') || isempty(is_test)
+                is_test = false;
+            end
+
+            command = sprintf('import dbcollection.manager as dbc;' ...
+                              'dbc.download(name=\'%s\',data_dir=%s,extract_data=%s,verbose=%s,is_test=%s)', ...
+                              name, data_dir, ...
+                              logical2str(extract_data), ...
+                              logical2str(verbose), ...
+                              logical2str(is_test));
+
+            [status,cmdout] = system(command,'-echo');
         end
 
-        function process(obj, options)
+        function process(obj, name, task, verbose, is_test)
             % Process a dataset's metadata and stores it to file.
             %
             % The data is stored in a HDF5 file for each task composing the dataset's tasks.
@@ -75,19 +172,39 @@ classdef dbcollection
             %     Name of the dataset.
             % task : str
             %     Name of the task to process.
+            %     (optional, default='all')
             % verbose : bool
             %     Displays text information (if true).
+            %     (optional, default=true)
             % is_test : bool
             %     Flag used for tests.
+            %     (optional, default=false)
             %
             % Returns
             % -------
             %     None
 
-            %% TODO
+            assert(~(~exist('name', 'var') || isempty(name)), 'Missing input arg: name')
+            if ~exist('task', 'var') || isempty(task)
+                task = true;
+            end
+            if ~exist('verbose', 'var') || isempty(verbose)
+                verbose = 'all';
+            end
+            if ~exist('is_test', 'var') || isempty(is_test)
+                is_test = false;
+            end
+
+            command = sprintf('import dbcollection.manager as dbc;' ...
+                              'dbc.process(name=\'%s\',task=\'%s\',verbose=%s,is_test=%s)', ...
+                              name, task, ...
+                              logical2str(verbose), ...
+                              logical2str(is_test));
+
+            [status,cmdout] = system(command,'-echo');
         end
 
-        function add(obj, options)
+        function add(obj, namne, task, data_dir, file_path, keywords, is_test)
             % Add a dataset/task to the list of available datasets for loading.
             %
             % Parameters
@@ -102,17 +219,45 @@ classdef dbcollection
             %     Path to the metadata HDF5 file.
             % keywords : table
             %     Table of strings of keywords that categorize the dataset.
+            %     (optional, default={})
             % is_test : bool
             %     Flag used for tests.
+            %     (optional, default=false)
             %
             % Returns
             % -------
             %     None
 
-            %% TODO
+            assert(~(~exist('name', 'var') || isempty(name)), 'Missing input arg: name')
+            assert(~(~exist('task', 'var') || isempty(task)), 'Missing input arg: task')
+            assert(~(~exist('data_dir', 'var') || isempty(data_dir)), 'Missing input arg: data_dir')
+            assert(~(~exist('file_path', 'var') || isempty(file_path)), 'Missing input arg: file_path')
+            if ~exist('keywords', 'var') || isempty(keywords)
+                keywords = '[]';
+            else
+                tmp_str = ''
+                for i=1:1:size(keywords,2)
+                    tmp_str = strcat(tmp_str, keywords{i});
+                    if i < size(keywords,2)
+                        tmp_str = strcat(tmp_str, ',');
+                    end
+                end
+                keywords = sprintf('[%s]', tmp_str);
+            end
+            if ~exist('is_test', 'var') || isempty(is_test)
+                is_test = false;
+            end
+
+            command = sprintf('import dbcollection.manager as dbc;' ...
+                              'dbc.add(name=\'%s\',task=\'%s\',data_dir=\'%s\',' ...
+                              'file_path=\'%s\',keywords=%s,is_test=%s)', ...
+                              name, task, data_dir, file_path, keywords, ...
+                              logical2str(is_test));
+
+            [status,cmdout] = system(command,'-echo');
         end
 
-        function remove(obj, options)
+        function remove(obj, name, delete_data, is_test)
             % Remove/delete a dataset from the cache.
             %
             % Removes the datasets cache information from the dbcollection.json file.
@@ -125,17 +270,33 @@ classdef dbcollection
             %     Name of the dataset to delete.
             % delete_data : bool
             %     Delete all data files from disk for this dataset if True.
+            %     (optional, default=false)
             % is_test : bool
             %     Flag used for tests.
+            %     (optional, default=false)
             %
             % Returns
             % -------
             %     None
 
-            %% TODO
+            assert(~(~exist('name', 'var') || isempty(name)), 'Missing input arg: name')
+            if ~exist('delete_data', 'var') || isempty(delete_data)
+                delete_data = false;
+            end
+            if ~exist('is_test', 'var') || isempty(is_test)
+                is_test = false;
+            end
+
+            command = sprintf('import dbcollection.manager as dbc;' ...
+                              'dbc.remove(name=\'%s\', delete_data=%s,is_test=%s)', ...
+                              name, ...
+                              logical2str(delete_data), ...
+                              logical2str(is_test));
+
+            [status,cmdout] = system(command,'-echo');
         end
 
-        function config_cache(obj, options)
+        function config_cache(obj, field, value, delete_cache, delete_cache_dir, delete_cache_file, reset_cache, is_test)
             % Configure the cache file.
             %
             % This method allows to configure the cache file directly by selecting
@@ -157,27 +318,67 @@ classdef dbcollection
             % ----------
             % field : str
             %     Name of the field to update/modify in the cache file.
+            %     (optional, default='None')
             % value : str, list, table
             %     Value to update the field.
+            %     (optional, default='None')
             % delete_cache : bool
             %     Delete/remove the dbcollection cache file + directory.
+            %     (optional, default=false)
             % delete_cache_dir : bool
             %     Delete/remove the dbcollection cache directory.
+            %     (optional, default=false)
             % delete_cache_file : bool
             %     Delete/remove the dbcollection.json cache file.
+            %     (optional, default=false)
             % reset_cache : bool
             %     Reset the cache file.
+            %     (optional, default=false)
             % is_test : bool
             %     Flag used for tests.
+            %     (optional, default=false)
             %
             % Returns
             % -------
             %     None
 
-            %% TODO
+            if ~exist('field', 'var') || isempty(field)
+                field = 'None';
+            end
+            if ~exist('value', 'var') || isempty(value)
+                value = 'None';
+            end
+            if ~exist('delete_cache', 'var') || isempty(delete_cache)
+                delete_cache = false;
+            end
+            if ~exist('delete_cache_dir', 'var') || isempty(delete_cache_dir)
+                delete_cache_dir = false;
+            end
+            if ~exist('delete_cache_file', 'var') || isempty(delete_cache_file)
+                delete_cache_file = false;
+            end
+            if ~exist('reset_cache', 'var') || isempty(reset_cache)
+                reset_cache = false;
+            end
+            if ~exist('is_test', 'var') || isempty(is_test)
+                is_test = false;
+            end
+
+            command = sprintf('import dbcollection.manager as dbc;' ...
+                              'dbc.config_cache(field=%s,value=%s,delete_cache=%s, ' ...
+                              'delete_cache_dir=%s,delete_cache_file=%s,reset_cache=%s, ' ...
+                              'is_test=%s)'), ...
+                              field, value, ...
+                              logical2str(delete_cache), ...
+                              logical2str(delete_cache_dir), ...
+                              logical2str(delete_cache_file), ...
+                              logical2str(reset_cache), ...
+                              logical2str(is_test));
+
+            [status,cmdout] = system(command,'-echo');
         end
 
-        function query(obj, options)
+        function query(obj, pattern, is_test)
             % Do simple queries to the cache.
             %
             % list all available datasets for download/preprocess. (tenho que pensar melhor sobre este)
@@ -186,17 +387,30 @@ classdef dbcollection
             % -----------
             % pattern : str
             %     Field name used to search for a matching pattern in cache data.
+            %     (optional, default='info')
             % is_test : bool
             %     Flag used for tests.
+            %     (optional, default=false)
             %
             % Returns
             % -------
             %     None
 
-            %% TODO
+            if ~exist('pattern', 'var') || isempty(pattern)
+                pattern = 'info';
+            end
+            if ~exist('is_test', 'var') || isempty(is_test)
+                is_test = false;
+            end
+
+            command = sprintf('import dbcollection.manager as dbc;' ...
+                              'print(dbc.query(pattern=\'%s\',is_test=%s)))', ...
+                              pattern, logical2str(is_test));
+
+            [status,cmdout] = system(command,'-echo');
         end
 
-        function info(obj, options)
+        function info(obj, list_datasets, is_test)
             % Prints the cache contents.
             %
             % Prints the contents of the dbcollection.json cache file to the screen.
@@ -205,15 +419,86 @@ classdef dbcollection
             % ----------
             % list_datasets : bool
             %     Print available datasets in the dbcollection package.
+            %     (optional, default=false)
             % is_test : bool
             %     Flag used for tests.
+            %     (optional, default=false)
             %
             % Returns
             % -------
             %     None
 
-            %% TODO
+            if ~exist('list_datasets', 'var') || isempty(list_datasets)
+                list_datasets = false;
+            end
+            if ~exist('is_test', 'var') || isempty(is_test)
+                is_test = false;
+            end
+
+            command = sprintf('import dbcollection.manager as dbc;' ...
+                              'dbc.info(list_datasets=%s,is_test=%s)', ...
+                              logical2str(list_datasets), ...
+                              logical2str(is_test));
+
+
+            [status,cmdout] = system(command,'-echo');
         end
     end
 
+end
+
+% -------------------------- Utility functions --------------------------
+
+function str = logical2str(bool)
+    % Convert a boolean to a string
+    assert(bool)
+    if bool
+        str = 'True';
+    else
+        str = 'False';
+    end
+end
+
+
+function path = get_cache_file_path(is_test)
+    % get the home directory
+    assert(~(~exist('is_test', 'var') || isempty(is_test)), 'Missing input arg: is_test')
+
+    if ispc
+        home_dir = [getenv('HOMEDRIVE') getenv('HOMEPATH')];
+    else
+        home_dir = getenv('HOME');
+    end
+
+    if is_test
+        path = fullfile(home_dir, 'tmp', 'dbcollection.json');
+    else
+        path = fullfile(home_dir, 'dbcollection.json');
+    end
+end
+
+
+function is_task = exists_task(cache, name, task)
+    % check if the task exists in the cache
+
+    dset = extractfield(cache.dataset, 'name');
+    if isfield(dset{1}, 'tasks')
+        tasks = extractfield(dset{1}, 'tasks');
+        if isfield(tasks{1}, task)
+            is_task = true;
+        else
+            is_task = false;
+        end
+    else
+        is_task = false;
+    end
+end
+
+
+function [data_dir, cache_path] = get_dataset_paths(cache, name, task)
+    % get the dataset's data and cache paths
+    dset = extractfield(cache.dataset, 'name');
+    data_dir = extractfield(dset{1}, 'data_dir'){1};
+    tasks = extractfield(dset{1}, 'tasks');
+    cache_path = extractfield(tasks{1}, task){1};
 end
