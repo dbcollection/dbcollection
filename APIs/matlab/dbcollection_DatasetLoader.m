@@ -50,7 +50,37 @@ classdef dbcollection_DatasetLoader
             % cache_path : str
             %     Path of the metadata cache file stored on disk.
 
-            %% TODO
+            assert(~(~exist('name', 'var') || isempty(name)), 'Missing input arg: name')
+            assert(~(~exist('task', 'var') || isempty(task)), 'Missing input arg: task')
+            assert(~(~exist('data_dir', 'var') || isempty(data_dir)), 'Missing input arg: data_dir')
+            assert(~(~exist('cache_path', 'var') || isempty(cache_path)), 'Missing input arg: cache_path')
+            
+            % store information of the dataset
+            loader.name = name;
+            loader.task = task;
+            loader.data_dir = data_dir;
+            loader.cache_path = cache_path;
+            
+            hinfo = hdf5info(cache_path);
+
+            loader.root_path = '/default';
+            loader.sets = {};
+            loader.object_fields = {};
+                     
+            for i=1:1:size(hinfo.GroupHierarchy.Groups, 2)
+                if isequal(hinfo.GroupHierarchy.Groups(1,i),loader.root_path)
+                    for j=1:1:size(hinfo.GroupHierarchy.Groups(1,i).Groups, 2)
+                        loader.sets{j} = {hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name};                       
+                        num_fields = size(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets, 2);
+                        field_names = cell(1, num_fields);
+                        for s=1:1:num_fields
+                            [~,field_name,~] = fileparts(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets(1,s).Name);                           
+                            field_names{s} = field_name;
+                        end                        
+                    end
+                    loader.object_fields{j} = field_names;                    
+                end
+            end
         end
 
         function out = get (obj, set_name, field_name, idx)
