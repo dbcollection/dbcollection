@@ -24,10 +24,10 @@ function DataLoader:__init(name, task, data_dir, cache_path)
     cache_path : str
         Path of the metadata cache file stored on disk.
 ]]
-    assert(name)
-    assert(task)
-    assert(data_dir)
-    assert(cache_path)
+    assert(name, ('Must input a valid dataset name: %s'):format(name))
+    assert(task, ('Must input a valid task name: %s'):format(task))
+    assert(data_dir, ('Must input a valid path for the data directory: %s'):format(data_dir))
+    assert(cache_path, ('Must input a valid path for the cache file: %s'):format(cache_path))
 
     -- store information of the dataset
     self.name = name
@@ -71,6 +71,7 @@ function DataLoader:get(set_name, field_name, idx)
 	idx : number/table
         Index number of the field. If the input is a table, it uses it as a range
         of indexes and returns the data for that range.
+        (optional, default=nil)
 
     Returns
     -------
@@ -81,8 +82,8 @@ function DataLoader:get(set_name, field_name, idx)
     ------
         None
 ]]
-    assert(set_name)
-    assert(field_name)
+    assert(set_name, 'Must input a valid set name')
+    assert(field_name, 'Must input a valid field name')
 
     local field_path = ('%s/%s/%s'):format(self.root_path, set_name, field_name)
     local data = self.file:read(field_path)
@@ -138,6 +139,7 @@ function DataLoader:object(set_name, idx, is_value)
     is_value : bool
        Outputs a tensor of indexes (if false)
        or a table of tensors/values (if true).
+       (optional, default=false)
 
     Returns:
     --------
@@ -148,7 +150,9 @@ function DataLoader:object(set_name, idx, is_value)
     ------
         None
 ]]
-    assert(set_name)
+    assert(set_name, 'Must input a valid set name')
+    assert(idx, 'Must input a valid index')
+    assert(idx>0, ('Must input a valid index range: %d (>0)'):format(idx))
 
     local is_value = is_value or false
 
@@ -188,6 +192,7 @@ function DataLoader:size(set_name, field_name)
         Name of the set.
     field_name : str
         Name of the data field.
+        (optional, default='object_ids')
 
     Returns:
     --------
