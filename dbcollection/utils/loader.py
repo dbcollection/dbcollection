@@ -26,10 +26,10 @@ class DatasetLoader:
         cache_path : str
             Path of the metadata cache file stored on disk.
         """
-        assert name
-        assert task
-        assert data_dir
-        assert cache_path
+        assert name, 'Must input a valid dataset name: {}'.format(name)
+        assert task, 'Must input a valid task name: {}'.format(task)
+        assert data_dir, 'Must input a valid path for the data directory: {}'.format(data_dir)
+        assert cache_path, 'Must input a valid path for the cache file: {}'.format(cache_path)
 
         # store information of the dataset
         self.name = name
@@ -65,6 +65,7 @@ class DatasetLoader:
 		idx : int/list
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list
+            (optional, default=None)
 
         Returns
         -------
@@ -103,6 +104,7 @@ class DatasetLoader:
         is_value : bool
             if False, outputs a list of indexes. If True,
             it outputs the values instead of the indexes.
+            (optional, default=False)
 
         Returns:
         --------
@@ -162,6 +164,7 @@ class DatasetLoader:
             Name of the set.
         field_name : str
             Name of the field in the metadata cache file.
+            (optional, default='object_ids')
 
         Returns:
         --------
