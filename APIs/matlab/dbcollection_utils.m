@@ -8,8 +8,8 @@ classdef dbcollection_utils
 
     methods
         function obj = dbcollection_utils()
-            obj.pad = dbcollection_utils_pad
-            obj.string_ascii = dbcollection_utils_string_ascii
+            obj.pad = dbcollection_utils_pad;
+            obj.string_ascii = dbcollection_utils_string_ascii;
         end
     end
 
