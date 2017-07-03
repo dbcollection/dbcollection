@@ -27,12 +27,16 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
         Name of the dataset.
     data_dir : str
         Directory path to store the downloaded data.
+        (optional, default=None)
     extract_data : bool
         Extracts/unpacks the data files (if true).
+        (optional, default=True)
 	verbose : bool
         Displays text information (if true).
+        (optional, default=True)
     is_test : bool
         Flag used for tests.
+        (optional, default=False)
 
     Returns
     -------
@@ -42,6 +46,8 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
     ------
         None
     """
+    assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
@@ -86,10 +92,13 @@ def process(name, task='all', verbose=True, is_test=False):
         Name of the dataset.
     task : str
         Name of the task to process.
+        (optional, default='all')
     verbose : bool
         Displays text information (if true).
+        (optional, default=True)
     is_test : bool
         Flag used for tests.
+        (optional, default=False)
 
     Returns
     -------
@@ -99,7 +108,7 @@ def process(name, task='all', verbose=True, is_test=False):
     ------
         None
     """
-    assert name, 'Must input a valid dataset name: {}'.format(name)
+    assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
@@ -130,12 +139,16 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
         Name of the dataset.
     task : str
         Name of the task to load.
+        (optional, default='default')
     data_dir : str
         Directory path to store the downloaded data.
+        (optional, default=None)
 	verbose : bool
         Displays text information (if true).
+        (optional, default=True)
     is_test : bool
         Flag used for tests.
+        (optional, default=False)
 
     Returns
     -------
@@ -147,7 +160,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     Exception
         If dataset is not available for loading.
     """
-    assert not name is None, 'Must input a valid name for the dataset: {}'.format(name)
+    assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
@@ -231,10 +244,13 @@ def remove(name, task=None, delete_data=False, is_test=False):
         Name of the dataset to delete.
     task : str
         Name of the task to delete.
+        (optional, default=None)
     delete_data : bool
         Delete all data files from disk for this dataset if True.
+        (optional, default=False)
     is_test : bool
         Flag used for tests.
+        (optional, default=False)
 
     Returns
     -------
@@ -244,6 +260,8 @@ def remove(name, task=None, delete_data=False, is_test=False):
     ------
         None
     """
+    assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
@@ -292,14 +310,19 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
         Value to update the field.
     delete_cache : bool
         Delete/remove the dbcollection cache file + directory.
+        (optional, default=False)
     delete_cache_dir : bool
         Delete/remove the dbcollection cache directory.
+        (optional, default=False)
     delete_cache_file : bool
         Delete/remove the dbcollection.json cache file.
+        (optional, default=False)
     reset_cache : bool
         Reset the cache file.
+        (optional, default=False)
     is_test : bool
         Flag used for tests.
+        (optional, default=False)
 
     Returns
     -------
@@ -309,6 +332,9 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     ------
         None
     """
+    assert not field is None, 'Must input a valid field name: {}'.format(field)
+    assert not value is None, 'Must input a valid value: {}'.format(value)
+
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
@@ -345,8 +371,10 @@ def query(pattern='info', is_test=False):
     -----------
 	pattern : str
         Field name used to search for a matching pattern in cache data.
+        (optional, default='info')
     is_test : bool
         Flag used for tests.
+        (optional, default=False)
 
     Returns
     -------
@@ -398,8 +426,10 @@ def info(list_datasets=False, is_test=False):
     ----------
     list_datasets : bool
         Print available datasets in the dbcollection package.
+        (optional, default=False)
     is_test : bool
         Flag used for tests.
+        (optional, default=False)
 
     Returns
     -------
