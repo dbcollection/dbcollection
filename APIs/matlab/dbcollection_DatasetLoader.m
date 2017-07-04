@@ -64,26 +64,26 @@ classdef dbcollection_DatasetLoader
             hinfo = hdf5info(cache_path);
 
             loader.root_path = '/default';
-            loader.sets = {};
-            loader.object_fields = {};
 
+            loader.sets = {};
+            loader.object_fields = struct();
             for i=1:1:size(hinfo.GroupHierarchy.Groups, 2)
                 if isequal(hinfo.GroupHierarchy.Groups(1,i),loader.root_path)
                     for j=1:1:size(hinfo.GroupHierarchy.Groups(1,i).Groups, 2)
-                        loader.sets{j} = {hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name};
-                        num_fields = size(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets, 2);
-                        field_names = cell(1, num_fields);
-                        for s=1:1:num_fields
-                            [~,field_name,~] = fileparts(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets(1,s).Name);
-                            field_names{s} = field_name;
-                        end
+                        set_name = hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name;
+
+                        % add set to a cell
+                        loader.sets{j} = {set_name};
+
+                        % fetch list of field names that compose the object list.
+                        data = get(obj, set_name, 'object_fields');
+                        loader.object_fields.(set_name) = convert_ascii_to_string(data);
                     end
-                    loader.object_fields{j} = field_names;
                 end
             end
         end
 
-        function out = get (obj, set_name, field_name, idx)
+        function out = get(obj, set_name, field_name, idx)
             % Retrieve data from the dataset's hdf5 metadata file.
             %
             % Retrieve the i'th data from the field 'field_name'.
@@ -111,8 +111,22 @@ classdef dbcollection_DatasetLoader
             assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
             assert(~(~exist('field_name', 'var') || isempty(field_name)), 'Missing input arg: field_name')
 
-            if ~exist('name', 'var') || isempty(name)
+            if ~exist('idx', 'var') || isempty(idx)
                 idx = [];
+            end
+
+            % read data from file
+            h5_path = sprintf('%s/%s/%s', obj.root_path, set_name,field_name);
+            data = h5read(obj.cache_path, h5_path)';
+
+            % reshape the matrix to the correct shape
+            data = flipH_array(data);
+
+            % slice data
+            if ~isempty(idx)
+                out = slice_(data, idx, 1);
+            else
+                out = data;
             end
         end
 
@@ -137,8 +151,8 @@ classdef dbcollection_DatasetLoader
             %
             % Returns:
             % --------
-            % table
-            %     Returns a table of indexes (or values, i.e. tensors, if is_value=True).
+            % cell
+            %     Returns a list of indexes (or values, i.e. tensors, if is_value=True).
             %
             % Raises
             % ------
@@ -150,6 +164,26 @@ classdef dbcollection_DatasetLoader
             end
             if ~exist('is_value', 'var') || isempty(is_value)
                 is_value = false;
+            end
+
+            indexes = get(obj, set_name, 'object_ids', idx);
+            if is_value
+                idx_size = size(indexes,2);
+                field_names = obj.object_fields.(set_name);
+                out = cell(1, idx_size);
+                for i=1:1:idx_size
+                    newdata = cell(1, size(field_names,2));
+                    for k=1:1:size(field_names,2)
+                        if indexes(i,k) > 0
+                            newdata{k} = get(obj, set_name, field_names(k), indexes(i,k));
+                        else
+                            newdata{k} = [];
+                        end
+                    end
+                    out{i} = newdata;
+                end
+            else
+                out = indexes;
             end
         end
 
@@ -168,8 +202,8 @@ classdef dbcollection_DatasetLoader
             %
             % Returns:
             % --------
-            % table
-            %     Returns the the size of the object list.
+            % Double Array
+            %     Returns the the size of the field.
             %
             % Raises
             % ------
@@ -179,6 +213,10 @@ classdef dbcollection_DatasetLoader
             if ~exist('field_name', 'var') || isempty(field_name)
                 field_name = 'object_ids';
             end
+
+            h5_path = sprintf('%s/%s/%s', obj.root_path, set_name, field_name);
+            info = h5info(obj.cache_path, h5_path);
+            size = flipH_array(info.Dataspace.Size);
         end
 
         function out = list(obj, set_name)
@@ -199,9 +237,29 @@ classdef dbcollection_DatasetLoader
             %     None
 
             assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
+
+            hinfo = hdf5info(obj.cache_path);
+
+            %% converter cell para struct
+            for i=1:1:size(hinfo.GroupHierarchy.Groups, 2)
+                if isequal(hinfo.GroupHierarchy.Groups(1,i),loader.root_path)
+                    for j=1:1:size(hinfo.GroupHierarchy.Groups(1,i).Groups, 2)
+                        set_name = hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name;
+                        if strcmp(set_name, hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name)
+                            num_fields = size(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets, 2);
+                            out = cell(1, num_fields);
+                            for s=1:1:num_fields
+                                [~,field_name,~] = fileparts(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets(1,s).Name);
+                                out{s} = field_name;
+                            end
+                            return
+                        end
+                    end
+                end
+            end
         end
 
-        function out = object_field_id(obj, set_name, field_name)
+        function idx = object_field_id(obj, set_name, field_name)
             % Retrieves the index position of a field in the 'object_ids' list.
             %
             % Parameters
@@ -223,7 +281,44 @@ classdef dbcollection_DatasetLoader
 
             assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
             assert(~(~exist('field_name', 'var') || isempty(field_name)), 'Missing input arg: field_name')
+
+            f = fieldnames(obj.object_fields.(set_name));
+            for i=1:1:length(f)
+                field = f{i};
+                if strcmp(field_name, field)
+                    idx = i;
+                    return
+                end
+            end
+            error('Field name ''%s'' does not exist.', field_name)
         end
     end
 
+end
+
+
+%------------------------- Utility functions%-------------------------
+
+function str = convert_ascii_to_string(array)
+    utils = dbcollection_utils();
+    str = utils.string_ascii.convert_ascii_to_str(array);
+end
+
+
+function out = slice_(A, ix, dim)
+    subses = repmat({':'}, [1 ndims(A)]);
+    subses{dim} = ix;
+    out = A(subses{:});
+end
+
+
+function out = flipH_array(array)
+    % Permute the array's dimensions
+    % (centered around the array/matrix dimension)
+    num_dims = ndims(array);
+    if num_dims == 2 && size(array, 1) == 1
+        out = flip(array);
+    else
+        out = permute(array, (ndims(array):-1:1));
+    end
 end
