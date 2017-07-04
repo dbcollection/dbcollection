@@ -306,8 +306,10 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     ----------
 	field : str
         Name of the field to update/modify in the cache file.
+        (optional, default=None)
     value : str, list, table
         Value to update the field.
+        (optional, default=None)
     delete_cache : bool
         Delete/remove the dbcollection cache file + directory.
         (optional, default=False)
@@ -332,8 +334,6 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     ------
         None
     """
-    assert not field is None, 'Must input a valid field name: {}'.format(field)
-    assert not value is None, 'Must input a valid value: {}'.format(value)
 
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
