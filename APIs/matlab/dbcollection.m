@@ -145,7 +145,7 @@ classdef dbcollection
             opt = parse_options(varargin, config);
 
             command = sprintf(strcat('import dbcollection.manager as dbc;', ...
-                              'dbc.download(name=''%s'',data_dir=%s,extract_data=%s,verbose=%s,is_test=%s)'), ...
+                              'dbc.download(name=''%s'',data_dir=''%s'',extract_data=%s,verbose=%s,is_test=%s)'), ...
                               opt.name, opt.data_dir, ...
                               logical2str(opt.extract_data), ...
                               logical2str(opt.verbose), ...
@@ -524,11 +524,16 @@ function is_task = exists_task(cache, name, task)
     dset = extractfield(cache.dataset, name);
     if isfield(dset{1}, 'tasks')
         tasks = extractfield(dset{1}, 'tasks');
-        if isfield(tasks{1}, task)
-            is_task = true;
+        if ~isempty(tasks)
+            if isfield(tasks{1}, task)
+                is_task = true;
+            else
+                is_task = false;
+            end
         else
             is_task = false;
         end
+        
     else
         is_task = false;
     end
