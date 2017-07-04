@@ -68,15 +68,16 @@ classdef dbcollection_DatasetLoader
             loader.sets = {};
             loader.object_fields = struct();
             for i=1:1:size(hinfo.GroupHierarchy.Groups, 2)
-                if isequal(hinfo.GroupHierarchy.Groups(1,i),loader.root_path)
+                if isequal(hinfo.GroupHierarchy.Groups(1,i).Name, loader.root_path)
                     for j=1:1:size(hinfo.GroupHierarchy.Groups(1,i).Groups, 2)
-                        set_name = hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name;
-
-                        % add set to a cell
-                        loader.sets{j} = {set_name};
+                        set_name_path = hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name;
+                        [~,set_name,~] = fileparts(set_name_path);
+                        
+                        % add set to a cell                        
+                        loader.sets{j} = set_name;
 
                         % fetch list of field names that compose the object list.
-                        data = get(obj, set_name, 'object_fields');
+                        data = h5read(cache_path, [set_name_path '/object_fields'])';
                         loader.object_fields.(set_name) = convert_ascii_to_string(data);
                     end
                 end
@@ -117,7 +118,7 @@ classdef dbcollection_DatasetLoader
 
             % read data from file
             h5_path = sprintf('%s/%s/%s', obj.root_path, set_name,field_name);
-            data = h5read(obj.cache_path, h5_path)';
+            data = h5read(obj.cache_path, h5_path);
 
             % reshape the matrix to the correct shape
             data = flipH_array(data);
@@ -242,10 +243,9 @@ classdef dbcollection_DatasetLoader
 
             %% converter cell para struct
             for i=1:1:size(hinfo.GroupHierarchy.Groups, 2)
-                if isequal(hinfo.GroupHierarchy.Groups(1,i),loader.root_path)
+                if isequal(hinfo.GroupHierarchy.Groups(1,i).Name, obj.root_path)
                     for j=1:1:size(hinfo.GroupHierarchy.Groups(1,i).Groups, 2)
-                        set_name = hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name;
-                        if strcmp(set_name, hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name)
+                        if strcmp(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name, [obj.root_path '/' set_name])
                             num_fields = size(hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Datasets, 2);
                             out = cell(1, num_fields);
                             for s=1:1:num_fields
@@ -282,9 +282,9 @@ classdef dbcollection_DatasetLoader
             assert(~(~exist('set_name', 'var') || isempty(set_name)), 'Missing input arg: set_name')
             assert(~(~exist('field_name', 'var') || isempty(field_name)), 'Missing input arg: field_name')
 
-            f = fieldnames(obj.object_fields.(set_name));
-            for i=1:1:length(f)
-                field = f{i};
+            f = obj.object_fields.(set_name);
+            for i=1:1:size(f, 1)
+                field = f(i,:);
                 if strcmp(field_name, field)
                     idx = i;
                     return
@@ -297,7 +297,7 @@ classdef dbcollection_DatasetLoader
 end
 
 
-%------------------------- Utility functions%-------------------------
+% -------------------------- Utility functions --------------------------
 
 function str = convert_ascii_to_string(array)
     utils = dbcollection_utils();
