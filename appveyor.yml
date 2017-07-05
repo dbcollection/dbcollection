@@ -110,7 +110,7 @@ install:
 test_script:
   # tests
   - cmd: activate dbcollection
-  - pytest --cov=dbcollection tests\
+  - pytest --cov=dbcollection dbcollection\tests\
 
 
 after_test:
