@@ -17,7 +17,7 @@ function [loader, utils] = setup_ini()
     loader = dbcollection_DatasetLoader(name, task, data_dir, cache_path);
     utils = dbcollection_utils();
 
-function test_get
+function test_get_all
     sample_classes = ['0'; '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'];
 
     % setup data loader + utils class
@@ -30,7 +30,33 @@ function test_get
 
     assertEqual(sample_classes, classes);
 
-function test_object
+function test_get_range
+    sample_classes = ['0'; '1'; '2'; '3'; '4'; '5'; '6'; '7'; '8'; '9'];
+
+    % setup data loader + utils class
+    [loader, utils] = setup_ini();
+
+    % call get() method
+    data = loader.get('train', 'classes', [1:10]);
+    % convert double to char
+    classes = utils.string_ascii.convert_ascii_to_str(data);
+
+    assertEqual(sample_classes, classes);
+
+function test_get_range2
+    sample_classes = ['5'; '6'; '7'; '8'; '9'];
+
+    % setup data loader + utils class
+    [loader, utils] = setup_ini();
+
+    % call get() method
+    data = loader.get('train', 'classes', [6:10]);
+    % convert double to char
+    classes = utils.string_ascii.convert_ascii_to_str(data);
+
+    assertEqual(sample_classes, classes);
+
+function test_object_single
     sample_ids = [0, 5];
 
     % setup data loader + utils class
@@ -38,6 +64,17 @@ function test_object
 
     % call object() method
     ids = loader.object('train', 1);
+
+    assertEqual(sample_ids, double(ids));  % int32 -> double
+
+function test_object_two
+    sample_ids = [[0, 5]; [1 0]];
+
+    % setup data loader + utils class
+    [loader, ~] = setup_ini();
+
+    % call object() method
+    ids = loader.object('train', [1:2]);
 
     assertEqual(sample_ids, double(ids));  % int32 -> double
 
