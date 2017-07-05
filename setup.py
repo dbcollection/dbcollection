@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 
 # Get version
-from dbcollection.version import VERSION
+from dbcollection._version import VERSION
 VERSION = str(VERSION)
 ISRELEASED = True
 
