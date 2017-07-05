@@ -545,7 +545,6 @@ function is_task = exists_task(cache, name, task)
         else
             is_task = false;
         end
-        
     else
         is_task = false;
     end
