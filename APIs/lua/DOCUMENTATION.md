@@ -5,15 +5,15 @@ This section covers the main API methods for dataset managing/data fetching for 
 
 The dbcollection package is composed by three main groups:
 
-- [dbcollection.manager](#db.manager): dataset manager API module.
-    - [load](#db.manager.load): load a dataset.
-    - [download](#db.manager.download): download a dataset data to disk.
-    - [process](#db.manager.process): process a dataset's metadata and stores it to file.
-    - [add](#db.manager.add): add a dataset/task to the list of available datasets for loading.
-    - [remove](#db.manager.remove): remove/delete a dataset from the cache.
-    - [config_cache](#db.manager.config_cache): configure the cache file.
-    - [query](#db.manager.query): do simple queries to the cache.
-    - [info](#db.manager.info): prints the cache contents.
+- [dbcollection](#db): dataset manager API.
+    - [load](#db.load): load a dataset.
+    - [download](#db.download): download a dataset data to disk.
+    - [process](#db.process): process a dataset's metadata and stores it to file.
+    - [add](#db.add): add a dataset/task to the list of available datasets for loading.
+    - [remove](#db.remove): remove/delete a dataset from the cache.
+    - [config_cache](#db.config_cache): configure the cache file.
+    - [query](#db.query): do simple queries to the cache.
+    - [info](#db.info): prints the cache contents.
 - [dbcollection.utils](#db.utils): utility functions.
     - [string_ascii](#db.utils.string_ascii): module containing methods for converting [strings to tensors](#db.utils.string_ascii.convert_string_to_ascii) and [tensors to strings](#db.utils.string_ascii.convert_ascii_to_string).
 
@@ -26,21 +26,29 @@ The [data loading API](#db.loader) contains a few methods for data retrieval/pro
 - [object_fields_id](#db.loader.object_field_id): retrieves the index position of a field in the `object_ids` list.
 
 
-<a name="db.manager"></a>
-## dbcollection.manager
+<a name="db"></a>
+## dbcollection
 
-This module is the main modules for easily managing/loading/processing datasets for the `dbcollection` package.
-The dataset managing API is composed by the following methods.
+This module is the main module for easily managing/loading/processing datasets for the `dbcollection` package.
+The dataset managing API is composed by the following methods. The (recommended) use of the package is as follows:
 
-<a name="db.manager.load"></a>
+```lua
+local dbc = require 'dbcollection'
+```
+
+The library is structured as a table. In this documentation we use the above convention to import the module and to call its methods (similar to the other APIs).
+
+
+<a name="db.load"></a>
 ### load
 
 ```lua
-loader = dbcollection.manager.load(name, task, data_dir, verbose, is_test)
+loader = dbcollection.load(name, task, data_dir, verbose, is_test)
 ```
 
-Returns a loader instant of a `DatasetLoader` class with methods to retrieve/probe data and other informations from the selected dataset.
+Returns a loader instant of a `dbcollection.DatasetLoader` class with methods to retrieve/probe data and other informations from the selected dataset.
 
+> Note1: It is important to point out that you can pass input arguments in two different ways: (1) by passing values in the correct order or (2) by defining passing a table with fields named as the input args. Here it is prefered to use the second strategy because its simpler and its usage is similar to the other APIs where you can specify only the required fields you want to change and let the others use the default values.
 
 #### Parameters
 
@@ -56,25 +64,25 @@ Returns a loader instant of a `DatasetLoader` class with methods to retrieve/pro
 You can simply load a dataset by its name like in the following example.
 
 ```lua
-local dbc = require 'dbcollection.manager'
 local mnist = dbc.load('mnist')
 ```
 
 In cases where you don't have the dataset's data on disk yet (and the selected dataset can be downloaded by the API), you can specify which directory the datset's data files should be stored to and which task should be loaded for this dataset.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-local cifar10 = dbc.load{name='cifar10', task='classification', data_dir='<my_home>/datasets/'}
+local cifar10 = dbc.load{name='cifar10',
+                         task='classification',
+                         data_dir='<my_home>/datasets/'}
 ```
 
 > Note: If you don't specify the directory path where to store the data files, then the files will be stored in the `dbcollection/<dataset>/data` dir where the metadata files are located.
 
 
-<a name="db.manager.download"></a>
+<a name="db.download"></a>
 ### download
 
 ```lua
-dbcollection.manager.download(name, data_dir, verbose, is_test)
+dbcollection.download(name, data_dir, extract_data, verbose, is_test)
 ```
 
 This method will download a dataset's data files to disk. After download, it updates the cache file with the dataset's name and path where the data is stored.
@@ -95,32 +103,31 @@ This method will download a dataset's data files to disk. After download, it upd
 A simple usage example for downloading a dataset (without providing a storage path for the data) requires only the name of the target dataset and it will download its data files and then extract them to disk without any supervision required.
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.download('cifar10')
 ```
 
 It is good practice to specify where the data will be download to by providing a existing directory path to `data_dir`. (This information is stored in the `dbcollection.json` file stored in your home path.)
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.download({name='cifar10', data_dir='<some_dir>'})
 ```
 
 In cases where you only want to download the dataset's files without extracting its contents, you can set `extract_data=false` and skip the data extraction/unpacking step.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-dbc.download({name='cifar10', data_dir='<some_dir>', extract_data=false})
+dbc.download({name='cifar10',
+              data_dir='<some_dir>',
+              extract_data=false})
 ```
 
 > Note: this package uses a text progressbar when downloading files from urls for visual purposes (file size, elapsed time, % download, etc.). To disable this feature, set `verbose=false`.
 
 
-<a name="db.manager.process"></a>
+<a name="db.process"></a>
 ### process
 
 ```lua
-dbcollection.manager.process(name, task, verbose. is_test)
+dbcollection.process(name, task, verbose. is_test)
 ```
 
 Processes a dataset's metadata and stores it to file. This metadata is stored in a HDF5 file for each task composing the dataset's tasks. For more information about a dataset's metadata format please check the list of available datasets in the [docs](http://dbcollection.readthedocs.io/en/latest/available_datasets.html).
@@ -138,31 +145,22 @@ Processes a dataset's metadata and stores it to file. This metadata is stored in
 To process (or reprocess) a dataset's metadata simply do:
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.process('cifar10')
 ```
 
-> Note: this method allows the user to reset a dataset's metadata format in case of manual or accidental changes to the structure of the data, although most users won't have the need for such functionality on their usage of this package.
+This will process all tasks for a given dataset (default='all'). To process only a specific task, you need to specify the task name you want to setup. This is handy when one wants to process only a single task of a bunch of tasks and speed up the processing/loading stage.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-dbc.process('cifar10') -- process all tasks
-```
-
-To process only a specific task, you need to specify the task name you want to setup. This is handy when one wants to process only a single task of a bunch of tasks and speed up the processing/loading stage.
-
-```lua
-local dbc = require 'dbcollection.manager'
 dbc.process({name='cifar10', task='default'}) -- process only the 'default' task
 ```
 
-> Note: this method allows the user to reset a dataset's metadata format in case of manual or accidental changes to the structure of the data, although most users won't have the need for such functionality on their usage of this package.
+> Note: this method allows the user to reset a dataset's metadata file content in case of manual or accidental changes to the structure of the data. Most users won't have the need for such functionality on their basic usage of this package.
 
-<a name="db.manager.add"></a>
+<a name="db.add"></a>
 ### add
 
 ```lua
-dbcollection.manager.add(name, task, data_dir, verbose)
+dbcollection.add(name, task, data_dir, verbose)
 ```
 
 This method provides an easy way to add a custom dataset/task to the `dbcollection.json` cache file without having to manually add them themselves (although it is super easy to do it and recommended!).
@@ -182,18 +180,20 @@ This method provides an easy way to add a custom dataset/task to the `dbcollecti
 Adding a custom dataset or a custom task to a dataset requires the user to introduce the dataset's `name`, `task` name, `data_dir` where the data files are stored and the metadata's `file_path` on disk.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-dbc.add{name='custom1', task='default', data_dir='<data_dir>', file_path='<metadata_file_path>'}
+dbc.add{name='custom1',
+        task='default',
+        data_dir='<data_dir>',
+        file_path='<metadata_file_path>'}
 ```
 
 > Note: In cases where no external files are required besides the metadata's data, you can set `data_dir`="".
 
 
-<a name="db.manager.remove"></a>
+<a name="db.remove"></a>
 ### remove
 
 ```lua
-dbcollection.manager.remove(name, task, data_dir, verbose)
+dbcollection.remove(name, task, data_dir, verbose)
 ```
 
 This method allows for a dataset to be removed from the list of available datasets for load in the cache. It also allows for the user to delete the dataset's files on disk if desired.
@@ -201,6 +201,7 @@ This method allows for a dataset to be removed from the list of available datase
 #### Parameters
 
 - `name`: Name of the dataset. (*type=string*)
+- `task`: Name of the task to delete. (*type=string, default='None'*)
 - `delete_data`: Delete all data files from disk for this dataset if True. (*type=boolean, default=false*)
 - `is_test`: Flag used for tests. (*type=boolean, default=false*)
 
@@ -210,37 +211,32 @@ This method allows for a dataset to be removed from the list of available datase
 To remove a dataset simply do:
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.remove('cifar10')
 ```
 
 If you want to remove the dataset completely from disk, you can set the `delete_data` parameter to `true`.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-dbc.remove('cifar10', true)
+dbc.remove{name='cifar10', delete_data=true}
 ```
 
 
-<a name="db.manager.config_cache"></a>
+<a name="db.config_cache"></a>
 ### config_cache
 
 ```lua
-dbcollection.manager.config_cache(field, value, delete_cache, delete_cache_dir, delete_cache_file, reset_cache, is_test)
+dbcollection.config_cache(field, value, delete_cache, delete_cache_dir, delete_cache_file, reset_cache, is_test)
 ```
 
+Configures the cache file via API. This method allows to configure the cache file directly by selecting any data field and (re)setting its value. The user can also manually configure the `dbcollection.json` cache file in the filesystem (recommended).
 
-Configures the cache file via an API. This method allows to configure the cache file directly by selecting any data field/value. The user can also manually configure the `dbcollection.json` cache file (recommended).
+To modify any entry in the cache file, simply input the field name you want to change along with the new data you want to insert. This applies to any existing field.
 
-To modify any entry in the cache file, simply input the field name
-you want to change along with the new data you want insert. This
-applies to any field/data in the file.
+Another available function is the reset/wipe the entire cache paths/configs from the file. To perform this action set the `reset_cache` input arg to `true`.
 
-Another thing available is to reset/clear the entire cache paths/configs from the file by simply enabling the `reset_cache` flag to `true`.
+Also, there is an option to completely remove the cache file+folder from the disk by enabling `delete_cache` to `true`. This will remove the cache file `dbcollection.json` and the `dbcollection/` folder from disk.
 
-Also, there is an option to completely remove the cache file+folder
-from the disk by enabling `delete_cache` to `true`. This will remove the cache `dbcollection.json` and the `dbcollection/` folder from disk.
-
+> Warning: Misusing this API method may result in tears. Proceed with caution.
 
 #### Parameters
 
@@ -258,44 +254,39 @@ from the disk by enabling `delete_cache` to `true`. This will remove the cache `
 For example, Lets change the directory where the dbcollection's metadata main folder is stored on disk. This is useful to store/move all the metadata files to another disk.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-dbc.config_cache{field='default_cache_dir', value='<home_dir>/new/path/db/'}
+dbc.config_cache{field='default_cache_dir',
+                 value='<home_dir>/new/path/db/'}
 ```
 
 If a user wants to remove all files relating to the `dbcollection` package, one can use the `config_cache` to accomplish this in a simple way:
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.config_cache{delete_cache=true}
 ```
 
 or if the user wants to remove only the cache file:
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.config_cache{delete_cache_file=true}
 ```
 
-or to remove the cache directory where all the metadata files from all datasets are stored:
+or to remove the cache directory where all the metadata files from all datasets are stored (**I hope you are sure about this one...**):
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.config_cache{delete_cache_dir=true}
 ```
 
-or to simply reset the cache file contents:
+or to simply reset the cache file contents withouth removing the file:
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.config_cache{reset_cache=true}
 ```
 
-
-<a name="db.manager.query"></a>
+<a name="db.query"></a>
 ### query
 
 ```lua
-dbcollection.manager.query(pattern, is_test)
+dbcollection.query(pattern, is_test)
 ```
 
 Do simple queries to the cache and displays them to the screen.
@@ -312,24 +303,22 @@ Do simple queries to the cache and displays them to the screen.
 Simple query about the existence of a dataset.
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.query('mnist')
 ```
 
 It can also retrieve information by category/keyword. For example, this is useful to see which datasets have the same task.
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.query('detection')
 ```
 
 > Note: this is the same as scanning the `dbcollection.json` cache file yourself, but it has the advantage of grouping information about a certain pattern for you.
 
-<a name="db.manager.info"></a>
+<a name="db.info"></a>
 ### info
 
 ```lua
-dbcollection.manager.info(list_datasets, is_test)
+dbcollection.info(list_datasets, is_test)
 ```
 
 Prints the cache contents to screen. It can also print a list of all available datasets to download/process in the `dbcollection` package.
@@ -345,14 +334,12 @@ Prints the cache contents to screen. It can also print a list of all available d
 Print the cache file contents to the screen:
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.info()
 ```
 
 Display all available datasets to download/process:
 
 ```lua
-local dbc = require 'dbcollection.manager'
 dbc.info(true)
 ```
 
@@ -361,7 +348,7 @@ dbc.info(true)
 
 The data loading API is class composed by some fields containing information about the dataset and some methods to retrieve data.
 
-Loading a dataset using [dbcollection.manager.load()](#db.manager.load) returns an instantiation of the `DatasetLoader` class which contains information about the selected dataset and methods to easily extract data from the metadata file.
+Loading a dataset using [dbcollection.load()](#db.load) returns an instantiation of the `DatasetLoader` class. It contains information about the selected dataset (name, task, set splits, directory of the data files stored in disk, etc.) and methods to easily extract data from the metadata file.
 
 The information of the dataset is stored as attributes of the class:
 
@@ -374,17 +361,17 @@ The information of the dataset is stored as attributes of the class:
 - `sets`: A list of available sets for the selected dataset (e.g., train/val/test/etc.). (*type = table*)
 - `object_fields`: A list of all field names available for each set of the dataset. (*type = table*)
 
-> Note: The list of available `sets` and `object_fields` varies from dataset to dataset.
+> Note: The list of available `sets` (set splits) and `object_fields` (available field names) varies from dataset to dataset.
 
 
 <a name="db.loader.get"></a>
 ### get
 
 ```lua
-data = Loader:get(set_name, field_name, idx)
+data = loader:get(set_name, field_name, idx)
 ```
 
-Retrieves data from a dataset's hdf5 metadata file. This method accesses the HDF5 metadata file and searches for a field `field_name` in the selected group `set_name`. If no idx is defined, then it returns a tensor containing the entire data.
+Retrieves data from a dataset's HDF5 metadata file. This method accesses the HDF5 metadata file and searches for a field `field_name` in the selected group `set_name`. If an index or list of indexes are input, the method returns a slice (rows) of the data's tensor. If no index is set, it return the entire data tensor.
 
 #### Parameters
 
@@ -397,9 +384,7 @@ Retrieves data from a dataset's hdf5 metadata file. This method accesses the HDF
 The first, and most common, usage of this method if to retrieve a single piece of data from a data field. Lets retrieve the first image+label from the `MNIST` dataset.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-local mnist = dbc.load('mnist') # returns a DatasetLoader class
-
+local mnist = dbc.load('mnist')  -- returns a DatasetLoader class
 local img = mnist:get('train', 'images', 1)
 local label = mnist:get('train', 'labels', 1)
 ```
@@ -425,7 +410,7 @@ indexes = Loader:object(set_name, idx, is_value)
 
 Retrieves a list of all fields' indexes/values of an object composition. If `is_value=true`, instead of returning a tensor containing the object's fields indexes, it returns a table of tensors for each field.
 
-This method is particularly useful when different fields are combined (like in detection tasks) and the required data can be quickly accessed and retrieved in one swoop.
+This method is particularly useful when different fields are linked (like in detection tasks with labeled data) and their contents can be quickly accessed and retrieved in one swoop.
 
 #### Parameters
 
@@ -439,22 +424,20 @@ This method is particularly useful when different fields are combined (like in d
 Fetch all indexes of an object.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-local mnist = dbc.load('mnist') # returns a DatasetLoader class
-
+local mnist = dbc.load('mnist')
 local obj_idxs = mnist:object('train', 1)
 ```
 
 Multiple lists can be retrieved just like with the [get()](#db.loader.get) method.
 
 ```lua
-local objs_idxs = mnist:object('train', {1, 20})
+local objs_idxs = mnist:object('train', {1, 10})
 ```
 
 It is also possible to retrieve the values/tensors instead of the indexes.
 
 ```lua
-local objs_data = mnist:object('train', {1, 20}, true)
+local objs_data = mnist:object('train', {1, 10}, true)
 ```
 
 
@@ -462,7 +445,7 @@ local objs_data = mnist:object('train', {1, 20}, true)
 ### size
 
 ```lua
-size = Loader:size(set_name, field_name)
+size = loader:size(set_name, field_name)
 ```
 
 Returns the size of a field.
@@ -479,9 +462,7 @@ Returns the size of a field.
 Get the size of the images tensor in `MNIST` train set.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-local mnist = dbc.load('mnist') # returns a DatasetLoader class
-
+local mnist = dbc.load('mnist')
 local images_size = mnist:size('train', 'images')
 ```
 
@@ -489,7 +470,7 @@ Get the size of the objects in `MNIST` train set.
 
 ```lua
 local obj_size = mnist:size('train', 'object_ids')
-# or
+-- or
 local obj_size = mnist:size('train')
 ```
 
@@ -498,7 +479,7 @@ local obj_size = mnist:size('train')
 ### list
 
 ```lua
-fields = Loader:list(set_name)
+fields = loader:list(set_name)
 ```
 
 Lists all field names in a set.
@@ -513,9 +494,7 @@ Lists all field names in a set.
 Get all fields available in the `MNIST` test set.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-local mnist = dbc.load('mnist') # returns a DatasetLoader class
-
+local mnist = dbc.load('mnist')
 local images_size = mnist:list('test')
 ```
 
@@ -524,7 +503,7 @@ local images_size = mnist:list('test')
 ### object_field_id
 
 ```lua
-position = Loader:object_field_id(set_name, field_name)
+position = loader:object_field_id(set_name, field_name)
 ```
 
 Retrieves the index position of a field in the `object_ids` list. This position points to the field name stored in the `object_fields` attribute.
@@ -539,9 +518,7 @@ Retrieves the index position of a field in the `object_ids` list. This position 
 This example shows how to use this method in order to retrieve the correct fields from an object index list.
 
 ```lua
-local dbc = require 'dbcollection.manager'
-local mnist = dbc.load('mnist') # returns a DatasetLoader class
-
+local mnist = dbc.load('mnist')
 print('object: images field idx: ', mnist:object_field_id('train', 'images'))
 print('object: labels field idx: ', mnist:object_field_id('train', 'labels'))
 print('Check if the positions match with the list of fields: ', mnist.object_fields['train'])
@@ -551,7 +528,7 @@ print('Check if the positions match with the list of fields: ', mnist.object_fie
 <a name="db.utils"></a>
 ## Utils
 
-This module contains some usefull utility functions available to the user.
+This module contains some useful utility functions available to the user.
 
 It is composed by the following modules:
 
@@ -560,7 +537,7 @@ It is composed by the following modules:
 <a name="db.utils.string_ascii"></a>
 ### dbcollection.utils.string_ascii
 
-This module contains methods to convert strings to ascii and vice-versa. These are usefull when recovering strings from the metadata file that are encoded as `torch.ByteTensors` (this is due to a limitation in the `HDF5` implementation on torch7).
+This module contains methods to convert strings to ascii and vice-versa. These are useful when recovering strings from the metadata file that are encoded as `torch.ByteTensors` (this is due to a limitation in the `HDF5` implementation on torch7).
 
 Although one might only need to convert `torch.ByteTensors` to strings, this module contains both methods for ascii-to-string and string-to-ascii.
 
@@ -582,11 +559,8 @@ Convert a string or table of string to a `torch.CharTensor`.
 Single string.
 
 ```lua
-local string_ascii = require 'dbcollection.utils.string_ascii'
-local toascii_ = string_ascii.convert_str_to_ascii
-
 local str = 'string1'
-local ascii_tensor = toascii_(str)
+local ascii_tensor = dbc.utils.string_ascii.convert_str_to_ascii(str)
 
 print(ascii_tensor)
  115  116  114  105  110  103   49    0
@@ -597,11 +571,8 @@ print(ascii_tensor)
 Table of strings.
 
 ```lua
-local string_ascii = require 'dbcollection.utils.string_ascii'
-local toascii_ = string_ascii.convert_str_to_ascii
-
 local str = {'string1', 'string2', 'string3'}
-local ascii_tensor = toascii_(str)
+local ascii_tensor = dbc.utils.string_ascii.convert_str_to_ascii(str)
 
 print(ascii_tensor)
  115  116  114  105  110  103   49    0
@@ -629,12 +600,9 @@ Convert a `torch.CharTensor` or `torch.ByteTensor` to a table of strings.
 Convert a `torch.CharTensor` to string.
 
 ```lua
-local string_ascii = require 'dbcollection.utils.string_ascii'
-local tostring_ = string_ascii.convert_ascii_to_str
-
-# ascii format of 'string1'
+-- ascii format of 'string1'
 local tensor = torch.CharTensor({{115, 116, 114, 105, 110, 103, 49, 0}})
-local str = tostring_(tensor)
+local str = dbc.utils.string_ascii.convert_ascii_to_str(tensor)
 
 print(str)
 {
