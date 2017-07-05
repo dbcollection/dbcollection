@@ -71,7 +71,7 @@ python setup.py install
 Using the module is pretty straight-forward. To import it just do:
 
 ```python
-import dbcollection.manager as dbc
+import dbcollection as dbc
 ```
 
 To load a dataset, you need to use `dbc` API `load()` method.
