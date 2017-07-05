@@ -288,7 +288,6 @@ or to simply reset the cache file contents withouth removing the file:
 dbc.config_cache(struct('reset_cache', 'true'));
 ```
 
-
 <a name="db.dbcollection.query"></a>
 ### query
 
@@ -377,7 +376,7 @@ The information of the dataset is stored as attributes of the class:
 data = loader.get(set_name, field_name, idx);
 ```
 
-Retrieves data from the dataset's hdf5 metadata file. This method accesses the HDF5 metadata file content and searches for a field `field_name` in the selected group `set_name`. If an index or list of indexes are input, the method returns a slice (rows) of the data's array. If no index is set, it return the entire data array.
+Retrieves data from the dataset's HDF5 metadata file. This method accesses the HDF5 metadata file content and searches for a field `field_name` in the selected group `set_name`. If an index or list of indexes are input, the method returns a slice (rows) of the data's array. If no index is set, it return the entire data array.
 
 #### Parameters
 
@@ -543,7 +542,7 @@ It is composed by the following modules:
 <a name="db.utils.string_ascii"></a>
 ### dbcollection.utils.string_ascii
 
-This module contains methods to convert strings to ascii and vice-versa. These are usefull when recovering strings from the metadata file that are encoded as `uint8` arrays.
+This module contains methods to convert strings to ascii and vice-versa. These are useful when recovering strings from the metadata file that are encoded as `uint8` arrays.
 
 Although one might only need to convert ascii encoded arrays to strings, this module contains both methods for ascii-to-string and string-to-ascii.
 
