@@ -304,6 +304,18 @@ function str = convert_ascii_to_string(array)
 end
 
 
+function out = slice_array(A, ix, dim)
+    if length(ix) == 1
+        out = slice_(A, ix, dim)
+    else
+        out = slice_(A, ix, dim);
+        for i=2:lenght(ix)
+            out = [out; slice_(A, ix, dim)];
+        end
+    end
+end
+
+
 function out = slice_(A, ix, dim)
     subses = repmat({':'}, [1 ndims(A)]);
     subses{dim} = ix;
