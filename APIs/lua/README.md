@@ -45,7 +45,7 @@ cd APIs/lua && luarocks make
 
 This package follows the same API as the Python version. Once installed, to use the package simply require *dbcollection*:
 ```lua
-local dbc = require 'dbcollection.manager'
+local dbc = require 'dbcollection'
 ```
 
 Then, just like with the Python's version, to load a dataset you simply do:
