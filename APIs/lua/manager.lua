@@ -3,7 +3,9 @@
 --]]
 
 require 'paths'
+local dbcollection = require 'dbcollection.env'
 require 'dbcollection.loader'
+
 local argcheck = require 'argcheck'
 local doc = require 'argcheck.doc'
 local json = require 'json'
@@ -68,12 +70,10 @@ end
 
 
 -----------------------------------------------------------
--- Manager API functions
+-- API functions
 -----------------------------------------------------------
 
-local manager = {}
-
-function manager.load(options)
+function dbcollection.load(options)
     local initcheck = argcheck{
         pack=true,
         help=[[
@@ -159,14 +159,14 @@ function manager.load(options)
     local data_dir, cache_path = get_dataset_paths(cache, args.name, args.task)
 
     -- load HDF5 file
-    local loader = DatasetLoader(args.name, args.task, data_dir, cache_path)
+    local loader = dbcollection.DatasetLoader(args.name, args.task, data_dir, cache_path)
 
     return loader
 end
 
 ------------------------------------------------------------------------------------------------------------
 
-function manager.download(options)
+function dbcollection.download(options)
     local initcheck = argcheck{
         pack=true,
         help=[[
@@ -232,7 +232,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
-function manager.process(options)
+function dbcollection.process(options)
     local initcheck = argcheck{
         pack=true,
         help=[[
@@ -290,7 +290,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
-function manager.add(options)
+function dbcollection.add(options)
     local initcheck = argcheck{
         pack=true,
         help=[[
@@ -368,7 +368,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
-function manager.remove(options)
+function dbcollection.remove(options)
     local initcheck = argcheck{
         pack=true,
         help=[[
@@ -421,7 +421,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
-function manager.config_cache(options)
+function dbcollection.config_cache(options)
     local initcheck = argcheck{
         pack=true,
         help=[[
@@ -514,7 +514,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
-function manager.query(options)
+function dbcollection.query(options)
     local initcheck = argcheck{
         pack=true,
         help=[[
@@ -559,7 +559,7 @@ end
 
 ------------------------------------------------------------------------------------------------------------
 
-function manager.info(options)
+function dbcollection.info(options)
     local initcheck = argcheck{
         pack=true,
         help=[[
@@ -598,8 +598,6 @@ function manager.info(options)
     -- parse options
     local args = initcheck(options)
 
-    print(args)
-
     local command = ('import dbcollection.manager as dbc;' ..
                     'dbc.info(list_datasets=%s,is_test=%s)')
                     :format(tostring_py(args.list_datasets),
@@ -607,10 +605,3 @@ function manager.info(options)
 
     os.execute(('python -c "%s"'):format(command))
 end
-
-
------------------------------------------------------------
--- Returns
------------------------------------------------------------
-
-return manager

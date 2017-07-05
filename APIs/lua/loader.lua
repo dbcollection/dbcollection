@@ -2,10 +2,11 @@
     Dataset loader class.
 --]]
 
+local dbcollection = require 'dbcollection.env'
 local hdf5 = require 'hdf5'
 local string_ascii = require 'dbcollection.utils.string_ascii'
 
-local DataLoader = torch.class('DatasetLoader')
+local DataLoader = torch.class('dbcollection.DatasetLoader', dbcollection)
 
 ------------------------------------------------------------------------------------------------------------
 
