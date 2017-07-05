@@ -49,7 +49,7 @@ install:
 # command to run tests
 script:
     - source activate dbcollection
-    - pytest --cov=dbcollection tests/
+    - pytest --cov=dbcollection dbcollection/tests/
 
 after_success:
     - ls -lha
