@@ -132,7 +132,7 @@ dbc.download(struct('name', 'cifar10', ...
 dbcollection.process(name, task, verbose, is_test)
 ```
 
-Processes a dataset's metadata and stores it to file. This metadata is stored in a HDF5 file for each task composing the dataset's tasks. For more information about a dataset's metadata format please check the [list of available datasets](link_list).
+Processes a dataset's metadata and stores it to file. This metadata is stored in a HDF5 file for each task composing the dataset's tasks. For more information about a dataset's metadata format please check the list of available datasets in the [docs](http://dbcollection.readthedocs.io/en/latest/available_datasets.html).
 
 #### Parameters
 
