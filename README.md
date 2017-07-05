@@ -18,6 +18,7 @@ collection of datasets for a variety of tasks such as
 object classification, detection, human pose estimation,
 captioning or NLP.
 
+This package is available for Windows, Linux and MacOs.
 
 ## Supported languages
 
