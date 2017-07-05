@@ -20,7 +20,26 @@ I cannot provide any garantees concerning older version.
 
 ### Installation
 
-To install this package, add APIS/matlab/ to the Matlab path.
+To install the dbcollection's Matlab API, first the Python's version must be installed on your system. If you do not have it installed, then follow the next steps to get it installed on your system:
+
+- step 1: install the package via pip
+
+```
+pip install dbcollection
+```
+
+- step 2: download the git repository to disk.
+
+```
+git clone https://github.com/farrajota/dbcollection
+```
+
+- step 3: add the `dbcollection/APIs/matlab/` to your Matlab path.
+
+```
+addpath('<path>/dbcollection/APIs/matlab/');
+```
+
 
 Also, this package requires the [JSONlab](https://github.com/fangq/jsonlab) json encoder/decoder to work. To install this package just download the repo to disk
 
@@ -28,7 +47,7 @@ Also, this package requires the [JSONlab](https://github.com/fangq/jsonlab) json
 git clone https://github.com/fangq/jsonlab
 ```
 
-and add it to Matlab's path:
+and add it to Matlab path:
 
 ```
 addpath('/path/to/jsonlab');
