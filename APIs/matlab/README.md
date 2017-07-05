@@ -9,7 +9,7 @@ This is a simple wrapper for the Python's dbcollection module for Matlab. The fu
 
 This package requires:
 
-- dbcollection package installed in Python.
+- dbcollection (Python).
 - Matlab >= 2014a
 - [JSONlab](https://github.com/fangq/jsonlab)
 
