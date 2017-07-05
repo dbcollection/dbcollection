@@ -208,8 +208,8 @@ classdef dbcollection
             %     Path of the stored data on disk.
             % file_path : str
             %     Path to the metadata HDF5 file.
-            % keywords : table
-            %     Table of strings of keywords that categorize the dataset.
+            % keywords : list
+            %     List of strings of keywords that categorize the dataset.
             %     (optional, default={})
             % is_test : bool
             %     Flag used for tests.
@@ -231,14 +231,20 @@ classdef dbcollection
             opt = parse_options(varargin, config);
 
             if ~isempty(opt.keywords)
-                tmp_str = '';
-                for i=1:1:size(opt.keywords,2)
-                    tmp_str = strcat(tmp_str, opt.keywords{i});
-                    if i < size(opt.keywords,2)
-                        tmp_str = strcat(tmp_str, ',');
+                if ischar(opt.keywords)
+                    opt.keywords = sprintf('[''%s'']', opt.keywords);
+                elseif iscell(opt.keywords)
+                    tmp_str = '';
+                    for i=1:1:size(opt.keywords,2)
+                        tmp_str = strcat(tmp_str, ['' opt.keywords{i} '']);
+                        if i < size(opt.keywords,2)
+                            tmp_str = strcat(tmp_str, ',');
+                        end
                     end
+                    opt.keywords = sprintf('[%s]', tmp_str);
+                else
+                    error('keywords input must be either a string or a cell of strings')
                 end
-                opt.keywords = sprintf('[%s]', tmp_str);
             else
                 opt.keywords = '[]';
             end
@@ -350,7 +356,7 @@ classdef dbcollection
             opt = parse_options(varargin, config);
 
             command = sprintf(strcat('import dbcollection.manager as dbc;', ...
-                              'dbc.config_cache(field=%s,value=%s,delete_cache=%s, ', ...
+                              'dbc.config_cache(field=''%s'',value=''%s'',delete_cache=%s, ', ...
                               'delete_cache_dir=%s,delete_cache_file=%s,reset_cache=%s, ', ...
                               'is_test=%s)'), ...
                               opt.field, opt.value, ...
@@ -389,7 +395,7 @@ classdef dbcollection
             opt = parse_options(varargin, config);
 
             command = sprintf(strcat('import dbcollection.manager as dbc;', ...
-                              'print(dbc.query(pattern=''%s'',is_test=%s)))'), ...
+                              'print(dbc.query(pattern=''%s'',is_test=%s))'), ...
                               opt.pattern, logical2str(opt.is_test));
 
             run_command(command);
@@ -436,8 +442,14 @@ end
 
 function opt = parse_options(input, config)
     [num_req, names_req] = num_required_inputs(config);
-    if size(input, 2) < num_req
-        error('Not enough input arguments were provided.')
+    if isstruct(input{1})
+        if size(fieldnames(input{1}), 1) < num_req
+            error('Not enough input arguments were provided.')
+        end
+    else
+        if size(input{1}, 2) < num_req
+            error('Not enough input arguments were provided.')
+        end
     end
 
     opt = config;
