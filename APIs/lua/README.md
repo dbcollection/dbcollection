@@ -87,9 +87,6 @@ local label = mnist:get('train', 'labels', 1)
 
 For a more detailed view of the Lua's API documentation see [here](DOCUMENTATION.md#db.documentation).
 
-# Available datasets
-
-Check out the dbcollection's [list of available datasets](link_list) for more information about the datasets details/data format.
 
 # License
 
