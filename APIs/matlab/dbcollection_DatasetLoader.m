@@ -29,7 +29,6 @@ classdef dbcollection_DatasetLoader
         task            % Name of the task
         data_dir        % Path of the data's files
         cache_path      % Filepath to the HDF5 file
-        file            % Handler for the HDF5 file
         root_path       % HDF5 default group path
         sets            % Names of the dataset splits (e.g. train/val/test/etc.)
         object_fields   % List of field names per set
@@ -72,8 +71,8 @@ classdef dbcollection_DatasetLoader
                     for j=1:1:size(hinfo.GroupHierarchy.Groups(1,i).Groups, 2)
                         set_name_path = hinfo.GroupHierarchy.Groups(1,i).Groups(1,j).Name;
                         [~,set_name,~] = fileparts(set_name_path);
-                        
-                        % add set to a cell                        
+
+                        % add set to a cell
                         loader.sets{j} = set_name;
 
                         % fetch list of field names that compose the object list.
@@ -95,7 +94,7 @@ classdef dbcollection_DatasetLoader
             %     Name of the set.
             % field_name : string
             %    Name of the data field.
-            % idx : number/table
+            % idx : number/array or numbers
             %     Index number of the field. If the input is a table, it uses it as a range
             %     of indexes and returns the data for that range.
             %     (optional, default=[])
