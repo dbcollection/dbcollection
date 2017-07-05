@@ -18,6 +18,14 @@ collection of datasets for a variety of tasks such as
 object classification, detection, human pose estimation,
 captioning or NLP.
 
+
+## Supported languages
+
+- Python (>=2.7 or >=3.4)
+- Lua/[Torch7](https://github.com/torch/torch7)
+- Matlab (>=2014a)
+
+
 ## Package installation
 
 ### From PyPi
@@ -55,7 +63,9 @@ git clone https://github.com/farrajota/dbcollection
 python setup.py install
 ```
 
-## Usage
+## Getting started
+
+### Usage
 
 Using the module is pretty straight-forward. To import it just do:
 
@@ -98,7 +108,7 @@ plt.show()
 ```
 
 > Note: For a more detailed overview of how to use this
-module check the next section.
+module check the documentation or the available tutorials.
 
 
 ### Tutorial
@@ -106,18 +116,6 @@ module check the next section.
 A more detailed tutorial on using the **dbcollection**
 module main APIs for dataset managing and data loading is
 provided as a python notebook format [here](todo).
-
-
-## Supported languages
-
-
-- Python (>=2.7 or >=3.4)
-- Lua/[Torch7](https://github.com/torch/torch7)
-- Matlab (comming soon)
-
-> Note: If you would like to see additional languages
-being supported, please consider contributing to the
-project.
 
 
 ## Documentation
@@ -131,7 +129,8 @@ learning how to use the library.
 ## Contributing
 
 All contributions, bug reports, bug fixes, documentation
-improvements, enhancements and ideas are welcome.
+improvements, enhancements and ideas are welcome. If you would like to see additional languages being supported, please consider contributing to the
+project.
 
 If you are interested in fixing issues and contributing
 directly to the code base, please see the document [How to Contribute](https://github.com/farrajota/dbcollection/wiki/How-to-Contribute).
