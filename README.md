@@ -55,7 +55,7 @@ the following setps:
 - Clone the repo to your hard drive:
 
 ```
-git clone https://github.com/farrajota/dbcollection
+git clone --recursive https://github.com/farrajota/dbcollection
 ```
 
 - `cd ` to the dbcollection folder and do the command
