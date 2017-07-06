@@ -91,6 +91,14 @@ source activate dbcollection
 time conda install pytest pytest-cov
 time pip install pytest-xdist
 
+# we have additional pip installs
+echo
+echo "[additional pip installs]"
+REQ="ci/requirements_pip.txt"
+if [ -e ${REQ} ]; then
+   pip install -r $REQ
+fi
+
 echo
 if [ -z "$BUILD_TEST" ]; then
 
@@ -109,13 +117,6 @@ if [ "${TRAVIS_BRANCH}" == "master" ] && [ "${TRAVIS_TAG}" != "" ]; then
     conda install conda-build anaconda-client wheel six pytest
 fi
 
-# we may have additional pip installs
-echo
-echo "[pip installs]"
-REQ="ci/requirements_pip.txt"
-if [ -e ${REQ} ]; then
-   pip install -r $REQ
-fi
 
 echo
 echo "[build/install source code]"
