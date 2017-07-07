@@ -1,5 +1,5 @@
 <a name="db.documentation"></a>
-# Documentation
+# Lua/Torch7 API documentation
 
 This section covers the main API methods for dataset managing/data fetching for the Lua/Torch7's dbcollection package.
 
