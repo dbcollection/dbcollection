@@ -6,7 +6,7 @@
 
 
 -- initializations
-local dbc = require 'dbcollection.manager'
+local dbc = require 'dbcollection'
 local hdf5 = require 'hdf5'
 local string_ascii = require 'dbcollection.utils.string_ascii'
 

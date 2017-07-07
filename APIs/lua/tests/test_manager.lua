@@ -6,7 +6,7 @@
 
 
 -- initializations
-local dbc = require 'dbcollection.manager'
+local dbc = require 'dbcollection'
 
 local mytest = torch.TestSuite()
 local tester = torch.Tester()
