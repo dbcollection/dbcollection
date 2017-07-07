@@ -1,5 +1,5 @@
 <a name="db.documentation"></a>
-# Documentation
+# Matlab API documentation
 
 This section covers the main API methods for dataset managing/data fetching for the Matlab's dbcollection package.
 
