@@ -8,19 +8,32 @@ def pad_list(listA, val=-1):
 
     Parameters
     ----------
-    listA : list of lists
+    listA : list
         List of lists of different sizes.
     val : number
         Value to pad the lists.
 
     Returns
     -------
-    list of lists
+    list
         A list of lists with the same same.
 
     Raises
     ------
         None
+
+    Examples
+    --------
+    Pad an uneven list of lists with a value.
+
+    >>> from dbcollection.utils.pad import pad_list
+    >>> pad_list([[0, 1, 2, 3], [45, 6], [7, 8], [9]])  # pad with -1 (default)
+    [[0, 1, 2, 3], [4, 5, 6, -1], [7, 8, -1, -1], [9-1, -1, -1]]
+    >>> pad_list([[1,2], [3, 4]])  # does nothing
+    [[1, 2], [3, 4]]
+    >>> pad_list([[], [1], [3, 4, 5]], 0)  # pad lists with 0
+    [[0, 0, 0], [1, 0, 0], [3, 4, 5]]
+
     """
     # pad list with zeros in order to have all lists of the same size
     assert isinstance(listA, list), 'Input must be a list. Got {}, espected {}' \
@@ -38,19 +51,28 @@ def pad_list2(listA, val=-1):
 
     Parameters
     ----------
-    listA : list of lists
-        List of lists of different sizes.
+    listA : list
+        List of lists of lists of different sizes.
     val : number
         Value to pad the lists.
 
     Returns
     -------
-    list of lists
-        A list of lists with the same same.
+    list
+        A list of lists of lists with the same same.
 
     Raises
     ------
         None
+
+    Examples
+    --------
+    Pad an uneven list of lists of lists with a value.
+
+    >>> from dbcollection.utils.pad import pad_list
+    >>> pad_list2([[[], [1]], [[5, 6]]])
+    [None, None, None]
+
     """
     # pad list with zeros in order to have all lists of the same size
     assert isinstance(listA, list), 'Input must be a list. Got {}, espected {}' \
@@ -70,19 +92,30 @@ def unpad_list(listA, val=-1):
 
     Parameters
     ----------
-    listA : list of lists
+    listA : list
         List of lists of equal sizes.
     val : number
         Value to unpad the lists.
 
     Returns
     -------
-    list of lists
+    list
         A list of lists without the padding values.
 
     Raises
     ------
         None
+
+    Examples
+    --------
+    Remove the padding values of a list of lists.
+
+    >>> from dbcollection.utils.pad import unpad_list
+    >>> unpad_list([[1,2,3,-1,-1],[5,6,-1,-1,-1]])
+    [[1, 2, 3], [5, 6]]
+    >>> unpad_list([[5,0,-1],[1,2,3,4,5]], 5)
+    [[0, -1], [1, 2, 3, 4]]
+
     """
     # pad list with zeros in order to have all lists of the same size
     assert isinstance(listA, list), 'Input must be a list. Got {}, espected {}' \
