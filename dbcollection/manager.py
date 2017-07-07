@@ -10,8 +10,8 @@ import shutil
 
 import dbcollection.datasets.funs as dataset
 from dbcollection.datasets.dblist import available_datasets
-from dbcollection.utils.cache import CacheManager
-from dbcollection.utils.loader import DatasetLoader
+from dbcollection.cache import CacheManager
+from dbcollection.loader import DatasetLoader
 
 
 def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=False):
