@@ -6,7 +6,7 @@ String-to-ascii and ascii-to-string convertion functions.
 import numpy as np
 
 
-def str_to_ascii(input_str):
+def _str_to_ascii(input_str):
     """Convert string to ascii numpy array.
 
     Converts a single string of characters into a numpy array
@@ -29,7 +29,7 @@ def str_to_ascii(input_str):
     return np.array([ord(c) for c in input_str], dtype=np.uint8)
 
 
-def ascii_to_str(input_array):
+def _ascii_to_str(input_array):
     """Convert ascii numpy array to a string.
 
     Parameters
@@ -74,6 +74,24 @@ def convert_str_to_ascii(inp_str):
     Raises
     ------
         None
+
+    Examples
+    --------
+    Example1: Convert a string to ASCII as a `numpy` array.
+
+    >>> from dbcollection.utils.string_ascii import convert_str_to_ascii
+    >>> convert_str_to_ascii('string1')
+    array([115, 116, 114, 105, 110, 103,  49,   0], dtype=uint8)
+
+
+    Example2: Convert a list of strings to ASCII as a `numpy` array.
+
+    >>> from dbcollection.utils.string_ascii import convert_str_to_ascii
+    >>> convert_str_to_ascii(['string1', 'string2', 'string3'])
+    array([[115, 116, 114, 105, 110, 103,  49,   0],
+        [115, 116, 114, 105, 110, 103,  50,   0],
+        [115, 116, 114, 105, 110, 103,  51,   0]], dtype=uint8)
+
     """
     # check if list
     if not isinstance(inp_str, list):
@@ -87,7 +105,7 @@ def convert_str_to_ascii(inp_str):
 
     # iteratively copy data to the array
     for i, val in enumerate(inp_str):
-        ascii_array[i, :len(val)] = str_to_ascii(val)
+        ascii_array[i, :len(val)] = _str_to_ascii(val)
 
     if len(inp_str) > 1:
         return ascii_array
@@ -111,9 +129,20 @@ def convert_ascii_to_str(input_array):
     Raises
     ------
         None
+
+    Examples
+    --------
+    Convert a `numpy` array to string.
+
+    >>> from dbcollection.utils.string_ascii import convert_ascii_to_str
+    >>> import numpy as np
+    >>> tensor = np.array([[115, 116, 114, 105, 110, 103, 49, 0]], dtype=np.uint8)  # ascii format of 'string1'
+    >>> convert_ascii_to_str(tensor)
+    ['string1']
+
     """
     list_str = input_array.tolist()
     if input_array.ndim > 1:
-        return [ascii_to_str(list(filter(lambda x: x > 0, str_))) for str_ in list_str]
+        return [_ascii_to_str(list(filter(lambda x: x > 0, str_))) for str_ in list_str]
     else:
-        return ascii_to_str(list(filter(lambda x: x > 0, list_str)))
+        return _ascii_to_str(list(filter(lambda x: x > 0, list_str)))
