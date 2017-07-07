@@ -547,27 +547,22 @@ Convert a string or list of string to a `numpy.uint8`.
 
 #### Usage examples
 
-Single string.
+Convert a string to ASCII as a `numpy` array.
 
 ```python
-string = 'string1'
-ascii_tensor = dbc.utils.string_ascii.convert_str_to_ascii(string)
-
-print(ascii_tensor)
-[115  116  114  105  110  103   49    0]
-
+>>> from dbcollection.utils.string_ascii import convert_str_to_ascii
+>>> convert_str_to_ascii('string1')
+array([115, 116, 114, 105, 110, 103,  49,   0], dtype=uint8)
 ```
 
-List of strings.
+Convert a list of strings to ASCII as a `numpy` array.
 
 ```python
-string = ['string1', 'string2', 'string3']
-ascii_tensor = dbc.utils.string_ascii.convert_str_to_ascii(string)
-
-print(ascii_tensor)
-[[115 116 114 105 110 103  49   0]
- [115 116 114 105 110 103  50   0]
- [115 116 114 105 110 103  51   0]]
+>>> from dbcollection.utils.string_ascii import convert_str_to_ascii
+>>> convert_str_to_ascii(['string1', 'string2', 'string3'])
+array([[115, 116, 114, 105, 110, 103,  49,   0],
+       [115, 116, 114, 105, 110, 103,  50,   0],
+       [115, 116, 114, 105, 110, 103,  51,   0]], dtype=uint8)
 ```
 
 
@@ -586,14 +581,13 @@ Convert a `numpy.uint8` to a list of strings.
 
 #### Usage examples
 
-Convert a `numpy.uint8` to string.
+Convert a `numpy` array to string.
 
 ```python
-# ascii format of 'string1'
-tensor = numpy.array([[115, 116, 114, 105, 110, 103, 49, 0]], dtype=numpy.uint8)
-string = dbc.utils.string_ascii.convert_ascii_to_str(tensor)
-
-print(string)
+>>> from dbcollection.utils.string_ascii import convert_ascii_to_str
+>>> import numpy as np
+>>> tensor = np.array([[115, 116, 114, 105, 110, 103, 49, 0]], dtype=np.uint8)  # ascii format of 'string1'
+>>> convert_ascii_to_str(tensor)
 ['string1']
 ```
 
