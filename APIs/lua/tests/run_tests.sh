@@ -1,8 +1,8 @@
 echo 'Run tests: manager API'
-th $PWD/tests/APIs/lua/test_manager.lua
+th $PWD/APIs/lua/tests/test_manager.lua
 
 echo 'Run tests: loader API'
-th $PWD/tests/APIs/lua/test_loader.lua
+th $PWD/APIs/lua/tests/test_loader.lua
 
 echo 'Run tests: string_ascii'
-th $PWD/tests/APIs/lua/test_string_ascii.lua
+th $PWD/APIs/lua/tests/test_string_ascii.lua
