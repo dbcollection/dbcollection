@@ -1,5 +1,5 @@
 <a name="db.documentation"></a>
-# Documentation
+# Python API documentation
 
 This section covers the main API methods for dataset managing/data fetching for the Python's dbcollection package.
 
@@ -16,6 +16,7 @@ The dbcollection package is composed by three main groups:
     - [info](#db.info): prints the cache contents.
 - [dbcollection.utils](#db.utils): utility functions.
     - [string_ascii](#db.utils.string_ascii): module containing methods for converting [strings to tensors](#db.utils.string_ascii.convert_string_to_ascii) and [tensors to strings](#db.utils.string_ascii.convert_ascii_to_string).
+    - [pad](#db.utils.pad): methods for [padding](#db.utils.pad.pad_list) and/or [unpadding](#db.utils.pad.unpad_list) lists.
 
 The [data loading API](#db.loader) contains a few methods for data retrieval/probing:
 
@@ -43,7 +44,7 @@ The library is structured as a table. In this documentation we use the above con
 ### load
 
 ```python
-loader = dbcollection.load(name, task, data_dir, verbose, is_test)
+loader = dbc.load(name, task, data_dir, verbose, is_test)
 ```
 
 Returns a loader instant of a `DatasetLoader` class with methods to retrieve/probe data and other informations from the selected dataset.
@@ -80,7 +81,7 @@ cifar10 = dbc.load(name='cifar10',
 ### download
 
 ```python
-dbcollection.download(name, data_dir, extract_data, verbose, is_test)
+dbc.download(name, data_dir, extract_data, verbose, is_test)
 ```
 
 This method will download a dataset's data files to disk. After download, it updates the cache file with the dataset's name and path where the data is stored.
@@ -122,7 +123,7 @@ dbc.download(name='cifar10',
 ### process
 
 ```python
-dbcollection.process(name, task, verbose. is_test)
+dbc.process(name, task, verbose. is_test)
 ```
 
 Processes a dataset's metadata and stores it to file. This metadata is stored in a HDF5 file for each task composing the dataset's tasks. For more information about a dataset's metadata format please check the list of available datasets in the [docs](http://dbcollection.readthedocs.io/en/latest/available_datasets.html).
@@ -154,7 +155,7 @@ dbc.process(name='cifar10', task='default')  # process only the 'default' task
 ### add
 
 ```python
-dbcollection.add(name, task, data_dir, verbose)
+dbc.add(name, task, data_dir, verbose)
 ```
 
 This method provides an easy way to add a custom dataset/task to the `dbcollection.json` cache file without having to manually add them themselves (although it is super easy to do it and recommended!).
@@ -186,7 +187,7 @@ dbc.add(name='custom1',
 ### remove
 
 ```python
-dbcollection.remove(name, task, data_dir, verbose)
+dbc.remove(name, task, data_dir, verbose)
 ```
 
 This method allows for a dataset to be removed from the list of available datasets for load in the cache. It also allows for the user to delete the dataset's files on disk if desired.
@@ -217,7 +218,7 @@ dbc.remove(name='cifar10', delete_data=True)
 ### config_cache
 
 ```python
-dbcollection.config_cache(field, value, delete_cache, delete_cache_dir, delete_cache_file, reset_cache, is_test)
+dbc.config_cache(field, value, delete_cache, delete_cache_dir, delete_cache_file, reset_cache, is_test)
 ```
 
 Configures the cache file via API. This method allows to configure the cache file directly by selecting any data field and (re)setting its value. The user can also manually configure the `dbcollection.json` cache file in the filesystem (recommended).
@@ -277,7 +278,7 @@ dbc.config_cache(reset_cache=True)
 ### query
 
 ```python
-dbcollection.query(pattern, is_test)
+dbc.query(pattern, is_test)
 ```
 
 Do simple queries to the cache and displays them to the screen.
@@ -308,7 +309,7 @@ dbc.query('detection')
 ### info
 
 ```python
-dbcollection.info(list_datasets, is_test)
+dbc.info(list_datasets, is_test)
 ```
 
 Prints the cache contents to screen. It can also print a list of all available datasets to download/process in the `dbcollection` package.
@@ -535,7 +536,7 @@ Although one might only need to convert `numpy.uint8` to strings, this module co
 ### convert_string_to_ascii
 
 ```python
-tensor = dbcollection.utils.string_ascii.convert_string_to_ascii(input)
+tensor = dbc.utils.string_ascii.convert_string_to_ascii(input)
 ```
 
 Convert a string or list of string to a `numpy.uint8`.
@@ -574,7 +575,7 @@ print(ascii_tensor)
 ### convert_ascii_to_string
 
 ```python
-string = dbcollection.utils.string_ascii.convert_ascii_to_string(input)
+string = dbc.utils.string_ascii.convert_ascii_to_string(input)
 ```
 
 Convert a `numpy.uint8` to a list of strings.
@@ -594,4 +595,94 @@ string = dbc.utils.string_ascii.convert_ascii_to_str(tensor)
 
 print(string)
 ['string1']
+```
+
+
+<a name="db.utils.pad"></a>
+### dbcollection.utils.pad
+
+This module contains methods for padding and/or unpadding python lists.
+
+The padding methods pad uneven lists of lists with an input value in order to have all lists with the same length. This methods are used mainly when storing data to the HDF5 files.
+
+The unpadding method removes a (padding) value from a list of lists, keeping the remaining data. It is useful when retrieving data from the HDF5 file that has been previously padded.
+
+<a name="db.utils.pad.pad_list"></a>
+### pad_list
+
+```python
+tensor = dbc.utils.pad.pad_list(listA, val)
+```
+
+Pad list of lists with 'val' such that all lists have the same length.
+
+#### Parameters
+
+- `listA`: List of lists of different sizes. (*type=list*)
+- `val`: Value to pad the lists. (*type=number, default=-1*)
+
+#### Usage examples
+
+Pad an uneven list of lists with a value.
+
+```python
+>>> from dbcollection.utils.pad import pad_list
+>>> pad_list([[0, 1, 2, 3], [45, 6], [7, 8], [9]])  # pad with -1 (default)
+[[0, 1, 2, 3], [4, 5, 6, -1], [7, 8, -1, -1], [9-1, -1 -1]]
+>>> pad_list([[1,2], [3, 4]])  # does nothing
+[[1, 2], [3, 4]]
+>>> pad_list([[], [1], [3, 4, 5]], 0)  # pad lists with 0
+[[0, 0, 0], [1, 0, 0], [3, 4, 5]]
+```
+
+
+<a name="db.utils.pad.pad_list2"></a>
+### pad_list2
+
+```python
+tensor = dbc.utils.pad.pad_list2(listA, val)
+```
+
+Pad list of lists of lists with 'val' such that all lists have the same length.
+
+#### Parameters
+
+- `listA`: List of lists of of lists different sizes. (*type=list*)
+- `val`: Value to pad the lists. (*type=number, default=-1*)
+
+#### Usage examples
+
+Pad an uneven list of lists of lists with a value.
+
+```python
+>>> from dbcollection.utils.pad import pad_list2
+>>> pad_list2([[[], [1]], [[5, 6]]])
+[None, None, None]  **TODO: fix this**
+```
+
+
+<a name="db.utils.pad.unpad_list"></a>
+### unpad_list
+
+```python
+string = dbc.utils.pad.unpad_list(listA, val)
+```
+
+Unpad list of lists with which has values equal to 'val'.
+
+#### Parameters
+
+- `listA`: List of lists of different sizes. (*type=list*)
+- `val`: Value to unpad the lists. (*type=number, default=-1*)
+
+#### Usage examples
+
+Remove the padding values of a list of lists.
+
+```python
+>>> from dbcollection.utils.pad import unpad_list
+>>> unpad_list([[1,2,3,-1,-1],[5,6,-1,-1,-1]])
+[[1, 2, 3], [5, 6]]
+>>> unpad_list([[5,0,-1],[1,2,3,4,5]], 5)
+[[0, -1], [1, 2, 3, 4]]
 ```
