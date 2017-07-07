@@ -6,7 +6,7 @@ Test dbcollection/utils/cache.py.
 import os
 import sys
 import pytest
-from dbcollection.utils.cache import CacheManager
+from dbcollection.cache import CacheManager
 
 
 def mock_cache():

@@ -6,7 +6,7 @@ Test dbcollection/utils/loader.py.
 import os
 import sys
 import pytest
-from dbcollection.utils.loader import DatasetLoader
+from dbcollection.loader import DatasetLoader
 
 
 def test_get():
