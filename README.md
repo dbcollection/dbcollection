@@ -104,7 +104,7 @@ print('Sets: ', mnist.sets)
 
 # plot the first data sample from the train set
 import matplotlib.pyplot as plt
-plt.imshow(mnist.get("train", "data", 0))
+plt.imshow(mnist.get("train", "images", 0))
 plt.show()
 ```
 
