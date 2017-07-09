@@ -280,15 +280,20 @@ class CacheManager:
         ------
             None
         """
+        keywords = []
         for keyword in self.data['category']:
             if name in self.data['category'][keyword]:
                 self.data['category'][keyword].remove(name)
                 if not any(self.data['category'][keyword]):
-                    self.data['category'].pop(keyword)
+                    keywords.append(keyword)  # add keyword name to the list
 
-                # update cache file on disk
-                self.write_data_cache(self.data)
+        # remove empty keyword
+        if any(keywords):
+            for keyword in keywords:
+                self.data['category'].pop(keyword)
 
+        # update cache file on disk
+        self.write_data_cache(self.data)
 
     def delete_task(self, name, task):
         """Delete a task of a dataset in cache.
