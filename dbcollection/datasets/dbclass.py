@@ -154,7 +154,7 @@ class BaseTask:
 
         # create/open hdf5 file with subgroups for train/val/test
         file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
-        fileh5 = h5py.File(file_name, 'w', version='latest')
+        fileh5 = h5py.File(file_name, 'w', libver='latest')
 
         if self.verbose:
             print('\n==> Storing metadata to file: {}'.format(file_name))
