@@ -128,7 +128,10 @@ def load_pickle(fname):
         If the file cannot be opened.
     """
     try:
-        return pickle.load(open_read_file(fname, 'rb'), encoding='latin1')
+        if sys.version_info[0] == 2:
+            return pickle.load(open_read_file(fname, 'rb'))
+        else:
+            return pickle.load(open_read_file(fname, 'rb'), encoding='latin1')
     except (IOError, OSError):
         raise IOError('Error opening file: {}'.format(fname))
 
