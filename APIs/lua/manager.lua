@@ -130,7 +130,7 @@ function dbcollection.load(options)
 
     -- check if the .json cache has been initialized
     if not paths.filep(home_path) then
-        manager.config_cache({is_test=args.is_test}) -- creates the cache file on disk if it doesn't exist
+        dbcollection.config_cache({is_test=args.is_test}) -- creates the cache file on disk if it doesn't exist
     end
 
     -- read the cache file (dbcollection.json)
@@ -138,14 +138,14 @@ function dbcollection.load(options)
 
     -- check if the dataset exists in the cache
     if not cache['dataset'][args.name] then
-        manager.download({name=args.name, data_dir=args.data_dir, extract_data=true,
+        dbcollection.download({name=args.name, data_dir=args.data_dir, extract_data=true,
                           verbose=args.verbose, is_test=args.is_test})
         cache = json.load(home_path) -- reload the cache file
     end
 
     -- check if the task exists in the cache
     if not exists_task(cache, args.name, args.task) then
-        manager.process({name=args.name, task=args.task, verbose=args.verbose,
+        dbcollection.process({name=args.name, task=args.task, verbose=args.verbose,
                          is_test=args.is_test})
         cache = json.load(home_path) -- reload the cache file
     end
