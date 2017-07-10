@@ -54,7 +54,11 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
     if data_dir is None or data_dir is '':
         data_dir_ = os.path.join(cache_manager.default_cache_dir, name, 'data')
     else:
-        assert os.path.isdir(data_dir), 'Must insert a valid path: data_dir={}'.format(data_dir)
+        #assert os.path.isdir(data_dir), 'Must insert a valid path: data_dir={}'.format(data_dir)
+        if not os.path.exists(data_dir):
+            print('Creating save directory in disk: ' + data_dir)
+            os.makedirs(data_dir)
+
         if os.path.split(data_dir)[1] == name:
             data_dir_ = data_dir
         else:
