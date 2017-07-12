@@ -1,7 +1,7 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """
-Test loading cifar10.
+Test downloading cifar10.
 """
 
 import os
