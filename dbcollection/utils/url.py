@@ -5,10 +5,11 @@ Download functions.
 
 from __future__ import print_function, division
 import os
-import urllib
 import hashlib
-import patoolib
+import shutil
+import tempfile
 import requests
+import patoolib
 import progressbar
 
 
@@ -35,54 +36,17 @@ def get_hash_value(fname):
         raise IOError('Error opening file: {}'.format(fname))
 
 
-def download_url_progressbar(url, file_save_name):
-    """Download a file (displays a progress bar).
-
-    Parameters
-    ----------
-    url : str
-        URL location.
-    file_save_name : str
-        File name + path to store on disk.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-    """
-    chunk_size = 4096*2
-    max_size = 1024*1024
-    with open(file_save_name, 'wb') as f:
-        response = requests.get(url, stream=True)
-        file_size = response.headers.get('content-length')
-
-        if file_size is None:
-            f.write(response.content)
-        else:
-            file_size = int(file_size)
-            if file_size >= max_size*10:
-                chunk_size = max_size
-            num_bars = file_size / chunk_size
-            progbar = progressbar.ProgressBar(maxval=num_bars).start()
-            i = 0
-            for data in response.iter_content(chunk_size=chunk_size):
-                f.write(data)
-                progbar.update(i)
-                i += 1
-
-
-def download_url_nodisplay(url, file_save_name):
+def download_url_requests(url, fname, verbose=False):
     """Download a file (no display text).
 
     Parameters
     ----------
     url : str
         URL location.
-    file_save_name : str
+    fname : str
         File name + path to store on disk.
+    verbose : bool
+        Display progress bar
 
     Returns
     -------
@@ -92,9 +56,28 @@ def download_url_nodisplay(url, file_save_name):
     ------
         None
     """
-    with urllib.request.urlopen(url) as response, open(file_save_name, 'wb') as out_file:
-        data = response.read() # a `bytes` object
-        out_file.write(data)
+    r = requests.get(url, stream=True)
+
+    with open(fname, 'wb') as f:
+        if verbose:
+            total_length = int(r.headers.get('content-length'))
+            if total_length is None:
+                f.write(r.content)
+            else:
+                chunk_size = 1024
+                progbar = progressbar.ProgressBar(maxval=int(total_length/chunk_size)).start()
+                i = 0
+                for data in r.iter_content(chunk_size=chunk_size):
+                    if data:
+                        f.write(data)
+                        f.flush()
+                        progbar.update(i)
+                        i += 1
+                progbar.finish()
+        else:
+            f.write(r.content)
+
+    r.close()
 
 
 def download_url(url, dir_path, fname_save, verbose=False):
@@ -119,22 +102,25 @@ def download_url(url, dir_path, fname_save, verbose=False):
     ------
         None
     """
-    # save file
-    file_save_name = fname_save
 
     # check if the filename already exists
-    if os.path.exists(file_save_name):
+    if os.path.exists(fname_save):
         return True
 
     # check if the path exists
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
+    # get filename for temp file in current directory
+    (fd, tmpfile) = tempfile.mkstemp(".tmp", prefix=fname_save, dir=".")
+    os.close(fd)
+    os.unlink(tmpfile)
+
     # download the file
-    if verbose:
-        download_url_progressbar(url, file_save_name)
-    else:
-        download_url_nodisplay(url, file_save_name)
+    download_url_requests(url, tmpfile, verbose)
+
+    # rename temporary file to final output file
+    shutil.move(tmpfile, fname_save)
 
 
 def download_url_google_drive(file_id, dir_path, fname_save, verbose=False):
@@ -177,17 +163,19 @@ def download_url_google_drive(file_id, dir_path, fname_save, verbose=False):
                 if chunk: # filter out keep-alive new chunks
                     f.write(chunk)
 
-    # save file
-    file_save_name = fname_save
 
     # check if the filename already exists
-    if os.path.exists(file_save_name):
+    if os.path.exists(fname_save):
         return True
 
     # check if the path exists
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
 
+    # get filename for temp file in current directory
+    (fd, tmpfile) = tempfile.mkstemp(".tmp", prefix=fname_save, dir=".")
+    os.close(fd)
+    os.unlink(tmpfile)
 
     URL = "https://docs.google.com/uc?export=download"
 
@@ -200,7 +188,10 @@ def download_url_google_drive(file_id, dir_path, fname_save, verbose=False):
         params = {'id' : file_id, 'confirm' : token}
         response = session.get(URL, params=params, stream=True)
 
-    save_response_content(response, file_save_name)
+    save_response_content(response, tmpfile)
+
+    # rename temporary file to final output file
+    shutil.move(tmpfile, fname_save)
 
 
 def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True):
@@ -272,4 +263,3 @@ def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True
         # extract file
         if extract_data:
             patoolib.extract_archive(filename, outdir=dir_save, verbosity=verbose)
-
