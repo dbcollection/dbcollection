@@ -8,19 +8,6 @@ from setuptools import setup, find_packages
 # Get version
 from dbcollection._version import VERSION
 VERSION = str(VERSION)
-ISRELEASED = True
-
-
-# Dynamically set the conda package version
-try:
-    if os.environ['CONDA_BUILD']:
-        with open('__conda_version__.txt', 'w') as f:
-            if ISRELEASED:
-                f.write(VERSION)
-            else:
-                f.write(VERSION + '.dev')
-except KeyError:
-    pass
 
 
 # Load requirements
