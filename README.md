@@ -7,6 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation Status](https://readthedocs.org/projects/dbcollection/badge/?version=latest)](http://dbcollection.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/dbcollection.svg)](https://badge.fury.io/py/dbcollection)
+[![Anaconda-Server Badge](https://anaconda.org/farrajota/dbcollection/badges/version.svg)](https://anaconda.org/farrajota/dbcollection)
+
 
 
 dbcollection is a python module for loading/managing
