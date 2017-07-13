@@ -52,18 +52,6 @@ script:
     - pytest --cov=dbcollection dbcollection/tests/
 
 after_success:
+    - echo "Upload code coverage to codecov"
     - ls -lha
     - bash <(curl -s https://codecov.io/bash)
-
-    - if [[ "$TRAVIS_TAG" != "" ]]; then bash ci/conda_upload.sh; fi
-
-deploy:
-    provider: pypi
-    user: farrajota
-    password:
-        secure: d2riCmXQwPcCo2rq47U0DC2NRaOTCdAoaDHBkXCyRR5+JzWo7LOJzd8OIH4JR9UpDMU8cidtsnQI53yAGIY7I0gFcv+CtoJ8HamIOf39YGhvIkBB/p13fhiv+r+7Nw9gTb9Flk9ilLHN8IlrLKawrNnuatG8RmksgNCZOv8zVKwJAtA/C1AMMJSZRChTswZCdyMfFDKJr0kyO4YGyPtC04FMtcm2faFM/rpZdrFCLBW4BAi/HbY0Md1Z9GgeDilXfBO0Nr4IshHqxZfEh1pAgjtn4PyIlOMZVYXBa0nqxnQdhdG0uTceXrPAiz1z/d+NxAJo10nEBk9Erj+nBJT/yWXkKJAPJyZjfU7D8ljcSJUyOY/zASr6LdSbHSXEHItNDMbqPywnLjdA24pABAuhywU633P0UpDAATcC8UMp5SbcDsqiM6GWlcOKW/fGpS+r9hfdchRXi5770A/07TfyO2nzTbrXEkI70RB+JXPCvtj7B0vNhBAIm8Lc6qUu7n1SyghXbs3/OBMOrKCJ3Z3KyrfX/yvR8O7aHYpkaORVpKpVoZyV11A7iQo2NC1w4LqGr3+NlDOOVrrtAXhwumES1i8XhXXpb2+CC8fpjrd0CJAU47NdSq8chwT0uOzC2iwGSuS/YDBOmMhqxG5KYyoTtlRQNM4DOVm4Mj+vONS8Qko=
-    distributions: sdist bdist_wheel
-    on:
-        tags: true
-        branch: master
-        repo: farrajota/dbcollection
