@@ -372,12 +372,10 @@ class CacheManager:
         ------
             None
         """
-        for name in self.data['dataset'].keys():
-            self.delete_dataset_cache(name)
-
         # remove dataset names/categories from the list
         self.data['dataset'] = {}
         self.data['category'] = {}
+        self.write_data_cache(self.data)
 
 
     def check_dataset_name(self, name):
