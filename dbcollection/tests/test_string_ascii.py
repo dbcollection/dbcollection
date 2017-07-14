@@ -3,8 +3,6 @@ Test dbcollection/utils/string_ascii.py.
 """
 
 
-import os
-import sys
 import pytest
 import numpy as np
 from dbcollection.utils.string_ascii import (_str_to_ascii,
