@@ -78,6 +78,20 @@ class BaseDataset:
         return tasks_init
 
 
+    def get_all_tasks(self):
+        """
+        Returns a list of all available tasks
+        """
+        # init tasks
+        tasks_loader = self.init_tasks_constructors()
+
+        tasks = []
+        for i, task in enumerate(tasks_loader):
+            tasks.append(task)
+
+        return tasks
+
+
     def process(self, task='default'):
         """
         Process metadata for all tasks
@@ -126,7 +140,7 @@ class BaseTask:
         Load data from annnotations and split it to corresponding
         sets (train, val, test, etc.)
         """
-        pass
+        pass  # stub
 
 
     def add_data_to_source(self, handler, data, set_name=None):
@@ -135,7 +149,7 @@ class BaseTask:
 
         It closely follows the tree structure of the data.
         """
-        pass
+        pass  # stub
 
 
     def add_data_to_default(self, handler, data, set_name=None):
@@ -144,7 +158,7 @@ class BaseTask:
 
         For each field, the data is organized into a single big matrix.
         """
-        pass
+        pass  # stub
 
 
     def process_metadata(self):
