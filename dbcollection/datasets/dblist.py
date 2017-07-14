@@ -54,5 +54,17 @@ datasets.update(human_action) # human action
 datasets.update(pedestrian_detection) # pedestrian detection/recognition
 datasets.update(human_pose) # human pose
 
-# list of all dataset's names
-available_datasets = list(datasets.keys())
+
+def available_datasets():
+    """
+    Returns a dictionary with all the available datasets and
+    their available tasks.
+    """
+    out = {}
+    for db in sorted(datasets):
+        constructor = datasets[db]
+        db_loader = constructor('', '', '', '')  # init with empty data
+        tasks = sorted(db_loader.get_all_tasks())
+        tasks.remove('default')
+        out[db] = tasks
+    return out
