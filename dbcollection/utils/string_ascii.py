@@ -25,6 +25,15 @@ def _str_to_ascii(input_str):
     Raises
     ------
         None
+
+    Examples
+    --------
+    Convert a string to numpy array.
+
+    >>> from dbcollection.utils.string_ascii import _str_to_ascii
+    >>> _str_to_ascii('string1')
+    array([115, 116, 114, 105, 110, 103,  49], dtype=uint8)
+
     """
     return np.array([ord(c) for c in input_str], dtype=np.uint8)
 
@@ -45,6 +54,16 @@ def _ascii_to_str(input_array):
     Raises
     ------
         None
+
+    Examples
+    --------
+    Convert a numpy array to string.
+
+    >>> import numpy as np
+    >>> from dbcollection.utils.string_ascii import _ascii_to_str
+    >>> _ascii_to_str(np.array([115, 116, 114, 105, 110, 103,  49], dtype=uint8))
+    'string1'
+
     """
     return "".join([chr(item) for item in input_array])
 
