@@ -1,6 +1,6 @@
 machine:
   python:
-    version: 3.5.1
+    version: 3.6.1
 
 checkout:
   post:
@@ -14,7 +14,7 @@ dependencies:
     - pip --version
     - tox --version
     - pip install tox-pyenv
-    - pyenv local 2.7.11 3.4.3 3.5.1
+    - pyenv local 2.7.11 3.4.3 3.5.1, 3.6.1
 
 test:
   override:
