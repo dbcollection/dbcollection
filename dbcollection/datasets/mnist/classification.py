@@ -14,7 +14,7 @@ from dbcollection.utils.pad import pad_list
 
 
 class Classification(BaseTask):
-    """ Cifar10 Classification preprocessing functions """
+    """ MNIST Classification preprocessing functions """
 
     # metadata filename
     filename_h5 = 'detection'
@@ -151,3 +151,16 @@ class Classification(BaseTask):
         handler.create_dataset('object_fields', data=data["object_fields"], dtype=np.uint8)
         handler.create_dataset('object_ids', data=data["object_ids"], dtype=np.int32)
         handler.create_dataset('list_images_per_class', data=data["list_images_per_class"], dtype=np.int32)
+
+
+class ClassificationNoSourceGrp(Classification):
+    """ MNIST Classification (default grp only - no source group) task class """
+
+    # metadata filename
+    filename_h5 = 'classification_d'
+
+    def add_data_to_source(self, handler, data, set_name):
+        """
+        Dummy method
+        """
+        # do nothing
