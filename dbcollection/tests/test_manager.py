@@ -2,15 +2,20 @@
 Test dbcollection/manager.py.
 """
 
-
+import os
 import pytest
 import dbcollection.manager as dbc
 
 
-testdata = [
-    #('cifar10', 'classification', None, True, True, True),
-    ('mnist', 'classification', None, True, True, True),
-]
+if os.name == 'nt':
+    testdata = [
+        ('mnist', 'classification', None, True, True, True),
+    ]
+else:
+    testdata = [
+        ('cifar10', 'classification', None, True, True, True),
+        ('mnist', 'classification', None, True, True, True),
+    ]
 
 @pytest.mark.parametrize("name, task, data_dir, extract_data, verbose, is_test",
                          testdata)
