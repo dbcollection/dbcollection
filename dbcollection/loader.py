@@ -116,7 +116,10 @@ class DatasetLoader:
             None
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
-        assert idx >= 0, 'idx must be >=0: {}'.format(idx)
+        if isinstance(idx, list):
+            assert min(idx) >= 0, 'list must have indexes >= 0: {}'.format(idx)
+        else:
+            assert idx >= 0, 'idx must be >=0: {}'.format(idx)
 
         dir_path = self.root_path + set_name + '/'
         field_path = dir_path + 'object_ids'
