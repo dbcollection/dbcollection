@@ -8,7 +8,7 @@ import dbcollection.manager as dbc
 
 
 testdata = [
-    ('cifar10', 'classification', None, True, True, True),
+    #('cifar10', 'classification', None, True, True, True),
     ('mnist', 'classification', None, True, True, True),
 ]
 
