@@ -2,6 +2,8 @@
 Padding functions.
 """
 
+import itertools
+
 
 def pad_list(listA, val=-1, length=None):
     """Pad list of lists with 'val' such that all lists have the same length.
@@ -53,51 +55,6 @@ def pad_list(listA, val=-1, length=None):
     return [l + [val]*int(max_size-len(l)) for l in listA]
 
 
-def pad_list2(listA, val=-1):
-    """Pad list of lists of lists with 'val' such that all lists have the same length.
-
-    Parameters
-    ----------
-    listA : list
-        List of lists of lists of different sizes.
-    val : number
-        Value to pad the lists.
-
-    Returns
-    -------
-    list
-        A list of lists of lists with the same same.
-
-    Raises
-    ------
-        None
-
-    Examples
-    --------
-    Pad an uneven list of lists of lists with a value.
-
-    >>> from dbcollection.utils.pad import pad_list2
-    >>> pad_list2([[[1,2]],[[1],[2]]])
-    [[[1, 2], [-1, -1]], [[1, -1], [2, -1]]]
-
-    """
-    # pad list with zeros in order to have all lists of the same size
-    assert isinstance(listA, list), 'Input must be a list. Got {}, espected {}' \
-                                    .format(type(listA), type(list))
-
-    max_nlists = max([len(l) for l in listA])
-    max_list_size = max([len(li) for l in listA for li in l])
-
-    out = []
-    for l in listA:
-        sublist = pad_list(l, val, max_list_size)
-        if not len(sublist) == max_nlists:
-            sublist += [[val] * int(max_list_size) for i in range(max_nlists - len(sublist))]
-        out.append(sublist)
-
-    return out
-
-
 def unpad_list(listA, val=-1):
     """Unpad list of lists with which has values equal to 'val'.
 
@@ -138,20 +95,25 @@ def unpad_list(listA, val=-1):
         return list(filter(lambda x: x != val, listA))
 
 
-def unpad_list2(listA, val=-1):
-    """Unpad list of lists of lists with which has values equal to 'val'.
+def squeeze_list(listA, val=-1):
+    """ Compact a list of lists into a single list.
+
+    Squeezes (spaghettify) a list of lists into a single list.
+    The lists are concatenated into a single one, and to separate
+    them it is used a separating value to mark the split location
+    when unsqueezing the list.
 
     Parameters
     ----------
     listA : list
-        List of lists or lists of equal sizes.
+        List of lists.
     val : number
-        Value to unpad the lists.
+        Value to separate the lists.
 
     Returns
     -------
     list
-        A list of lists of lists without the padding values.
+        A list with all lists concatenated into one.
 
     Raises
     ------
@@ -159,23 +121,53 @@ def unpad_list2(listA, val=-1):
 
     Examples
     --------
-    Remove the padding values of a list of lists of lists.
+    Compact a list of lists into a single list.
 
-    >>> from dbcollection.utils.pad import unpad_list2
-    >>> unpad_list2([[[1,2,3,-1,-1],[5,6,-1,-1,-1]]])
-    [[[1, 2, 3], [5, 6]]]
-    >>> unpad_list2([[[1,2,3,-1,-1],[5,6,-1,-1,-1],[-1,-1,-1,-1,-1,-1]]])
-    [[[1, 2, 3], [5, 6]]]
+    >>> from dbcollection.utils.pad import squeeze_list
+    >>> squeeze_list([[1,2], [3], [4,5,6]], -1)
+    [1, 2, -1, 3, -1, 4, 5, 6]
+    """
+    concatA = [l + [val] for l in listA]
+    out = [li for l in concatA for li in l]
+    return out[:-1]
+
+
+def unsqueeze_list(listA, val=-1):
+    """ Unpacks a list into a list of lists.
+
+    Returns a list of lists by splitting the input list
+    into 'N' lists when encounters an element equal to
+    'val'. Empty lists resulting of trailing values at the
+    end of the list are discarded.
+
+    Parameters
+    ----------
+    listA : list
+        A list.
+    val : number
+        Value to separate the lists.
+
+    Returns
+    -------
+    list
+        A list of lists.
+
+    Raises
+    ------
+        None
+
+    Source
+    ------
+    https://stackoverflow.com/questions/4322705/split-a-list-into-nested-lists-on-a-value
+
+    Examples
+    --------
+    Unpack a list into a list of lists.
+
+    >>> from dbcollection.utils.pad import unsqueeze_list
+    >>> unsqueeze_list([1, 2, -1, 3, -1, 4, 5, 6], -1)
+    [[1, 2], [3], [4, 5, 6]]
 
     """
-
-    # pad list with zeros in order to have all lists of the same size
-    assert isinstance(listA, list), 'Input must be a list. Got {}, espected {}' \
-                                    .format(type(listA), type(list))
-
-    out = []
-    for l in listA:
-        sublist = unpad_list(l, val)
-        out.append([li for li in sublist if li])
-
+    out = [list(g) for k,g in itertools.groupby(listA, lambda x:x in (val, )) if not k]
     return out
