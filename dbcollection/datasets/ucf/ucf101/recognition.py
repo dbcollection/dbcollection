@@ -238,17 +238,3 @@ class Recognition(BaseTask):
         handler.create_dataset('list_image_filenames_per_video', data=data["list_image_filenames_per_video"], dtype=np.int32)
         handler.create_dataset('object_ids', data=data["object_ids"], dtype=np.int32)
         handler.create_dataset('object_fields', data=data["object_fields"], dtype=np.int32)
-
-
-class RecognitionNoSourceGrp(Recognition):
-    """ UCF101 action recognition preprocessing functions """
-
-    # metadata filename
-    filename_h5 = 'recognition_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
-        pass
