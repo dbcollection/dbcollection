@@ -4,7 +4,7 @@ MPII Human Pose Dataset download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .keypoints import Keypoints, KeypointsFull, KeypointsNoSourceGrp, KeypointsFullNoSourceGrp
+from .keypoints import Keypoints, KeypointsFull
 
 
 class MPIIPose(BaseDataset):
@@ -22,9 +22,7 @@ class MPIIPose(BaseDataset):
 
     # init tasks
     tasks = {
-        "keypoints" : Keypoints,  # clean version (removes invalid annotations)
-        "keypoints_d" : KeypointsNoSourceGrp,  # clean version (removes invalid annotations)
-        "keypoints_full" : KeypointsFull,  # Contains all the original annotations
-        "keypoints_full_d" : KeypointsFullNoSourceGrp  # Contains all the original annotations
+        "keypoints": Keypoints,  # clean version (removes invalid annotations)
+        "keypoints_full": KeypointsFull,  # Contains all the original annotations
     }
     default_task = 'keypoints'
