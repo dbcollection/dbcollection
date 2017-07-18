@@ -7,7 +7,7 @@ import os
 import shutil
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .classification import Classification, ClassificationNoSourceGrp
+from .classification import Classification
 
 
 class MNIST(BaseDataset):
@@ -19,8 +19,7 @@ class MNIST(BaseDataset):
 
     # init tasks
     tasks = {
-        "classification": Classification,
-        "classification_d": ClassificationNoSourceGrp
+        "classification": Classification
     }
     default_task = 'classification'
 
