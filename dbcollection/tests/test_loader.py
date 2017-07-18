@@ -5,16 +5,11 @@ Test dbcollection/utils/loader.py.
 
 import os
 import pytest
-from dbcollection.loader import DatasetLoader
+import dbcollection as dbc
 from dbcollection.utils.string_ascii import convert_ascii_to_str as tostr_
 
 
-home_dir = os.path.expanduser("~")
-name = 'mnist'
-task = 'classification'
-data_dir = os.path.join(home_dir, 'dbcollection', 'mnist', 'data')
-cache_path = os.path.join(home_dir, 'dbcollection','mnist','classification.h5')
-loader = DatasetLoader(name, task, data_dir, cache_path)
+loader = dbc.load('mnist')
 
 
 @pytest.mark.parametrize("output", [
