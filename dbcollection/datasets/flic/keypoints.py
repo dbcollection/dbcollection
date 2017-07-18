@@ -176,16 +176,3 @@ class Keypoints(BaseTask):
         handler['torso_boxes'] = np.array(torso_boxes, dtype=np.float)
         handler['keypoints'] = np.array(keypoints, dtype=np.float)
         handler['keypoint_names'] = str2ascii(self.keypoints_labels)
-
-
-class KeypointsNoSourceGrp(Keypoints):
-    """ FLIC Keypoints (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'keypoint_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
