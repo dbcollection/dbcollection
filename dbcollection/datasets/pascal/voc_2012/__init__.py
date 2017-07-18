@@ -4,7 +4,7 @@ Pascal VOC 2012 download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .detection import Detection, DetectionNoSourceGrp
+from .detection import Detection
 
 
 class PascalVOC2012(BaseDataset):
@@ -21,8 +21,7 @@ class PascalVOC2012(BaseDataset):
 
     # init tasks
     tasks = {
-        "detection" : Detection,
-        "detection_d" : DetectionNoSourceGrp
+        "detection" : Detection
 
     }
     default_task = 'detection'
