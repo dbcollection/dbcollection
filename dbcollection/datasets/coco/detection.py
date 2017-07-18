@@ -5,14 +5,14 @@ COCO Detection 2015/2016 process functions.
 
 from __future__ import print_function, division
 import os
+from collections import OrderedDict
 import numpy as np
 import progressbar
-from collections import OrderedDict
 
 from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
-from dbcollection.utils.pad import pad_list, pad_list2
+from dbcollection.utils.pad import pad_list, squeeze_list
 from dbcollection.utils.file_load import load_json
 
 from .load_data_test import load_data_test
@@ -125,13 +125,10 @@ class Detection2015(BaseTask):
             annotation_id_dict[obj_id] = i
 
             if isinstance(annot["segmentation"], list):
-                segmentation_type = 0
-                segmentation = annot["segmentation"]
+                segmentation = squeeze_list(annot["segmentation"], -1)  # squeeze list
             elif isinstance(annot["segmentation"]['counts'], list):
-                segmentation_type = 1
                 segmentation = annot["segmentation"]["counts"]
             else:
-                segmentation_type = 2
                 segmentation = annot["segmentation"]
 
             # convert from [x,y,w,h] to [xmin,ymin,xmax,ymax]
@@ -145,8 +142,7 @@ class Detection2015(BaseTask):
                 "supercategory": category_annot['supercategory'],
                 "area": annot['area'],
                 "iscrowd": annot['iscrowd'],
-                "segmentation": segmentation, #annot['segmentation'],
-                "segmentation_type": segmentation_type,
+                "segmentation": segmentation,
                 "bbox": bbox,
                 "image_id": annot['image_id'],
                 "category_id": annot['category_id'],
@@ -266,17 +262,7 @@ class Detection2015(BaseTask):
                 file_grp['category_id'] = np.array(annot["category_id"], dtype=np.int32)
                 file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
                 file_grp['bbox'] = np.array(annot["bbox"], dtype=np.float)
-                if isinstance(annot["segmentation"], list):
-                    segmentation_type = 0
-                    segmentation = pad_list(annot["segmentation"], -1)
-                elif isinstance(annot["segmentation"]['counts'], list):
-                    segmentation_type = 1
-                    segmentation = annot["segmentation"]["counts"]
-                else:
-                    segmentation_type = 2
-                    segmentation = annot["segmentation"]
-                file_grp['segmentation'] = np.array(segmentation, dtype=np.float)
-                file_grp['segmentation_type'] = np.array(segmentation_type, dtype=np.uint8)
+                file_grp['segmentation'] = np.array(annot["segmentation"], dtype=np.float)
 
                 # update progressbar
                 if self.verbose:
@@ -309,11 +295,7 @@ class Detection2015(BaseTask):
                     obj_grp['area'] = np.array(obj["area"], dtype=np.int32)
                     obj_grp['iscrowd'] = np.array(obj["iscrowd"], dtype=np.int32)
                     obj_grp['bbox'] = np.array(obj["bbox"], dtype=np.float)
-                    if obj["segmentation_type"] == 0:
-                        obj_grp['segmentation'] = np.array(pad_list(obj["segmentation"], -1), dtype=np.float)
-                    else:
-                        obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.int32)
-                    obj_grp['segmentation_type'] = obj["segmentation_type"]
+                    obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.float)
 
             # update progressbar
             if self.verbose:
@@ -358,8 +340,6 @@ class Detection2015(BaseTask):
         area = []
         iscrowd = [0, 1]
         segmentation = []
-        segmentation_t1 = []
-        segmentation_t2 = []
         bbox = []
         object_id = []
 
@@ -376,7 +356,7 @@ class Detection2015(BaseTask):
         else:
             object_fields = ["image_filenames", "coco_urls", "width", "height",
                              "category", "supercategory", "boxes", "area",
-                             "iscrowd", "segmentation_t1", "segmentation_t2",
+                             "iscrowd", "segmentation",
                              "image_id", "category_id", "annotation_id"]
 
         list_image_filenames_per_category = []
@@ -419,29 +399,16 @@ class Detection2015(BaseTask):
                         area.append(obj["area"])
                         bbox.append(obj["bbox"])
                         annotation_id.append(obj["id"])
-
-                        if obj["segmentation_type"] == 0:
-                            segmentation_t1.append(obj["segmentation"])
-                            segmentation_t2_id = -1
-                            segmentation_t1_id = segmentation_t1_counter
-                            segmentation_t1_counter += 1
-                        else:
-                            segmentation_t2.append(obj["segmentation"])
-                            segmentation_t1_id = -1
-                            segmentation_t2_id = segmentation_t2_counter
-                            segmentation_t2_counter += 1
-
+                        segmentation.append(obj["segmentation"])
 
                         # *** object_id ***
                         # [filename, coco_url, width, height,
                         # category, supercategory,
-                        # bbox, area, iscrowd,
-                        # segmentation_1, segmentation_2,
+                        # bbox, area, iscrowd, segmentation,
                         # "image_id", "category_id", "annotation_id"]
                         object_id.append([i, i, i, i,
                                           category.index(obj["category"]), supercategory.index(obj["supercategory"]),
-                                          counter, counter, obj["iscrowd"],
-                                          segmentation_t1_id, segmentation_t2_id,
+                                          counter, counter, obj["iscrowd"], counter,
                                           i, category.index(obj["category"]), counter])
 
                         boxes_per_image.append(counter)
@@ -506,28 +473,31 @@ class Detection2015(BaseTask):
                 print('> Processing lists...')
 
             for i in range(len(category)):
-                imgs_per_category = [val[0] for _, val in enumerate(object_id) if val[1] == i]
+                imgs_per_category = [val[0] for _, val in enumerate(object_id) if val[4] == i]
                 imgs_per_category = list(set(imgs_per_category)) # get unique values
                 imgs_per_category.sort()
                 list_image_filenames_per_category.append(imgs_per_category)
 
             for i in range(len(supercategory)):
-                imgs_per_supercategory = [val[0] for _, val in enumerate(object_id) if val[2] == i]
+                imgs_per_supercategory = [val[0] for _, val in enumerate(object_id) if val[5] == i]
                 imgs_per_supercategory = list(set(imgs_per_supercategory)) # get unique values
                 imgs_per_supercategory.sort()
                 list_image_filenames_per_supercategory.append(imgs_per_supercategory)
 
             for i in range(len(category)):
-                obj_per_category = [j for j, val in enumerate(object_id) if val[1] == i]
+                obj_per_category = [j for j, val in enumerate(object_id) if val[4] == i]
                 obj_per_category = list(set(obj_per_category)) # get unique values
                 obj_per_category.sort()
                 list_objects_ids_per_category.append(obj_per_category)
 
             for i in range(len(supercategory)):
-                obj_per_supercategory = [j for j, val in enumerate(object_id) if val[2] == i]
+                obj_per_supercategory = [j for j, val in enumerate(object_id) if val[5] == i]
                 obj_per_supercategory = list(set(obj_per_supercategory)) # get unique values
                 obj_per_supercategory.sort()
                 list_objects_ids_per_supercategory.append(obj_per_supercategory)
+
+            if self.verbose:
+                print('> Done.')
 
 
         handler['image_filenames'] = str2ascii(image_filenames)
@@ -553,8 +523,25 @@ class Detection2015(BaseTask):
             handler['annotation_id'] = np.array(annotation_id, dtype=np.int32)
             handler['boxes'] = np.array(bbox, dtype=np.float)
             handler['iscrowd'] = np.array(iscrowd, dtype=np.uint8)
-            handler['segmentation_t1'] = np.array(pad_list2(segmentation_t1, -1), dtype=np.float)
-            handler['segmentation_t2'] = np.array(pad_list(segmentation_t2, -1), dtype=np.int32)
+
+            nrows = len(segmentation)
+            ncols = max([len(l) for l in segmentation])
+            dset = handler.create_dataset('segmentation',
+                                          (nrows, ncols),
+                                          dtype=np.float,
+                                          chunks=True,
+                                          fillvalue=-1)
+            if self.verbose:
+                print('   -- Saving segmentation field to disk (this will take some time to finish)')
+                prgbar = progressbar.ProgressBar(max_value=nrows)
+            for i in range(nrows):
+                dset[i, :len(segmentation[i])] = np.array(segmentation[i], dtype=np.float)
+                if self.verbose:
+                    prgbar.update(i)
+
+            if self.verbose:
+                prgbar.finish()
+
             handler['area'] = np.array(area, dtype=np.int32)
 
             handler['coco_annotations_ids'] = np.array(coco_annotations_ids, dtype=np.int32)

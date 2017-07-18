@@ -45,6 +45,13 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
     Raises
     ------
         None
+
+    Examples
+    --------
+    Download the CIFAR10 dataset to disk.
+
+    >>> import dbcollection as dbc
+    >>> dbc.download('cifar10')
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
@@ -111,6 +118,13 @@ def process(name, task='all', verbose=True, is_test=False):
     Raises
     ------
         None
+
+    Examples
+    --------
+    Download the CIFAR10 dataset to disk.
+
+    >>> import dbcollection as dbc
+    >>> dbc.process('cifar10', task='classification', verbose=False)
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
@@ -163,6 +177,15 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     ------
     Exception
         If dataset is not available for loading.
+
+    Examples
+    --------
+    Load the MNIST dataset.
+
+    >>> import dbcollection as dbc
+    >>> mnist = dbc.load('mnist')
+    >>> print('Dataset name: ', mnist.name)
+    Dataset name:  mnist
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
@@ -217,6 +240,16 @@ def add(name=None, task=None, data_dir=None, file_path=None, keywords=[], is_tes
     Raises
     ------
         None
+
+    Examples
+    --------
+    Add a dataset manually to dbcollection.
+
+    >>> import dbcollection as dbc
+    >>> dbc.add('new_db', 'new_task', 'new/path/db', 'newdb.h5', ['new_category'])
+    >>> dbc.query('new_db')
+    {'new_db': {'tasks': {'new_task': 'newdb.h5'}, 'data_dir': 'new/path/db', 'keywords': ['new_category']}}
+
     """
     assert name, "Must input a valid name: {}".format(name)
     assert task, "Must input a valid task: {}".format(task)
@@ -263,6 +296,20 @@ def remove(name, task=None, delete_data=False, is_test=False):
     Raises
     ------
         None
+
+    Examples
+    --------
+    Remove a dataset from the list.
+
+    >>> import dbcollection as dbc
+    >>> dbc.add('new_db', 'new_task', 'new/path/db', 'newdb.h5', ['new_category'])  # add a dataset
+    >>> dbc.query('new_db')
+    {'new_db': {'tasks': {'new_task': 'newdb.h5'}, 'data_dir': 'new/path/db', 'keywords': ['new_category']}}
+    >>> dbc.remove('new_db')  # remove the dataset
+    Removed 'new_db' dataset: cache=True, disk=False
+    >>> dbc.query('new_db')  # check if the dataset info was removed (retrieves an empty dict)
+    {}
+
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
@@ -288,7 +335,7 @@ def remove(name, task=None, delete_data=False, is_test=False):
 
 
 def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=False,
-                 delete_cache_file=False, reset_cache=False, is_test=False):
+                 delete_cache_file=False, reset_cache=False, verbose=True, is_test=False):
     """Configure the cache file.
 
     This method allows to configure the cache file directly by selecting
@@ -326,6 +373,9 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     reset_cache : bool
         Reset the cache file.
         (optional, default=False)
+    verbose : bool
+        Displays text information (if true).
+        (optional, default=True)
     is_test : bool
         Flag used for tests.
         (optional, default=False)
@@ -337,6 +387,15 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     Raises
     ------
         None
+
+    Examples
+    --------
+    Delete the cache by removing the dbcollection.json cache file.
+    This will NOT remove the contents of the dbcollection/. For that,
+    just set the *delete_cache_dir* flag to True.
+
+    >>> import dbcollection as dbc
+    >>> dbc.config_cache(delete_cache_file=True)
     """
 
     # Load a cache manager object
@@ -350,20 +409,23 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
         # delete cache dir
         if os.path.exists(cache_manager.default_cache_dir):
             shutil.rmtree(cache_manager.default_cache_dir)
-            print('Deleted {} directory.'.format(cache_manager.default_cache_dir))
+            if verbose:
+                print('Deleted {} directory.'.format(cache_manager.default_cache_dir))
 
     if delete_cache_file:
         # delete the entire cache
         if os.path.exists(cache_manager.cache_fname):
             os.remove(cache_manager.cache_fname)
-            print('Deleted {} cache file.'.format(cache_manager.cache_fname))
+            if verbose:
+                print('Deleted {} cache file.'.format(cache_manager.cache_fname))
     else:
         if reset_cache:
             # reset the cache file
             cache_manager.reset_cache()
         else:
             if not field is None:
-                print(cache_manager.modify_field(field, value))
+                if verbose:
+                    print(cache_manager.modify_field(field, value))
 
 
 def query(pattern='info', is_test=False):
@@ -421,16 +483,27 @@ def query(pattern='info', is_test=False):
     return query_list
 
 
-def info(list_datasets=False, is_test=False):
-    """Prints the cache contents.
+def info(name=None, is_test=False):
+    """Prints the cache contents and other information.
 
-    Prints the contents of the dbcollection.json cache file to the screen.
+    This method provides a dual functionality: (1) It displays
+    the cache file content that shows which datasets are
+    available for loading right now; (2) It can display all
+    available datasets to use in the dbcollection package, and
+    if a name is provided, it displays what tasks it contains
+    for loading.
+
+    The default is to display the cache file contents to the
+    screen. To list the available datasets, set the 'name'
+    input argument to 'all'. To list the tasks of a specific
+    dataset, set the 'name' input argument to the name of the
+    desired dataset (e.g., 'cifar10').
 
     Parameters
     ----------
-    list_datasets : bool
-        Print available datasets in the dbcollection package.
-        (optional, default=False)
+    name : str
+        Name of the dataset to display information.
+        (optional, default=None)
     is_test : bool
         Flag used for tests.
         (optional, default=False)
@@ -446,23 +519,41 @@ def info(list_datasets=False, is_test=False):
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
-    if list_datasets:
-        print('dbcollection available datasets: ', available_datasets)
+    if name:
+        db_list = available_datasets()
+
+        if name == 'all':
+            print('\nAvailable datasets for load/download:')
+            for db_name in sorted(db_list):
+                print('   - ' + str(db_name))
+        else:
+            assert name in db_list, 'Invalid dataset name: ' + str(name)
+
+            print('\nAvailable tasks for {}:'.format(name))
+            for task in db_list[name]:
+                print('   -- ' + str(task))
     else:
         print('Printing contents of {}:\n'.format(cache_manager.cache_fname))
 
         data = cache_manager.data
 
         # print info header
-        print('*** Paths info ***')
+        print('--------------')
+        print('  Paths info ')
+        print('--------------')
         print(json.dumps(data['info'], sort_keys=True, indent=4))
         print('')
 
         # print datasets
-        print('*** Dataset info ***')
+        print('----------------')
+        print('  Dataset info ')
+        print('----------------')
         print(json.dumps(data['dataset'], sort_keys=True, indent=4))
         print('')
 
-        print('*** Dataset categories ***')
+        #print('*** Datasets by category ***\n')
+        print('------------------------')
+        print('  Datasets by category ')
+        print('------------------------\n')
         for name in data['category']:
-            print('>> {}: {}'.format(name, data['category'][name]))
+            print('   > {}: \t {}'.format(name, data['category'][name]))

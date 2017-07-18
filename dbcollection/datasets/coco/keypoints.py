@@ -12,7 +12,7 @@ from collections import OrderedDict
 from dbcollection.datasets.dbclass import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
-from dbcollection.utils.pad import pad_list, pad_list2
+from dbcollection.utils.pad import pad_list, squeeze_list
 from dbcollection.utils.file_load import load_json
 
 from .load_data_test import load_data_test
@@ -147,13 +147,10 @@ class Keypoints2016(BaseTask):
             annotation_id_dict[obj_id] = i
 
             if isinstance(annot["segmentation"], list):
-                segmentation_type = 0
-                segmentation = annot["segmentation"]
+                segmentation = squeeze_list(annot["segmentation"], -1)  # squeeze list
             elif isinstance(annot["segmentation"]['counts'], list):
-                segmentation_type = 1
                 segmentation = annot["segmentation"]["counts"]
             else:
-                segmentation_type = 2
                 segmentation = annot["segmentation"]
 
             # convert from [x,y,w,h] to [xmin,ymin,xmax,ymax]
@@ -167,8 +164,7 @@ class Keypoints2016(BaseTask):
                 "supercategory": category_annot['supercategory'],
                 "area": annot['area'],
                 "iscrowd": annot['iscrowd'],
-                "segmentation": segmentation, #annot['segmentation'],
-                "segmentation_type": segmentation_type,
+                "segmentation": segmentation,
                 "bbox": bbox,
                 "num_keypoints": annot['num_keypoints'],
                 "keypoints": annot['keypoints'],
@@ -316,17 +312,7 @@ class Keypoints2016(BaseTask):
                 file_grp['category_id'] = np.array(annot["category_id"], dtype=np.int32)
                 file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
                 file_grp['bbox'] = np.array(annot["bbox"], dtype=np.float)
-                if isinstance(annot["segmentation"], list):
-                    segmentation_type = 0
-                    segmentation = pad_list(annot["segmentation"], -1)
-                elif isinstance(annot["segmentation"]['counts'], list):
-                    segmentation_type = 1
-                    segmentation = annot["segmentation"]["counts"]
-                else:
-                    segmentation_type = 2
-                    segmentation = annot["segmentation"]
-                file_grp['segmentation'] = np.array(segmentation, dtype=np.float)
-                file_grp['segmentation_type'] = np.array(segmentation_type, dtype=np.uint8)
+                file_grp['segmentation'] = np.array(annot["segmentation"], dtype=np.float)
                 file_grp['keypoints'] = np.array(annot["keypoints"], dtype=np.int32)
                 file_grp['num_keypoints'] = np.array(annot["num_keypoints"], dtype=np.uint8)
 
@@ -357,11 +343,7 @@ class Keypoints2016(BaseTask):
                     obj_grp['area'] = np.array(obj["area"], dtype=np.int32)
                     obj_grp['iscrowd'] = np.array(obj["iscrowd"], dtype=np.int32)
                     obj_grp['bbox'] = np.array(obj["bbox"], dtype=np.float)
-                    if obj["segmentation_type"] == 0:
-                        obj_grp['segmentation'] = np.array(pad_list(obj["segmentation"], -1), dtype=np.float)
-                    else:
-                        obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.int32)
-                    obj_grp['segmentation_type'] = obj["segmentation_type"]
+                    obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.float)
                     obj_grp['num_keypoints'] = np.array(obj["num_keypoints"], dtype=np.uint8)
                     obj_grp['keypoints'] = np.array(obj["keypoints"], dtype=np.int32)
 
@@ -415,8 +397,7 @@ class Keypoints2016(BaseTask):
         annotation_id = []
         area = []
         iscrowd = [0, 1]
-        segmentation_t1 = []
-        segmentation_t2 = []
+        segmentation = []
         num_keypoints = list(range(0, 17+1))
         keypoints_list = []
         bbox = []
@@ -435,7 +416,7 @@ class Keypoints2016(BaseTask):
         else:
             object_fields = ["image_filenames", "coco_urls", "width", "height",
                              "category", "supercategory", "boxes", "area",
-                             "iscrowd", "segmentation_t1", "segmentation_t2",
+                             "iscrowd", "segmentation",
                              "image_id", "category_id", "annotation_id",
                              "num_keypoints", "keypoints"]
 
@@ -476,30 +457,19 @@ class Keypoints2016(BaseTask):
                         area.append(obj["area"])
                         bbox.append(obj["bbox"])
                         annotation_id.append(obj["id"])
+                        segmentation.append(obj["segmentation"])
                         keypoints_list.append(obj["keypoints"])
 
-                        if obj["segmentation_type"] == 0:
-                            segmentation_t1.append(obj["segmentation"])
-                            segmentation_t2_id = -1
-                            segmentation_t1_id = segmentation_t1_counter
-                            segmentation_t1_counter += 1
-                        else:
-                            segmentation_t2.append(obj["segmentation"])
-                            segmentation_t1_id = -1
-                            segmentation_t2_id = segmentation_t2_counter
-                            segmentation_t2_counter += 1
 
                         # *** object_id ***
                         # [filename, coco_url, width, height,
                         # category, supercategory,
-                        # bbox, area, iscrowd,
-                        # segmentation_1, segmentation_2,
+                        # bbox, area, iscrowd, segmentation,
                         # "image_id", "category_id", "annotation_id"
                         # "num_keypoints", "keypoints"]
                         object_id.append([i, i, i, i,
                                         category.index(obj["category"]), supercategory.index(obj["supercategory"]),
-                                        counter, counter, obj["iscrowd"],
-                                        segmentation_t1_id, segmentation_t2_id,
+                                        counter, counter, obj["iscrowd"], counter,
                                         i, category.index(obj["category"]), counter,
                                         obj["num_keypoints"], counter])
 
@@ -602,8 +572,25 @@ class Keypoints2016(BaseTask):
             handler['skeleton'] = skeleton_
             handler['boxes'] = np.array(bbox, dtype=np.float)
             handler['iscrowd'] = np.array(iscrowd, dtype=np.uint8)
-            handler['segmentation_t1'] = np.array(pad_list2(segmentation_t1, -1), dtype=np.float)
-            handler['segmentation_t2'] = np.array(pad_list(segmentation_t2, -1), dtype=np.int32)
+
+            nrows = len(segmentation)
+            ncols = max([len(l) for l in segmentation])
+            dset = handler.create_dataset('segmentation',
+                                          (nrows, ncols),
+                                          dtype=np.float,
+                                          chunks=True,
+                                          fillvalue=-1)
+            if self.verbose:
+                print('   -- Saving segmentation field to disk (this will take some time to finish)')
+                prgbar = progressbar.ProgressBar(max_value=nrows)
+            for i in range(nrows):
+                dset[i, :len(segmentation[i])] = np.array(segmentation[i], dtype=np.float)
+                if self.verbose:
+                    prgbar.update(i)
+
+            if self.verbose:
+                prgbar.finish()
+
             handler['area'] = np.array(area, dtype=np.int32)
             handler['num_keypoints'] = np.array(num_keypoints, dtype=np.uint8)
             handler['keypoints'] = np.array(keypoints_list, dtype=np.int32)
