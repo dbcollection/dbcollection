@@ -4,8 +4,8 @@ UCF-Sports Action recognition download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .recognition import Recognition, RecognitionNoSourceGrp
-from .detection import Detection, DetectionNoSourceGrp
+from .recognition import Recognition
+from .detection import Detection
 
 
 class UCFSports(BaseDataset):
@@ -24,9 +24,7 @@ class UCFSports(BaseDataset):
 
     # init tasks
     tasks = {
-        "recognition" : Recognition,
-        "recognition_d" : RecognitionNoSourceGrp,
-        "detection" : Detection,
-        "detection_d" : DetectionNoSourceGrp
+        "recognition": Recognition,
+        "detection": Detection
     }
     default_task = 'recognition'
