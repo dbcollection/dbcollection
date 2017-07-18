@@ -80,16 +80,3 @@ class Keypoints(LspKeypoints):
             data[set_name].append({"filename" : filename, "joints" : joints})
 
         return data
-
-
-class KeypointsNoSourceGrp(Keypoints):
-    """ LSP Keypoints (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'keypoint_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
