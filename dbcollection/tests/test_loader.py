@@ -75,7 +75,7 @@ def test_list():
                           'list_images_per_class',
                           'object_fields',
                           'object_ids']
-    assert(sample_field_names == loader.list('train'))
+    assert(set(sample_field_names) == set(loader.list('train')))
 
 
 @pytest.mark.parametrize("field_name, output", [
