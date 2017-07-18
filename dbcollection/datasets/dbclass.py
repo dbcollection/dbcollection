@@ -65,9 +65,7 @@ class BaseDataset:
         """
         Parses the task string to look for key suffixes.
         """
-        if task.endswith('_d'):
-            return task[:-2], '_d'
-        elif task.endswith('_s'):
+        if task.endswith('_s'):
             return task[:-2], '_s'
         else:
             return task, None
@@ -78,8 +76,8 @@ class BaseDataset:
         Initialize the tasks' class constructor.
         """
         assert any(self.tasks), 'No defined tasks for process. Please insert a task for processing.'
+
         tasks_init = {}
-        #
         for task in self.tasks:
             tasks_init[task] = self.tasks[task](self.data_path, self.cache_path, suffix, self.verbose)
 
@@ -113,6 +111,7 @@ class BaseDataset:
         if task == 'all':
             tasks_loader = self.init_tasks_constructors()
             for i, task in enumerate(tasks_loader):
+
                 if self.verbose:
                     print('\nProcessing ::{}:: task: ({}/{})'.format(task, i+1, len(tasks_loader)))
                 info_output[task] = tasks_loader[task].run()
@@ -201,14 +200,13 @@ class BaseTask:
                     print('\nSaving set metadata: {}'.format(set_name))
 
                 # add data to the **source** group
-                if self.suffix is None or self.suffix is '_s':
+                if self.suffix is '_s':
                     sourceg = fileh5.create_group('source/' + set_name)
                     self.add_data_to_source(sourceg, data[set_name], set_name)
 
                 # add data to the **default** group
-                if self.suffix is None or self.suffix is '_d':
-                    defaultg = fileh5.create_group('default/' + set_name)
-                    self.add_data_to_default(defaultg, data[set_name], set_name)
+                defaultg = fileh5.create_group('default/' + set_name)
+                self.add_data_to_default(defaultg, data[set_name], set_name)
 
         # close file
         fileh5.close()
