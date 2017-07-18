@@ -419,3 +419,18 @@ class Keypoints(BaseTask):
             handler['keypoints'] = np.array(keypoints, dtype=np.float)
 
             handler['list_keypoints_per_image'] = np.array(pad_list(list_keypoints_per_image, -1), dtype=np.int32)
+
+
+class KeypointsFull(Keypoints):
+    """ MPII Keypoints (FULL original annotations) task class """
+
+    # metadata filename
+    filename_h5 = 'keypoint_full'
+
+    is_full = True
+
+    def add_data_to_source(self, handler, data, set_name):
+        """
+        Dummy method
+        """
+        # do nothing
