@@ -227,10 +227,11 @@ class CacheManager:
             If the file does not exist.
         """
         try:
-            if os.path.isdir(fname):
-                shutil.rmtree(fname, ignore_errors=True)
-            else:
-                os.remove(fname)
+            if os.path.exists(fname):
+                if os.path.isdir(fname):
+                    shutil.rmtree(fname, ignore_errors=True)
+                else:
+                    os.remove(fname)
         except OSError as err:
             if err.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
                 raise OSError('Unable to remove: {}'.format(fname))
@@ -597,11 +598,16 @@ class CacheManager:
             keywords = [keywords]
 
         for keyword in keywords:
-            if keyword in self.data['category']:
-                if not name in self.data['category'][keyword]:
-                    self.data['category'][keyword].append(name)
-            else:
-                self.data['category'][keyword] = [name]
+            if any(keyword):
+
+                if keyword not in self.data["dataset"][name]["keywords"]:
+                    self.data["dataset"][name]["keywords"].append(keyword)
+
+                if keyword in self.data['category']:
+                    if not name in self.data['category'][keyword]:
+                        self.data['category'][keyword].append(name)
+                else:
+                    self.data['category'][keyword] = [name]
 
 
     def update(self, name, data_dir, cache_tasks, cache_keywords, is_append=True):
@@ -647,7 +653,10 @@ class CacheManager:
 
 
     def modify_field(self, field=None, value=None):
-        """Modify a field value.
+        """Assign/Modify a field value to the cache data.
+
+        This method allows to change/assign a value to any field
+        by referencing only the name of the field.
 
         Parameters
         ----------
