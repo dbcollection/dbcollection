@@ -161,20 +161,6 @@ class Keypoints(BaseTask):
         handler['object_fields'] = str2ascii(object_fields)
 
 
-class KeypointsNoSourceGrp(Keypoints):
-    """ LSP Keypoints (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'keypoint_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
-
-
-
 class KeypointsOriginal(Keypoints):
     """ LSP Keypoints full images size (default grp only - no source group) task class """
 
@@ -189,16 +175,3 @@ class KeypointsOriginal(Keypoints):
         images_dir = os.path.join(self.data_path, 'images')
 
         return annot_filepath, images_dir
-
-
-class KeypointsOriginalNoSourceGrp(KeypointsOriginal):
-    """ LSP Keypoints (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'keypoint_original_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
