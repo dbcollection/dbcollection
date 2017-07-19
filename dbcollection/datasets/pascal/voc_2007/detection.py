@@ -276,19 +276,3 @@ class Detection(BaseTask):
         handler['list_objects_ids_difficult'] = np.array(list_objects_ids_difficult, dtype=np.int32)
         handler['list_objects_ids_no_truncated'] = np.array(list_objects_ids_no_truncated, dtype=np.int32)
         handler['list_objects_ids_truncated'] = np.array(list_objects_ids_truncated, dtype=np.int32)
-
-        if self.verbose:
-            print('> Done.')
-
-
-class DetectionNoSourceGrp(Detection):
-    """ Pascal VOC 2007 object detection (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'detection_d.h5'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing

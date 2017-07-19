@@ -4,7 +4,7 @@ UCF101-Action recognition download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .recognition import Recognition, RecognitionNoSourceGrp
+from .recognition import Recognition
 
 
 class UCF101(BaseDataset):
@@ -25,7 +25,6 @@ class UCF101(BaseDataset):
 
     # init tasks
     tasks = {
-        "recognition" : Recognition,
-        "recognition_d" : RecognitionNoSourceGrp
+        "recognition": Recognition
     }
     default_task = 'recognition'

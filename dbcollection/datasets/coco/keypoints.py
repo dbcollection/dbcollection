@@ -601,16 +601,3 @@ class Keypoints2016(BaseTask):
             handler['list_keypoints_per_image'] = np.array(pad_list(list_keypoints_per_image, -1), dtype=np.int32)
             handler['list_image_filenames_per_num_keypoints'] = np.array(pad_list(list_image_filenames_per_num_keypoints, -1), dtype=np.int32)
             handler['list_object_ids_per_keypoint'] = np.array(pad_list(list_object_ids_per_keypoint, -1), dtype=np.int32)
-
-
-class Keypoints2016NoSourceGrp(Keypoints2016):
-    """ COCO Keypoints (2016) (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'keypoint_2016_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing

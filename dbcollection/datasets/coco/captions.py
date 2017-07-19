@@ -326,23 +326,9 @@ class Caption2015(BaseTask):
             handler['coco_categories_ids'] = np.array(coco_categories_ids, dtype=np.int32)
 
 
-class Caption2015NoSourceGrp(Caption2015):
-    """ COCO Caption (2015) (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'caption_2015_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
-
-
 #---------------------------------------------------------
 # Captions 2016
 #---------------------------------------------------------
-
 
 class Caption2016(Caption2015):
     """ COCO Caption (2016) preprocessing functions """
@@ -363,16 +349,3 @@ class Caption2016(Caption2015):
         "test" : os.path.join('annotations', 'image_info_test2015.json'),
         "test-dev" : os.path.join('annotations', 'image_info_test-dev2015.json')
     }
-
-
-class Caption2016NoSourceGrp(Caption2016):
-    """ COCO Caption (2016) (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'caption_2016_d'
-
-    def add_data_to_source(self, handler, data):
-        """
-        Dummy method
-        """
-        # do nothing

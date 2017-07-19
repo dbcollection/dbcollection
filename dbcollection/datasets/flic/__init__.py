@@ -4,7 +4,7 @@ Frames Labeled In Cinema (FLIC) Dataset download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .keypoints import Keypoints, KeypointsNoSourceGrp
+from .keypoints import Keypoints
 
 
 class Flic(BaseDataset):
@@ -23,7 +23,6 @@ class Flic(BaseDataset):
 
     # init tasks
     tasks = {
-        "keypoints" : Keypoints,
-        "keypoints_d" : KeypointsNoSourceGrp
+        "keypoints" : Keypoints
     }
     default_task = 'keypoints'

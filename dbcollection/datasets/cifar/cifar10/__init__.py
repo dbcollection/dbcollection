@@ -4,7 +4,7 @@ Cifar10 download/process functions.
 
 
 from dbcollection.datasets.dbclass import BaseDataset
-from .classification import Classification, ClassificationNoSourceGrp
+from .classification import Classification
 
 
 class Cifar10(BaseDataset):
@@ -20,7 +20,6 @@ class Cifar10(BaseDataset):
 
     # init tasks
     tasks = {
-        "classification": Classification,
-        "classification_d": ClassificationNoSourceGrp
+        "classification": Classification
     }
     default_task = 'classification'

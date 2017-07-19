@@ -275,19 +275,6 @@ class Classification(BaseTask):
             handler.create_dataset(field_name, data=data_array[field_name])
 
 
-class ClassificationNoSourceGrp(Classification):
-    """ ImageNet ILSVRC 2012 Classification (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'keypoint_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
-
-
 #---------------------------------------------------------
 # Resized images to 256px
 #---------------------------------------------------------
@@ -382,17 +369,3 @@ class Raw256(Classification):
             if self.verbose:
                 print(' > Resizing images for the set: {}'.format(set_name))
             self.dir_resize_images(new_data_dir, sets[set_name][1])
-
-
-
-class Raw256NoSourceGrp(Raw256):
-    """ ImageNet ILSVRC 2012 Classification raw256 (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'keypoint_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing

@@ -339,19 +339,3 @@ class Detection(BaseTask):
         else:
             handler['object_ids'] = np.array(object_id, dtype=np.int32)
             handler['object_fields'] = str2ascii(['image_filenames'])
-
-        if self.verbose:
-            print('> Done.')
-
-
-class DetectionNoSourceGrp(Detection):
-    """ Pascal VOC 2007 object detection (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'detection_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing

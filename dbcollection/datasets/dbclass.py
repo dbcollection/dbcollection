@@ -61,14 +61,25 @@ class BaseDataset:
             return task
 
 
-    def init_tasks_constructors(self):
+    def parse_task_name(self, task):
+        """
+        Parses the task string to look for key suffixes.
+        """
+        if task.endswith('_s'):
+            return task[:-2], '_s'
+        else:
+            return task, None
+
+
+    def init_tasks_constructors(self, suffix=None):
         """
         Initialize the tasks' class constructor.
         """
         assert any(self.tasks), 'No defined tasks for process. Please insert a task for processing.'
+
         tasks_init = {}
         for task in self.tasks:
-            tasks_init[task] = self.tasks[task](self.data_path, self.cache_path, self.verbose)
+            tasks_init[task] = self.tasks[task](self.data_path, self.cache_path, suffix, self.verbose)
 
         if self.default_task == '':
             self.default_task = self.fetch_task_key()
@@ -96,19 +107,21 @@ class BaseDataset:
         """
         Process metadata for all tasks
         """
-        # init tasks
-        tasks_loader = self.init_tasks_constructors()
-
         info_output = {}
         if task == 'all':
+            tasks_loader = self.init_tasks_constructors()
             for i, task in enumerate(tasks_loader):
+
                 if self.verbose:
                     print('\nProcessing ::{}:: task: ({}/{})'.format(task, i+1, len(tasks_loader)))
                 info_output[task] = tasks_loader[task].run()
         else:
+            task_, suffix = self.parse_task_name(task)
+
             if self.verbose:
-                print('\nProcessing ::{}:: task:'.format(task))
-            info_output[task] = tasks_loader[task].run()
+                print('\nProcessing ::{}:: task:'.format(task_))
+            tasks_loader = self.init_tasks_constructors(suffix)
+            info_output[task] = tasks_loader[task_].run()
 
         return info_output, self.keywords
 
@@ -124,13 +137,14 @@ class BaseTask:
     filename_h5 = 'task'
 
 
-    def __init__(self, data_path, cache_path, verbose=True):
+    def __init__(self, data_path, cache_path, suffix=None, verbose=True):
         """
         Initialize class.
         """
         self.cache_path = cache_path
         self.data_path = data_path
         self.verbose = verbose
+        self.suffix = suffix
 
 
     def load_data(self):
@@ -167,7 +181,10 @@ class BaseTask:
         """
 
         # create/open hdf5 file with subgroups for train/val/test
-        file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
+        if self.suffix:
+            file_name = os.path.join(self.cache_path, self.filename_h5 + self.suffix + '.h5')
+        else:
+            file_name = os.path.join(self.cache_path, self.filename_h5 + '.h5')
         fileh5 = h5py.File(file_name, 'w', libver='latest')
 
         if self.verbose:
@@ -183,8 +200,9 @@ class BaseTask:
                     print('\nSaving set metadata: {}'.format(set_name))
 
                 # add data to the **source** group
-                sourceg = fileh5.create_group('source/' + set_name)
-                self.add_data_to_source(sourceg, data[set_name], set_name)
+                if self.suffix is '_s':
+                    sourceg = fileh5.create_group('source/' + set_name)
+                    self.add_data_to_source(sourceg, data[set_name], set_name)
 
                 # add data to the **default** group
                 defaultg = fileh5.create_group('default/' + set_name)

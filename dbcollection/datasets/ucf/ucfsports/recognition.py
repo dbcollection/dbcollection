@@ -285,17 +285,3 @@ class Recognition(BaseTask):
         data_array = self.convert_data_to_arrays(data)
         for field_name in data_array:
             handler.create_dataset(field_name, data=data_array[field_name])
-
-
-class RecognitionNoSourceGrp(Recognition):
-    """ UCF-Sports action detection preprocessing functions """
-
-    # metadata filename
-    filename_h5 = 'detection_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
-        pass

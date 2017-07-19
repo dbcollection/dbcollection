@@ -553,23 +553,9 @@ class Detection2015(BaseTask):
             handler['list_objects_ids_per_supercategory'] = np.array(pad_list(list_objects_ids_per_supercategory), dtype=np.int32)
 
 
-class Detection2015NoSourceGrp(Detection2015):
-    """ COCO Detection (2015) (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'detection_2015_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
-
-
 #---------------------------------------------------------
 # Detection 2016
 #---------------------------------------------------------
-
 
 class Detection2016(Detection2015):
     """ COCO Detection (2015) preprocessing functions """
@@ -590,16 +576,3 @@ class Detection2016(Detection2015):
         "test" : os.path.join('annotations', 'image_info_test2015.json'),
         "test-dev" : os.path.join('annotations', 'image_info_test-dev2015.json')
     }
-
-
-class Detection2016NoSourceGrp(Detection2016):
-    """ COCO Detection (2016) (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'detection_2016_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
