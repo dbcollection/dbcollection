@@ -24,9 +24,9 @@ This package is available for Windows, Linux and MacOs.
 
 ## Supported languages
 
-- Python (>=2.7 or >=3.4)
-- Lua/[Torch7](https://github.com/torch/torch7)
-- Matlab (>=2014a)
+- Python (>=2.7 or >=3.5)
+- Lua/Torch7 ([link](https://github.com/dbcollection/dbcollection-torch7))
+- [Matlab (>=2014a) ([link](https://github.com/dbcollection/dbcollection-matlab))
 
 
 ## Package installation
@@ -57,7 +57,7 @@ the following setps:
 - Clone the repo to your hard drive:
 
 ```
-git clone --recursive https://github.com/farrajota/dbcollection
+git clone --recursive https://github.com/dbcollection/dbcollection
 ```
 
 - `cd ` to the dbcollection folder and do the command
@@ -114,7 +114,7 @@ plt.show()
 module check the documentation or the available tutorials.
 
 
-### Tutorial
+### Notebooks
 
 A more detailed tutorial on using the **dbcollection**
 module main APIs for dataset managing and data loading is
@@ -136,14 +136,14 @@ improvements, enhancements and ideas are welcome. If you would like to see addit
 project.
 
 If you are interested in fixing issues and contributing
-directly to the code base, please see the document [How to Contribute](https://github.com/farrajota/dbcollection/wiki/How-to-Contribute).
+directly to the code base, please see the document [How to Contribute](https://github.com/dbcollection/dbcollection/wiki/How-to-Contribute).
 
 
 ## Feedback
 
-For now, use the [Github issues](https://github.com/farrajota/dbcollection/issues) for requests/bug issues.
+For now, use the [Github issues](https://github.com/dbcollection/dbcollection/issues) for requests/bug issues.
 
 
 ## License
 
-MIT license (see the `LICENSE.txt` file)
+MIT license (see the [LICENSE](LICENSE.txt) file)
