@@ -1,3 +1,0 @@
-local dbcollection = {}
-
-return dbcollection

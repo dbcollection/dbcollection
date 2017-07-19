@@ -1,1 +1,0 @@
-th $PWD/tests/APIs/lua/functional/_test_info.lua
