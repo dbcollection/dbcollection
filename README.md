@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/dbcollection/dbcollection.svg?branch=master)](https://travis-ci.org/dbcollection/dbcollection)
 [![CircleCI](https://circleci.com/gh/dbcollection/dbcollection/tree/master.svg?style=svg)](https://circleci.com/gh/dbcollection/dbcollection/tree/master)
 [![Build status](https://ci.appveyor.com/api/projects/status/85gpibosxhjo8yjl/branch/master?svg=true)](https://ci.appveyor.com/project/farrajota/dbcollection-x3l0d/branch/master)
-[![codecov](https://codecov.io/gh/farrajota/dbcollection/branch/master/graph/badge.svg)](https://codecov.io/gh/farrajota/dbcollection)
+[![codecov](https://codecov.io/gh/dbcollection/dbcollection/branch/master/graph/badge.svg)](https://codecov.io/gh/dbcollection/dbcollection)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Documentation Status](https://readthedocs.org/projects/dbcollection/badge/?version=latest)](http://dbcollection.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/dbcollection.svg)](https://badge.fury.io/py/dbcollection)
