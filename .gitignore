@@ -4,9 +4,6 @@
 # temporary code
 tmp/
 
-# Lua API
-APIs/lua/build.luarocks/
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
