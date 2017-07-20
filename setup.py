@@ -20,11 +20,13 @@ setup(
     version=VERSION,
     author='M. Farrajota',
     url='https://github.com/dbcollection/dbcollection',
-    download_url='https://github.com/dbcollectiona/dbcollection/archive/' + VERSION + '.tar.gz',
-    description='Cross-platform, cross-language dataset metadata manager for machine learning',
-    long_description="""dbcollection is a cross-platform (Windows, MacOS, Linux),
-        cross-language (Python, Lua/Torch7, Matlab) API to easily manage datasets'
-        metadata by using the standard HDF5 file format.
+    download_url='https://github.com/dbcollection/dbcollection/archive/' + VERSION + '.tar.gz',
+    description='Cross-platform, cross-language dataset metadata manager for machine learning.',
+    long_description="""
+        dbcollection is a cross-platform (Windows, MacOS, Linux),
+        cross-language (Python, Lua/Torch7, Matlab) API to easily
+        manage datasets' metadata by using the standard HDF5 file
+        format.
         """,
     license='MIT License',
     classifiers=[
