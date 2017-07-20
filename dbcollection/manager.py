@@ -579,16 +579,20 @@ def info(name=None, paths_info=True, datasets_info=True, categories_info=True, i
             print('------------------------')
             print('  Datasets by category ')
             print('------------------------\n')
-            max_size_name = max([len(name) for name in data['category']]) + 7
-            if isinstance(categories_info, bool):
-                for name in data['category']:
-                    print("{:{}}".format('   > {}: '.format(name), max_size_name)
-                          + "{}".format( sorted(data['category'][name])))
-            elif isinstance(categories_info, str):
-                for name in data['category']:
-                    l = [dset for dset in data['category'][name] if dset == categories_info]
-                    print("{:{}}".format('   > {}: '.format(name), max_size_name)
-                          + "{}".format( sorted(l)))
-            else:
-                raise Exception('Invalid input argument categories_info: {}.'.format(categories_info)
-                                + ' Must be either a string or a bool.')
+            try:
+                max_size_name = max([len(name) for name in data['category']]) + 7
+
+                if isinstance(categories_info, bool):
+                    for name in data['category']:
+                        print("{:{}}".format('   > {}: '.format(name), max_size_name)
+                            + "{}".format( sorted(data['category'][name])))
+                elif isinstance(categories_info, str):
+                    for name in data['category']:
+                        l = [dset for dset in data['category'][name] if dset == categories_info]
+                        print("{:{}}".format('   > {}: '.format(name), max_size_name)
+                            + "{}".format( sorted(l)))
+                else:
+                    raise Exception('Invalid input argument categories_info: {}.'.format(categories_info)
+                                    + ' Must be either a string or a bool.')
+            except:
+                print('')
