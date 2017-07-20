@@ -19,8 +19,8 @@ setup(
     name='dbcollection',
     version=VERSION,
     author='M. Farrajota',
-    url='https://github.com/farrajota/dbcollection',
-    download_url='https://github.com/farrajota/dbcollection/archive/' + VERSION + '.tar.gz',
+    url='https://github.com/dbcollection/dbcollection',
+    download_url='https://github.com/dbcollectiona/dbcollection/archive/' + VERSION + '.tar.gz',
     description='Cross-platform, cross-language dataset metadata manager for machine learning',
     long_description="""dbcollection is a cross-platform (Windows, MacOS, Linux),
         cross-language (Python, Lua/Torch7, Matlab) API to easily manage datasets'
@@ -46,6 +46,6 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
-    packages=find_packages(exclude=['tests', 'APIs', 'docs']),
+    packages=find_packages(exclude=['tests', 'docs']),
     install_requires=requirements
 )
