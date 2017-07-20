@@ -431,7 +431,7 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
 def query(pattern='info', is_test=False):
     """Do simple queries to the cache.
 
-    list all available datasets for download/preprocess. (tenho que pensar melhor sobre este)
+    list all available datasets for download/preprocess.
 
     Parameters:
     -----------
@@ -483,7 +483,7 @@ def query(pattern='info', is_test=False):
     return query_list
 
 
-def info(name=None, is_test=False):
+def info(name=None, paths_info=True, datasets_info=True, categories_info=True, is_test=False):
     """Prints the cache contents and other information.
 
     This method provides a dual functionality: (1) It displays
@@ -504,6 +504,21 @@ def info(name=None, is_test=False):
     name : str
         Name of the dataset to display information.
         (optional, default=None)
+    paths_info : bool
+        Print the paths info to screen.
+        (optional, default=True)
+    datasets_info : bool/str
+        Print the datasets info to screen.
+        If a string is provided, it selects
+        only the information of that string
+        (dataset name).
+        (optional, default=True)
+    categories_info : bool/str
+        Print the paths info to screen.
+        If a string is provided, it selects
+        only the information of that string
+        (dataset name).
+        (optional, default=True)
     is_test : bool
         Flag used for tests.
         (optional, default=False)
@@ -538,22 +553,42 @@ def info(name=None, is_test=False):
         data = cache_manager.data
 
         # print info header
-        print('--------------')
-        print('  Paths info ')
-        print('--------------')
-        print(json.dumps(data['info'], sort_keys=True, indent=4))
-        print('')
+        if paths_info:
+            print('--------------')
+            print('  Paths info ')
+            print('--------------')
+            print(json.dumps(data['info'], sort_keys=True, indent=4))
+            print('')
 
         # print datasets
-        print('----------------')
-        print('  Dataset info ')
-        print('----------------')
-        print(json.dumps(data['dataset'], sort_keys=True, indent=4))
-        print('')
+        if datasets_info:
+            print('----------------')
+            print('  Dataset info ')
+            print('----------------')
+            if isinstance(datasets_info, bool):
+                print(json.dumps(data['dataset'], sort_keys=True, indent=4))
+            elif isinstance(datasets_info, str):
+                print(json.dumps(data['dataset'][datasets_info], sort_keys=True, indent=4))
+            else:
+                raise Exception('Invalid input argument datasets_info: {}.'.format(datasets_info)
+                                + ' Must be either a string or a bool.')
+            print('')
 
         #print('*** Datasets by category ***\n')
-        print('------------------------')
-        print('  Datasets by category ')
-        print('------------------------\n')
-        for name in data['category']:
-            print('   > {}: \t {}'.format(name, data['category'][name]))
+        if categories_info:
+            print('------------------------')
+            print('  Datasets by category ')
+            print('------------------------\n')
+            max_size_name = max([len(name) for name in data['category']]) + 7
+            if isinstance(categories_info, bool):
+                for name in data['category']:
+                    print("{:{}}".format('   > {}: '.format(name), max_size_name)
+                          + "{}".format( sorted(data['category'][name])))
+            elif isinstance(categories_info, str):
+                for name in data['category']:
+                    l = [dset for dset in data['category'][name] if dset == categories_info]
+                    print("{:{}}".format('   > {}: '.format(name), max_size_name)
+                          + "{}".format( sorted(l)))
+            else:
+                raise Exception('Invalid input argument categories_info: {}.'.format(categories_info)
+                                + ' Must be either a string or a bool.')
