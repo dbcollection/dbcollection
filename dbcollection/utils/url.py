@@ -272,6 +272,6 @@ def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True
                     print('**WARNING**: md5 checksum does not match for file: {}'.format(filename))
                     print('Checksum expected: {}, got: {}'.format(md5sum, file_hash))
 
-        # extract file
-        if extract_data:
-            patoolib.extract_archive(filename, outdir=dir_save, verbosity=verbose)
+            # extract file
+            if extract_data:
+                patoolib.extract_archive(filename, outdir=dir_save, verbosity=verbose)
