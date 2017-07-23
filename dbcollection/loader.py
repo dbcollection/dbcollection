@@ -7,7 +7,29 @@ from dbcollection.utils.string_ascii import convert_ascii_to_str
 
 
 class DatasetLoader:
-    """ Dataset loader (HDF5 data loading) class """
+    """ Dataset loader (HDF5 data loading) class
+
+    Attributes
+    ----------
+    name : str
+        Name of the dataset.
+    category : str
+        Category of the dataset (e.g. image processing, natural language processing)
+    task : str
+        Name of the task.
+    data_dir : str
+        Path of the dataset's data directory on disk.
+    cache_path : str
+        Path of the metadata cache file stored on disk.
+    file : h5py._hl.files.File
+        hdf5 file object handler.
+    root_path : str
+        Default data group of the hdf5 file.
+    sets : list
+        List of names of set splits (e.g. train, test, val, etc.)
+    object_fields : dict
+        Data field names for each set split.
+    """
 
 
     def __init__(self, name, task, data_dir, cache_path):
@@ -25,6 +47,7 @@ class DatasetLoader:
             Path of the dataset's data directory on disk.
         cache_path : str
             Path of the metadata cache file stored on disk.
+
         """
         assert name, 'Must input a valid dataset name: {}'.format(name)
         assert task, 'Must input a valid task name: {}'.format(task)
@@ -62,19 +85,15 @@ class DatasetLoader:
             Name of the set.
         field_name : str
             Field name identifier.
-		idx : int/list
+		idx : int/list, optional
             Index number of the field. If it is a list, returns the data
-            for all the value indexes of that list
-            (optional, default=None)
+            for all the value indexes of that list.
 
         Returns
         -------
         str, int, list
             Value/list of a field from the metadata cache file.
 
-        Raises
-        ------
-            None
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
         assert field_name, 'Must input a valid field_name name: {}'.format(field_name)
@@ -101,19 +120,15 @@ class DatasetLoader:
         idx : int, long, list
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list
-        is_value : bool
+        is_value : bool, optional
             if False, outputs a list of indexes. If True,
             it outputs the values instead of the indexes.
-            (optional, default=False)
 
         Returns:
         --------
         list
             Returns a list of indexes (or values if is_value=True).
 
-        Raises
-        ------
-            None
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
         if isinstance(idx, list):
@@ -165,18 +180,14 @@ class DatasetLoader:
         ----------
         set_name : str
             Name of the set.
-        field_name : str
+        field_name : str, optional
             Name of the field in the metadata cache file.
-            (optional, default='object_ids')
 
         Returns:
         --------
         list
             Returns the size of the object list.
 
-        Raises
-        ------
-            None
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
 
