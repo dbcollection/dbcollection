@@ -12,31 +12,6 @@ else:
     import pickle
 
 
-def open_read_file(fname, mode='r'):
-    """Opens a file and returns the data.
-
-    Parameters
-    ----------
-    fname : str
-        File name + path on disk.
-    mode : str
-        File open mode.
-
-    Returns
-    -------
-    <any>
-        File data.
-
-    Raises
-    ------
-        None
-    """
-    try:
-        return open(fname, mode)
-    except (IOError, OSError):
-        raise IOError('Error opening file: {}'.format(fname))
-
-
 def load_txt(fname, mode='r'):
     """Load a .txt file to memory.
 
@@ -49,16 +24,15 @@ def load_txt(fname, mode='r'):
 
     Returns
     -------
-        None
+    list of strings
 
-    Raises
-    ------
-        None
     """
-    with open(fname, mode, encoding="utf-8") as f:
+    with open(fname, mode=mode, encoding="utf-8") as f:
         data = f.read()
 
-    return data.split('\n')
+    split_lines = data.split('\n')
+
+    return split_lines[:-1]
 
 
 def load_matlab(fname):
@@ -104,7 +78,7 @@ def load_json(fname):
         If the file cannot be opened.
     """
     try:
-        return json.load(open_read_file(fname))
+        return json.load(open(fname, mode='r'))
     except (IOError, OSError):
         raise IOError('Error opening file: {}'.format(fname))
 
@@ -129,9 +103,9 @@ def load_pickle(fname):
     """
     try:
         if sys.version_info[0] == 2:
-            return pickle.load(open_read_file(fname, 'rb'))
+            return pickle.load(open(fname, mode='rb'))
         else:
-            return pickle.load(open_read_file(fname, 'rb'), encoding='latin1')
+            return pickle.load(open(fname, mode='rb'), encoding='latin1')
     except (IOError, OSError):
         raise IOError('Error opening file: {}'.format(fname))
 
@@ -143,14 +117,5 @@ def load_xml(fname):
     ----------
     fname : str
         File name + path on disk.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
     """
-    with open(fname) as fd:
-        return xmltodict.parse(fd.read())
+    return xmltodict.parse(open(fname, mode='r').read())
