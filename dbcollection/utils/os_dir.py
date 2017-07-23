@@ -31,9 +31,6 @@ def dir_get_size(dir_path):
     int
         Number of folders in the path.
 
-    Raises
-    ------
-        None
     """
     files = folders = 0
     for _, dirname, filenames in os.walk(dir_path):
@@ -61,9 +58,6 @@ def construct_set_from_dir(dir_path, verbose=True):
     dict
         Set structure with keys as class names and values as image filenames.
 
-    Raises
-    ------
-        None
     """
     assert os.path.isdir(dir_path), 'Invalid path: {}'.format(dir_path)
 
@@ -126,9 +120,6 @@ def construct_dataset_from_dir(dir_path, verbose=True):
     dict
         Dataset structure.
 
-    Raises
-    ------
-        None
     """
     assert os.path.isdir(dir_path), 'Invalid path: {}'.format(dir_path)
 
