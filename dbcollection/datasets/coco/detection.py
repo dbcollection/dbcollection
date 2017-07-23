@@ -474,25 +474,25 @@ class Detection2015(BaseTask):
 
             for i in range(len(category)):
                 imgs_per_category = [val[0] for _, val in enumerate(object_id) if val[4] == i]
-                imgs_per_category = list(set(imgs_per_category)) # get unique values
+                imgs_per_category = list(set(imgs_per_category))  # get unique values
                 imgs_per_category.sort()
                 list_image_filenames_per_category.append(imgs_per_category)
 
             for i in range(len(supercategory)):
                 imgs_per_supercategory = [val[0] for _, val in enumerate(object_id) if val[5] == i]
-                imgs_per_supercategory = list(set(imgs_per_supercategory)) # get unique values
+                imgs_per_supercategory = list(set(imgs_per_supercategory))  # get unique values
                 imgs_per_supercategory.sort()
                 list_image_filenames_per_supercategory.append(imgs_per_supercategory)
 
             for i in range(len(category)):
                 obj_per_category = [j for j, val in enumerate(object_id) if val[4] == i]
-                obj_per_category = list(set(obj_per_category)) # get unique values
+                obj_per_category = list(set(obj_per_category))  # get unique values
                 obj_per_category.sort()
                 list_objects_ids_per_category.append(obj_per_category)
 
             for i in range(len(supercategory)):
                 obj_per_supercategory = [j for j, val in enumerate(object_id) if val[5] == i]
-                obj_per_supercategory = list(set(obj_per_supercategory)) # get unique values
+                obj_per_supercategory = list(set(obj_per_supercategory))  # get unique values
                 obj_per_supercategory.sort()
                 list_objects_ids_per_supercategory.append(obj_per_supercategory)
 
@@ -530,6 +530,7 @@ class Detection2015(BaseTask):
                                           (nrows, ncols),
                                           dtype=np.float,
                                           chunks=True,
+                                          compression="gzip",
                                           fillvalue=-1)
             if self.verbose:
                 print('   -- Saving segmentation field to disk (this will take some time to finish)')
