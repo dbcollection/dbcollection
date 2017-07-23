@@ -38,20 +38,13 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
         Flag used for tests.
         (optional, default=False)
 
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-
     Examples
     --------
     Download the CIFAR10 dataset to disk.
 
     >>> import dbcollection as dbc
     >>> dbc.download('cifar10')
+
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
@@ -111,20 +104,13 @@ def process(name, task='all', verbose=True, is_test=False):
         Flag used for tests.
         (optional, default=False)
 
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-
     Examples
     --------
     Download the CIFAR10 dataset to disk.
 
     >>> import dbcollection as dbc
     >>> dbc.process('cifar10', task='classification', verbose=False)
+
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
@@ -186,6 +172,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     >>> mnist = dbc.load('mnist')
     >>> print('Dataset name: ', mnist.name)
     Dataset name:  mnist
+
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
 
@@ -232,14 +219,6 @@ def add(name=None, task=None, data_dir=None, file_path=None, keywords=[], is_tes
         List of keywords to categorize the dataset.
     is_test : bool
         Flag used for tests.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
 
     Examples
     --------
@@ -288,14 +267,6 @@ def remove(name, task=None, delete_data=False, is_test=False):
     is_test : bool
         Flag used for tests.
         (optional, default=False)
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
 
     Examples
     --------
@@ -380,14 +351,6 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
         Flag used for tests.
         (optional, default=False)
 
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-
     Examples
     --------
     Delete the cache by removing the dbcollection.json cache file.
@@ -442,13 +405,6 @@ def query(pattern='info', is_test=False):
         Flag used for tests.
         (optional, default=False)
 
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
     """
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
@@ -523,13 +479,6 @@ def info(name=None, paths_info=True, datasets_info=True, categories_info=True, i
         Flag used for tests.
         (optional, default=False)
 
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
     """
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
