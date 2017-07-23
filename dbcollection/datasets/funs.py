@@ -52,12 +52,9 @@ def setup_dataset_constructor(name, data_dir, cache_dir, extract_data=True, verb
 
     Returns
     -------
-    class
+    BaseTask
         Dataset class object contianing the download/preprocess data methods.
 
-    Raises
-    ------
-        None
     """
     # check if the directories exist already
     assert os.path.exists(data_dir), 'Data directory does not exist: {}'.format(data_dir)
@@ -70,28 +67,6 @@ def setup_dataset_constructor(name, data_dir, cache_dir, extract_data=True, verb
 
     # setup dataset constructor
     return constructor(data_dir, cache_dir, extract_data, verbose)
-
-
-def exists(name):
-    """Checks if a dataset name exists for download.
-
-    Parameters
-    ----------
-    name : str
-        Name of the dataset.
-
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
-    """
-    for category in datasets:
-        if name in datasets[category]:
-            return True
-    return False
 
 
 def download(name, data_dir, cache_dir, extract_data=True, verbose=True):
@@ -114,11 +89,9 @@ def download(name, data_dir, cache_dir, extract_data=True, verbose=True):
 
     Returns
     -------
-        None
+    str/list
+        String or list of strings of keywords.
 
-    Raises
-    ------
-        None
     """
     # get dataset constructor
     dataset_loader = setup_dataset_constructor(name, data_dir, cache_dir, extract_data, verbose)
@@ -150,7 +123,8 @@ def process(name, task, data_dir, cache_dir, verbose):
 
     Raises
     ------
-        None
+    KeyError
+        If task does not exist.
     """
     # get dataset constructor
     dataset_loader = setup_dataset_constructor(name, data_dir, cache_dir, False, verbose)
