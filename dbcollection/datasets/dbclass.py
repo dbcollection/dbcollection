@@ -15,7 +15,29 @@ from dbcollection.utils.url import download_extract_all
 #---------------------------------------------------------
 
 class BaseDataset:
-    """ Base class for download/processing a dataset. """
+    """ Base class for download/processing a dataset.
+
+    Attributes
+    ----------
+    data_path : str
+        Path to the data directory.
+    cache_path : str
+        Path to the cache file
+    extract_data : bool, optional
+        Extracts the downloaded files if they are compacted.
+    verbose : bool
+        Be verbose
+    url : list
+        List of URL links to download.
+    md5_checksum : str, optional
+        MD5 Hash for each of the urls.
+    keywords : list
+        List of keywords.
+    tasks : dict
+        Dataset's tasks.
+    default_task : str
+        Default task name.
+    """
 
     # download url
     url = [] # list of urls to download
@@ -28,16 +50,31 @@ class BaseDataset:
 
     # init tasks
     tasks = {} # dictionary of available tasks to process
-               # Example: tasks = {'classification':Classification}
+            # Example: tasks = {'classification':Classification}
     default_task = '' # Should define a default class!
                       # Example: default_task='classification'
 
-    def __init__(self, data_path, cache_path, extract_data, verbose=True):
+
+    def __init__(self, data_path, cache_path, extract_data=True, verbose=True):
         """
         Initialize class.
+
+        Parameters
+        ----------
+        data_path : str
+            Path to the data directory.
+        cache_path : str
+            Path to the cache file
+        extract_data : bool, optional
+            Extracts the downloaded files if they are compacted.
+        verbose : bool
+            Be verbose
+
         """
-        self.cache_path = cache_path
+        assert data_path
+        assert cache_path
         self.data_path = data_path
+        self.cache_path = cache_path
         self.extract_data = extract_data
         self.verbose = verbose
 
@@ -131,7 +168,22 @@ class BaseDataset:
 #---------------------------------------------------------
 
 class BaseTask:
-    """ Base class for processing a task of a dataset. """
+    """ Base class for processing a task of a dataset.
+
+    Attributes
+    ----------
+    data_path : str
+        Path to the data directory.
+    cache_path : str
+        Path to the cache file
+    suffix : str, optional
+        Suffix to select optional properties for a task.
+    verbose : bool, optional
+        Be verbose.
+    filename_h5 : str
+        hdf5 metadata file name.
+
+    """
 
     # name of the task file
     filename_h5 = 'task'
@@ -140,11 +192,25 @@ class BaseTask:
     def __init__(self, data_path, cache_path, suffix=None, verbose=True):
         """
         Initialize class.
+
+        Parameters
+        ----------
+        data_path : str
+            Path to the data directory.
+        cache_path : str
+            Path to the cache file
+        suffix : str, optional
+            Suffix to select optional properties for a task.
+        verbose : bool, optional
+            Be verbose.
+
         """
+        assert data_path
+        assert cache_path
         self.cache_path = cache_path
         self.data_path = data_path
-        self.verbose = verbose
         self.suffix = suffix
+        self.verbose = verbose
 
 
     def load_data(self):
