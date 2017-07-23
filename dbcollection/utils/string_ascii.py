@@ -22,10 +22,6 @@ def _str_to_ascii(input_str):
     numpy.uint8
        Single numpy array.
 
-    Raises
-    ------
-        None
-
     Examples
     --------
     Convert a string to numpy array.
@@ -50,10 +46,6 @@ def _ascii_to_str(input_array):
     -------
     str
        Single string.
-
-    Raises
-    ------
-        None
 
     Examples
     --------
@@ -90,10 +82,6 @@ def convert_str_to_ascii(inp_str):
     numpy.uint8
         Array containing all strings converted to numpy arrays in ascii format.
 
-    Raises
-    ------
-        None
-
     Examples
     --------
     Example1: Convert a string to ASCII as a `numpy` array.
@@ -101,7 +89,6 @@ def convert_str_to_ascii(inp_str):
     >>> from dbcollection.utils.string_ascii import convert_str_to_ascii
     >>> convert_str_to_ascii('string1')
     array([115, 116, 114, 105, 110, 103,  49,   0], dtype=uint8)
-
 
     Example2: Convert a list of strings to ASCII as a `numpy` array.
 
@@ -144,10 +131,6 @@ def convert_ascii_to_str(input_array):
     -------
     str/list
         String or list of strings.
-
-    Raises
-    ------
-        None
 
     Examples
     --------

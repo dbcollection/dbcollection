@@ -4,11 +4,23 @@ Test utility functions/classes.
 
 
 from __future__ import print_function
-import dbcollection as dbc
+import dbcollection.manager as dbc
 
 
 class TestBaseDB:
-    """ Test Class for loading datasets """
+    """ Test Class for loading datasets.
+
+    Attributes
+    ----------
+    name : str
+        Name of the dataset.
+    task : str
+        Name of the task.
+     data_dir : str
+        Path of the dataset's data directory on disk.
+    verbose : bool
+        Be verbose.
+    """
 
     def __init__(self, name, task, data_dir, verbose=True):
         """
@@ -16,7 +28,14 @@ class TestBaseDB:
 
         Parameters
         ----------
-            options :
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the task.
+         data_dir : str
+            Path of the dataset's data directory on disk.
+        verbose : bool, optional
+            Be verbose.
 
         """
         assert name, "Must insert input arg: name"
@@ -41,23 +60,23 @@ class TestBaseDB:
         dbc.info(is_test=True)
 
 
-    def print_info(self):
+    def print_info(self, loader):
         """Print information about the dataset to the screen"""
         print('\n######### info #########')
-        print('Dataset: ' + self.dataset.name)
-        print('Task: ' + self.dataset.task)
-        print('Data path: ' + self.dataset.data_dir)
-        print('Metadata cache path: ' + self.dataset.cache_path)
+        print('Dataset: ' + loader.name)
+        print('Task: ' + loader.task)
+        print('Data path: ' + loader.data_dir)
+        print('Metadata cache path: ' + loader.cache_path)
 
 
     def load(self):
         """Load dataset to memory"""
         print('\n==> dbcollection: load()')
-        self.dataset = dbc.load(name=self.name,
-                                task=self.task,
-                                data_dir=self.data_dir,
-                                verbose=self.verbose,
-                                is_test=True)
+        return  dbc.load(name=self.name,
+                         task=self.task,
+                         data_dir=self.data_dir,
+                         verbose=self.verbose,
+                         is_test=True)
 
 
     def download(self, extract_data=True):
@@ -73,10 +92,10 @@ class TestBaseDB:
     def process(self):
         """Process dataset"""
         print('\n==> dbcollection: process()')
-        self.dataset = dbc.process(name=self.name,
-                                   task=self.task,
-                                   verbose=self.verbose,
-                                   is_test=True)
+        dbc.process(name=self.name,
+                    task=self.task,
+                    verbose=self.verbose,
+                    is_test=True)
 
 
     def run(self, mode):
@@ -88,10 +107,10 @@ class TestBaseDB:
 
         if mode is 'load':
             # download/setup dataset
-            self.load()
+            loader = self.load()
 
             # print data from the loader
-            self.print_info()
+            self.print_info(loader)
 
         elif mode is 'download':
             # download dataset

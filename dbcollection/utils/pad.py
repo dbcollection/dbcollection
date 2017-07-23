@@ -22,10 +22,6 @@ def pad_list(listA, val=-1, length=None):
     list
         A list of lists with the same same.
 
-    Raises
-    ------
-        None
-
     Examples
     --------
     Pad an uneven list of lists with a value.
@@ -70,10 +66,6 @@ def unpad_list(listA, val=-1):
     list
         A list of lists without the padding values.
 
-    Raises
-    ------
-        None
-
     Examples
     --------
     Remove the padding values of a list of lists.
@@ -115,10 +107,6 @@ def squeeze_list(listA, val=-1):
     list
         A list with all lists concatenated into one.
 
-    Raises
-    ------
-        None
-
     Examples
     --------
     Compact a list of lists into a single list.
@@ -126,6 +114,7 @@ def squeeze_list(listA, val=-1):
     >>> from dbcollection.utils.pad import squeeze_list
     >>> squeeze_list([[1,2], [3], [4,5,6]], -1)
     [1, 2, -1, 3, -1, 4, 5, 6]
+
     """
     concatA = [l + [val] for l in listA]
     out = [li for l in concatA for li in l]
@@ -152,10 +141,6 @@ def unsqueeze_list(listA, val=-1):
     list
         A list of lists.
 
-    Raises
-    ------
-        None
-
     Source
     ------
     https://stackoverflow.com/questions/4322705/split-a-list-into-nested-lists-on-a-value
@@ -169,5 +154,4 @@ def unsqueeze_list(listA, val=-1):
     [[1, 2], [3], [4, 5, 6]]
 
     """
-    out = [list(g) for k,g in itertools.groupby(listA, lambda x:x in (val, )) if not k]
-    return out
+    return [list(g) for k,g in itertools.groupby(listA, lambda x:x in (val, )) if not k]

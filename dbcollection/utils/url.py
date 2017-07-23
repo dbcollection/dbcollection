@@ -28,7 +28,8 @@ def get_hash_value(fname):
 
     Raises
     ------
-        None
+    IOError
+        If the file cannot be opened
     """
     try:
         return hashlib.md5(open(fname, 'rb').read()).hexdigest()
@@ -48,13 +49,6 @@ def download_url_requests(url, fname, verbose=False):
     verbose : bool
         Display progress bar
 
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
     """
     r = requests.get(url, stream=True)
 
@@ -92,13 +86,6 @@ def download_url_google_drive(file_id, filename, verbose=False):
     verbose : bool
         Display messages + progress bar on screen when downloading the file.
 
-    Returns
-    -------
-        None
-
-    Raises
-    ------
-        None
     """
 
     def get_confirm_token(response):
@@ -147,13 +134,11 @@ def download_url(url, filename, method, verbose=False):
     verbose : bool
         Display messages + progress bar on screen when downloading the file.
 
-    Returns
-    -------
-        None
-
     Raises
     ------
-        None
+    Exception
+        If the method does not exit.
+        
     """
 
     # get filename for temp file in current directory
@@ -187,17 +172,13 @@ def check_if_file_exists(filename, dir_save, verbose=True):
 
     Returns
     -------
-        None
+    bool
+        True if file exists. Otherwise, Flase.
 
-    Raises
-    ------
-        None
     """
-    # check if the path exists
     if not os.path.exists(dir_save):
         os.makedirs(dir_save)
 
-    # check if the filename already exists
     return os.path.exists(filename)
 
 
@@ -220,13 +201,12 @@ def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True
     verbose : bool
         Display messages on screen.
 
-    Returns
-    -------
-        None
-
     Raises
     ------
-        None
+    Exception
+        If it is an invalid url type.
+    KeyError
+        If the download method is invalid.
     """
     # Check if urls is a str
     if isinstance(urls, str):
@@ -272,6 +252,6 @@ def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True
                     print('**WARNING**: md5 checksum does not match for file: {}'.format(filename))
                     print('Checksum expected: {}, got: {}'.format(md5sum, file_hash))
 
-        # extract file
-        if extract_data:
-            patoolib.extract_archive(filename, outdir=dir_save, verbosity=verbose)
+            # extract file
+            if extract_data:
+                patoolib.extract_archive(filename, outdir=dir_save, verbosity=verbose)
