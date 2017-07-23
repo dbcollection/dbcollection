@@ -63,7 +63,7 @@ def available_datasets():
     out = {}
     for db in sorted(datasets):
         constructor = datasets[db]
-        db_loader = constructor('', '', '', '')  # init with empty data
+        db_loader = constructor('nan', 'nan', False, False)  # init with empty data
         tasks = sorted(db_loader.get_all_tasks())
         tasks.remove('default')
         out[db] = tasks
