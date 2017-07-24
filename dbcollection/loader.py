@@ -91,7 +91,7 @@ class DatasetLoader:
 
         Returns
         -------
-        str, int, list
+        str/int/list
             Value/list of a field from the metadata cache file.
 
         """
@@ -105,7 +105,66 @@ class DatasetLoader:
             return self.file[field_path][idx]
 
 
-    def object(self, set_name, idx, is_value=False):
+    def _convert(self, set_name, idx):
+        """Retrieve data from the dataset's hdf5 metadata file in the original format.
+
+        This method fetches all indices of an object(s), and then it looks up for the
+        value for each field in 'object_ids' for a certain index(es), and then it
+        groups the fetches data into a single list.
+
+        Parameters
+        ----------
+        set_name : str
+            Name of the set.
+		idx : int/list
+            Index number of the field. If it is a list, returns the data
+            for all the indexes of that list as values.
+
+        Returns
+        -------
+        str/int/list
+            Value/list of a field from the metadata cache file.
+
+        """
+        assert set_name, 'Must input a valid set name: {}'.format(set_name)
+        if isinstance(idx, list):
+            assert min(idx) >= 0, 'list must have indexes >= 0: {}'.format(idx)
+        else:
+            assert idx >= 0, 'idx must be >=0: {}'.format(idx)
+
+        dir_path = self.root_path + set_name + '/'
+
+        # convert idx to a list (in case it is a number)
+        if not isinstance(idx, list):
+            idx = [idx]
+
+        # fetch the field names composing 'object_ids'
+        fields = self.object_fields[set_name]
+
+        # iterate over all ids and build an output list
+        output = []
+        for idx_ in idx:
+            # fetch list of indexes for the current id
+            ids = self.file[dir_path + 'object_ids'][idx_]
+
+            # fetch data for each element of the list
+            data = []
+            for i, field_name in enumerate(fields):
+                field_id = ids[i]
+                if field_id >= 0:
+                    data.append(self.file[dir_path + field_name][field_id])
+                else:
+                    data.append([])
+            output.append(data)
+
+        # output data
+        if len(idx) == 1:
+            return output[0]
+        else:
+            return output
+
+
+    def object(self, set_name, idx=None, is_value=False):
         """Retrieves a list of all fields' indexes/values of an object composition.
 
         Retrieves the data's ids or contents of all fields of an object.
@@ -117,9 +176,10 @@ class DatasetLoader:
         ----------
         set_name : str
             Name of the set.
-        idx : int, long, list
+        idx : int/list, optional
             Index number of the field. If it is a list, returns the data
-            for all the value indexes of that list
+            for all the value indexes of that list. If no index is used,
+            it returns the entire data field array.
         is_value : bool, optional
             if False, outputs a list of indexes. If True,
             it outputs the values instead of the indexes.
@@ -131,44 +191,18 @@ class DatasetLoader:
 
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
-        if isinstance(idx, list):
-            assert min(idx) >= 0, 'list must have indexes >= 0: {}'.format(idx)
+        if idx is None:
+            idx = list(range(0, self.size(set_name)[0]))
         else:
-            assert idx >= 0, 'idx must be >=0: {}'.format(idx)
-
-        dir_path = self.root_path + set_name + '/'
-        field_path = dir_path + 'object_ids'
-        if not is_value:
-            return self.file[field_path][idx]
-        else:
-            # convert idx to a list (in case it is a number)
-            if not isinstance(idx, list):
-                idx = [idx]
-
-            # fetch the field names composing 'object_ids'
-            fields = self.object_fields[set_name]
-
-            # iterate over all ids and build an output list
-            output = []
-            for idx_ in idx:
-                # fetch list of indexes for the current id
-                ids = self.file[field_path][idx_]
-
-                # fetch data for each element of the list
-                data = []
-                for i, field_name in enumerate(fields):
-                    field_id = ids[i]
-                    if field_id >= 0:
-                        data.append(self.file[dir_path + field_name][field_id])
-                    else:
-                        data.append([])
-                output.append(data)
-
-            # output data
-            if len(idx) == 1:
-                return output[0]
+            if isinstance(idx, list):
+                assert min(idx) >= 0, 'list must have indexes >= 0: {}'.format(idx)
             else:
-                return output
+                assert idx >= 0, 'idx must be >=0: {}'.format(idx)
+
+        if is_value:
+            return self._convert(set_name, idx)
+        else:
+            return self.get(set_name, 'object_ids', idx)
 
 
     def size(self, set_name, field_name='object_ids'):
@@ -208,9 +242,6 @@ class DatasetLoader:
         list
             List of all data fields of the dataset.
 
-        Raises
-        ------
-            None
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
 
