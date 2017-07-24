@@ -195,7 +195,10 @@ class DatasetLoader:
             idx = list(range(0, self.size(set_name)[0]))
         else:
             if isinstance(idx, list):
-                assert min(idx) >= 0, 'list must have indexes >= 0: {}'.format(idx)
+                if any(idx):
+                    assert min(idx) >= 0, 'list must have indexes >= 0: {}'.format(idx)
+                else:
+                    idx = list(range(0, self.size(set_name)[0]))
             else:
                 assert idx >= 0, 'idx must be >=0: {}'.format(idx)
 
