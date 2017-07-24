@@ -59,6 +59,9 @@ def test_object_two(output, index):
 def test_object_no_index():
     assert((60000, 2) == loader.object('train').shape)
 
+def test_object_empty_index():
+    assert((60000, 2) == loader.object('train', []).shape)
+
 @pytest.mark.parametrize("field_name, output", [
     ('classes', [10, 2]),
     ('images', [60000, 28, 28]),
