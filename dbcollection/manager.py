@@ -25,18 +25,14 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
     ----------
     name : str
         Name of the dataset.
-    data_dir : str
+    data_dir : str, optional
         Directory path to store the downloaded data.
-        (optional, default=None)
-    extract_data : bool
+    extract_data : bool, optional
         Extracts/unpacks the data files (if true).
-        (optional, default=True)
-	verbose : bool
+	verbose : bool, optional
         Displays text information (if true).
-        (optional, default=True)
-    is_test : bool
+    is_test : bool, optional
         Flag used for tests.
-        (optional, default=False)
 
     Examples
     --------
@@ -94,15 +90,12 @@ def process(name, task='all', verbose=True, is_test=False):
     ----------
     name : str
         Name of the dataset.
-    task : str
+    task : str, optional
         Name of the task to process.
-        (optional, default='all')
-    verbose : bool
+    verbose : bool, optional
         Displays text information (if true).
-        (optional, default=True)
-    is_test : bool
+    is_test : bool, optional
         Flag used for tests.
-        (optional, default=False)
 
     Examples
     --------
@@ -141,18 +134,14 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     ----------
     name : str
         Name of the dataset.
-    task : str
+    task : str, optional
         Name of the task to load.
-        (optional, default='default')
-    data_dir : str
+    data_dir : str, optional
         Directory path to store the downloaded data.
-        (optional, default=None)
-	verbose : bool
+	verbose : bool, optional
         Displays text information (if true).
-        (optional, default=True)
-    is_test : bool
+    is_test : bool, optional
         Flag used for tests.
-        (optional, default=False)
 
     Returns
     -------
@@ -202,7 +191,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     return dataset_loader
 
 
-def add(name=None, task=None, data_dir=None, file_path=None, keywords=[], is_test=False):
+def add(name, task, data_dir, file_path, keywords=[], is_test=False):
     """Add a dataset/task to the list of available datasets for loading.
 
     Parameters
@@ -213,11 +202,11 @@ def add(name=None, task=None, data_dir=None, file_path=None, keywords=[], is_tes
         Name of the task to load.
     data_dir : str
         Path of the stored data on disk.
-	file_path : bool
+    file_path : bool
         Path to the metadata HDF5 file.
-    keywords : list of strings
+    keywords : list of strings, optional
         List of keywords to categorize the dataset.
-    is_test : bool
+    is_test : bool, optional
         Flag used for tests.
 
     Examples
@@ -258,15 +247,12 @@ def remove(name, task=None, delete_data=False, is_test=False):
     ----------
     name : str
         Name of the dataset to delete.
-    task : str
+    task : str, optional
         Name of the task to delete.
-        (optional, default=None)
-    delete_data : bool
+    delete_data : bool, optional
         Delete all data files from disk for this dataset if True.
-        (optional, default=False)
-    is_test : bool
+    is_test : bool, optional
         Flag used for tests.
-        (optional, default=False)
 
     Examples
     --------
@@ -326,30 +312,22 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
 
     Parameters
     ----------
-	field : str
+	field : str, optional
         Name of the field to update/modify in the cache file.
-        (optional, default=None)
-    value : str, list, table
+    value : str, list, table, optional
         Value to update the field.
-        (optional, default=None)
-    delete_cache : bool
+    delete_cache : bool, optional
         Delete/remove the dbcollection cache file + directory.
-        (optional, default=False)
-    delete_cache_dir : bool
+    delete_cache_dir : bool, optional
         Delete/remove the dbcollection cache directory.
-        (optional, default=False)
-    delete_cache_file : bool
+    delete_cache_file : bool, optional
         Delete/remove the dbcollection.json cache file.
-        (optional, default=False)
-    reset_cache : bool
+    reset_cache : bool, optional
         Reset the cache file.
-        (optional, default=False)
-    verbose : bool
+    verbose : bool, optional
         Displays text information (if true).
-        (optional, default=True)
-    is_test : bool
+    is_test : bool, optional
         Flag used for tests.
-        (optional, default=False)
 
     Examples
     --------
@@ -457,27 +435,22 @@ def info(name=None, paths_info=True, datasets_info=True, categories_info=True, i
 
     Parameters
     ----------
-    name : str
+    name : str, optional
         Name of the dataset to display information.
-        (optional, default=None)
-    paths_info : bool
+    paths_info : bool, optional
         Print the paths info to screen.
-        (optional, default=True)
-    datasets_info : bool/str
+    datasets_info : bool/str, optional
         Print the datasets info to screen.
         If a string is provided, it selects
         only the information of that string
         (dataset name).
-        (optional, default=True)
-    categories_info : bool/str
+    categories_info : bool/str, optional
         Print the paths info to screen.
         If a string is provided, it selects
         only the information of that string
         (dataset name).
-        (optional, default=True)
-    is_test : bool
+    is_test : bool, optional
         Flag used for tests.
-        (optional, default=False)
 
     """
     # Load a cache manager object
