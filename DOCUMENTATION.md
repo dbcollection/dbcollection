@@ -123,7 +123,7 @@ dbc.download(name='cifar10',
 ### process
 
 ```python
-dbc.process(name, task, verbose. is_test)
+dbc.process(name, task, verbose, is_test)
 ```
 
 Processes a dataset's metadata and stores it to file. This metadata is stored in a HDF5 file for each task composing the dataset's tasks. For more information about a dataset's metadata format please check the list of available datasets in the [docs](http://dbcollection.readthedocs.io/en/latest/available_datasets.html).
@@ -155,7 +155,7 @@ dbc.process(name='cifar10', task='default')  # process only the 'default' task
 ### add
 
 ```python
-dbc.add(name, task, data_dir, verbose)
+dbc.add(name, task, data_dir, file_path, keywords, verbose, is_test)
 ```
 
 This method provides an easy way to add a custom dataset/task to the `dbcollection.json` cache file without having to manually add them themselves (although it is super easy to do it and recommended!).
@@ -187,7 +187,7 @@ dbc.add(name='custom1',
 ### remove
 
 ```python
-dbc.remove(name, task, data_dir, verbose)
+dbc.remove(name, task, data_dir, verbose, is_test)
 ```
 
 This method allows for a dataset to be removed from the list of available datasets for load in the cache. It also allows for the user to delete the dataset's files on disk if desired.
@@ -309,15 +309,19 @@ dbc.query('detection')
 ### info
 
 ```python
-dbc.info(list_datasets, is_test)
+dbc.info(name, paths_info, datasets_info, categories_info, is_test)
 ```
 
 Prints the cache contents to screen. It can also print a list of all available datasets to download/process in the `dbcollection` package.
 
 #### Parameters
 
-- `list_datasets`: Print available datasets in the `dbcollection` package. (*type=boolean, default=False*)
+- `name`: Name of the dataset to display information. (*type=string, default=None*)
+- `paths_info`: Print the paths info to screen. (*type=boolean, default=True*)
+- `datasets_info`: Print the datasets info to screen. If a string is provided, it selects only the information of that string (dataset name). (*type=boolean/string, default=True*)
+- `categories_info`: Print the paths info to screen. If a string is provided, it selects only the information of that string (dataset name). (*type=boolean/string, default=True*)
 - `is_test`: Flag used for tests. (*type=boolean, default=False*)
+
 
 #### Usage examples
 
@@ -330,8 +334,10 @@ dbc.info()
 Display all available datasets to download/process:
 
 ```python
-dbc.info(True)
+dbc.info('all')
 ```
+
+> TODO: Add more examples for the other options
 
 <a name="db.loader"></a>
 ## Data loading API
@@ -406,7 +412,7 @@ This method is particularly useful when different fields are linked (like in det
 #### Parameters
 
 - `set_name`: Name of the set. (*type=string*)
-- `idx`:  Index number of the field. If it is a list, returns the data for all the value indexes of that list. (ty*pe=number or list*)
+- `idx`:  Index number of the field. If it is a list, returns the data for all the value indexes of that list. If the list is empty, it returns all the values of the field.  (ty*pe=number or list*)
 - `is_value`: Outputs a tensor of indexes (if false) or a list of tensors/values (if True). (*type=boolean, default=false*)
 
 #### Usage examples
