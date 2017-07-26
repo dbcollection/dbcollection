@@ -168,6 +168,8 @@ class Detection(BaseTask):
         """
         Divide dataset into train and test splits
         """
+        random.seed(4)
+
         for i in range(1, num_splits+1):
             if self.verbose:
                 print(' > Generating random dataset splits ({}/{}): train percentage={}, num splits={}'
