@@ -5,9 +5,13 @@ import os
 from setuptools import setup, find_packages
 
 
-# Get version
-from dbcollection._version import VERSION
-VERSION = str(VERSION)
+# set version
+VERSION = '0.1.6'
+
+cwd = os.path.dirname(os.path.abspath(__file__))
+version_path = os.path.join(cwd, 'dbcollection', 'version.py')
+with open(version_path, 'w') as f:
+    f.write("__version__ = '{}'\n".format(VERSION))
 
 
 # Load requirements

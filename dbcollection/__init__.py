@@ -18,8 +18,7 @@ dataset every time.
 #from dbcollection import manager, utils
 
 # get version
-from ._version import VERSION
-__version__ = str(VERSION)
+from .version import __version__
 
 # load API methods
 from .manager import load, download, process, add, remove, config_cache, query, info
