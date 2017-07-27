@@ -17,8 +17,8 @@ from . import ucf
 
 
 human_action = {
-    "ucf101": ucf.ucf101.UCF101,
-    "ucfsports": ucf.ucfsports.UCFSports
+    "ucf_101": ucf.ucf101.UCF101,
+    "ucf_sports": ucf.ucfsports.UCFSports
 }
 
 human_pose = {
