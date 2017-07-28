@@ -90,3 +90,44 @@ def test_list():
 ])
 def test_object_field_id(field_name, output):
     assert(output == loader.object_field_id('train', field_name))
+
+
+def test_info():
+    loader.info()
+    pass
+
+
+@pytest.mark.parametrize("set_name", [
+    ('train'),
+    ('test'),
+])
+def test_info_set_succeed(set_name):
+    loader.info(set_name)
+    pass
+
+
+@pytest.mark.parametrize("set_name", [
+    ('train1'),
+    ('val'),
+])
+def test_info_set_fail(set_name):
+    with pytest.raises(Exception):
+        loader.info(set_name)
+
+
+@pytest.mark.parametrize("set_name", [
+    ('train'),
+    ('test'),
+])
+def test__print_info_succeed(set_name):
+    loader._print_info(set_name)
+    pass
+
+
+@pytest.mark.parametrize("set_name", [
+    ('train1'),
+    ('val'),
+])
+def test__print_info_fail(set_name):
+    with pytest.raises(Exception):
+        loader._print_info(set_name)
