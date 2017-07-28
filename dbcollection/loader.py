@@ -279,3 +279,101 @@ class DatasetLoader:
             return self.object_fields[set_name].index(field_name)
         except ValueError:
             raise ValueError('Field name \'{}\' does not exist.'.format(field_name))
+
+
+    def _print_info(self, set_name):
+        """Prints information about the data fields of a set.
+
+        Displays information of all fields available like field name,
+        size and shape of all sets. If a 'set_name' is provided, it
+        displays only the information for that specific set.
+
+        This method provides the necessary information about a data set
+        internals to help determine how to use/handle a specific field.
+
+        Parameters
+        ----------
+        set_name : str
+            Name of the set.
+
+        """
+        assert set_name, 'Invalid set name: {}'.format(set_name)
+
+        print('\n> Set: {}'.format(set_name))
+
+        field_path = self.root_path + set_name
+        field_names = list(self.file[field_path].keys())
+
+        # prints all fields except list_*
+        fields_info = []
+        lists_info = []
+        for field_name in sorted(field_names):
+            f = self.file[self.root_path + set_name + '/' + field_name]
+
+            if field_name.startswith('list_'):
+                lists_info.append({
+                    "name": str(field_name),
+                    "shape": 'shape = {}'.format(str(f.shape)),
+                    "type": 'dtype = {}'.format(str(f.dtype))
+                })
+            else:
+                # check if its in 'object_ids'
+                s_obj = ''
+                if field_name in self.object_fields[set_name]:
+                    s_obj = "(in 'object_ids', position = {})".format(self.object_field_id(set_name, field_name))
+
+                fields_info.append({
+                    "name": str(field_name),
+                    "shape": 'shape = {}'.format(str(f.shape)),
+                    "type": 'dtype = {}'.format(str(f.dtype)),
+                    "obj": s_obj
+                })
+
+        maxsize_name = max([len(d["name"]) for d in fields_info]) + 8
+        maxsize_shape = max([len(d["shape"]) for d in fields_info]) + 3
+        maxsize_type = max([len(d["type"]) for d in fields_info]) + 3
+
+        for i, info in enumerate(fields_info):
+            s_name  = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
+            s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
+            s_obj   = info["obj"]
+            if any(s_obj):
+                s_type  = '{:{}}'.format('{},'.format(info["type"]), maxsize_type)
+            else:
+                s_type  = '{:{}}'.format('{}'.format(info["type"]), maxsize_type)
+            print(s_name + s_shape + s_type + s_obj)
+
+        if any(lists_info):
+            print('\n   (Pre-ordered lists)')
+
+            maxsize_name = max([len(d["name"]) for d in lists_info]) + 8
+            maxsize_shape = max([len(d["shape"]) for d in lists_info]) + 3
+
+            for i, info in enumerate(lists_info):
+                s_name  = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
+                s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
+                s_type  = info["type"]
+                print(s_name + s_shape + s_type)
+
+
+    def info(self, set_name=None):
+        """Prints information about the data fields of a set.
+
+        Displays information of all fields available like field name,
+        size and shape of all sets. If a 'set_name' is provided, it
+        displays only the information for that specific set.
+
+        This method provides the necessary information about a data set
+        internals to help determine how to use/handle a specific field.
+
+        Parameters
+        ----------
+        set_name : str
+            Name of the set.
+
+        """
+        if set_name:
+            self._print_info(set_name)
+        else:
+            for set_name in sorted(self.sets):
+                self._print_info(set_name)
