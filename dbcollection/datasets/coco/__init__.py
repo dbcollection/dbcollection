@@ -36,16 +36,13 @@ class COCO(BaseDataset):
 
     # init tasks
     tasks = {
-        "detection" : Detection2015,
         "detection_2015" : Detection2015,
         "detection_2016" : Detection2016,
 
-        "caption" : Caption2015,
         "caption_2015" : Caption2015,
         "caption_2016" : Caption2016,
 
-        "keypoints" : Keypoints2016,
         "keypoints_2016" : Keypoints2016,
     }
 
-    default_task = 'detection'
+    default_task = 'detection_2015'
