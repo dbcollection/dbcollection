@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 """
 Test loading ucf101.
@@ -9,7 +9,7 @@ from dbcollection.utils.test import TestBaseDB
 
 
 # setup
-name = 'ucf101'
+name = 'ucf_101'
 task = 'recognition'
 data_dir = os.path.join(os.path.expanduser("~"), 'tmp', 'download_data')
 verbose = True

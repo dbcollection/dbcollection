@@ -53,6 +53,10 @@ class Recognition(BaseTask):
         """
         Extract frames from a video.
         """
+        assert video_filename
+        assert video_name
+        assert save_dir
+
         # setup stdout suppression for subprocess
         try:
             from subprocess import DEVNULL # py3k
@@ -66,6 +70,67 @@ class Recognition(BaseTask):
                              shell=True, stdout=DEVNULL, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             raise Exception('\n\nError occurred when parsing {}\n'.format(video_filename))
+
+
+    def get_video_filename(self, all_files):
+        """Returns the video filename."""
+        assert all_files
+
+        video_filename = [vname for vname in all_files if vname.endswith('.avi')]
+
+        if not any(video_filename):
+            video_filename = 'not_available'
+        else:
+            video_filename = video_filename[0]
+        return video_filename
+
+
+    def get_image_filenames(self, dir_path, video_filename, activity, video, all_files):
+        """Return a list of all image filenames sorted."""
+        assert dir_path
+        assert video_filename
+        assert activity
+        assert video
+        assert all_files
+
+        image_filenames = [fname for fname in all_files if fname.endswith('.jpg')]
+
+        # check if any image filenames exist
+        if not any(image_filenames):
+            video_filename_path = os.path.join(dir_path, video_filename)
+            video_name = os.path.splitext(os.path.basename(video_filename_path))[0]
+            self.extract_video_frames(video_filename_path, video_name, dir_path)
+
+            # fetch again the image filenames
+            image_filenames = [fname for fname in all_files if fname.endswith('.jpg')]
+
+        # add the directory path to the image filenames
+        image_filenames = [os.path.join(self.activities_dir, activity, video, fname) for fname in image_filenames]
+        image_filenames.sort()
+
+        return image_filenames
+
+
+    def get_image_bndboxes(self, dir_path, all_files):
+        """Returns a list of bounding boxes for each image."""
+        assert dir_path
+        assert all_files
+
+        # check if exists ground-truth bounding boxes
+        image_bboxes = []
+        if os.path.exists(os.path.join(dir_path, 'gt')):
+            all_files = os.listdir(os.path.join(dir_path, 'gt'))
+            bbox_filenames = [fname for fname in all_files if fname.endswith('.txt')]
+            bbox_filenames.sort()
+
+            for i, fname in enumerate(bbox_filenames):
+                boxes = open(os.path.join(dir_path, 'gt', fname), 'r').read().split('\t')
+                image_bboxes.append([int(boxes[0]),
+                                   int(boxes[1]),
+                                   int(boxes[0]) + int(boxes[2]) -1,
+                                   int(boxes[1]) + int(boxes[3]) -1])  # [x1,y1,x2,y2]
+
+        return image_bboxes
 
 
     def get_files_paths(self):
@@ -108,30 +173,16 @@ class Recognition(BaseTask):
                 dir_path = os.path.join(self.root_dir_imgs, activity, video)
                 all_files = os.listdir(dir_path)
                 all_files.sort()
-                image_filenames = [fname for fname in all_files if fname.endswith('.jpg')]
-                video_filename = [vname for vname in all_files if vname.endswith('.avi')]
-                if not any(video_filename):
-                    video_filename = 'not_available'
-                else:
-                    video_filename = video_filename[0]
 
-                # check if any image filenames exist
-                if not any(image_filenames):
-                    video_filename_path = os.path.join(dir_path, video_filename)
-                    video_name = os.path.splitext(os.path.basename(video_filename_path))[0]
-                    self.extract_video_frames(video_filename_path, video_name, dir_path)
-
-                    # fetch again the image filenames
-                    image_filenames = [fname for fname in all_files if fname.endswith('.jpg')]
-
-                # add the directory path to the image filenames
-                image_filenames = [os.path.join(self.activities_dir, activity, video, fname) for fname in image_filenames]
-                image_filenames.sort()
+                video_filename = self.get_video_filename(all_files)
+                image_filenames = self.get_image_filenames(dir_path, video_filename, activity, video, all_files)
+                image_bboxes = self.get_image_bndboxes(dir_path, all_files)
 
                 # assign data to dict
                 data[activity_][video] = {
-                    "video_filename" : os.path.join(self.activities_dir, activity, video, video_filename),
-                    "image_filenames" : image_filenames
+                    "video_filename": os.path.join(self.activities_dir, activity, video, video_filename),
+                    "image_filenames": image_filenames,
+                    "image_bboxes": image_bboxes
                 }
 
                 # update progress bar
@@ -207,59 +258,67 @@ class Recognition(BaseTask):
         """
         # intialize lists
         activities = self.classes
+        object_fields = ['image_filenames', 'boxes', 'videos', "activities"]
         object_ids = []
         videos = []
-        video_filenames = []
+        video_filenames_ids = []
+        video_boxes_ids = []
         image_filenames = []
-        total_frames = []
-        list_videos_per_class = {}
-        list_image_filenames_per_video = []
+        bboxes = [[0,0,0,0]]
+        activity_video_ids = []
 
-        count_video = 0
+        counter_files_id = 0
+        counter_video_id = 0
         for activity_id, activity in enumerate(activities):
             videos_ordered = list(data[activity].keys())
             videos_ordered.sort()
+
+            video_ids = []
             for _, video_name in enumerate(videos_ordered):
+                videos.append(video_name)
+                video_ids.append(counter_video_id)
                 img_fnames = data[activity][video_name]['image_filenames']
+                boxes = data[activity][video_name]['image_bboxes']
+
+                fname_ids = []
+                bboxes_ids = []
+                for i, fname in enumerate(img_fnames):
+                    image_filenames.append(fname)
+                    if any(boxes):
+                        bboxes.append(boxes[i])
+                        bbox_id = len(bboxes) -1
+                    else:
+                        bbox_id = 0
+                    fname_ids.append(counter_files_id)
+                    bboxes_ids.append(bbox_id)
+
+                    object_ids.append([counter_files_id, bbox_id, counter_video_id, activity_id])
+
+                    # increment file counter
+                    counter_files_id += 1
+
                 num_imgs = len(img_fnames)
-                total_frames.append(num_imgs)
 
-                videos.append(video_name) # add video name
-                video_filenames.append(data[activity][video_name]['video_filename'])
+                video_filenames_ids.append(fname_ids)
+                video_boxes_ids.append(bboxes_ids)
 
-                image_filenames = image_filenames + img_fnames
+                # increment video counter
+                counter_video_id += 1
 
-
-                # add to list of images per video
-                total_imgs = len(image_filenames)
-                list_range = list(range(total_imgs - num_imgs, total_imgs))
-                list_image_filenames_per_video.append(list_range)
-
-                # add to list of videos per class
-                try:
-                    list_videos_per_class[activity_id].append(count_video)
-                except KeyError:
-                    list_videos_per_class[activity_id] = [count_video]
-
-                # add data to 'object_ids'
-                # [video, video_filename, list_images_per_video, activity, total_imgs]
-                object_ids.append([count_video, count_video, count_video, activity_id, num_imgs])
-
-                # update video counter
-                count_video += 1
+            activity_video_ids.append(video_ids)
 
         return {
-            "object_fields" : str2ascii(['videos', 'video_filenames',
-                                         'list_image_filenames_per_video',
-                                         'activities', 'total_frames']),
-            "object_ids" : np.array(object_ids, dtype=np.int32),
-            "videos" : str2ascii(videos),
-            "video_filenames" : str2ascii(video_filenames),
-            "activities" : str2ascii(activities),
-            "image_filenames" : str2ascii(image_filenames),
-            "total_frames" : np.array(total_frames, dtype=np.int32),
-            "list_videos_per_activity" : np.array(pad_list(list(list_videos_per_class.values()), -1), dtype=np.int32),
-            "list_image_filenames_per_video" : np.array(pad_list(list_image_filenames_per_video, -1), dtype=np.int32)
+            "object_fields": str2ascii(object_fields),
+            "activities": str2ascii(activities),
+            "videos": str2ascii(videos),
+            "image_filenames": str2ascii(image_filenames),
+            "boxes": np.array(bboxes, dtype=np.int32),
+            "object_ids": np.array(object_ids, dtype=np.int32),
+
+            "list_object_ids_per_video": np.array(pad_list(video_filenames_ids, -1), dtype=np.int32),
+            "list_filenames_per_video": np.array(pad_list(video_filenames_ids, -1), dtype=np.int32),
+            "list_boxes_per_video": np.array(pad_list(video_boxes_ids, -1), dtype=np.int32),
+            "list_videos_per_activity": np.array(pad_list(activity_video_ids, -1), dtype=np.int32)
         }
 
 
