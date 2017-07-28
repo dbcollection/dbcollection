@@ -9,7 +9,7 @@ import json
 import shutil
 
 import dbcollection.datasets.funs as dataset
-from dbcollection.datasets.dblist import available_datasets
+from dbcollection.datasets.dblist import available_datasets, fetch_default_task_name
 from dbcollection.cache import CacheManager
 from dbcollection.loader import DatasetLoader
 
@@ -167,6 +167,10 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
 
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
+
+    # convert task if equal to 'default'
+    if task == 'default':
+        task = fetch_default_task_name(name)
 
     # check if dataset exists. If not attempt to download the dataset
     if not cache_manager.exists_dataset(name):
