@@ -236,43 +236,23 @@ class Detection(BaseTask):
             list_objects_ids_per_class.append(objs_per_class)
 
         # add data to hdf5 file
-        set_grp = handler.create_group('default/' + set_name)
+        handler['image_filenames'] = str2ascii(image_filenames)
+        handler['classes'] = str2ascii(self.classes)
+        handler['boxes'] = np.array(bbox, dtype=np.float)
+        handler['boxesv'] = np.array(bboxv, dtype=np.float)
+        handler['id'] = np.array(lbl_id, dtype=np.int32)
+        handler['occlusion'] = np.array(occlusion, dtype=np.float)
+        handler['object_ids'] = np.array(object_id, dtype=np.int32)
+        handler['object_fields'] = str2ascii(object_fields)
 
-        set_grp['image_filenames'] = str2ascii(image_filenames)
-        set_grp['classes'] = str2ascii(self.classes)
-        set_grp['boxes'] = np.array(bbox, dtype=np.float)
-        set_grp['boxesv'] = np.array(bboxv, dtype=np.float)
-        set_grp['id'] = np.array(lbl_id, dtype=np.int32)
-        set_grp['occlusion'] = np.array(occlusion, dtype=np.float)
-        set_grp['object_ids'] = np.array(object_id, dtype=np.int32)
-        set_grp['object_fields'] = str2ascii(object_fields)
-
-        set_grp['list_image_filenames_per_class'] = np.array(pad_list(list_image_filenames_per_class, -1), dtype=np.int32)
-        set_grp['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
-        set_grp['list_boxesv_per_image'] = np.array(pad_list(list_boxesv_per_image, -1), dtype=np.int32)
-        set_grp['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
-        set_grp['list_objects_ids_per_class'] = np.array(pad_list(list_objects_ids_per_class, -1), dtype=np.int32)
+        handler['list_image_filenames_per_class'] = np.array(pad_list(list_image_filenames_per_class, -1), dtype=np.int32)
+        handler['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
+        handler['list_boxesv_per_image'] = np.array(pad_list(list_boxesv_per_image, -1), dtype=np.int32)
+        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
+        handler['list_objects_ids_per_class'] = np.array(pad_list(list_objects_ids_per_class, -1), dtype=np.int32)
 
         if self.verbose:
             print('> Done.')
-
-
-class DetectionNoSourceGrp(Detection):
-    """ Caltech Pedestrian detection (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'detection_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
-
-
-#---------------------------------------------------------
-# Caltech 10x
-#---------------------------------------------------------
 
 
 class Detection10x(Detection):
@@ -282,39 +262,8 @@ class Detection10x(Detection):
     filename_h5 = 'detection_10x'
 
 
-class Detection10xNoSourceGrp(Detection10x):
-    """ Caltech Pedestrian detection (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'detection_10x_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
-
-
-#---------------------------------------------------------
-# Caltech 30x
-#---------------------------------------------------------
-
-
 class Detection30x(Detection):
     """ Caltech Pedestrian detection (30x data) preprocessing functions """
 
     skip_step = 1
     filename_h5 = 'detection_30x'
-
-
-class Detection30xNoSourceGrp(Detection30x):
-    """ Caltech Pedestrian detection (default grp only - no source group) task class """
-
-    # metadata filename
-    filename_h5 = 'detection_30x_d'
-
-    def add_data_to_source(self, handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
