@@ -55,16 +55,33 @@ datasets.update(pedestrian_detection) # pedestrian detection/recognition
 datasets.update(human_pose) # human pose
 
 
+
+#---------------------------------------------------------
+# Other functions
+#---------------------------------------------------------
+
+def fetch_default_task_name(name):
+    """Returns the real task name associated to the default tag."""
+    assert name, 'Must provide a name for the dataset.'
+    return datasets[name].default_task
+
+
+def dataset_tasks(name):
+    """Returns a list of available tasks for a dataset."""
+    assert name, 'Must provide a name for the dataset.'
+    constructor = datasets[name]
+    db_loader = constructor('nan', 'nan', False, False)  # init with empty data
+    tasks = sorted(db_loader.get_all_tasks())
+    tasks.remove('default')
+    return tasks
+
+
 def available_datasets():
     """
     Returns a dictionary with all the available datasets and
     their available tasks.
     """
     out = {}
-    for db in sorted(datasets):
-        constructor = datasets[db]
-        db_loader = constructor('nan', 'nan', False, False)  # init with empty data
-        tasks = sorted(db_loader.get_all_tasks())
-        tasks.remove('default')
-        out[db] = tasks
+    for db_name in sorted(datasets):
+        out[db_name] = dataset_tasks(db_name)
     return out
