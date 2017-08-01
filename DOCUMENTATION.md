@@ -380,21 +380,29 @@ Retrieves data from a dataset's HDF5 metadata file. This method accesses the HDF
 The first, and most common, usage of this method if to retrieve a single piece of data from a data field. Lets retrieve the first image+label from the `MNIST` dataset.
 
 ```python
-mnist = dbc.load('mnist')  # returns a DatasetLoader class
-img = mnist.get('train', 'images', 0)
-label = mnist.get('train', 'labels', 0)
+>>> mnist = dbc.load('mnist')  # returns a DatasetLoader class
+>>> img = mnist.get('train', 'images', 0)
+>>> label = mnist.get('train', 'labels', 0)
+>>> print(img.shape)
+(28, 28)
+>>> print(label)
+5
 ```
 
 This method can also be used to retrieve a range of data/values.
 
 ```python
-imgs = mnist.get('train', 'images', list(range(20)))
+>>> imgs = mnist.get('train', 'images', list(range(20)))
+>>> print(imgs.shape)
+(20, 28, 28)
 ```
 
 Or all values if desired.
 
 ```python
-imgs = mnist.get('train', 'images')
+>>> imgs = mnist.get('train', 'images')
+>>> print(imgs.shape)
+(60000, 28, 28)
 ```
 
 
@@ -420,20 +428,37 @@ This method is particularly useful when different fields are linked (like in det
 Fetch all indexes of an object.
 
 ```python
-mnist = dbc.load('mnist')
-obj_idxs = mnist.object('train', 0)
+>>> mnist = dbc.load('mnist')
+>>> obj_idx = mnist.object('train', 0)
+>>> obj_idx
+array([0, 5], dtype=int32)
 ```
 
 Multiple lists can be retrieved just like with the [get()](#db.loader.get) method.
 
 ```python
-objs_idxs = mnist.object('train', list(range(10)))
+>>> obj_idx = mnist.object('train', list(range(10)))
+>>> obj_idx
+array([[0, 5],
+       [1, 0],
+       [2, 4],
+       [3, 1],
+       [4, 9],
+       [5, 2],
+       [6, 1],
+       [7, 3],
+       [8, 1],
+       [9, 4]], dtype=int32)
 ```
 
 It is also possible to retrieve the values/tensors instead of the indexes.
 
 ```python
-objs_data = mnist.object('train', list(range(10)), True)
+>>> obj_data = mnist.object('train', 0, True)
+>>> obj_data[0].shape  # image data
+(28, 28)
+>>> obj_data[1]  # label
+1
 ```
 
 
@@ -458,16 +483,19 @@ Returns the size of a field.
 Get the size of the images tensor in `MNIST` train set.
 
 ```python
-mnist = dbc.load('mnist')
-images_size = mnist.size('train', 'images')
+>>> mnist = dbc.load('mnist')
+>>> mnist.size('train', 'images')
+[60000, 28, 28]
 ```
 
 Get the size of the objects in `MNIST` train set.
 
 ```python
-obj_size = mnist.size('train', 'object_ids')
+>>> mnist.size('train', 'object_ids')
+[60000, 2]
 # or
-obj_size = mnist.size('train')
+>>> mnist.size('train')  # defaults to 'object_ids'
+[60000, 2]
 ```
 
 
@@ -489,8 +517,72 @@ Lists all field names in a set.
 Get all fields available in the `MNIST` test set.
 
 ```python
-mnist = dbc.load('mnist')
-images_size = mnist.list('test')
+>>> mnist = dbc.load('mnist')
+>>> mnist.list('test')
+['classes', 'labels', 'object_fields', 'images', 'object_ids', 'list_images_per_class']
+```
+
+
+<a name="db.loader.info"></a>
+### info
+
+```python
+loader.info(set_name)
+```
+
+Prints information about the data fields of a set.
+
+Displays information of all fields available like field name, size and shape of all sets. If a `set_name` is provided, it displays only the information for that specific set.
+
+#### Parameters
+
+- `set_name`: Name of the set. (*type=string*)
+
+
+#### Usage examples
+
+Display all field information for the `MNIST` dataset.
+
+```python
+>>> mnist = dbc.load('mnist')
+>>> mnist.info()
+
+> Set: test
+   - classes,        shape = (10, 2),          dtype = uint8
+   - images,         shape = (10000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+   - labels,         shape = (10000,),         dtype = uint8,  (in 'object_ids', position = 1)
+   - object_fields,  shape = (2, 7),           dtype = uint8
+   - object_ids,     shape = (10000, 2),       dtype = int32
+
+   (Pre-ordered lists)
+   - list_images_per_class,  shape = (10, 1135),  dtype = int32
+
+> Set: train
+   - classes,        shape = (10, 2),          dtype = uint8
+   - images,         shape = (60000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+   - labels,         shape = (60000,),         dtype = uint8,  (in 'object_ids', position = 1)
+   - object_fields,  shape = (2, 7),           dtype = uint8
+   - object_ids,     shape = (60000, 2),       dtype = int32
+
+   (Pre-ordered lists)
+   - list_images_per_class,  shape = (10, 6742),  dtype = int32
+```
+
+List only the information of the `MNIST` train set.
+
+```python
+>>> mnist.info('train')
+
+> Set: train
+   - classes,        shape = (10, 2),          dtype = uint8
+   - images,         shape = (60000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+   - labels,         shape = (60000,),         dtype = uint8,  (in 'object_ids', position = 1)
+   - object_fields,  shape = (2, 7),           dtype = uint8
+   - object_ids,     shape = (60000, 2),       dtype = int32
+
+   (Pre-ordered lists)
+   - list_images_per_class,  shape = (10, 6742),  dtype = int32
+
 ```
 
 
@@ -513,10 +605,13 @@ Retrieves the index position of a field in the `object_ids` list. This position 
 This example shows how to use this method in order to retrieve the correct fields from an object index list.
 
 ```python
-mnist = dbc.load('mnist')
-print('object: images field idx: ', mnist.object_field_id('train', 'images'))
-print('object: labels field idx: ', mnist.object_field_id('train', 'labels'))
-print('Check if the positions match with the list of fields: ', mnist.object_fields['train'])
+>>> mnist = dbc.load('mnist')
+>>> print('object field idx (image): ', mnist.object_field_id('train', 'images'))
+object field idx (image):  0
+>>> print('object field idx (label): ', mnist.object_field_id('train', 'labels'))
+object field idx (label):  1
+>>> mnist.object_fields['train']  # fields list (should match the position)
+['images', 'labels']
 ```
 
 
