@@ -54,6 +54,10 @@ class Detection(BaseTask):
         """
         Extract frames from a video.
         """
+        assert video_filename
+        assert video_name
+        assert save_dir
+
         # setup stdout suppression for subprocess
         try:
             from subprocess import DEVNULL # py3k
@@ -63,8 +67,9 @@ class Detection(BaseTask):
         # extract image frames from the videos
         try:
             img_name = os.path.join(save_dir, video_name)
-            subprocess.Popen('ffmpeg -i {} -f image2 {}-%04d.jpg'.format(video_filename, img_name),
-                             shell=True, stdout=DEVNULL, stderr=subprocess.STDOUT)
+            cmd = ['ffmpeg', '-i', video_filename, '-f', 'image2',
+                   '{}-%04d.jpg'.format(img_name)]
+            subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             raise Exception('\n\nError occurred when parsing {}\n'.format(video_filename))
 
