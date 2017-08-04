@@ -9,6 +9,7 @@ import random
 import subprocess
 import numpy as np
 import progressbar
+from PIL import Image
 
 from dbcollection.datasets.dbclass import BaseTask
 
@@ -66,8 +67,9 @@ class Recognition(BaseTask):
         # extract image frames from the videos
         try:
             img_name = os.path.join(save_dir, video_name)
-            subprocess.Popen('ffmpeg -i {} -f image2 {}-%04d.jpg'.format(video_filename, img_name),
-                             shell=True, stdout=DEVNULL, stderr=subprocess.STDOUT)
+            cmd = ['ffmpeg', '-i', video_filename, '-f', 'image2',
+                   '{}-%04d.jpg'.format(img_name)]
+            subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             raise Exception('\n\nError occurred when parsing {}\n'.format(video_filename))
 
@@ -129,6 +131,16 @@ class Recognition(BaseTask):
                                    int(boxes[1]),
                                    int(boxes[0]) + int(boxes[2]) -1,
                                    int(boxes[1]) + int(boxes[3]) -1])  # [x1,y1,x2,y2]
+        else:
+            # center crop the image
+            all_files = os.listdir(dir_path)
+            all_files = [fname for fname in all_files if fname.endswith('.jpg')]
+            all_files.sort()
+            for i, fname in enumerate(all_files):
+                im = Image.open(os.path.join(dir_path, fname))
+                width, height = im.size # (width,height) tuple
+                pad_x = int((width - height)/2)
+                image_bboxes.append([pad_x, 1, pad_x + height, height])  # [x1,y1,x2,y2]
 
         return image_bboxes
 
@@ -264,7 +276,7 @@ class Recognition(BaseTask):
         video_filenames_ids = []
         video_boxes_ids = []
         image_filenames = []
-        bboxes = [[0,0,0,0]]
+        bboxes = []
         activity_video_ids = []
 
         counter_files_id = 0
@@ -284,15 +296,11 @@ class Recognition(BaseTask):
                 bboxes_ids = []
                 for i, fname in enumerate(img_fnames):
                     image_filenames.append(fname)
-                    if any(boxes):
-                        bboxes.append(boxes[i])
-                        bbox_id = len(bboxes) -1
-                    else:
-                        bbox_id = 0
+                    bboxes.append(boxes[i])
                     fname_ids.append(counter_files_id)
-                    bboxes_ids.append(bbox_id)
+                    bboxes_ids.append(counter_files_id)
 
-                    object_ids.append([counter_files_id, bbox_id, counter_video_id, activity_id])
+                    object_ids.append([counter_files_id, counter_files_id, counter_video_id, activity_id])
 
                     # increment file counter
                     counter_files_id += 1

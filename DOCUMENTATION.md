@@ -24,7 +24,9 @@ The [data loading API](#db.loader) contains a few methods for data retrieval/pro
 - [object](#db.loader.object): retrieves a list of all fields' indexes/values of an object composition.
 - [size](#db.loader.size): size of a field.
 - [list](#db.loader.list): lists all fields' names.
+- [info](#db.loader.info): prints information about the data fields of a set.
 - [object_fields_id](#db.loader.object_field_id): retrieves the index position of a field in the `object_ids` list.
+
 
 
 <a name="db"></a>
@@ -63,15 +65,15 @@ Returns a loader instant of a `DatasetLoader` class with methods to retrieve/pro
 You can simply load a dataset by its name like in the following example.
 
 ```python
-mnist = dbc.load('mnist')
+>>> mnist = dbc.load('mnist')
 ```
 
 In cases where you don't have the dataset's data on disk yet (and the selected dataset can be downloaded by the API), you can specify which directory the dataset's data files should be stored to and which task should be loaded for this dataset.
 
 ```python
-cifar10 = dbc.load(name='cifar10',
-                   task='classification',
-                   data_dir='<my_home>/datasets/')
+>>> cifar10 = dbc.load(name='cifar10',
+                      task='classification',
+                      data_dir='<my_home>/datasets/')
 ```
 
 > Note: If you don't specify the directory path where to store the data files, then the files will be stored in the `dbcollection/<dataset>/data` dir where the metadata files are located.
@@ -99,21 +101,21 @@ This method will download a dataset's data files to disk. After download, it upd
 A simple usage example for downloading a dataset (without providing a storage path for the data) requires only the name of the target dataset and it will download its data files and then extract them to disk without any supervision required.
 
 ```python
-dbc.download('cifar10')
+>>> dbc.download('cifar10')
 ```
 
 It is good practice to specify where the data will be download to by providing a existing directory path to `data_dir`. (This information is stored in the `dbcollection.json` file stored in your home path.)
 
 ```python
-dbc.download(name='cifar10', data_dir='<some_dir>')
+>>> dbc.download(name='cifar10', data_dir='<some_dir>')
 ```
 
 In cases where you only want to download the dataset's files without extracting its contents, you can set `extract_data=False` and skip the data extraction/unpacking step.
 
 ```python
-dbc.download(name='cifar10',
-             data_dir='<some_dir>',
-             extract_data=False)
+>>> dbc.download(name='cifar10',
+                data_dir='<some_dir>',
+                extract_data=False)
 ```
 
 > Note: this package uses a text progressbar when downloading files from urls for visual purposes (file size, elapsed time, % download, etc.). To disable this feature, set `verbose=False`.
@@ -140,13 +142,13 @@ Processes a dataset's metadata and stores it to file. This metadata is stored in
 To process (or reprocess) a dataset's metadata simply do:
 
 ```python
-dbc.process('cifar10')
+>>> dbc.process('cifar10')
 ```
 
 This will process all tasks for a given dataset (default='all'). To process only a specific task, you need to specify the task name you want to setup. This is handy when one wants to process only a single task of a bunch of tasks and speed up the processing/loading stage.
 
 ```python
-dbc.process(name='cifar10', task='default')  # process only the 'default' task
+>>> dbc.process(name='cifar10', task='default')  # process only the 'default' task
 ```
 
 > Note: this method allows the user to reset a dataset's metadata file content in case of manual or accidental changes to the structure of the data. Most users won't have the need for such functionality on their basic usage of this package.
@@ -174,10 +176,10 @@ This method provides an easy way to add a custom dataset/task to the `dbcollecti
 Adding a custom dataset or a custom task to a dataset requires the user to introduce the dataset's `name`, `task` name, `data_dir` where the data files are stored and the metadata's `file_path` on disk.
 
 ```python
-dbc.add(name='custom1',
-        task='default',
-        data_dir='<data_dir>',
-        file_path='<metadata_file_path>')
+>>> dbc.add(name='custom1',
+            task='default',
+            data_dir='<data_dir>',
+            file_path='<metadata_file_path>')
 ```
 
 > Note: In cases where no external files are required besides the metadata's data, you can set `data_dir`="".
@@ -204,13 +206,13 @@ This method allows for a dataset to be removed from the list of available datase
 To remove a dataset simply do:
 
 ```python
-dbc.remove('cifar10')
+>>> dbc.remove('cifar10')
 ```
 
 If you want to remove the dataset completely from disk, you can set the `delete_data` parameter to `True`.
 
 ```python
-dbc.remove(name='cifar10', delete_data=True)
+>>> dbc.remove(name='cifar10', delete_data=True)
 ```
 
 
@@ -246,32 +248,32 @@ Also, there is an option to completely remove the cache file+folder from the dis
 For example, Lets change the directory where the dbcollection's metadata main folder is stored on disk. This is useful to store/move all the metadata files to another disk.
 
 ```python
-dbc.config_cache(field='default_cache_dir',
-                 value='<home_dir>/new/path/db/')
+>>> dbc.config_cache(field='default_cache_dir',
+                     value='<home_dir>/new/path/db/')
 ```
 
 If a user wants to remove all files relating to the `dbcollection` package, one can use the `config_cache` to accomplish this in a simple way:
 
 ```python
-dbc.config_cache(delete_cache=True)
+>>> dbc.config_cache(delete_cache=True)
 ```
 
 or if the user wants to remove only the cache file:
 
 ```python
-dbc.config_cache(delete_cache_file=True)
+>>> dbc.config_cache(delete_cache_file=True)
 ```
 
 or to remove the cache directory where all the metadata files from all datasets are stored (**I hope you are sure about this one...**):
 
 ```python
-dbc.config_cache(delete_cache_dir=True)
+>>> dbc.config_cache(delete_cache_dir=True)
 ```
 
 or to simply reset the cache file contents withouth removing the file:
 
 ```python
-dbc.config_cache(reset_cache=True)
+>>> dbc.config_cache(reset_cache=True)
 ```
 
 <a name="db.query"></a>
@@ -293,13 +295,13 @@ Do simple queries to the cache and displays them to the screen.
 Simple query about the existence of a dataset.
 
 ```python
-dbc.query('mnist')
+>>> dbc.query('mnist')
 ```
 
 It can also retrieve information by category/keyword. For example, this is useful to see which datasets have the same task.
 
 ```python
-dbc.query('detection')
+>>> dbc.query('detection')
 ```
 
 > Note: this is the same as scanning the `dbcollection.json` cache file yourself, but it has the advantage of grouping information about a certain pattern for you.
@@ -328,13 +330,13 @@ Prints the cache contents to screen. It can also print a list of all available d
 Print the cache file contents to the screen:
 
 ```python
-dbc.info()
+>>> dbc.info()
 ```
 
 Display all available datasets to download/process:
 
 ```python
-dbc.info('all')
+>>> dbc.info('all')
 ```
 
 > TODO: Add more examples for the other options
@@ -380,21 +382,29 @@ Retrieves data from a dataset's HDF5 metadata file. This method accesses the HDF
 The first, and most common, usage of this method if to retrieve a single piece of data from a data field. Lets retrieve the first image+label from the `MNIST` dataset.
 
 ```python
-mnist = dbc.load('mnist')  # returns a DatasetLoader class
-img = mnist.get('train', 'images', 0)
-label = mnist.get('train', 'labels', 0)
+>>> mnist = dbc.load('mnist')  # returns a DatasetLoader class
+>>> img = mnist.get('train', 'images', 0)
+>>> label = mnist.get('train', 'labels', 0)
+>>> print(img.shape)
+(28, 28)
+>>> print(label)
+5
 ```
 
 This method can also be used to retrieve a range of data/values.
 
 ```python
-imgs = mnist.get('train', 'images', list(range(20)))
+>>> imgs = mnist.get('train', 'images', list(range(20)))
+>>> print(imgs.shape)
+(20, 28, 28)
 ```
 
 Or all values if desired.
 
 ```python
-imgs = mnist.get('train', 'images')
+>>> imgs = mnist.get('train', 'images')
+>>> print(imgs.shape)
+(60000, 28, 28)
 ```
 
 
@@ -420,20 +430,37 @@ This method is particularly useful when different fields are linked (like in det
 Fetch all indexes of an object.
 
 ```python
-mnist = dbc.load('mnist')
-obj_idxs = mnist.object('train', 0)
+>>> mnist = dbc.load('mnist')
+>>> obj_idx = mnist.object('train', 0)
+>>> obj_idx
+array([0, 5], dtype=int32)
 ```
 
 Multiple lists can be retrieved just like with the [get()](#db.loader.get) method.
 
 ```python
-objs_idxs = mnist.object('train', list(range(10)))
+>>> obj_idx = mnist.object('train', list(range(10)))
+>>> obj_idx
+array([[0, 5],
+       [1, 0],
+       [2, 4],
+       [3, 1],
+       [4, 9],
+       [5, 2],
+       [6, 1],
+       [7, 3],
+       [8, 1],
+       [9, 4]], dtype=int32)
 ```
 
 It is also possible to retrieve the values/tensors instead of the indexes.
 
 ```python
-objs_data = mnist.object('train', list(range(10)), True)
+>>> obj_data = mnist.object('train', 0, True)
+>>> obj_data[0].shape  # image data
+(28, 28)
+>>> obj_data[1]  # label
+1
 ```
 
 
@@ -458,16 +485,19 @@ Returns the size of a field.
 Get the size of the images tensor in `MNIST` train set.
 
 ```python
-mnist = dbc.load('mnist')
-images_size = mnist.size('train', 'images')
+>>> mnist = dbc.load('mnist')
+>>> mnist.size('train', 'images')
+[60000, 28, 28]
 ```
 
 Get the size of the objects in `MNIST` train set.
 
 ```python
-obj_size = mnist.size('train', 'object_ids')
+>>> mnist.size('train', 'object_ids')
+[60000, 2]
 # or
-obj_size = mnist.size('train')
+>>> mnist.size('train')  # defaults to 'object_ids'
+[60000, 2]
 ```
 
 
@@ -489,8 +519,72 @@ Lists all field names in a set.
 Get all fields available in the `MNIST` test set.
 
 ```python
-mnist = dbc.load('mnist')
-images_size = mnist.list('test')
+>>> mnist = dbc.load('mnist')
+>>> mnist.list('test')
+['classes', 'labels', 'object_fields', 'images', 'object_ids', 'list_images_per_class']
+```
+
+
+<a name="db.loader.info"></a>
+### info
+
+```python
+loader.info(set_name)
+```
+
+Prints information about the data fields of a set.
+
+Displays information of all fields available like field name, size and shape of all sets. If a `set_name` is provided, it displays only the information for that specific set.
+
+#### Parameters
+
+- `set_name`: Name of the set. (*type=string*)
+
+
+#### Usage examples
+
+Display all field information for the `MNIST` dataset.
+
+```python
+>>> mnist = dbc.load('mnist')
+>>> mnist.info()
+
+> Set: test
+   - classes,        shape = (10, 2),          dtype = uint8
+   - images,         shape = (10000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+   - labels,         shape = (10000,),         dtype = uint8,  (in 'object_ids', position = 1)
+   - object_fields,  shape = (2, 7),           dtype = uint8
+   - object_ids,     shape = (10000, 2),       dtype = int32
+
+   (Pre-ordered lists)
+   - list_images_per_class,  shape = (10, 1135),  dtype = int32
+
+> Set: train
+   - classes,        shape = (10, 2),          dtype = uint8
+   - images,         shape = (60000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+   - labels,         shape = (60000,),         dtype = uint8,  (in 'object_ids', position = 1)
+   - object_fields,  shape = (2, 7),           dtype = uint8
+   - object_ids,     shape = (60000, 2),       dtype = int32
+
+   (Pre-ordered lists)
+   - list_images_per_class,  shape = (10, 6742),  dtype = int32
+```
+
+List only the information of the `MNIST` train set.
+
+```python
+>>> mnist.info('train')
+
+> Set: train
+   - classes,        shape = (10, 2),          dtype = uint8
+   - images,         shape = (60000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+   - labels,         shape = (60000,),         dtype = uint8,  (in 'object_ids', position = 1)
+   - object_fields,  shape = (2, 7),           dtype = uint8
+   - object_ids,     shape = (60000, 2),       dtype = int32
+
+   (Pre-ordered lists)
+   - list_images_per_class,  shape = (10, 6742),  dtype = int32
+
 ```
 
 
@@ -513,10 +607,13 @@ Retrieves the index position of a field in the `object_ids` list. This position 
 This example shows how to use this method in order to retrieve the correct fields from an object index list.
 
 ```python
-mnist = dbc.load('mnist')
-print('object: images field idx: ', mnist.object_field_id('train', 'images'))
-print('object: labels field idx: ', mnist.object_field_id('train', 'labels'))
-print('Check if the positions match with the list of fields: ', mnist.object_fields['train'])
+>>> mnist = dbc.load('mnist')
+>>> print('object field idx (image): ', mnist.object_field_id('train', 'images'))
+object field idx (image):  0
+>>> print('object field idx (label): ', mnist.object_field_id('train', 'labels'))
+object field idx (label):  1
+>>> mnist.object_fields['train']  # fields list (should match the position)
+['images', 'labels']
 ```
 
 

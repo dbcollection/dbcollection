@@ -13,8 +13,6 @@ class DatasetLoader:
     ----------
     name : str
         Name of the dataset.
-    category : str
-        Category of the dataset (e.g. image processing, natural language processing)
     task : str
         Name of the task.
     data_dir : str
@@ -39,8 +37,6 @@ class DatasetLoader:
         ----------
         name : str
             Name of the dataset.
-        category : str
-            Category of the dataset (e.g. image processing, natural language processing)
         task : str
             Name of the task.
         data_dir : str
