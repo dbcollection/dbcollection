@@ -21,4 +21,12 @@ dataset every time.
 from ._version import __version__
 
 # load API methods
-from .manager import load, download, process, add, remove, config_cache, query, info
+from .manager import (
+    load,
+    download,
+    process,
+    add,
+    remove,
+    config_cache,
+    query,
+    info)
