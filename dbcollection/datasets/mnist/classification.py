@@ -17,7 +17,7 @@ class Classification(BaseTask):
     """ MNIST Classification preprocessing functions """
 
     # metadata filename
-    filename_h5 = 'detection'
+    filename_h5 = 'classification'
 
     classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
