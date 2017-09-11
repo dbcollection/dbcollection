@@ -7,6 +7,7 @@ from __future__ import print_function, division
 import os
 import random
 import subprocess
+import math
 import numpy as np
 import progressbar
 from PIL import Image
@@ -137,6 +138,7 @@ class Recognition(BaseTask):
             all_files = [fname for fname in all_files if fname.endswith('.jpg')]
             all_files.sort()
             for i, fname in enumerate(all_files):
+                #image_bboxes.append([0, 0, 0, 0])
                 im = Image.open(os.path.join(dir_path, fname))
                 width, height = im.size # (width,height) tuple
                 pad_x = int((width - height)/2)
@@ -159,7 +161,7 @@ class Recognition(BaseTask):
         # initialize data dictorionary
         data = {}
         for activity in self.classes:
-            data[activity] = {}
+            data[activity] = []
 
         if self.verbose:
             # count the total number of videos
@@ -177,25 +179,26 @@ class Recognition(BaseTask):
         activities_dir.sort()
 
         # cycle all folders
-        for activity in activities_dir:
-            activity_ = self.get_activity_name(activity)
-            videos = os.listdir(os.path.join(self.root_dir_imgs, activity))
+        for folder in activities_dir:
+            activity = self.get_activity_name(folder)
+            videos = os.listdir(os.path.join(self.root_dir_imgs, folder))
             videos.sort()
             for video in videos:
-                dir_path = os.path.join(self.root_dir_imgs, activity, video)
+                dir_path = os.path.join(self.root_dir_imgs, folder, video)
                 all_files = os.listdir(dir_path)
                 all_files.sort()
 
                 video_filename = self.get_video_filename(all_files)
-                image_filenames = self.get_image_filenames(dir_path, video_filename, activity, video, all_files)
+                image_filenames = self.get_image_filenames(dir_path, video_filename, folder, video, all_files)
                 image_bboxes = self.get_image_bndboxes(dir_path, all_files)
 
                 # assign data to dict
-                data[activity_][video] = {
-                    "video_filename": os.path.join(self.activities_dir, activity, video, video_filename),
+                data[activity].append({
+                    "video_folder_name": os.path.join(folder,video),
+                    "video_filename": os.path.join(self.activities_dir, folder, video, video_filename),
                     "image_filenames": image_filenames,
                     "image_bboxes": image_bboxes
-                }
+                })
 
                 # update progress bar
                 progbar.update(i)
@@ -227,24 +230,21 @@ class Recognition(BaseTask):
             }
 
             for activity in data:
-                videos = list(data[activity].keys())
-
-                # shuffle videos
-                random.shuffle(videos)
-
-                # determine splits
-                num_videos = len(videos)
-                tr_num_vids = int(num_videos*train_percent)
+                num_videos = len(data[activity])
+                tr_num_vids = math.ceil(num_videos*train_percent)
+                random_video_ids = np.random.permutation(range(num_videos)).tolist()
+                train_ids = random_video_ids[:tr_num_vids]
+                test_ids = random_video_ids[tr_num_vids:]
 
                 # train set
-                out_data[train_set_name][activity] = {}
-                for video in videos[:tr_num_vids]:
-                    out_data[train_set_name][activity][video] = data[activity][video]
+                out_data[train_set_name][activity] = []
+                for video_id in sorted(train_ids):
+                    out_data[train_set_name][activity].append(data[activity][video_id])
 
                 # test set
-                out_data[test_set_name][activity] = {}
-                for video in videos[tr_num_vids:]:
-                    out_data[test_set_name][activity][video] = data[activity][video]
+                out_data[test_set_name][activity] = []
+                for video_id in sorted(test_ids):
+                    out_data[test_set_name][activity].append(data[activity][video_id])
 
             yield out_data
 
@@ -282,15 +282,13 @@ class Recognition(BaseTask):
         counter_files_id = 0
         counter_video_id = 0
         for activity_id, activity in enumerate(activities):
-            videos_ordered = list(data[activity].keys())
-            videos_ordered.sort()
 
             video_ids = []
-            for _, video_name in enumerate(videos_ordered):
-                videos.append(video_name)
+            for _, video_data in enumerate(data[activity]):
+                videos.append(video_data['video_folder_name'])
                 video_ids.append(counter_video_id)
-                img_fnames = data[activity][video_name]['image_filenames']
-                boxes = data[activity][video_name]['image_bboxes']
+                img_fnames = video_data['image_filenames']
+                boxes = video_data['image_bboxes']
 
                 fname_ids = []
                 bboxes_ids = []
