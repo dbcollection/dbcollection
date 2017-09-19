@@ -6,3 +6,4 @@ scipy
 xmltodict
 requests
 Pillow
+shutil
