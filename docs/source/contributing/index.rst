@@ -16,6 +16,7 @@ Following these guidelines is a great way to effectively contribute to the proje
 
    how_to
    submitting_bugs
+   feedback_channels
    code_organization
    coding_guidelines
    testing_guidelines
@@ -26,7 +27,7 @@ Following these guidelines is a great way to effectively contribute to the proje
 
     how_to
     submitting_bugs
-    .. feedback_channels
+    feedback_channels
     code_organization
     coding_guidelines
     testing_guidelines

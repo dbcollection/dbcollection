@@ -37,6 +37,15 @@ def get_hash_value(fname):
         raise IOError('Error opening file: {}'.format(fname))
 
 
+def check_url_exists(url):
+    """Check if an url exists."""
+    request = requests.head(url, allow_redirects=False)
+    if request.status_code == 200:
+        return True, ''
+    else:
+        return False, 'url does not exist: {}'.format(url)
+
+
 def download_url_requests(url, fname, verbose=False):
     """Download a file (no display text).
 
@@ -50,28 +59,32 @@ def download_url_requests(url, fname, verbose=False):
         Display progress bar
 
     """
-    r = requests.get(url, stream=True)
 
-    with open(fname, 'wb') as f:
-        if verbose:
-            total_length = int(r.headers.get('content-length'))
-            if total_length is None:
-                f.write(r.content)
+    status, err = check_url_exists(url)
+
+    if status:
+        r = requests.get(url, stream=True)
+        with open(fname, 'wb') as f:
+            if verbose:
+                total_length = int(r.headers.get('content-length'))
+                if total_length is None:
+                    f.write(r.content)
+                else:
+                    chunk_size = 1024
+                    progbar = progressbar.ProgressBar(maxval=int(total_length/chunk_size)).start()
+                    i = 0
+                    for data in r.iter_content(chunk_size=chunk_size):
+                        if data:
+                            f.write(data)
+                            f.flush()
+                            progbar.update(i)
+                            i += 1
+                    progbar.finish()
             else:
-                chunk_size = 1024
-                progbar = progressbar.ProgressBar(maxval=int(total_length/chunk_size)).start()
-                i = 0
-                for data in r.iter_content(chunk_size=chunk_size):
-                    if data:
-                        f.write(data)
-                        f.flush()
-                        progbar.update(i)
-                        i += 1
-                progbar.finish()
-        else:
-            f.write(r.content)
+                f.write(r.content)
 
-    r.close()
+        r.close()
+    return status, err
 
 
 def download_url_google_drive(file_id, filename, verbose=False):
@@ -116,8 +129,13 @@ def download_url_google_drive(file_id, filename, verbose=False):
     if token:
         params = {'id' : file_id, 'confirm' : token}
         response = session.get(URL, params=params, stream=True)
+        status, err = True, ''
+    else:
+        status, err = False, 'Invalid url: {}. Token does not exist'.format(URL)
 
     save_response_content(response, filename)
+
+    return status, err
 
 
 def download_url(url, filename, method, verbose=False):
@@ -138,7 +156,7 @@ def download_url(url, filename, method, verbose=False):
     ------
     Exception
         If the method does not exit.
-        
+
     """
 
     # get filename for temp file in current directory
@@ -148,41 +166,56 @@ def download_url(url, filename, method, verbose=False):
 
     # download the file
     if method == 'requests':
-        download_url_requests(url, tmpfile, verbose)
+        status, err = download_url_requests(url, tmpfile, verbose)
     elif method == 'googledrive':
-        download_url_google_drive(url, tmpfile, verbose)
+        status, err = download_url_google_drive(url, tmpfile, verbose)
     else:
-        raise Exception('Invalid method: {}'.format(method))
+        status, err = False, 'Invalid method: {}'.format(method)
 
     # rename temporary file to final output file
-    shutil.move(tmpfile, filename)
+    if status:
+        shutil.move(tmpfile, filename)
+
+    return status, err
 
 
-def check_if_file_exists(filename, dir_save, verbose=True):
-    """Check if the file exists in a directory.
+def parse_url(url):
+    """Returns the url, md5hash and dir strings from a tupple"""
 
-    Parameters
-    ----------
-    filename : str
-        Name of the file.
-    dir_save : str
-        Path of the directory to store the file.
-    verbose : bool
-        Display messages on screen.
+    def get_field_value(d, field):
+        """Check if field exists and return its value from a dictionary. Else, return None."""
+        if field in d:
+            return d[field]
+        else:
+            return None
 
-    Returns
-    -------
-    bool
-        True if file exists. Otherwise, Flase.
+    if isinstance(url, str):
+        return url, None, os.path.basename(url), '', 'requests'
+    elif isinstance(url, dict):
+        url_ = get_field_value(url, 'url')
+        md5hash = get_field_value(url, 'md5hash')
+        save_name = get_field_value(url, 'save_name')
+        extract_dir = get_field_value(url, 'extract_dir') or ''
+        method = get_field_value(url, 'googledrive') or 'requests'
 
-    """
-    if not os.path.exists(dir_save):
-        os.makedirs(dir_save)
+        if save_name:
+            filename = save_name
+        else:
+            filename = os.path.basename(url_)
+        return url_, md5hash, filename, extract_dir, method
+    else:
+        raise TypeError('Invalid url type: {}'.format(type(url)))
 
-    return os.path.exists(filename)
+
+def md5_checksum(filename, md5hash):
+    """Check file integrity using a checksum."""
+    file_hash = get_hash_value(filename)
+    if not file_hash == md5hash:
+        print('**WARNING**: md5 checksum does not match for file: {}'.format(filename))
+        print('Checksum expected: {}, got: {}'.format(md5hash, file_hash))
 
 
-def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True):
+def download_extract_all(urls, dir_save, extract_data=True, verbose=True):
     """Download urls + extract files to disk.
 
     Download + extract all url files to disk. If clean_cache is
@@ -221,37 +254,22 @@ def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True
         if verbose:
             print('\nDownload url ({}/{}): {}'.format(i+1, len(urls), url))
 
-        # parse filename
-        if isinstance(url, str):
-            filename = os.path.join(dir_save, os.path.basename(url))
-        elif isinstance(url, list):
-            filename = os.path.join(dir_save, url[-1])
-        else:
-            raise Exception('Invalid url type: {}'.format(type(url)))
+        url, md5hash, filename, extract_dir, method = parse_url(url)
 
-        # check if file exists in disk
-        if check_if_file_exists(filename, dir_save, verbose):
+        save_dir = os.path.join(dir_save, extract_dir)
+        filename = os.path.join(save_dir, filename)
+
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        if os.path.exists(filename):
             print('File already exists, skip downloading this url.')
         else:
-            if isinstance(url, str):
-                method = 'requests'
-            elif isinstance(url, list):
-                if url[0] is 'googledrive':
-                    method = 'googledrive'
-                    url = url[1]
-                else:
-                    raise KeyError('Invalid key: {}. Valid keys: googledrive.'.format(url[0]))
+            status, err = download_url(url, filename, method, verbose)
+            if not status:
+                raise Exception(err)
 
-            # download file
-            download_url(url, filename, method, verbose)
-
-            # check md5 sum (if available)
-            if any(md5sum):
-                file_hash = get_hash_value(filename)
-                if not file_hash == md5sum:
-                    print('**WARNING**: md5 checksum does not match for file: {}'.format(filename))
-                    print('Checksum expected: {}, got: {}'.format(md5sum, file_hash))
-
-            # extract file
+            if md5hash:
+                md5_checksum(filename, md5hash)
             if extract_data:
-                patoolib.extract_archive(filename, outdir=dir_save, verbosity=verbose)
+                patoolib.extract_archive(filename, outdir=save_dir, verbosity=verbose)

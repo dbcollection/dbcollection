@@ -11,10 +11,8 @@ class MPIIPose(BaseDataset):
     """ Frames Labeled In Cinema (FLIC) Dataset preprocessing/downloading functions """
 
     # download url
-    url = ["http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz",
-           "http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1_u12_2.zip"]
-
-    md5_checksum = ''
+    urls = ['http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz',
+            'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1_u12_2.zip']
 
     # some keywords. These are used to classify datasets for easier
     # categorization.

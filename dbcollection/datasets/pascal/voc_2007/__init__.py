@@ -11,11 +11,8 @@ class PascalVOC2007(BaseDataset):
     """ Pascal VOC 2007 preprocessing/downloading class """
 
     # download url
-    url = [
-        'http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar',
-        'http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar',
-    ]
-    md5_checksum = []
+    urls = ['http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar',
+            'http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtest_06-Nov-2007.tar']
 
     # some keywords. These are used to classify datasets for easier
     # categorization.
