@@ -11,11 +11,7 @@ class Flic(BaseDataset):
     """ Frames Labeled In Cinema (FLIC) Dataset preprocessing/downloading functions """
 
     # download url
-    url = [
-        ['googledrive', '0B4K3PZp8xXDJN0Fpb0piVjQ3Y3M', 'flic.zip']
-    ]
-
-    md5_checksum = ''
+    urls = [{'googledrive': '0B4K3PZp8xXDJN0Fpb0piVjQ3Y3M', 'save_name': 'flic.zip'}]
 
     # some keywords. These are used to classify datasets for easier
     # categorization.

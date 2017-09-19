@@ -11,10 +11,13 @@ class LSPe(BaseDataset):
     """ Leeds Sports Pose Extended (LSPe) Dataset preprocessing/downloading functions """
 
     # download url
-    url = ["http://sam.johnson.io/research/lsp_dataset.zip",
-           "http://sam.johnson.io/research/lspet_dataset.zip"]
-
-    md5_checksum = ''
+    urls = [
+        'http://sam.johnson.io/research/lspet_dataset.zip',
+        {
+            'url': 'http://sam.johnson.io/research/lsp_dataset.zip',
+            'extract_dir': 'lsp_dataset'
+        }
+    ]
 
     # some keywords. These are used to classify datasets for easier
     # categorization.

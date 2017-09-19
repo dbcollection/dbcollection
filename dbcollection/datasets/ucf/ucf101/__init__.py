@@ -11,12 +11,11 @@ class UCF101(BaseDataset):
     """ UCF101-Action recognitio preprocessing/downloading functions """
 
     # download url
-    url = [
+    urls = [
         'http://crcv.ucf.edu/data/UCF101/UCF101.rar',
         'http://crcv.ucf.edu/data/UCF101/UCF101TrainTestSplits-RecognitionTask.zip',
         'http://crcv.ucf.edu/data/UCF101/UCF101TrainTestSplits-DetectionTask.zip'
     ]
-    md5_checksum = ''
 
     # some keywords. These are used to classify datasets for easier
     # categorization.

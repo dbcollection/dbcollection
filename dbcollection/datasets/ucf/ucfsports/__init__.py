@@ -12,10 +12,7 @@ class UCFSports(BaseDataset):
     """ UCF-Sports action recognition preprocessing/downloading functions """
 
     # download url
-    url = [
-        'http://crcv.ucf.edu/data/ucf_sports_actions.zip',
-    ]
-    md5_checksum = ''
+    urls = ['http://crcv.ucf.edu/data/ucf_sports_actions.zip']
 
     # some keywords. These are used to classify datasets for easier
     # categorization.
