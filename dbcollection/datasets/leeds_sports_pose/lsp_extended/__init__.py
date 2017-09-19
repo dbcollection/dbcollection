@@ -11,8 +11,8 @@ class LSPe(BaseDataset):
     """ Leeds Sports Pose Extended (LSPe) Dataset preprocessing/downloading functions """
 
     # download url
-    url = ["http://www.comp.leeds.ac.uk/mat4saj/lsp_dataset.zip",
-           "http://www.comp.leeds.ac.uk/mat4saj/lspet_dataset.zip"]
+    url = ["http://sam.johnson.io/research/lsp_dataset.zip",
+           "http://sam.johnson.io/research/lspet_dataset.zip"]
 
     md5_checksum = ''
 
