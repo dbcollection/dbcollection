@@ -27,10 +27,8 @@ class BaseDataset:
         Extracts the downloaded files if they are compacted.
     verbose : bool
         Be verbose
-    url : list
+    urls : list
         List of URL links to download.
-    md5_checksum : str, optional
-        MD5 Hash for each of the urls.
     keywords : list
         List of keywords.
     tasks : dict
@@ -40,9 +38,7 @@ class BaseDataset:
     """
 
     # download url
-    url = [] # list of urls to download
-    md5_checksum = '' # list of md5 hashes to validate the urls.
-                      # If not available, leave it empty ([] or '')
+    urls = [] # list of urls to download
 
     # some keywords. These are used to classify datasets for easier
     # categorization in the cache file.
@@ -84,8 +80,7 @@ class BaseDataset:
         Download and extract files to disk.
         """
         # download + extract data and remove temporary files
-        download_extract_all(self.url, self.md5_checksum, self.data_path,
-                             self.extract_data, self.verbose)
+        download_extract_all(self.urls, self.data_path, self.extract_data, self.verbose)
 
         return self.keywords
 
