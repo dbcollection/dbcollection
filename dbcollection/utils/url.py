@@ -193,7 +193,7 @@ def parse_url(url):
         return url, None, os.path.basename(url), '', 'requests'
     elif isinstance(url, dict):
         url_ = get_field_value(url, 'url')
-        md5sum = get_field_value(url, 'md5sum')
+        md5hash = get_field_value(url, 'md5hash')
         save_name = get_field_value(url, 'save_name')
         extract_dir = get_field_value(url, 'extract_dir') or ''
         method = get_field_value(url, 'googledrive') or 'requests'
@@ -202,7 +202,7 @@ def parse_url(url):
             filename = save_name
         else:
             filename = os.path.basename(url_)
-        return url_, md5sum, filename, extract_dir, method
+        return url_, md5hash, filename, extract_dir, method
     else:
         raise TypeError('Invalid url type: {}'.format(type(url)))
 
@@ -215,7 +215,7 @@ def md5_checksum(filename, md5hash):
         print('Checksum expected: {}, got: {}'.format(md5hash, file_hash))
 
 
-def download_extract_all(urls, md5sum, dir_save, extract_data=True, verbose=True):
+def download_extract_all(urls, dir_save, extract_data=True, verbose=True):
     """Download urls + extract files to disk.
 
     Download + extract all url files to disk. If clean_cache is
