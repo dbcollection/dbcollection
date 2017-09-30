@@ -6,23 +6,25 @@ from __future__ import print_function, division
 import os
 import shutil
 
-from dbcollection.datasets.dbclass import BaseDataset
+from dbcollection.datasets import BaseDataset
 from .classification import Classification
 
+urls = (
+    "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
+    "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz",
+    "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
+    "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz"
+)
+keywords = ('classification')
+tasks = {"classification": Classification}
+default_task = 'classification'
 
-class MNIST(BaseDataset):
+class Dataset(BaseDataset):
     """ Cifar10 preprocessing/downloading functions """
-
-    # some keywords. These are used to classify datasets for easier
-    # categorization.
-    keywords = ['classification']
-
-    # init tasks
-    tasks = {
-        "classification": Classification
-    }
-    default_task = 'classification'
-
+    urls = urls
+    keywords = keywords
+    tasks = tasks
+    default_task = default_task
 
     def download(self):
         """
