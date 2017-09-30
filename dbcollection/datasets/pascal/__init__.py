@@ -1,3 +1,3 @@
-__all__ = ['voc_2007', 'voc_2012']
+__all__ = ['pascal_voc_2007', 'pascal_voc_2012']
 
 from . import *
