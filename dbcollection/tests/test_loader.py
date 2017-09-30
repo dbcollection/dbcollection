@@ -9,7 +9,7 @@ import dbcollection as dbc
 from dbcollection.utils.string_ascii import convert_ascii_to_str as tostr_
 
 
-loader = dbc.load(name='mnist')
+loader = dbc.load(name='cifar10')
 
 
 @pytest.mark.parametrize("output", [
