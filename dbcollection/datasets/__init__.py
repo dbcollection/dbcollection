@@ -38,11 +38,11 @@ class BaseDataset:
     """
 
     # download url
-    urls = [] # list of urls to download
+    urls = () # list of urls to download
 
     # some keywords. These are used to classify datasets for easier
     # categorization in the cache file.
-    keywords = []
+    keywords = ()
 
     # init tasks
     tasks = {} # dictionary of available tasks to process
@@ -85,14 +85,6 @@ class BaseDataset:
         return self.keywords
 
 
-    def fetch_task_key(self):
-        """
-        Return the first key that appears on the dictionary.
-        """
-        for task in self.tasks:
-            return task
-
-
     def parse_task_name(self, task):
         """
         Parses the task string to look for key suffixes.
@@ -103,59 +95,28 @@ class BaseDataset:
             return task, None
 
 
-    def init_tasks_constructors(self, suffix=None):
-        """
-        Initialize the tasks' class constructor.
-        """
-        assert any(self.tasks), 'No defined tasks for process. Please insert a task for processing.'
-
-        tasks_init = {}
-        for task in self.tasks:
-            tasks_init[task] = self.tasks[task](self.data_path, self.cache_path, suffix, self.verbose)
-
-        if self.default_task == '':
-            self.default_task = self.fetch_task_key()
-
-        tasks_init['default'] = tasks_init[self.default_task]
-
-        return tasks_init
-
-
-    def get_all_tasks(self):
-        """
-        Returns a list of all available tasks
-        """
-        # init tasks
-        tasks_loader = self.init_tasks_constructors()
-
-        tasks = []
-        for i, task in enumerate(tasks_loader):
-            tasks.append(task)
-
-        return tasks
+    def get_task_constructor(self, task):
+        """Returns the class constructor for the input task."""
+        if task == '':
+            task_, suffix = self.default_task, None
+        elif task == 'default':
+            task_, suffix = self.default_task, None
+        else:
+            task_, suffix = self.parse_task_name(task)
+        return task_, suffix, self.tasks[task_]
 
 
     def process(self, task='default'):
-        """
-        Process metadata for all tasks
-        """
-        info_output = {}
-        if task == 'all':
-            tasks_loader = self.init_tasks_constructors()
-            for i, task in enumerate(tasks_loader):
-
-                if self.verbose:
-                    print('\nProcessing ::{}:: task: ({}/{})'.format(task, i+1, len(tasks_loader)))
-                info_output[task] = tasks_loader[task].run()
+        """Processes the metadata of a task."""
+        task_, suffix, task_constructor = self.get_task_constructor(task)
+        if self.verbose:
+            print('\nProcessing \'{}\' task:'.format(task_))
+        task_loader = task_constructor(self.data_path, self.cache_path, suffix, self.verbose)
+        task_filename = task_loader.run()
+        if suffix:
+            return {task_+suffix: task_filename}
         else:
-            task_, suffix = self.parse_task_name(task)
-
-            if self.verbose:
-                print('\nProcessing ::{}:: task:'.format(task_))
-            tasks_loader = self.init_tasks_constructors(suffix)
-            info_output[task] = tasks_loader[task_].run()
-
-        return info_output, self.keywords
+            return {task_: task_filename}
 
 
 #---------------------------------------------------------
@@ -262,11 +223,11 @@ class BaseTask:
 
                 # add data to the **source** group
                 if self.suffix is '_s':
-                    sourceg = fileh5.create_group('source/' + set_name)
+                    sourceg = fileh5.create_group(set_name + '/raw')
                     self.add_data_to_source(sourceg, data[set_name], set_name)
 
                 # add data to the **default** group
-                defaultg = fileh5.create_group('default/' + set_name)
+                defaultg = fileh5.create_group(set_name)
                 self.add_data_to_default(defaultg, data[set_name], set_name)
 
         # close file
@@ -280,4 +241,5 @@ class BaseTask:
         """
         Run task processing.
         """
-        return self.process_metadata()
+        filename = self.process_metadata()
+        return filename
