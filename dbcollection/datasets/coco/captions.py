@@ -9,7 +9,7 @@ import numpy as np
 import progressbar
 from collections import OrderedDict
 
-from dbcollection.datasets.dbclass import BaseTask
+from dbcollection.datasets import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
