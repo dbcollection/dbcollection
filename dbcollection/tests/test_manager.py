@@ -11,11 +11,12 @@ testdata = [
     ('mnist', 'classification', None, True, True),
 ]
 
-# download mnist before using it
-loader = dbc.load(name=testdata[0][0], is_test=True)
+testdata2 = [
+    ('cifar10', 'classification', None, True, True),
+]
 
 @pytest.mark.parametrize("name, task, data_dir, extract_data, verbose",
-                         testdata)
+                         testdata2)
 def test_download(name, task, data_dir, extract_data, verbose):
     dbc.download(name=name,
                  data_dir=data_dir,
