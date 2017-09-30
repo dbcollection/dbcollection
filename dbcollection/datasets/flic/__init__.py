@@ -3,22 +3,17 @@ Frames Labeled In Cinema (FLIC) Dataset download/process functions.
 """
 
 
-from dbcollection.datasets.dbclass import BaseDataset
+from dbcollection.datasets import BaseDataset
 from .keypoints import Keypoints
 
+urls = ({'googledrive': '0B4K3PZp8xXDJN0Fpb0piVjQ3Y3M', 'save_name': 'flic.zip'})
+keywords = ('image_processing', 'detection', 'human pose', 'keypoints')
+tasks = {"keypoints" : Keypoints}
+default_task = 'keypoints'
 
-class Flic(BaseDataset):
+class Dataset(BaseDataset):
     """ Frames Labeled In Cinema (FLIC) Dataset preprocessing/downloading functions """
-
-    # download url
-    urls = [{'googledrive': '0B4K3PZp8xXDJN0Fpb0piVjQ3Y3M', 'save_name': 'flic.zip'}]
-
-    # some keywords. These are used to classify datasets for easier
-    # categorization.
-    keywords = ['image_processing', 'detection', 'human pose', 'keypoints']
-
-    # init tasks
-    tasks = {
-        "keypoints" : Keypoints
-    }
-    default_task = 'keypoints'
+    urls = urls
+    keywords = keywords
+    tasks = tasks
+    default_task = default_task
