@@ -7,12 +7,102 @@ from __future__ import print_function
 import os
 import json
 import shutil
+import pkgutil
 
-import dbcollection.datasets.funs as dataset
-from dbcollection.datasets.dblist import available_datasets, fetch_default_task_name
+import dbcollection.datasets as datasets
 from dbcollection.cache import CacheManager
 from dbcollection.loader import DatasetLoader
 
+
+#---------------------------------------------------------
+# Utility functions + variables
+#---------------------------------------------------------
+
+def get_dataset_attributes(module, path):
+    """Returns the constructor and other info of a dataset"""
+    if any(path):
+        get_dataset_attributes(module.__getattribute__(path[0]), path[1:])
+    else:
+        try:
+            db_fields =  {
+                "urls": getattr(module, 'urls'),
+                "keywords": getattr(module, 'keywords'),
+                "tasks": getattr(module, 'tasks'),
+                "default_task": getattr(module, 'default_task'),
+                "constructor": getattr(module, 'Dataset')
+            }
+            return db_fields
+        except AttributeError:
+            return None
+
+
+def fetch_list_datasets():
+    """Get all datasets into a dictionary"""
+    db_list = {}
+    for importer, modname, ispkg in pkgutil.walk_packages(path=datasets.__path__,
+                                                          prefix=datasets.__name__ + '.',
+                                                          onerror=lambda x: None):
+        if ispkg:
+            paths = modname.split('.')
+            db = get_dataset_attributes(datasets, paths[2:])
+            if db:
+                dbname = paths[-1]
+                db_list.update({dbname: db})
+    return db_list
+
+
+# fetch list of available datasets to load
+dataset_list = fetch_list_datasets()
+
+# cache manager
+cache_manager = CacheManager()
+
+
+def _get_dirs(cache_manager, name, data_dir):
+    """Parse data directory and cache save path."""
+    if data_dir is None or data_dir is '':
+        data_dir_ = os.path.join(cache_manager.default_cache_dir, name, 'data')
+    else:
+        #assert os.path.isdir(data_dir), 'Must insert a valid path: data_dir={}'.format(data_dir)
+        if not os.path.exists(data_dir):
+            print('Creating save directory in disk: ' + data_dir)
+            os.makedirs(data_dir)
+
+        if os.path.split(data_dir)[1] == name:
+            data_dir_ = data_dir
+        else:
+            data_dir_ = os.path.join(data_dir, name)
+
+    if not os.path.exists(data_dir_):
+        os.makedirs(data_dir_)
+
+    cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
+    if not os.path.exists(cache_save_path):
+        os.makedirs(cache_save_path)
+
+    return data_dir, cache_save_path
+
+
+def exists_task(name, task):
+    """Checks if a task exists for a dataset."""
+    if task == '':
+        task_ = dataset_list[name]['default_task']
+    elif: task == 'default':
+        task_ = dataset_list[name]['default_task']
+    elif task.endswith('_s'):
+        task_ = task[:-2]
+    else:
+        task_ = task
+
+    if task_ in dataset_list[name]['tasks']:
+        return True
+    else:
+        return False
+
+
+#---------------------------------------------------------
+# Main API methods
+#---------------------------------------------------------
 
 def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=False):
     """Download a dataset data to disk.
@@ -43,36 +133,30 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
 
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+    assert name in dataset_list, 'Invalid dataset name: {}'.format(name)
 
     # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    if is_test:
+        cache_manager = CacheManager(is_test)
 
-    if data_dir is None or data_dir is '':
-        data_dir_ = os.path.join(cache_manager.default_cache_dir, name, 'data')
-    else:
-        #assert os.path.isdir(data_dir), 'Must insert a valid path: data_dir={}'.format(data_dir)
-        if not os.path.exists(data_dir):
-            print('Creating save directory in disk: ' + data_dir)
-            os.makedirs(data_dir)
-
-        if os.path.split(data_dir)[1] == name:
-            data_dir_ = data_dir
-        else:
-            data_dir_ = os.path.join(data_dir, name)
-
-    if not os.path.exists(data_dir_):
-        os.makedirs(data_dir_)
-
-    # get cache default save path
-    cache_save_path = os.path.join(cache_manager.default_cache_dir, name)
-    if not os.path.exists(cache_save_path):
-        os.makedirs(cache_save_path)
+    # get data dir + cache default save path
+    data_dir_, cache_save_path = _get_dirs(cache_manager, name, data_dir)
 
     if verbose:
         print('==> Download {} data to disk...'.format(name))
 
+    # setup dataset class
+    constructor = dataset_list['name']['constructor']
+    db = constructor(data_path=data_dir_,
+                     cache_path=cache_save_path,
+                     extract_data=extract_data,
+                     verbose=verbose)
+
+    # download dataset
+    db.download()
+
     # download/preprocess dataset
-    keywords = dataset.download(name, data_dir_, cache_save_path, extract_data, verbose)
+    keywords = dataset_list['name']['keywords']
 
     # update dbcollection.json file with the new data
     cache_manager.update(name, data_dir_, {}, keywords)
@@ -97,6 +181,11 @@ def process(name, task='all', verbose=True, is_test=False):
     is_test : bool, optional
         Flag used for tests.
 
+    Raises
+    ------
+    KeyError
+        If a task does not exist for a dataset.
+
     Examples
     --------
     Download the CIFAR10 dataset to disk.
@@ -106,20 +195,37 @@ def process(name, task='all', verbose=True, is_test=False):
 
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+    assert name in dataset_list, 'Invalid dataset name: {}'.format(name)
 
     # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    if is_test:
+        cache_manager = CacheManager(is_test)
 
     # get data + cache dir paths
     dset_paths = cache_manager.get_dataset_storage_paths(name)
+    data_dir = dset_paths['data_dir']
+    cache_save_path = dset_paths['cache_dir']
 
-    # process dataset metadata
-    if verbose:
-        print('==> Processing {} metadata ...'.format(name))
-    cache_info = dataset.process(name, task, dset_paths['data_dir'], dset_paths['cache_dir'], verbose)
+     # setup dataset class
+    constructor = dataset_list[name]['constructor']
+    db = constructor(data_path=data_dir,
+                     cache_path=cache_save_path,
+                     extract_data=False,
+                     verbose=verbose)
+
+    # check if task exists in the list
+    if not exists_task(name, task):
+        raise KeyError('The task \'{\' does not exists for loading/processing.'.format(task))
+
+    if not os.path.exists(cache_save_path):
+        os.makedirs(cache_save_path)
+
+    # process metadata
+    task_info = db.process(task)
 
     # update dbcollection.json file with the new data
-    cache_manager.update(name, cache_info['data_dir'], cache_info['tasks'], cache_info['keywords'])
+    keywords = dataset_list['name']['keywords']
+    cache_manager.update(name, data_dir, task_info, keywords)
 
     if verbose:
         print('==> Processing complete.')
@@ -164,13 +270,11 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
 
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+    assert name in dataset_list, 'Invalid dataset name: {}'.format(name)
 
     # Load a cache manager object
-    cache_manager = CacheManager(is_test)
-
-    # convert task if equal to 'default'
-    if task == 'default':
-        task = fetch_default_task_name(name)
+    if is_test:
+        cache_manager = CacheManager(is_test)
 
     # check if dataset exists. If not attempt to download the dataset
     if not cache_manager.exists_dataset(name):
@@ -229,7 +333,8 @@ def add(name, task, data_dir, file_path, keywords=[], is_test=False):
     assert file_path, "Must input a valid file_path: {}".format(file_path)
 
     # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    if is_test:
+        cache_manager = CacheManager(is_test)
 
     # update the cache for the dataset
     cache_manager.update(name, data_dir, {task: file_path}, keywords, True)
@@ -273,9 +378,11 @@ def remove(name, task=None, delete_data=False, is_test=False):
 
     """
     assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+    assert name in dataset_list, 'Invalid dataset name: {}'.format(name)
 
     # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    if is_test:
+        cache_manager = CacheManager(is_test)
 
     # check if dataset exists in the cache file
     if cache_manager.exists_dataset(name):
@@ -344,7 +451,8 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     """
 
     # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    if is_test:
+        cache_manager = CacheManager(is_test)
 
     if delete_cache:
         delete_cache_dir = True
@@ -389,7 +497,8 @@ def query(pattern='info', is_test=False):
 
     """
     # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    if is_test:
+        cache_manager = CacheManager(is_test)
 
     # init list
     query_list = {}
@@ -419,6 +528,43 @@ def query(pattern='info', is_test=False):
             query_list.update({pattern : cache_manager.data['dataset'][name]['keywords'][pattern]})
 
     return query_list
+
+
+def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=True, is_test=False):
+    """Prints the cache contents and other information.
+
+    Parameters
+    ----------
+        None
+
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    """
+    
+
+
+def info_datasets(name=None):
+    """Prints information about available and downloaded datasets.
+
+    Parameters
+    ----------
+        None
+
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    """
+    
+
 
 
 def info(name=None, paths_info=True, datasets_info=True, categories_info=True, is_test=False):
@@ -458,7 +604,8 @@ def info(name=None, paths_info=True, datasets_info=True, categories_info=True, i
 
     """
     # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    if is_test:
+        cache_manager = CacheManager(is_test)
 
     if name:
         db_list = available_datasets()
