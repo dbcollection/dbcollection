@@ -1,3 +1,3 @@
-__all__=['pedestrian']
+__all__=['caltech_pedestrian']
 
-from . import *
+from . import caltech_pedestrian
