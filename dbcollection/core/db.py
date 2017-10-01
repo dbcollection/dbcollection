@@ -4,10 +4,12 @@ Dataset utility methods/classes.
 
 from __future__ import print_function
 import os
+import sys
 import pkgutil
 import h5py
 
 import dbcollection.datasets as datasets
+#from dbcollection import datasets
 from dbcollection.utils.url import download_extract_all
 
 
@@ -15,23 +17,20 @@ from dbcollection.utils.url import download_extract_all
 # Methods
 #---------------------------------------------------------
 
-def get_dataset_attributes(module, path):
-    """Returns the constructor and other info of a dataset"""
-    if any(path):
-        get_dataset_attributes(module.__getattribute__(path[0]), path[1:])
-    else:
-        try:
-            db_fields =  {
-                "urls": getattr(module, 'urls'),
-                "keywords": getattr(module, 'keywords'),
-                "tasks": getattr(module, 'tasks'),
-                "default_task": getattr(module, 'default_task'),
-                "constructor": getattr(module, 'Dataset')
-            }
-            return db_fields
-        except AttributeError:
-            return None
-
+def get_dataset_attributes(name):
+    __import__(name)
+    module = sys.modules[name]
+    try:
+        db_fields =  {
+            "urls": getattr(module, 'urls'),
+            "keywords": getattr(module, 'keywords'),
+            "tasks": getattr(module, 'tasks'),
+            "default_task": getattr(module, 'default_task'),
+            "constructor": getattr(module, 'Dataset')
+        }
+        return db_fields
+    except AttributeError:
+        return None
 
 def fetch_list_datasets():
     """Get all datasets into a dictionary"""
@@ -41,7 +40,7 @@ def fetch_list_datasets():
                                                           onerror=lambda x: None):
         if ispkg:
             paths = modname.split('.')
-            db = get_dataset_attributes(datasets, paths[2:])
+            db = get_dataset_attributes(modname)
             if db:
                 dbname = paths[-1]
                 db_list.update({dbname: db})
