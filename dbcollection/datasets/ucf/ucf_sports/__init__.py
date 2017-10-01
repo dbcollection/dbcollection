@@ -3,7 +3,7 @@ UCF-Sports Action recognition download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .recognition import Recognition
 from .detection import Detection
 

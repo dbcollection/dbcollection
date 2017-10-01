@@ -6,7 +6,7 @@ LSP Keypoints process functions.
 from __future__ import print_function, division
 import os
 
-from dbcollection.datasets.leeds_sports_pose.lsp.keypoints import Keypoints as LspKeypoints
+from dbcollection.datasets.leeds_sports_pose.leeds_sports_pose.keypoints import Keypoints as LspKeypoints
 
 from dbcollection.utils.file_load import load_matlab
 

@@ -6,7 +6,7 @@ from __future__ import print_function, division
 import os
 import shutil
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .classification import Classification
 
 urls = (

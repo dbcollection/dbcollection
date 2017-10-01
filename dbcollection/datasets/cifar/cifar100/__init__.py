@@ -3,7 +3,7 @@ Cifar100 download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .classification import Classification
 
 urls = ({'url': 'https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz',

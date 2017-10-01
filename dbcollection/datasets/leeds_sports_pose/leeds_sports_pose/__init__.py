@@ -3,7 +3,7 @@ Leeds Sports Pose (LSP) Dataset download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .keypoints import Keypoints, KeypointsOriginal
 
 urls = (

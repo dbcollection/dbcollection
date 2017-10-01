@@ -3,7 +3,7 @@ MPII Human Pose Dataset download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .keypoints import Keypoints, KeypointsFull
 
 urls = (

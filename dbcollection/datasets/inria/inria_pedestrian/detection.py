@@ -3,7 +3,7 @@ Inria Pedestrian detection process functions.
 """
 
 
-from dbcollection.datasets.caltech.pedestrian.detection import Detection as CaltechDetection
+from dbcollection.datasets.caltech.caltech_pedestrian.detection import Detection as CaltechDetection
 
 
 class Detection(CaltechDetection):

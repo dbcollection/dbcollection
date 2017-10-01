@@ -8,7 +8,7 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTask
+from dbcollection.core.db import BaseTask
 
 from dbcollection.utils.file_load import load_txt
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii

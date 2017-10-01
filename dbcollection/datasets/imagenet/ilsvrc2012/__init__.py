@@ -4,7 +4,7 @@ ImageNet ILSVRC 2012 download/process functions.
 
 
 from __future__ import print_function
-from dbcollection.datasets import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .classification import Classification, Raw256
 
 urls = ()

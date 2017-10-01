@@ -6,7 +6,7 @@ Caltech Pedestrian Dataset download/process functions.
 import os
 import sys
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .detection import Detection2015, Detection2016
 from .captions import Caption2015, Caption2016
 from .keypoints import Keypoints2016
