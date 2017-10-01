@@ -58,15 +58,15 @@ class DatasetLoader:
 
         # create a handler for the cache file
         self.file = h5py.File(self.cache_path, 'r', libver='latest')
-        self.root_path = 'default/'
+        self.root_path = '/'
 
         # make links for all groups (train/val/test/etc) for easier access
-        self.sets = [name for name in self.file['default/'].keys()]
+        self.sets = [name for name in self.file['/'].keys()]
 
         # fetch list of field names that compose the object list.
         self.object_fields = {}
         for set_name in self.sets:
-            data = self.file['default/{}/object_fields'.format(set_name)].value
+            data = self.file['/{}/object_fields'.format(set_name)].value
             self.object_fields[set_name] = convert_ascii_to_str(data)
 
 
