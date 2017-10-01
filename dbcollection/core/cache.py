@@ -27,11 +27,12 @@ class CacheManager:
         is_test : bool
             Flag used for tests.
         """
-
         self.is_test = is_test
 
+        self.home_dir = self._set_home_dir(is_test)
+
         # setup cache paths
-        self.setup_paths()
+        self._setup_paths()
 
         # create cache file (if it does not exist)
         if not os.path.exists(self.cache_fname):
@@ -42,7 +43,7 @@ class CacheManager:
         self.data = self.read_data_cache()
 
 
-    def setup_paths(self):
+    def _setup_paths(self):
         """Setup the cache/data directories for storing the cache file.
 
         Creates two paths for the default cache directory for storing the cache data,
@@ -50,17 +51,30 @@ class CacheManager:
         is stored.
         """
         # cache directory path (should work for all platforms)
-        home_dir = os.path.expanduser("~")
-        if self.is_test:
-            home_dir = os.path.join(home_dir, 'tmp')
-
-        self.default_cache_dir = os.path.join(home_dir, 'dbcollection')
-        self.cache_fname = os.path.join(home_dir, 'dbcollection.json')
+        self.default_cache_dir = os.path.join(self.home_dir, 'dbcollection')
+        self.cache_fname = os.path.join(self.home_dir, 'dbcollection.json')
 
         # create dir
         if not os.path.exists(self.default_cache_dir):
             print('Create cache dir: {}'.format(self.default_cache_dir))
             os.makedirs(self.default_cache_dir)
+
+
+    def _set_home_dir(self, is_test=None):
+        """Sets the home directory folder for the cache."""
+        home_dir = os.path.expanduser("~")
+        if is_test is None:
+            if self.is_test:
+                home_dir = os.path.join(home_dir, 'tmp')
+        else:
+            if is_test:
+                home_dir = os.path.join(home_dir, 'tmp')
+        return home_dir
+
+
+    def _default_cache_dir(self):
+        """Return the default cache directory."""
+        return os.path.join(self.home_dir, 'dbcollection')
 
 
     def create_root_dir(self):
@@ -545,3 +559,59 @@ class CacheManager:
             return True
 
         raise Exception('Field name not existing: {}'.format(field))
+
+
+    def info(self, name=None, show_paths=True, show_datasets=True, show_categories=True):
+        """Display the cache contents in a digestible format.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        show_paths : bool, optional
+            Displays the paths information.
+        show_datasets : bool, optional
+            Displays the dataset contents.
+        show_categories : bool, optional
+            Displays the categories information.
+
+        """
+        # print info header
+        if show_paths:
+            print('--------------')
+            print('  Paths info ')
+            print('--------------')
+            print(json.dumps(self.data['info'], sort_keys=True, indent=4))
+            print('')
+
+        # print datasets
+        if show_datasets:
+            if name:
+                print('---------------------')
+                print('  Dataset info: {} '.format(name))
+                print('---------------------')
+                print(json.dumps(self.data['dataset'][name], sort_keys=True, indent=4))
+            else:
+                print('---------------------')
+                print('  Dataset info: all ')
+                print('---------------------')
+                print(json.dumps(self.data['dataset'], sort_keys=True, indent=4))
+            print('')
+
+        #print('*** Datasets by category ***\n')
+        if show_categories:
+            if name:
+                print('------------------------')
+                print('  Categories: {} '.format(name))
+                print('------------------------\n')
+                max_size_name = max([len(n) for n in self.data['category'][name]]) + 7
+                for name in self.data['category']:
+                    print("{:{}}".format('   > {}: '.format(name), max_size_name)
+                        + "{}".format( sorted(self.data['category'][name])))
+            else:
+                print('------------------------')
+                print('  Categories: all ')
+                print('------------------------\n')
+                for cat_name in self.data['category']:
+                    if name in self.data['category'][cat_name]:
+                        print('   > {}: '.format(cat_name))
