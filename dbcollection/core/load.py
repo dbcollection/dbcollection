@@ -60,10 +60,6 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
-    # Load a cache manager object
-    if is_test:
-        cache_manager = CacheManager(is_test)
-
     # check if dataset exists. If not attempt to download the dataset
     if not cache_manager.exists_dataset(name):
         download(name, data_dir, True, verbose, is_test)
@@ -78,6 +74,8 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     dset_paths = cache_manager.get_dataset_storage_paths(name)
 
     # get task cache file path
+    if task=='' or task=='default':
+        task = available_datasets_list[name]['default_task']
     task_cache_path = cache_manager.get_cache_path(name, task)
 
     # Create a loader
