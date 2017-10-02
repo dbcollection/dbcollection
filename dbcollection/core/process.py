@@ -88,7 +88,7 @@ def process(name, task='default', verbose=True, is_test=False):
     task_info = db.process(task)
 
     # update dbcollection.json file with the new data
-    keywords = available_datasets_list['name']['keywords']
+    keywords = available_datasets_list[name]['keywords']
     cache_manager.update(name, data_dir, task_info, keywords)
 
     if verbose:
