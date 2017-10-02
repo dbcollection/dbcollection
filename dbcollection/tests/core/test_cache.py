@@ -5,7 +5,7 @@ Test dbcollection/utils/cache.py.
 
 import os
 import pytest
-from dbcollection.cache import CacheManager
+from dbcollection.core.cache import CacheManager
 
 
 data = {
