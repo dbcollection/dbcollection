@@ -13,7 +13,7 @@ from dbcollection.core.db import BaseTask
 from dbcollection.utils.file_load import load_json
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
-from dbcollection.utils.caltech_pedestrian_extractor.converter import extract_data
+from dbcollection.utils.db.caltech.caltech_pedestrian_extractor.converter import extract_data
 
 
 class Detection(BaseTask):
