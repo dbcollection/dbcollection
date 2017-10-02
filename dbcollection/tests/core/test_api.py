@@ -26,16 +26,23 @@ def test_download(name, task, data_dir, extract_data, verbose, is_test):
              extract_data=extract_data,
              verbose=verbose,
              is_test=is_test)
+    config_cache(delete_cache=True, is_test=True)
     pass
 
 
 @pytest.mark.parametrize("name, task, data_dir, extract_data, verbose, is_test",
                          testdata)
 def test_process(name, task, data_dir, extract_data, verbose, is_test):
+    download(name=name,
+             data_dir=data_dir,
+             extract_data=extract_data,
+             verbose=verbose,
+             is_test=is_test)
     process(name=name,
             task=task,
             verbose=verbose,
             is_test=is_test)
+    config_cache(delete_cache=True, is_test=True)
     pass
 
 
@@ -47,6 +54,7 @@ def test_load(name, task, data_dir, extract_data, verbose, is_test):
               data_dir=data_dir,
               verbose=verbose,
               is_test=is_test)
+    config_cache(delete_cache=True, is_test=True)
     assert(db.name == name)
 
 
@@ -58,6 +66,7 @@ def test_add():
         keywords=['new_category'],
         is_test=True)
     add('new_db', 'new_task', 'new/path/db', 'newdb.h5', ['new_category'], True)
+    config_cache(delete_cache=True, is_test=True)
     pass
 
 
@@ -67,6 +76,7 @@ def test_remove():
            task='new_task',
            delete_data=True,
            is_test=True)
+    config_cache(delete_cache=True, is_test=True)
     pass
 
 
@@ -86,9 +96,9 @@ def test_query_return_empty():
 
 
 def test_info_cache():
-    info_cache()
+    info_cache(is_test=True)
     pass
 
 def test_info_datasets():
-    info_datasets()
+    info_datasets(is_test=True)
     pass
