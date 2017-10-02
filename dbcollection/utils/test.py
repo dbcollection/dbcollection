@@ -4,7 +4,7 @@ Test utility functions/classes.
 
 
 from __future__ import print_function
-import dbcollection.manager as dbc
+import dbcollection as dbc
 
 
 class TestBaseDB:
@@ -57,7 +57,7 @@ class TestBaseDB:
     def list_datasets(self):
         """Print dbcollection info"""
         print('\n==> dbcollection: info()')
-        dbc.info(is_test=True)
+        dbc.info_cache(is_test=True)
 
 
     def print_info(self, loader):
@@ -72,11 +72,11 @@ class TestBaseDB:
     def load(self):
         """Load dataset to memory"""
         print('\n==> dbcollection: load()')
-        return  dbc.load(name=self.name,
-                         task=self.task,
-                         data_dir=self.data_dir,
-                         verbose=self.verbose,
-                         is_test=True)
+        return dbc.load(name=self.name,
+                        task=self.task,
+                        data_dir=self.data_dir,
+                        verbose=self.verbose,
+                        is_test=True)
 
 
     def download(self, extract_data=True):
