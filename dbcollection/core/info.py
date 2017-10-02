@@ -33,20 +33,21 @@ def print_datasets_info(data, names=None):
 
 def print_categories_info(data, names=None):
     """Prints the categories information of the cache."""
-    print('------------------------')
-    print('  Datasets by category ')
-    print('------------------------\n')
-    if names:
-        max_size_name = max([len(name) for name in names]) + 7
-        for name in names:
-            print("{:{}}".format('   > {}: '.format(name), max_size_name)
-                   + "{}".format(sorted(data['category'][name])))
-    else:
-        max_size_name = max([len(name) for name in data['category']]) + 7
-        for name in data['category']:
+    if any(data['category']):
+        print('------------------------')
+        print('  Datasets by category ')
+        print('------------------------\n')
+        if names:
+            max_size_name = max([len(name) for name in names]) + 7
+            for name in names:
                 print("{:{}}".format('   > {}: '.format(name), max_size_name)
                     + "{}".format(sorted(data['category'][name])))
-    print('')
+        else:
+            max_size_name = max([len(name) for name in data['category']]) + 7
+            for name in data['category']:
+                    print("{:{}}".format('   > {}: '.format(name), max_size_name)
+                        + "{}".format(sorted(data['category'][name])))
+        print('')
 
 
 def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=True, is_test=False):
@@ -81,6 +82,8 @@ def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=T
             names = tuple(name)
         else:
             raise TypeError('Input \'name\' must be either a string or a list/tuple.')
+    else:
+        names = None
 
     data = cache_manager.data
 
@@ -116,8 +119,8 @@ def info_datasets(db_pattern='', show_downloaded=True, show_available=True, is_t
         print('  Available datasets in cache for load ')
         print('----------------------------------------')
         data = cache_manager.data
-        for name in sorted(data['datasets']):
-            tasks = list(sorted(data['datasets'][name]['tasks'].keys()))
+        for name in sorted(data['dataset']):
+            tasks = list(sorted(data['dataset'][name]['tasks'].keys()))
             print('  - {}  {}'.format(name, tasks))
 
     if show_available:
