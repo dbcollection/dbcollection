@@ -3,23 +3,18 @@ Cifar10 download/process functions.
 """
 
 
-from dbcollection.datasets.dbclass import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .classification import Classification
 
+urls = ({'url': 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz',
+         'md5hash': 'c58f30108f718f92721af3b95e74349a'})
+keywords = ('image_processing', 'classification')
+tasks = {"classification": Classification}
+default_task = 'classification'
 
-class Cifar10(BaseDataset):
+class Dataset(BaseDataset):
     """ Cifar10 preprocessing/downloading functions """
-
-    # download url
-    urls = [{'url': 'https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz',
-             'md5hash': 'c58f30108f718f92721af3b95e74349a'}]
-
-    # some keywords. These are used to classify datasets for easier
-    # categorization.
-    keywords = ['image_processing', 'classification']
-
-    # init tasks
-    tasks = {
-        "classification": Classification
-    }
-    default_task = 'classification'
+    urls = urls
+    keywords = keywords
+    tasks = tasks
+    default_task = default_task

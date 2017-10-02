@@ -4,24 +4,23 @@ ImageNet ILSVRC 2012 download/process functions.
 
 
 from __future__ import print_function
-from dbcollection.datasets.dbclass import BaseDataset
+from dbcollection.core.db import BaseDataset
 from .classification import Classification, Raw256
 
+urls = ()
+keywords = ('image_processing', 'classification')
+tasks = {
+    "classification": Classification,
+    "raw256": Raw256
+}
+default_task = 'classification'
 
-class ILSVRC2012(BaseDataset):
+class Dataset(BaseDataset):
     """ ImageNet ILSVRC 2012 preprocessing/downloading functions """
-
-    # some keywords. These are used to classify datasets for easier
-    # categorization.
-    keywords = ['image_processing', 'classification']
-
-    # init tasks
-    tasks = {
-        "classification": Classification,
-        "raw256": Raw256
-    }
-    default_task = 'classification'
-
+    urls = urls
+    keywords = keywords
+    tasks = tasks
+    default_task = default_task
 
     def download(self):
         """
