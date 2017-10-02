@@ -31,7 +31,7 @@ def get_dirs(cache_manager, name, data_dir):
     if not os.path.exists(cache_save_path):
         os.makedirs(cache_save_path)
 
-    return data_dir, cache_save_path
+    return data_dir_, cache_save_path
 
 
 def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=False):
@@ -79,7 +79,7 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
         print('==> Download {} data to disk...'.format(name))
 
     # setup dataset class
-    constructor = available_datasets_list['name']['constructor']
+    constructor = available_datasets_list[name]['constructor']
     db = constructor(data_path=data_dir_,
                      cache_path=cache_save_path,
                      extract_data=extract_data,
@@ -89,7 +89,7 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
     db.download()
 
     # download/preprocess dataset
-    keywords = available_datasets_list['name']['keywords']
+    keywords = available_datasets_list[name]['keywords']
 
     # update dbcollection.json file with the new data
     cache_manager.update(name, data_dir_, {}, keywords)
