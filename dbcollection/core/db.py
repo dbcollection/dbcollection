@@ -9,7 +9,6 @@ import pkgutil
 import h5py
 
 import dbcollection.datasets as datasets
-#from dbcollection import datasets
 from dbcollection.utils.url import download_extract_all
 
 
