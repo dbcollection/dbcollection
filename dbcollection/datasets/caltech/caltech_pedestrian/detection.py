@@ -13,6 +13,7 @@ from dbcollection.core.db import BaseTask
 from dbcollection.utils.file_load import load_json
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
+from dbcollection.utils.hdf5 import hdf5_write_data
 from dbcollection.utils.db.caltech.caltech_pedestrian_extractor.converter import extract_data
 
 
@@ -100,7 +101,7 @@ class Detection(BaseTask):
             yield data
 
 
-    def add_data_to_source(self, handler, data, set_name):
+    def add_data_to_source(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the source group.
         """
@@ -109,7 +110,7 @@ class Detection(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=len(data))
 
         # create set group
-        set_name_grp = handler.create_group('source/' + set_name)
+        set_name_grp = hdf5_handler.create_group('source/' + set_name)
 
         for i, set_data in enumerate(sorted(data)):
             set_grp = set_name_grp.create_group(set_data)
@@ -117,8 +118,12 @@ class Detection(BaseTask):
                 video_grp = set_grp.create_group(video)
                 for j in range(len(data[set_data][video]['images'])):
                     file_grp = video_grp.create_group(str(j))
-                    file_grp['image_filenames'] = str2ascii(data[set_data][video]['images'][j])
-                    file_grp['annotation_filenames'] = str2ascii(data[set_data][video]['annotations'][j])
+                    hdf5_write_data(file_grp, 'image_filenames',
+                                    str2ascii(data[set_data][video]['images'][j]),
+                                    dtype=np.uint8, fillvalue=0)
+                    hdf5_write_data(file_grp, 'annotation_filenames',
+                                    str2ascii(data[set_data][video]['annotations'][j]),
+                                    dtype=np.uint8, fillvalue=0)
 
             # update progressbar
             if self.verbose:
@@ -129,7 +134,7 @@ class Detection(BaseTask):
             prgbar.finish()
 
 
-    def add_data_to_default(self, handler, data, set_name):
+    def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default file.
         """
@@ -236,20 +241,31 @@ class Detection(BaseTask):
             list_objects_ids_per_class.append(objs_per_class)
 
         # add data to hdf5 file
-        handler['image_filenames'] = str2ascii(image_filenames)
-        handler['classes'] = str2ascii(self.classes)
-        handler['boxes'] = np.array(bbox, dtype=np.float)
-        handler['boxesv'] = np.array(bboxv, dtype=np.float)
-        handler['id'] = np.array(lbl_id, dtype=np.int32)
-        handler['occlusion'] = np.array(occlusion, dtype=np.float)
-        handler['object_ids'] = np.array(object_id, dtype=np.int32)
-        handler['object_fields'] = str2ascii(object_fields)
+        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'classes', str2ascii(self.classes), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'boxes', np.array(bbox, dtype=np.float), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'boxesv', np.array(bboxv, dtype=np.float), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'id', np.array(lbl_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'occlusion', np.array(occlusion, dtype=np.float), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
 
-        handler['list_image_filenames_per_class'] = np.array(pad_list(list_image_filenames_per_class, -1), dtype=np.int32)
-        handler['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
-        handler['list_boxesv_per_image'] = np.array(pad_list(list_boxesv_per_image, -1), dtype=np.int32)
-        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
-        handler['list_objects_ids_per_class'] = np.array(pad_list(list_objects_ids_per_class, -1), dtype=np.int32)
+        pad_value = -1
+        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_class',
+                        np.array(pad_list(list_image_filenames_per_class, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_boxes_per_image',
+                        np.array(pad_list(list_boxes_per_image, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_boxesv_per_image',
+                        np.array(pad_list(list_boxesv_per_image, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
+                        np.array(pad_list(list_object_ids_per_image, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_objects_ids_per_class',
+                        np.array(pad_list(list_objects_ids_per_class, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
 
         if self.verbose:
             print('> Done.')
