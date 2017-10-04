@@ -255,7 +255,7 @@ class BaseTask:
 
                 # add data to the **source** group
                 if self.suffix is '_s':
-                    sourceg = fileh5.create_group(set_name + '/raw')
+                    sourceg = fileh5.create_group(set_name + '/source')
                     self.add_data_to_source(sourceg, data[set_name], set_name)
 
                 # add data to the **default** group
