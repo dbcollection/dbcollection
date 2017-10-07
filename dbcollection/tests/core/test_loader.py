@@ -61,19 +61,20 @@ def test_object_no_index(loader):
     assert((60000, 2) == loader.object('train').shape)
 
 def test_object_empty_index(loader):
-    assert((60000, 2) == loader.object('train', []).shape)
+    with pytest.raises(ValueError):
+        shape = loader.object('train', []).shape
 
 @pytest.mark.parametrize("field_name, output", [
-    ('classes', [10, 2]),
-    ('images', [60000, 28, 28]),
-    ('object_ids', [60000, 2]),
+    ('classes', (10, 2)),
+    ('images', (60000, 28, 28)),
+    ('object_ids', (60000, 2)),
 ])
 def test_size_1(field_name, output, loader):
     assert(output == loader.size('train', field_name))
 
 
 def test_size_2(loader):
-    assert([60000, 2] == loader.size('train'))
+    assert((60000, 2) == loader.size('train'))
 
 def test_list(loader):
     sample_field_names = ['classes',
@@ -116,19 +117,20 @@ def test_info_set_fail(set_name, loader):
         loader.info(set_name)
 
 
-@pytest.mark.parametrize("set_name", [
-    ('train'),
-    ('test'),
-])
-def test__print_info_succeed(set_name, loader):
-    loader._print_info(set_name)
-    pass
-
-
-@pytest.mark.parametrize("set_name", [
-    ('train1'),
-    ('val'),
-])
-def test__print_info_fail(set_name, loader):
-    with pytest.raises(Exception):
-        loader._print_info(set_name)
+#@pytest.mark.parametrize("set_name", [
+#    ('train'),
+#    ('test'),
+#])
+#def test__print_info_succeed(set_name, loader):
+#    loader._print_info(set_name)
+#    pass
+#
+#
+#@pytest.mark.parametrize("set_name", [
+#    ('train1'),
+#    ('val'),
+#])
+#def test__print_info_fail(set_name, loader):
+#    with pytest.raises(Exception):
+#        loader._print_info(set_name)
+#

@@ -55,7 +55,7 @@ def test_load(name, task, data_dir, extract_data, verbose, is_test):
               verbose=verbose,
               is_test=is_test)
     config_cache(reset_cache=True, is_test=True)
-    assert(db.name == name)
+    assert(db.db_name == name)
 
 
 def test_add():
@@ -102,3 +102,7 @@ def test_info_cache():
 def test_info_datasets():
     info_datasets(is_test=True)
     pass
+
+
+if __name__ == '__main__':
+    test_process('mnist', 'classification', None, True, True, True)
