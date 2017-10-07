@@ -5,15 +5,16 @@ COCO Captions 2015/2016 process functions.
 
 from __future__ import print_function, division
 import os
+from collections import OrderedDict
 import numpy as np
 import progressbar
-from collections import OrderedDict
 
 from dbcollection.core.db import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_json
+from dbcollection.utils.hdf5 import hdf5_write_data
 
 from .load_data_test import load_data_test
 
@@ -120,7 +121,7 @@ class Caption2015(BaseTask):
                 yield self.load_data_trainval(set_name, image_dir, annot_filepath)
 
 
-    def add_data_to_source(self, handler, data, set_name):
+    def add_data_to_source(self, hdf5_handler, data, set_name):
         """
         Store classes + filenames as a nested tree.
         """
@@ -142,14 +143,14 @@ class Caption2015(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
 
         # images - original
-        image_grp = handler.create_group('images')
+        image_grp = hdf5_handler.create_group('images')
         for i, annot in enumerate(annotations['images']):
             file_grp = image_grp.create_group(str(i))
-            file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
-            file_grp['coco_url'] = str2ascii(annot["coco_url"])
-            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
-            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
-            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+            hdf5_write_data(hdf5_handler, 'file_name', str2ascii(os.path.join(image_dir, annot["file_name"])), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'coco_url', str2ascii(annot["coco_url"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'width', np.array(annot["width"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'height', np.array(annot["height"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
 
             # update progressbar
             if self.verbose:
@@ -162,12 +163,12 @@ class Caption2015(BaseTask):
 
         # annotations - original
         if not is_test:
-            annot_grp = handler.create_group('annotations')
+            annot_grp = hdf5_handler.create_group('annotations')
             for i, annot in enumerate(annotations['annotations']):
                 file_grp = annot_grp.create_group(str(i))
-                file_grp['caption'] = str2ascii(annot["caption"])
-                file_grp['id'] = np.array(annot["id"], dtype=np.int32)
-                file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
+                hdf5_write_data(hdf5_handler, 'caption', str2ascii(annot["caption"]), dtype=np.uint8, fillvalue=0)
+                hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
+                hdf5_write_data(hdf5_handler, 'image_id', np.array(annot["image_id"], dtype=np.int32), fillvalue=-1)
 
                 # update progressbar
                 if self.verbose:
@@ -179,16 +180,16 @@ class Caption2015(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=len(data_))
 
         # grouped/combined data - parsed by me
-        grouped_grp = handler.create_group('grouped')
+        grouped_grp = hdf5_handler.create_group('grouped')
         for i, key in enumerate(data_):
             file_grp = grouped_grp.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(data_[key]["file_name"])
-            file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
-            file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
-            file_grp['id'] = np.array(data_[key]["id"], dtype=np.int32)
-            file_grp['coco_url'] = str2ascii(data_[key]["coco_url"])
+            hdf5_write_data(hdf5_handler, 'image_filename', str2ascii(data_[key]["file_name"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'width', np.array(data_[key]["width"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'height', np.array(data_[key]["height"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'id', np.array(data_[key]["id"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'coco_url', str2ascii(data_[key]["coco_url"]), dtype=np.uint8, fillvalue=0)
             if 'captions' in data_[key]:
-                file_grp['captions'] = str2ascii(data_[key]["captions"])
+                hdf5_write_data(hdf5_handler, 'captions', str2ascii(data_[key]["captions"]), dtype=np.uint8, fillvalue=0)
 
             # update progressbar
             if self.verbose:
@@ -199,7 +200,7 @@ class Caption2015(BaseTask):
             prgbar.finish()
 
 
-    def add_data_to_default(self, handler, data, set_name):
+    def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
         """
@@ -301,29 +302,28 @@ class Caption2015(BaseTask):
         if is_test:
             coco_categories_ids = list(range(len(category)))
 
+        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'coco_urls', str2ascii(coco_urls), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'width', np.array(width, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'height', np.array(height, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'image_id', np.array(image_id, dtype=np.int32), fillvalue=-1)
 
-        handler['image_filenames'] = str2ascii(image_filenames)
-        handler['coco_urls'] = str2ascii(coco_urls)
-        handler['width'] = np.array(width, dtype=np.int32)
-        handler['height'] = np.array(height, dtype=np.int32)
-        handler['image_id'] = np.array(image_id, dtype=np.int32)
+        hdf5_write_data(hdf5_handler, 'coco_images_ids', np.array(coco_images_ids, dtype=np.int32), fillvalue=-1)
 
-        handler['coco_images_ids'] = np.array(coco_images_ids, dtype=np.int32)
+        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
 
-        handler['object_ids'] = np.array(object_id, dtype=np.int32)
-        handler['object_fields'] = str2ascii(object_fields)
-
-        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
+        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image', np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32), fillvalue=-1)
 
         if not is_test:
-            handler['captions'] = str2ascii(caption)
+            hdf5_write_data(hdf5_handler, 'captions', str2ascii(caption), dtype=np.uint8, fillvalue=0)
 
-            handler['list_captions_per_image'] = np.array(pad_list(list_captions_per_image, -1), dtype=np.int32)
+            hdf5_write_data(hdf5_handler, 'list_captions_per_image', np.array(pad_list(list_captions_per_image, -1), dtype=np.int32), fillvalue=-1)
         else:
-            handler['category'] = str2ascii(category)
-            handler['supercategory'] = str2ascii(supercategory)
+            hdf5_write_data(hdf5_handler, 'category', str2ascii(category), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(supercategory), dtype=np.uint8, fillvalue=0)
 
-            handler['coco_categories_ids'] = np.array(coco_categories_ids, dtype=np.int32)
+            hdf5_write_data(hdf5_handler, 'coco_categories_ids', np.array(coco_categories_ids, dtype=np.int32), fillvalue=-1)
 
 
 #---------------------------------------------------------

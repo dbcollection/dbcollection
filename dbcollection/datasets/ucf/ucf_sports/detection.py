@@ -15,10 +15,11 @@ from dbcollection.core.db import BaseTask
 from dbcollection.utils.file_load import load_txt
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
+from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Detection(BaseTask):
-    """ UCF-Sports action detection preprocessing functions """
+    """UCF-Sports action detection preprocessing functions """
 
     # metadata filename
     filename_h5 = 'detection'
@@ -295,14 +296,14 @@ class Detection(BaseTask):
         }
 
 
-    def add_data_to_source(self, handler, data, set_name=None):
+    def add_data_to_source(self, hdf5_handler, data, set_name=None):
         """
         Store data annotations in a nested tree fashion.
 
         It closely follows the tree structure of the data.
         """
         for activity in data:
-            activity_grp = handler.create_group(activity)
+            activity_grp = hdf5_handler.create_group(activity)
             for video_name in data[activity]:
                 video_grp = activity_grp.create_group(video_name)
                 set_data = data[activity][video_name]
@@ -311,12 +312,26 @@ class Detection(BaseTask):
                 video_grp.create_dataset('annotations', data=np.array(set_data['image_annotations']), dtype=np.int32)
 
 
-    def add_data_to_default(self, handler, data, set_name=None):
+    def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
         Add data of a set to the default group.
 
         For each field, the data is organized into a single big matrix.
         """
         data_array = self.convert_data_to_arrays(data)
-        for field_name in data_array:
-            handler.create_dataset(field_name, data=data_array[field_name])
+        hdf5_write_data(hdf5_handler, 'videos', data_array["videos"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'video_filenames', data_array["video_filenames"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'activities', data_array["activities"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_filenames', data_array["image_filenames"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'annotations', data_array["annotations"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'total_frames', data_array["total_frames"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids', data_array["object_ids"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', data_array["object_fields"], dtype=np.uint8, fillvalue=0)
+
+        pad_value = -1
+        hdf5_write_data(hdf5_handler, 'list_videos_per_activity', data_array["list_videos_per_activity"], dtype=np.int32,
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_video', data_array["list_image_filenames_per_video"], dtype=np.int32,
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_annotations_per_video', data_array["list_annotations_per_video"], dtype=np.int32,
+                        fillvalue=pad_value)

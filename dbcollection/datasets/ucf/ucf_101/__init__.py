@@ -15,8 +15,9 @@ keywords = ('image_processing', 'recognition', 'activity', 'human', 'single pers
 tasks = {"recognition": Recognition}
 default_task = 'recognition'
 
+
 class Dataset(BaseDataset):
-    """ UCF101-Action recognitio preprocessing/downloading functions """
+    """UCF101-Action recognitio preprocessing/downloading functions """
     urls = urls
     keywords = keywords
     tasks = tasks

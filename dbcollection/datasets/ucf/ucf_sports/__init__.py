@@ -17,8 +17,9 @@ tasks = {
 }
 default_task = 'recognition'
 
+
 class Dataset(BaseDataset):
-    """ UCF-Sports action recognition preprocessing/downloading functions """
+    """UCF-Sports action recognition preprocessing/downloading functions """
     urls = urls
     keywords = keywords
     tasks = tasks

@@ -16,6 +16,7 @@ from dbcollection.utils.file_load import load_txt, load_matlab
 from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
+from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Classification(BaseTask):
@@ -185,7 +186,7 @@ class Classification(BaseTask):
             yield {set_name : data}
 
 
-    def store_data_source(self, handler, data, set_name):
+    def store_data_source(self, hdf5_handler, data, set_name):
         """
         Store classes + filenames as a nested tree.
         """
@@ -194,13 +195,13 @@ class Classification(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=len(data)).start()
             counter = 0
 
-        sourceg = handler.create_group('source/' + set_name)
+        sourceg = hdf5_handler.create_group('source/' + set_name)
 
         # cycle all classes from the data with the original annotations
         for cname in data:
             images_filenames = [os.path.join(set_name, cname, fname) for fname in data[cname]]
             images_filenames.sort()
-            sourceg.create_dataset(cname + '/' + 'image_filenames', data=str2ascii(images_filenames), dtype=np.uint8)
+            hdf5_write_data(sourceg, cname + '/' + 'image_filenames', str2ascii(images_filenames), dtype=np.uint8, fillvalue=0)
 
             # update progress bar
             if self.verbose:
@@ -245,34 +246,39 @@ class Classification(BaseTask):
         list_image_filenames_per_class = pad_list(list_image_filenames_per_class, -1)
 
         return {
-            "object_fields": str2ascii(['image_filenames', 'classes']),
             "classes": str2ascii(classes),
             "labels": str2ascii(label_list),
-            "descriptions": str2ascii(description_list),
             "image_filenames": str2ascii(filenames),
+            "descriptions": str2ascii(description_list),
             "object_ids": np.array(object_ids, dtype=np.int32),
+            "object_fields": str2ascii(['image_filenames', 'classes']),
             "list_image_filenames_per_class": np.array(list_image_filenames_per_class, dtype=np.int32)
         }
 
 
-    def add_data_to_source(self, handler, data, set_name=None):
+    def add_data_to_source(self, hdf5_handler, data, set_name=None):
         """
         Store data annotations in a nested tree fashion.
 
         It closely follows the tree structure of the data.
         """
-        self.store_data_source(handler, data, set_name)
+        self.store_data_source(hdf5_handler, data, set_name)
 
 
-    def add_data_to_default(self, handler, data, set_name=None):
+    def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
         Add data of a set to the default group.
 
         For each field, the data is organized into a single big matrix.
         """
         data_array = self.convert_data_to_arrays(data, set_name)
-        for field_name in data_array:
-            handler.create_dataset(field_name, data=data_array[field_name])
+        hdf5_write_data(hdf5_handler, 'classes', data_array["classes"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'labels', data_array["labels"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_filenames', data_array["image_filenames"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'descriptions', data_array["descriptions"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'object_ids', data_array["object_ids"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', data_array["object_fields"], dtype=np.uint8, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_class', data_array["list_image_filenames_per_class"], dtype=np.int32, fillvalue=-1)
 
 
 #---------------------------------------------------------

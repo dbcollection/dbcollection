@@ -12,6 +12,7 @@ from dbcollection.core.db import BaseTask
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
+from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Classification(BaseTask):
@@ -156,25 +157,26 @@ class Classification(BaseTask):
         yield {"test" : self.load_data_test()}
 
 
-    def add_data_to_source(self, handler, data, set_name=None):
+    def add_data_to_source(self, hdf5_handler, data, set_name=None):
         """
         Store data annotations in a nested tree fashion.
 
         It closely follows the tree structure of the data.
         """
-        handler.create_dataset('classes', data=data["class_name"], dtype=np.uint8)
-        handler.create_dataset('images', data=data["data"], dtype=np.uint8)
-        handler.create_dataset('labels', data=data["labels"], dtype=np.uint8)
+        hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=1)
 
 
-    def add_data_to_default(self, handler, data, set_name=None):
+    def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
         Add data of a set to the default group.
 
         For each field, the data is organized into a single big matrix.
         """
-        handler.create_dataset('classes', data=data["class_name"], dtype=np.uint8)
-        handler.create_dataset('images', data=data["data"], dtype=np.uint8)
-        handler.create_dataset('object_ids', data=data["object_ids"], dtype=np.int32)
-        handler.create_dataset('object_fields', data=data["object_fields"], dtype=np.int32)
-        handler.create_dataset('list_images_per_class', data=data["list_images_per_class"], dtype=np.int32)
+        hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=1)
+        hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids', data["object_ids"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', data["object_fields"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'list_images_per_class', data["list_images_per_class"], dtype=np.int32, fillvalue=-1)

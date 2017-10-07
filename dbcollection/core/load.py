@@ -9,7 +9,7 @@ from dbcollection.core.db import fetch_list_datasets
 from dbcollection.core.download import download
 from dbcollection.core.process import process
 from dbcollection.core.cache import CacheManager
-from dbcollection.core.loader import DatasetLoader
+from dbcollection.core.loader import DataLoader
 
 
 def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
@@ -32,7 +32,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
 
     Returns
     -------
-    DatasetLoader
+    DataLoader
        Data loader class.
 
     Raises
@@ -79,7 +79,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     task_cache_path = cache_manager.get_cache_path(name, task)
 
     # Create a loader
-    dataset_loader = DatasetLoader(name, task, dset_paths['data_dir'], task_cache_path)
+    dataset_loader = DataLoader(name, task, dset_paths['data_dir'], task_cache_path)
 
     # return Loader
     return dataset_loader

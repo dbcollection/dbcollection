@@ -2,6 +2,7 @@
 Padding functions.
 """
 
+
 import itertools
 
 
@@ -38,7 +39,7 @@ def pad_list(listA, val=-1, length=None):
 
     """
     # pad list with zeros in order to have all lists of the same size
-    assert isinstance(listA, list), 'Input must be a list. Got {}, espected {}' \
+    assert isinstance(listA, list), 'Input must be a list. Got {}, expected {}' \
                                     .format(type(listA), type(list))
 
     # get size of the biggest list
@@ -78,7 +79,7 @@ def unpad_list(listA, val=-1):
 
     """
     # pad list with zeros in order to have all lists of the same size
-    assert isinstance(listA, list), 'Input must be a list. Got {}, espected {}' \
+    assert isinstance(listA, list), 'Input must be a list. Got {}, expected {}' \
                                     .format(type(listA), type(list))
 
     if isinstance(listA[0], list):

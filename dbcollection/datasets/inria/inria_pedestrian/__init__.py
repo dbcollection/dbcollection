@@ -15,6 +15,7 @@ keywords = ('image_processing', 'detection', 'pedestrian')
 tasks = {"detection": Detection}
 default_task = 'detection'
 
+
 class Dataset(BaseDataset):
     """ Inria Pedestrian Dataset preprocessing/downloading functions """
     urls = urls

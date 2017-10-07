@@ -14,8 +14,9 @@ keywords = ('image_processing', 'object_detection')
 tasks = {"detection": Detection}
 default_task = 'detection'
 
+
 class Dataset(BaseDataset):
-    """ Pascal VOC 2007 preprocessing/downloading class """
+    """Pascal VOC 2007 preprocessing/downloading class """
     urls = urls
     keywords = keywords
     tasks = tasks

@@ -13,12 +13,13 @@ from dbcollection.core.db import BaseTask
 from dbcollection.utils.file_load import load_txt
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
+from dbcollection.utils.hdf5 import hdf5_write_data
 
 from .extract_frames import extract_video_frames
 
 
 class Recognition(BaseTask):
-    """ UCF101 action recognition preprocessing functions """
+    """UCF101 action recognition preprocessing functions """
 
     # metadata filename
     filename_h5 = 'recognition'
@@ -210,31 +211,31 @@ class Recognition(BaseTask):
         yield set_splits_data
 
 
-    def add_data_to_source(self, handler, data, set_name=None):
+    def add_data_to_source(self, hdf5_handler, data, set_name=None):
         """
         Store data annotations in a nested tree fashion.
 
         It closely follows the tree structure of the data.
         """
         for category in data['source_data']:
-            category_grp = handler.create_group(category)
+            category_grp = hdf5_handler.create_group(category)
             for video_name in data[set_name]['source_data'][category]:
                 video_grp = category_grp.create_group(video_name)
                 video_grp.create_dataset('images_path', data=data['source_data'][category][video_name]['images'])
                 video_grp.create_dataset('video_path', data=data['source_data'][category][video_name]['video'])
 
 
-    def add_data_to_default(self, handler, data, set_name=None):
+    def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
         Add data of a set to the default group.
 
         For each field, the data is organized into a single big matrix.
         """
-        handler.create_dataset('videos', data=data["videos"], dtype=np.uint8)
-        handler.create_dataset('video_filenames', data=data["video_filenames"], dtype=np.uint8)
-        handler.create_dataset('image_filenames', data=data["image_filenames"], dtype=np.uint8)
-        handler.create_dataset('total_frames', data=data["total_frames"], dtype=np.int32)
-        handler.create_dataset('list_videos_per_activity', data=data["list_videos_per_activity"], dtype=np.int32)
-        handler.create_dataset('list_image_filenames_per_video', data=data["list_image_filenames_per_video"], dtype=np.int32)
-        handler.create_dataset('object_ids', data=data["object_ids"], dtype=np.int32)
-        handler.create_dataset('object_fields', data=data["object_fields"], dtype=np.int32)
+        hdf5_write_data(hdf5_handler, 'videos', data["videos"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'video_filenames', data["video_filenames"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_filenames', data["image_filenames"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'total_frames', data["total_frames"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids', data["object_ids"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', data["object_fields"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'list_videos_per_activity', data["list_videos_per_activity"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_video', data["list_image_filenames_per_video"], dtype=np.int32, fillvalue=-1)

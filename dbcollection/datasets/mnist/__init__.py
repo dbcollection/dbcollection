@@ -2,6 +2,7 @@
 MNIST download/process functions.
 """
 
+
 from __future__ import print_function, division
 import os
 import shutil
@@ -18,6 +19,7 @@ urls = (
 keywords = ('classification')
 tasks = {"classification": Classification}
 default_task = 'classification'
+
 
 class Dataset(BaseDataset):
     """ Cifar10 preprocessing/downloading functions """

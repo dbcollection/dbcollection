@@ -12,6 +12,7 @@ from dbcollection.core.db import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.file_load import load_matlab
+from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Keypoints(BaseTask):
@@ -100,7 +101,7 @@ class Keypoints(BaseTask):
             yield {set_name : annotations[set_name]}
 
 
-    def add_data_to_source(self, handler, data, set_name):
+    def add_data_to_source(self, hdf5_handler, data, set_name):
         """
         Store classes + filenames as a nested tree.
         """
@@ -111,14 +112,14 @@ class Keypoints(BaseTask):
         keypoint_names = str2ascii(self.keypoints_labels)
 
         for i, annot in enumerate(data):
-            file_grp = handler.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(annot["filename"])
-            file_grp['moviename'] = str2ascii(annot["moviename"])
-            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
-            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
-            file_grp['keypoint_names'] = keypoint_names
-            file_grp['torso_box'] = np.array(annot["torso_box"], dtype=np.float)
-            file_grp['keypoints'] = np.array(annot["parts"], dtype=np.float)
+            file_grp = hdf5_handler.create_group(str(i))
+            hdf5_write_data(hdf5_handler, 'image_filename', str2ascii(annot["filename"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'moviename', str2ascii(annot["moviename"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'width', np.array(annot["width"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'height', np.array(annot["height"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'keypoint_names', keypoint_names, dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'torso_box', np.array(annot["torso_box"], dtype=np.float), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'keypoints', np.array(annot["parts"], dtype=np.float), fillvalue=-1)
 
             # update progressbar
             if self.verbose:
@@ -129,7 +130,7 @@ class Keypoints(BaseTask):
             prgbar.finish()
 
 
-    def add_data_to_default(self, handler, data, set_name):
+    def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
         """
@@ -167,12 +168,13 @@ class Keypoints(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        handler['image_filenames'] = str2ascii(image_filenames)
-        handler['movienames'] = str2ascii(movienames)
-        handler['width'] = np.array(width, dtype=np.int32)
-        handler['height'] = np.array(height, dtype=np.int32)
-        handler['object_ids'] = np.array(object_id, dtype=np.int32)
-        handler['object_fields'] = str2ascii(object_fields)
-        handler['torso_boxes'] = np.array(torso_boxes, dtype=np.float)
-        handler['keypoints'] = np.array(keypoints, dtype=np.float)
-        handler['keypoint_names'] = str2ascii(self.keypoints_labels)
+
+        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'movienames', str2ascii(movienames), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'width', np.array(width, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'height', np.array(height, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'torso_boxes', np.array(torso_boxes, dtype=np.float), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'keypoints', np.array(keypoints, dtype=np.float), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'keypoint_names', str2ascii(self.keypoints_labels), dtype=np.uint8, fillvalue=0)

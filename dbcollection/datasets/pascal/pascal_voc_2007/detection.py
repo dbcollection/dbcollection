@@ -13,10 +13,11 @@ from dbcollection.core.db import BaseTask
 from dbcollection.utils.file_load import load_xml
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
+from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Detection(BaseTask):
-    """ Pascal VOC 2007 object detection task class """
+    """Pascal VOC 2007 object detection task class """
 
     # metadata filename
     filename_h5 = 'detection'
@@ -90,22 +91,22 @@ class Detection(BaseTask):
             yield {set_name : data}
 
 
-    def add_data_to_source(self, handler, data, set_name):
+    def add_data_to_source(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the source group.
         """
 
-        def add_data_hdf5(handler, anno):
+        def add_data_hdf5(hdf5_handler, anno):
             """Add data to the hdf5 file."""
-            handler['category_id'] = self.classes.index(anno['name'])
-            handler['name'] = anno['name']
-            handler['pose'] = anno['pose']
-            handler['truncated'] = anno['truncated']
-            handler['difficult'] = anno['difficult']
-            handler['bndbox/xmin'] = anno['bndbox']['xmin']
-            handler['bndbox/ymin'] = anno['bndbox']['ymin']
-            handler['bndbox/xmax'] = anno['bndbox']['xmax']
-            handler['bndbox/ymax'] = anno['bndbox']['ymax']
+            hdf5_handler['category_id'] = self.classes.index(anno['name'])
+            hdf5_handler['name'] = anno['name']
+            hdf5_handler['pose'] = anno['pose']
+            hdf5_handler['truncated'] = anno['truncated']
+            hdf5_handler['difficult'] = anno['difficult']
+            hdf5_handler['bndbox/xmin'] = anno['bndbox']['xmin']
+            hdf5_handler['bndbox/ymin'] = anno['bndbox']['ymin']
+            hdf5_handler['bndbox/xmax'] = anno['bndbox']['xmax']
+            hdf5_handler['bndbox/ymax'] = anno['bndbox']['ymax']
 
         if self.verbose:
             print('> Adding data to source group:')
@@ -114,7 +115,7 @@ class Detection(BaseTask):
         for i, data_ in enumerate(data):
             image_filename, fileid, annotation = data_
 
-            file_grp = handler.create_group(str(i))
+            file_grp = hdf5_handler.create_group(str(i))
 
             file_grp['image_filename'] = image_filename
             file_grp['id'] = fileid
@@ -141,7 +142,7 @@ class Detection(BaseTask):
             prgbar.finish()
 
 
-    def add_data_to_default(self, handler, data, set_name):
+    def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
         """
@@ -153,8 +154,8 @@ class Detection(BaseTask):
         difficult = [0, 1]
         object_id = []
 
-        obj_id = []  # for mscoco
-        image_id = [] # for mscoco
+        obj_id = []    # needed because of ms coco
+        image_id = []  # needed because of ms coco
         category_id = list(range(1, len(self.classes)+1)) # for mscoco
 
         list_image_filenames_per_class = []
@@ -255,24 +256,40 @@ class Detection(BaseTask):
         objs_truncated.sort()
         list_objects_ids_truncated = objs_truncated
 
+        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'id', np.array(obj_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'image_id', np.array(image_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'category_id', np.array(category_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'sizes', np.array(size, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'classes', str2ascii(self.classes), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'boxes', np.array(bbox, dtype=np.float), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'truncated', np.array(truncated, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'difficult', np.array(difficult, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
 
-        handler['image_filenames'] = str2ascii(image_filenames)
-        handler['id'] = np.array(obj_id, dtype=np.int32)
-        handler['image_id'] = np.array(image_id, dtype=np.int32)
-        handler['category_id'] = np.array(category_id, dtype=np.int32)
-        handler['sizes'] = np.array(size, dtype=np.int32)
-        handler['classes'] = str2ascii(self.classes)
-        handler['boxes'] = np.array(bbox, dtype=np.float)
-        handler['truncated'] = np.array(truncated, dtype=np.int32)
-        handler['difficult'] = np.array(difficult, dtype=np.int32)
-        handler['object_ids'] = np.array(object_id, dtype=np.int32)
-        handler['object_fields'] = str2ascii(object_fields)
-
-        handler['list_image_filenames_per_class'] = np.array(pad_list(list_image_filenames_per_class, -1), dtype=np.int32)
-        handler['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
-        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
-        handler['list_objects_ids_per_class'] = np.array(pad_list(list_objects_ids_per_class, -1), dtype=np.int32)
-        handler['list_objects_ids_no_difficult'] = np.array(list_objects_ids_no_difficult, dtype=np.int32)
-        handler['list_objects_ids_difficult'] = np.array(list_objects_ids_difficult, dtype=np.int32)
-        handler['list_objects_ids_no_truncated'] = np.array(list_objects_ids_no_truncated, dtype=np.int32)
-        handler['list_objects_ids_truncated'] = np.array(list_objects_ids_truncated, dtype=np.int32)
+        pad_value = -1
+        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_class',
+                        np.array(pad_list(list_image_filenames_per_class, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_boxes_per_image',
+                        np.array(pad_list(list_boxes_per_image, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
+                        np.array(pad_list(list_object_ids_per_image, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_objects_ids_per_class',
+                        np.array(pad_list(list_objects_ids_per_class, pad_value), dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_objects_ids_no_difficult',
+                        np.array(list_objects_ids_no_difficult, dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_objects_ids_difficult',
+                        np.array(list_objects_ids_difficult, dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_objects_ids_no_truncated',
+                        np.array(list_objects_ids_no_truncated, dtype=np.int32),
+                        fillvalue=pad_value)
+        hdf5_write_data(hdf5_handler, 'list_objects_ids_truncated',
+                        np.array(list_objects_ids_truncated, dtype=np.int32),
+                        fillvalue=pad_value)

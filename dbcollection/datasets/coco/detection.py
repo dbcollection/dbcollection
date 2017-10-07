@@ -14,6 +14,7 @@ from dbcollection.core.db import BaseTask
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list, squeeze_list
 from dbcollection.utils.file_load import load_json
+from dbcollection.utils.hdf5 import hdf5_write_data
 
 from .load_data_test import load_data_test
 
@@ -194,7 +195,7 @@ class Detection2015(BaseTask):
                 yield self.load_data_trainval(set_name, image_dir, annot_filepath)
 
 
-    def add_data_to_source(self, handler, data, set_name):
+    def add_data_to_source(self, hdf5_handler, data, set_name):
         """
         Store classes + filenames as a nested tree.
         """
@@ -216,14 +217,14 @@ class Detection2015(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
 
         # images - original
-        image_grp = handler.create_group('images')
+        image_grp = hdf5_handler.create_group('images')
         for i, annot in enumerate(annotations['images']):
             file_grp = image_grp.create_group(str(i))
-            file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
-            file_grp['coco_url'] = str2ascii(annot["coco_url"])
-            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
-            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
-            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+            hdf5_write_data(hdf5_handler, 'file_name', str2ascii(os.path.join(image_dir, annot["file_name"])), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'coco_url', str2ascii(annot["coco_url"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'width', np.array(annot["width"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'height', np.array(annot["height"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
 
             # update progressbar
             if self.verbose:
@@ -235,12 +236,12 @@ class Detection2015(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=len(annotations['categories']))
 
         # categories - original
-        cat_grp = handler.create_group('categories')
+        cat_grp = hdf5_handler.create_group('categories')
         for i, annot in enumerate(annotations['categories']):
             file_grp = cat_grp.create_group(str(i))
-            file_grp['supercategory'] = str2ascii(annot["supercategory"])
-            file_grp['name'] = str2ascii(annot["name"])
-            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+            hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(annot["supercategory"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'name', str2ascii(annot["name"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
 
             # update progressbar
             if self.verbose:
@@ -253,16 +254,16 @@ class Detection2015(BaseTask):
                 print('>>> Adding data to group: annotations')
                 prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
 
-            annot_grp = handler.create_group('annotations')
+            annot_grp = hdf5_handler.create_group('annotations')
             for i, annot in enumerate(annotations['annotations']):
                 file_grp = annot_grp.create_group(str(i))
-                file_grp['iscrowd'] = np.array(annot["iscrowd"], dtype=np.int32)
-                file_grp['area'] = np.array(annot["area"], dtype=np.float)
-                file_grp['id'] = np.array(annot["id"], dtype=np.int32)
-                file_grp['category_id'] = np.array(annot["category_id"], dtype=np.int32)
-                file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
-                file_grp['bbox'] = np.array(annot["bbox"], dtype=np.float)
-                file_grp['segmentation'] = np.array(annot["segmentation"], dtype=np.float)
+                hdf5_write_data(hdf5_handler, 'iscrowd', np.array(annot["iscrowd"], dtype=np.int32), fillvalue=-1)
+                hdf5_write_data(hdf5_handler, 'area', np.array(annot["area"], dtype=np.float), fillvalue=-1)
+                hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
+                hdf5_write_data(hdf5_handler, 'category_id', np.array(annot["category_id"], dtype=np.int32), fillvalue=-1)
+                hdf5_write_data(hdf5_handler, 'image_id', np.array(annot["image_id"], dtype=np.int32), fillvalue=-1)
+                hdf5_write_data(hdf5_handler, 'bbox', np.array(annot["bbox"], dtype=np.float), fillvalue=-1)
+                hdf5_write_data(hdf5_handler, 'segmentation', np.array(annot["segmentation"], dtype=np.float), fillvalue=-1)
 
                 # update progressbar
                 if self.verbose:
@@ -274,28 +275,28 @@ class Detection2015(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=len(data_))
 
         # grouped/combined data - parsed by me
-        grouped_grp = handler.create_group('grouped')
+        grouped_grp = hdf5_handler.create_group('grouped')
         for i, key in enumerate(data_):
             file_grp = grouped_grp.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(data_[key]["file_name"])
-            file_grp['coco_url'] = str2ascii(data_[key]["coco_url"])
-            file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
-            file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
-            file_grp['id'] = np.array(data_[key]["id"], dtype=np.int32)
+            hdf5_write_data(hdf5_handler, 'image_filename', str2ascii(data_[key]["file_name"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'coco_url', str2ascii(data_[key]["coco_url"]), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'width', np.array(data_[key]["width"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'height', np.array(data_[key]["height"], dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'id', np.array(data_[key]["id"], dtype=np.int32), fillvalue=-1)
 
             if 'object' in data_[key]:
                 for j, obj_id in enumerate(data_[key]["object"]):
                     obj_grp = file_grp.create_group(str(j))
                     obj = data_[key]["object"][obj_id]
-                    obj_grp['id'] = np.array(obj["id"], dtype=np.int32)
-                    obj_grp['image_id'] = np.array(obj["image_id"], dtype=np.int32)
-                    obj_grp['category_id'] = np.array(obj["category_id"], dtype=np.int32)
-                    obj_grp['category'] = str2ascii(obj["category"])
-                    obj_grp['supercategory'] = str2ascii(obj["supercategory"])
-                    obj_grp['area'] = np.array(obj["area"], dtype=np.int32)
-                    obj_grp['iscrowd'] = np.array(obj["iscrowd"], dtype=np.int32)
-                    obj_grp['bbox'] = np.array(obj["bbox"], dtype=np.float)
-                    obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.float)
+                    hdf5_write_data(hdf5_handler, 'id', np.array(obj["id"], dtype=np.int32), fillvalue=-1)
+                    hdf5_write_data(hdf5_handler, 'image_id', np.array(obj["image_id"], dtype=np.int32), fillvalue=-1)
+                    hdf5_write_data(hdf5_handler, 'category_id', np.array(obj["category_id"], dtype=np.int32), fillvalue=-1)
+                    hdf5_write_data(hdf5_handler, 'category', str2ascii(obj["category"]), dtype=np.uint8, fillvalue=0)
+                    hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(obj["supercategory"]), dtype=np.uint8, fillvalue=0)
+                    hdf5_write_data(hdf5_handler, 'area', np.array(obj["area"], dtype=np.int32), fillvalue=-1)
+                    hdf5_write_data(hdf5_handler, 'iscrowd', np.array(obj["iscrowd"], dtype=np.int32), fillvalue=-1)
+                    hdf5_write_data(hdf5_handler, 'bbox', np.array(obj["bbox"], dtype=np.float), fillvalue=-1)
+                    hdf5_write_data(hdf5_handler, 'segmentation', np.array(obj["segmentation"], dtype=np.float), fillvalue=-1)
 
             # update progressbar
             if self.verbose:
@@ -306,7 +307,7 @@ class Detection2015(BaseTask):
             prgbar.finish()
 
 
-    def add_data_to_default(self, handler, data, set_name):
+    def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
         """
@@ -499,39 +500,39 @@ class Detection2015(BaseTask):
             if self.verbose:
                 print('> Done.')
 
+        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'coco_urls', str2ascii(coco_urls), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'width', np.array(width, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'height', np.array(height, dtype=np.int32), fillvalue=-1)
 
-        handler['image_filenames'] = str2ascii(image_filenames)
-        handler['coco_urls'] = str2ascii(coco_urls)
-        handler['width'] = np.array(width, dtype=np.int32)
-        handler['height'] = np.array(height, dtype=np.int32)
+        hdf5_write_data(hdf5_handler, 'category', str2ascii(category), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(supercategory), dtype=np.uint8, fillvalue=0)
 
-        handler['category'] = str2ascii(category)
-        handler['supercategory'] = str2ascii(supercategory)
+        hdf5_write_data(hdf5_handler, 'image_id', np.array(image_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'category_id', np.array(category_id, dtype=np.int32), fillvalue=-1)
 
-        handler['image_id'] = np.array(image_id, dtype=np.int32)
-        handler['category_id'] = np.array(category_id, dtype=np.int32)
+        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
 
-        handler['object_ids'] = np.array(object_id, dtype=np.int32)
-        handler['object_fields'] = str2ascii(object_fields)
+        hdf5_write_data(hdf5_handler, 'coco_images_ids', np.array(coco_images_ids, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'coco_categories_ids', np.array(coco_categories_ids, dtype=np.int32), fillvalue=-1)
 
-        handler['coco_images_ids'] = np.array(coco_images_ids, dtype=np.int32)
-        handler['coco_categories_ids'] = np.array(coco_categories_ids, dtype=np.int32)
-
-        handler['list_object_ids_per_image'] = np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32)
+        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image', np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32), fillvalue=-1)
 
         if not is_test:
-            handler['annotation_id'] = np.array(annotation_id, dtype=np.int32)
-            handler['boxes'] = np.array(bbox, dtype=np.float)
-            handler['iscrowd'] = np.array(iscrowd, dtype=np.uint8)
+            hdf5_write_data(hdf5_handler, 'annotation_id', np.array(annotation_id, dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'boxes', np.array(bbox, dtype=np.float), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'iscrowd', np.array(iscrowd, dtype=np.uint8), fillvalue=0)
 
             nrows = len(segmentation)
             ncols = max([len(l) for l in segmentation])
-            dset = handler.create_dataset('segmentation',
-                                          (nrows, ncols),
-                                          dtype=np.float,
-                                          chunks=True,
-                                          compression="gzip",
-                                          fillvalue=-1)
+            dset = hdf5_handler.create_dataset('segmentation',
+                                               (nrows, ncols),
+                                               dtype=np.float,
+                                               chunks=True,
+                                               compression="gzip",
+                                               compression_opts=4,
+                                               fillvalue=-1)
             if self.verbose:
                 print('   -- Saving segmentation field to disk (this will take some time to finish)')
                 prgbar = progressbar.ProgressBar(max_value=nrows)
@@ -543,15 +544,27 @@ class Detection2015(BaseTask):
             if self.verbose:
                 prgbar.finish()
 
-            handler['area'] = np.array(area, dtype=np.int32)
+            hdf5_write_data(hdf5_handler, 'area', np.array(area, dtype=np.int32), fillvalue=-1)
 
-            handler['coco_annotations_ids'] = np.array(coco_annotations_ids, dtype=np.int32)
+            hdf5_write_data(hdf5_handler, 'coco_annotations_ids', np.array(coco_annotations_ids, dtype=np.int32),
+                            fillvalue=-1)
 
-            handler['list_image_filenames_per_category'] = np.array(pad_list(list_image_filenames_per_category, -1), dtype=np.int32)
-            handler['list_image_filenames_per_supercategory'] = np.array(pad_list(list_image_filenames_per_supercategory, -1), dtype=np.int32)
-            handler['list_boxes_per_image'] = np.array(pad_list(list_boxes_per_image, -1), dtype=np.int32)
-            handler['list_objects_ids_per_category'] = np.array(pad_list(list_objects_ids_per_category, -1), dtype=np.int32)
-            handler['list_objects_ids_per_supercategory'] = np.array(pad_list(list_objects_ids_per_supercategory), dtype=np.int32)
+            pad_value = -1
+            hdf5_write_data(hdf5_handler, 'list_image_filenames_per_category',
+                            np.array(pad_list(list_image_filenames_per_category, pad_value), dtype=np.int32),
+                            fillvalue=pad_value)
+            hdf5_write_data(hdf5_handler, 'list_image_filenames_per_supercategory',
+                            np.array(pad_list(list_image_filenames_per_supercategory, pad_value), dtype=np.int32),
+                            fillvalue=pad_value)
+            hdf5_write_data(hdf5_handler, 'list_boxes_per_image',
+                            np.array(pad_list(list_boxes_per_image, pad_value), dtype=np.int32),
+                            fillvalue=pad_value)
+            hdf5_write_data(hdf5_handler, 'list_objects_ids_per_category',
+                            np.array(pad_list(list_objects_ids_per_category, pad_value), dtype=np.int32),
+                            fillvalue=pad_value)
+            hdf5_write_data(hdf5_handler, 'list_objects_ids_per_supercategory',
+                            np.array(pad_list(list_objects_ids_per_supercategory, pad_value), dtype=np.int32),
+                            fillvalue=pad_value)
 
 
 #---------------------------------------------------------
