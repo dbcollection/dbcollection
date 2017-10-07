@@ -21,6 +21,8 @@ class CacheManager:
         Cache file path + name.
     default_dir : str
         Default directory for the cache.
+    data : dict
+        Cache contents.
     """
 
     def __init__(self, is_test=False):
@@ -585,3 +587,8 @@ class CacheManager:
                 for cat_name in self.data['category']:
                     if name in self.data['category'][cat_name]:
                         print('   > {}: '.format(cat_name))
+
+
+    def reload_cache(self):
+        """Reload the cache file contents."""
+        self.data = self.read_data_cache()
