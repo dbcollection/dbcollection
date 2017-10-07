@@ -11,7 +11,7 @@ import json
 
 
 class CacheManager:
-    """ Class to manage the dbcollection cache data
+    """Class to manage the dbcollection cache data
 
     Attributes
     ----------
@@ -21,6 +21,8 @@ class CacheManager:
         Cache file path + name.
     default_dir : str
         Default directory for the cache.
+    download_dir : str
+        default save dir path for downloaded data.
     data : dict
         Cache contents.
     """
@@ -71,6 +73,30 @@ class CacheManager:
         """Create the main dir to store all metadata files."""
         if not os.path.exists(self.default_dir):
             os.makedirs(self.default_dir)
+
+
+    def set_download_dir(self, path):
+        """Set the default save dir path for downloaded data."""
+        assert path, 'Must input a non-empty path.'
+        self.data['info']['default_download_dir'] = path
+
+
+    def reset_download_dir(self):
+        """Reset the default download dir."""
+        return self.set_download_dir('')
+
+
+    @property
+    def download_dir(self):
+        """Default save dir path for downloaded data."""
+        return self.data['info']['default_download_dir']
+
+
+    @download_dir.setter
+    def download_dir(self, path):
+        """Set the default save dir path for downloaded data."""
+        assert isinstance(path, str), 'Invalid input type: {}'.format(type(path))
+        self.set_download_dir(path)
 
 
     def clear(self):
@@ -143,7 +169,8 @@ class CacheManager:
         """Returns an empty (dummy) template of the cache data structure."""
         return {
             "info": {
-                "default_cache_dir": self.default_dir
+                "default_cache_dir": self.default_dir,
+                "default_download_dir": '',
             },
             "dataset": {},
             "category": {}
