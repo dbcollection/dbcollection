@@ -11,7 +11,6 @@ def hdf5_write_data(h5_handler, field_name, data, dtype=None, chunks=True,
     """Write/store data into a hdf5 file."""
     assert h5_handler, "Must input a hdf5 file handler"
     assert field_name, 'Must input a field name.'
-    assert data, 'Must input a data field.'
     assert isinstance(data, np.ndarray), 'Data must be a numpy array.'
 
     if dtype is None:
