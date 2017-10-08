@@ -486,7 +486,7 @@ class CacheManager:
         if isinstance(keywords, list):
             keywords = tuple(keywords)
         elif not isinstance(keywords, tuple):
-            keywords = (keywords)
+            keywords = (keywords,)
 
         for keyword in keywords:
             if any(keyword):
