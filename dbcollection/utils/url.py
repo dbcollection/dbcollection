@@ -192,11 +192,18 @@ def parse_url(url):
     if isinstance(url, str):
         return url, None, os.path.basename(url), '', 'requests'
     elif isinstance(url, dict):
-        url_ = get_field_value(url, 'url')
-        md5hash = get_field_value(url, 'md5hash')
-        save_name = get_field_value(url, 'save_name')
-        extract_dir = get_field_value(url, 'extract_dir') or ''
-        method = get_field_value(url, 'googledrive') or 'requests'
+        if 'googledrive' in url:
+            url_ = get_field_value(url, 'googledrive')
+            md5hash = get_field_value(url, 'md5hash')
+            save_name = get_field_value(url, 'save_name')
+            extract_dir = get_field_value(url, 'extract_dir') or ''
+            method = 'googledrive'
+        else:
+            url_ = get_field_value(url, 'url')
+            md5hash = get_field_value(url, 'md5hash')
+            save_name = get_field_value(url, 'save_name')
+            extract_dir = get_field_value(url, 'extract_dir') or ''
+            method = 'requests'
 
         if save_name:
             filename = save_name

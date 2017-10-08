@@ -1,5 +1,5 @@
 """
-LSP Keypoints process functions.
+LSPe Keypoints process functions.
 """
 
 
@@ -12,7 +12,7 @@ from dbcollection.utils.file_load import load_matlab
 
 
 class Keypoints(LspKeypoints):
-    """ LSP Keypoints preprocessing functions """
+    """LSPe Keypoints preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'detection'
@@ -47,7 +47,7 @@ class Keypoints(LspKeypoints):
             else:
                 set_name = 'train'
 
-            filename = os.path.join('lsp_dataset', 'images', image_filenames_lsp[i])
+            filename = os.path.join(self.data_path, 'lsp_dataset', 'images', image_filenames_lsp[i])
 
             joints = []
             for j in range(0, 14):
@@ -68,7 +68,7 @@ class Keypoints(LspKeypoints):
 
         set_name = 'train'
         for i in range(0, 10000):
-            filename = os.path.join('images', image_filenames_lspe[i])
+            filename = os.path.join(self.data_path, 'images', image_filenames_lspe[i])
 
             joints = []
             for j in range(0, 14):

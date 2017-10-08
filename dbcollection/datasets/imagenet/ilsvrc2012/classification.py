@@ -20,7 +20,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Classification(BaseTask):
-    """ ImageNet ILSVRC 2012 Classification preprocessing functions """
+    """ImageNet ILSVRC 2012 Classification preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'classification'
@@ -111,14 +111,15 @@ class Classification(BaseTask):
         # cycle all filenames and assign them the correct class
         set_data = {}
         for i, filename in enumerate(filenames):
+            filename_ = os.path.join(self.data_path, filename)
             idx = indexes[i] - 1 # matlab data is 1-indexed
             class_name = annot['synsets'][idx][0][1].tolist()[0]
 
             # add filename and class
             try:
-                set_data[class_name].append(filename)
+                set_data[class_name].append(filename_)
             except KeyError:
-                set_data[class_name] = [filename]
+                set_data[class_name] = [filename_]
 
             if self.verbose:
                 # update progress bar
@@ -286,7 +287,7 @@ class Classification(BaseTask):
 #---------------------------------------------------------
 
 class Raw256(Classification):
-    """ ImageNet ILSVRC 2012 Classification raw256 preprocessing functions """
+    """ImageNet ILSVRC 2012 Classification raw256 preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'raw256'

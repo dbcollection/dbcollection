@@ -5,11 +5,13 @@ Test dbcollection/utils/loader.py.
 
 import pytest
 import dbcollection as dbc
+from dbcollection.core.config import config_cache
 from dbcollection.utils.string_ascii import convert_ascii_to_str as tostr_
 
 
 @pytest.fixture(scope="module")
 def loader():
+    config_cache(reset_cache=True, is_test=True)
     return dbc.load('mnist', is_test=True)
 
 

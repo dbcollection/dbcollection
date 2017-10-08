@@ -11,7 +11,7 @@ urls = (
     {
         'url': 'http://sam.johnson.io/research/lsp_dataset.zip',
         'extract_dir': 'lsp_dataset'
-    }
+    },
 )
 keywords = ('image_processing', 'detection', 'human pose', 'keypoints')
 tasks = {
@@ -22,7 +22,7 @@ default_task = 'keypoints'
 
 
 class Dataset(BaseDataset):
-    """ Leeds Sports Pose (LSP) Dataset preprocessing/downloading functions """
+    """Leeds Sports Pose (LSP) Dataset preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
     tasks = tasks

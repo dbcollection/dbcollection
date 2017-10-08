@@ -110,7 +110,7 @@ class Caption2015(BaseTask):
                 print('\n> Loading data files for the set: ' + set_name)
 
             # image dir
-            image_dir = self.image_dir_path[set_name]
+            image_dir =  os.path.join(self.data_path, self.image_dir_path[set_name])
 
             # annotation file path
             annot_filepath = os.path.join(self.data_path, self.annotation_path[set_name])
@@ -125,7 +125,7 @@ class Caption2015(BaseTask):
         """
         Store classes + filenames as a nested tree.
         """
-        image_dir = self.image_dir_path[set_name]
+        image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
         if 'test' in set_name:
             is_test = True
             data_ = data[0]
@@ -146,11 +146,11 @@ class Caption2015(BaseTask):
         image_grp = hdf5_handler.create_group('images')
         for i, annot in enumerate(annotations['images']):
             file_grp = image_grp.create_group(str(i))
-            hdf5_write_data(hdf5_handler, 'file_name', str2ascii(os.path.join(image_dir, annot["file_name"])), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'coco_url', str2ascii(annot["coco_url"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'width', np.array(annot["width"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'height', np.array(annot["height"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
+            file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
+            file_grp['coco_url'] = str2ascii(annot["coco_url"])
+            file_grp['width'] =  np.array(annot["width"], dtype=np.int32)
+            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
+            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
 
             # update progressbar
             if self.verbose:
@@ -166,9 +166,9 @@ class Caption2015(BaseTask):
             annot_grp = hdf5_handler.create_group('annotations')
             for i, annot in enumerate(annotations['annotations']):
                 file_grp = annot_grp.create_group(str(i))
-                hdf5_write_data(hdf5_handler, 'caption', str2ascii(annot["caption"]), dtype=np.uint8, fillvalue=0)
-                hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
-                hdf5_write_data(hdf5_handler, 'image_id', np.array(annot["image_id"], dtype=np.int32), fillvalue=-1)
+                file_grp['caption'] = str2ascii(annot["caption"])
+                file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+                file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
 
                 # update progressbar
                 if self.verbose:
@@ -183,13 +183,13 @@ class Caption2015(BaseTask):
         grouped_grp = hdf5_handler.create_group('grouped')
         for i, key in enumerate(data_):
             file_grp = grouped_grp.create_group(str(i))
-            hdf5_write_data(hdf5_handler, 'image_filename', str2ascii(data_[key]["file_name"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'width', np.array(data_[key]["width"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'height', np.array(data_[key]["height"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'id', np.array(data_[key]["id"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'coco_url', str2ascii(data_[key]["coco_url"]), dtype=np.uint8, fillvalue=0)
+            file_grp['image_filename'] = str2ascii(data_[key]["file_name"])
+            file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
+            file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
+            file_grp['id'] = np.array(data_[key]["id"], dtype=np.int32)
+            file_grp['coco_url'] = str2ascii(data_[key]["coco_url"])
             if 'captions' in data_[key]:
-                hdf5_write_data(hdf5_handler, 'captions', str2ascii(data_[key]["captions"]), dtype=np.uint8, fillvalue=0)
+                file_grp['captions'] = str2ascii(data_[key]["captions"])
 
             # update progressbar
             if self.verbose:
@@ -204,7 +204,7 @@ class Caption2015(BaseTask):
         """
         Add data of a set to the default group.
         """
-        image_dir = self.image_dir_path[set_name]
+        image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
         if "test" in set_name:
             is_test = True
             data_ = data[0]
@@ -317,12 +317,10 @@ class Caption2015(BaseTask):
 
         if not is_test:
             hdf5_write_data(hdf5_handler, 'captions', str2ascii(caption), dtype=np.uint8, fillvalue=0)
-
             hdf5_write_data(hdf5_handler, 'list_captions_per_image', np.array(pad_list(list_captions_per_image, -1), dtype=np.int32), fillvalue=-1)
         else:
             hdf5_write_data(hdf5_handler, 'category', str2ascii(category), dtype=np.uint8, fillvalue=0)
             hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(supercategory), dtype=np.uint8, fillvalue=0)
-
             hdf5_write_data(hdf5_handler, 'coco_categories_ids', np.array(coco_categories_ids, dtype=np.int32), fillvalue=-1)
 
 

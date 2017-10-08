@@ -184,7 +184,7 @@ class Detection2015(BaseTask):
                 print('\n> Loading data files for the set: ' + set_name)
 
             # image dir
-            image_dir = self.image_dir_path[set_name]
+            image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
 
             # annotation file path
             annot_filepath = os.path.join(self.data_path, self.annotation_path[set_name])
@@ -199,7 +199,7 @@ class Detection2015(BaseTask):
         """
         Store classes + filenames as a nested tree.
         """
-        image_dir = self.image_dir_path[set_name]
+        image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
         if 'test' in set_name:
             is_test = True
             data_ = data[0]
@@ -220,11 +220,11 @@ class Detection2015(BaseTask):
         image_grp = hdf5_handler.create_group('images')
         for i, annot in enumerate(annotations['images']):
             file_grp = image_grp.create_group(str(i))
-            hdf5_write_data(hdf5_handler, 'file_name', str2ascii(os.path.join(image_dir, annot["file_name"])), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'coco_url', str2ascii(annot["coco_url"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'width', np.array(annot["width"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'height', np.array(annot["height"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
+            file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
+            file_grp['coco_url'] = str2ascii(annot["coco_url"])
+            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
+            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
+            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
 
             # update progressbar
             if self.verbose:
@@ -239,9 +239,9 @@ class Detection2015(BaseTask):
         cat_grp = hdf5_handler.create_group('categories')
         for i, annot in enumerate(annotations['categories']):
             file_grp = cat_grp.create_group(str(i))
-            hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(annot["supercategory"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'name', str2ascii(annot["name"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
+            file_grp['supercategory'] = str2ascii(annot["supercategory"])
+            file_grp['name'] = str2ascii(annot["name"])
+            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
 
             # update progressbar
             if self.verbose:
@@ -257,13 +257,13 @@ class Detection2015(BaseTask):
             annot_grp = hdf5_handler.create_group('annotations')
             for i, annot in enumerate(annotations['annotations']):
                 file_grp = annot_grp.create_group(str(i))
-                hdf5_write_data(hdf5_handler, 'iscrowd', np.array(annot["iscrowd"], dtype=np.int32), fillvalue=-1)
-                hdf5_write_data(hdf5_handler, 'area', np.array(annot["area"], dtype=np.float), fillvalue=-1)
-                hdf5_write_data(hdf5_handler, 'id', np.array(annot["id"], dtype=np.int32), fillvalue=-1)
-                hdf5_write_data(hdf5_handler, 'category_id', np.array(annot["category_id"], dtype=np.int32), fillvalue=-1)
-                hdf5_write_data(hdf5_handler, 'image_id', np.array(annot["image_id"], dtype=np.int32), fillvalue=-1)
-                hdf5_write_data(hdf5_handler, 'bbox', np.array(annot["bbox"], dtype=np.float), fillvalue=-1)
-                hdf5_write_data(hdf5_handler, 'segmentation', np.array(annot["segmentation"], dtype=np.float), fillvalue=-1)
+                file_grp['iscrowd'] = np.array(annot["iscrowd"], dtype=np.int32)
+                file_grp['area'] = np.array(annot["area"], dtype=np.float)
+                file_grp['id'] = np.array(annot["id"], dtype=np.int32)
+                file_grp['category_id'] = np.array(annot["category_id"], dtype=np.int32)
+                file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
+                file_grp['bbox'] = np.array(annot["bbox"], dtype=np.float)
+                file_grp['segmentation'] = np.array(annot["segmentation"], dtype=np.float)
 
                 # update progressbar
                 if self.verbose:
@@ -278,25 +278,25 @@ class Detection2015(BaseTask):
         grouped_grp = hdf5_handler.create_group('grouped')
         for i, key in enumerate(data_):
             file_grp = grouped_grp.create_group(str(i))
-            hdf5_write_data(hdf5_handler, 'image_filename', str2ascii(data_[key]["file_name"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'coco_url', str2ascii(data_[key]["coco_url"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'width', np.array(data_[key]["width"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'height', np.array(data_[key]["height"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'id', np.array(data_[key]["id"], dtype=np.int32), fillvalue=-1)
+            file_grp['image_filename'] = str2ascii(data_[key]["file_name"])
+            file_grp['coco_url'] = str2ascii(data_[key]["coco_url"])
+            file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
+            file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
+            file_grp['id'] = np.array(data_[key]["id"], dtype=np.int32)
 
             if 'object' in data_[key]:
                 for j, obj_id in enumerate(data_[key]["object"]):
                     obj_grp = file_grp.create_group(str(j))
                     obj = data_[key]["object"][obj_id]
-                    hdf5_write_data(hdf5_handler, 'id', np.array(obj["id"], dtype=np.int32), fillvalue=-1)
-                    hdf5_write_data(hdf5_handler, 'image_id', np.array(obj["image_id"], dtype=np.int32), fillvalue=-1)
-                    hdf5_write_data(hdf5_handler, 'category_id', np.array(obj["category_id"], dtype=np.int32), fillvalue=-1)
-                    hdf5_write_data(hdf5_handler, 'category', str2ascii(obj["category"]), dtype=np.uint8, fillvalue=0)
-                    hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(obj["supercategory"]), dtype=np.uint8, fillvalue=0)
-                    hdf5_write_data(hdf5_handler, 'area', np.array(obj["area"], dtype=np.int32), fillvalue=-1)
-                    hdf5_write_data(hdf5_handler, 'iscrowd', np.array(obj["iscrowd"], dtype=np.int32), fillvalue=-1)
-                    hdf5_write_data(hdf5_handler, 'bbox', np.array(obj["bbox"], dtype=np.float), fillvalue=-1)
-                    hdf5_write_data(hdf5_handler, 'segmentation', np.array(obj["segmentation"], dtype=np.float), fillvalue=-1)
+                    obj_grp['id'] = np.array(obj["id"], dtype=np.int32)
+                    obj_grp['image_id'] = np.array(obj["image_id"], dtype=np.int32)
+                    obj_grp['category_id'] = np.array(obj["category_id"], dtype=np.int32)
+                    obj_grp['category'] = str2ascii(obj["category"])
+                    obj_grp['supercategory'] = str2ascii(obj["supercategory"])
+                    obj_grp['area'] = np.array(obj["area"], dtype=np.int32)
+                    obj_grp['iscrowd'] = np.array(obj["iscrowd"], dtype=np.int32)
+                    obj_grp['bbox'] = np.array(obj["bbox"], dtype=np.float)
+                    obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.float)
 
             # update progressbar
             if self.verbose:
@@ -311,7 +311,7 @@ class Detection2015(BaseTask):
         """
         Add data of a set to the default group.
         """
-        image_dir = self.image_dir_path[set_name]
+        image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
         if 'test' in set_name:
             is_test = True
             data_ = data[0]

@@ -16,7 +16,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Keypoints(BaseTask):
-    """ FLIC Keypoints preprocessing functions """
+    """FLIC Keypoints preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'keypoint'
@@ -58,7 +58,7 @@ class Keypoints(BaseTask):
 
             width, height, _ = annot[4][0].tolist()
             moviename = annot[1][0]
-            filename = os.path.join('FLIC', 'images', annot[3][0])
+            filename = os.path.join(self.data_path, 'FLIC', 'images', annot[3][0])
             torso_box = annot[6][0].tolist(),  # [x1,y1,x2,y2]
             parts = [
                 # [x, y, is_visible]
@@ -113,13 +113,13 @@ class Keypoints(BaseTask):
 
         for i, annot in enumerate(data):
             file_grp = hdf5_handler.create_group(str(i))
-            hdf5_write_data(hdf5_handler, 'image_filename', str2ascii(annot["filename"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'moviename', str2ascii(annot["moviename"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'width', np.array(annot["width"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'height', np.array(annot["height"], dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'keypoint_names', keypoint_names, dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'torso_box', np.array(annot["torso_box"], dtype=np.float), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'keypoints', np.array(annot["parts"], dtype=np.float), fillvalue=-1)
+            file_grp['image_filename'] = str2ascii(annot["filename"])
+            file_grp['moviename'] = str2ascii(annot["moviename"])
+            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
+            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
+            file_grp['keypoint_names'] = keypoint_names
+            file_grp['torso_box'] = np.array(annot["torso_box"], dtype=np.float)
+            file_grp['keypoints'] = np.array(annot["parts"], dtype=np.float)
 
             # update progressbar
             if self.verbose:

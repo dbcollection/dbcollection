@@ -75,13 +75,13 @@ class Detection(BaseTask):
                 for video in folders:
                     # fetch all images filenames
                     img_fnames = os.listdir(os.path.join(extracted_data_dir, video, 'images'))
-                    img_fnames = [os.path.join('extracted_data', set_data, video, 'images', fname) for fname in img_fnames]
+                    img_fnames = [os.path.join(self.data_path, 'extracted_data', set_data, video, 'images', fname) for fname in img_fnames]
                     img_fnames.sort()
                     img_fnames_list = [img_fnames[i] for i in range(self.skip_step-1, len(img_fnames), self.skip_step)]
 
                     # fetch all annotations filenames
-                    annotation_fnames = os.listdir(os.path.join(extracted_data_dir, video, 'annotations'))
-                    annotation_fnames = [os.path.join('extracted_data', set_data, video, 'annotations', fname) for fname in annotation_fnames]
+                    annotation_fnames = os.listdir(os.path.join( extracted_data_dir, video, 'annotations'))
+                    annotation_fnames = [os.path.join(self.data_path, 'extracted_data', set_data, video, 'annotations', fname) for fname in annotation_fnames]
                     annotation_fnames.sort()
                     annotation_fnames_list = [annotation_fnames[i] for i in range(self.skip_step-1, len(annotation_fnames), self.skip_step)]
 
@@ -118,12 +118,8 @@ class Detection(BaseTask):
                 video_grp = set_grp.create_group(video)
                 for j in range(len(data[set_data][video]['images'])):
                     file_grp = video_grp.create_group(str(j))
-                    hdf5_write_data(file_grp, 'image_filenames',
-                                    str2ascii(data[set_data][video]['images'][j]),
-                                    dtype=np.uint8, fillvalue=0)
-                    hdf5_write_data(file_grp, 'annotation_filenames',
-                                    str2ascii(data[set_data][video]['annotations'][j]),
-                                    dtype=np.uint8, fillvalue=0)
+                    file_grp['image_filenames'] = str2ascii(data[set_data][video]['images'][j])
+                    file_grp['annotation_filenames'] = str2ascii(data[set_data][video]['annotations'][j])
 
             # update progressbar
             if self.verbose:
@@ -171,7 +167,8 @@ class Detection(BaseTask):
                     image_filenames.append(img_fnames[j])
 
                     # load annotation file
-                    annotation = load_json(os.path.join(self.data_path, annot_fnames[j]))
+                    #annotation = load_json(os.path.join(self.data_path, annot_fnames[j]))
+                    annotation = load_json(annot_fnames[j])
 
                     obj_per_img = []
                     if any(annotation):

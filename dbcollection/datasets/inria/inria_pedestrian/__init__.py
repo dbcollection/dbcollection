@@ -17,7 +17,7 @@ default_task = 'detection'
 
 
 class Dataset(BaseDataset):
-    """ Inria Pedestrian Dataset preprocessing/downloading functions """
+    """Inria Pedestrian Dataset preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
     tasks = tasks
