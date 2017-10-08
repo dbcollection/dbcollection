@@ -17,7 +17,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Keypoints(BaseTask):
-    """ LSP Keypoints preprocessing functions """
+    """LSP Keypoints preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'keypoint'
@@ -73,7 +73,7 @@ class Keypoints(BaseTask):
             else:
                 set_name = 'train'
 
-            filename = os.path.join('images', image_filenames[i])
+            filename = os.path.join(self.data_path, 'images', image_filenames[i])
 
             joints = []
             for j in range(0, 14):
@@ -114,9 +114,9 @@ class Keypoints(BaseTask):
 
         for i, annot in enumerate(data):
             file_grp = hdf5_handler.create_group(str(i))
-            hdf5_write_data(hdf5_handler, 'image_filename', str2ascii(annot["filename"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'keypoints', np.array(annot["joints"], dtype=np.float), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'keypoint_names', keypoint_names, dtype=np.uint8, fillvalue=0)
+            file_grp['image_filename'] = str2ascii(annot["filename"])
+            file_grp['keypoints'] = np.array(annot["joints"], dtype=np.float)
+            file_grp['keypoint_names'] = keypoint_names
 
             # update progressbar
             if self.verbose:
@@ -162,7 +162,7 @@ class Keypoints(BaseTask):
 
 
 class KeypointsOriginal(Keypoints):
-    """ LSP Keypoints full images size (no source group) task class """
+    """LSP Keypoints full images size (no source group) task class."""
 
     # metadata filename
     filename_h5 = 'keypoint_original'
