@@ -39,7 +39,10 @@ class CacheManager:
         self.is_test = is_test
 
         # setup cache file path+name
-        self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection.json')
+        if self.is_test:
+            self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection_test.json')
+        else:
+            self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection.json')
         if not os.path.exists(self.cache_filename):
             print('Generating the dbcollection\'s package cache file on disk: {}'.format(self.cache_filename))
             self.write_data_cache(self._empty_data(), self.cache_filename)
@@ -175,7 +178,7 @@ class CacheManager:
         return {
             "info": {
                 "default_cache_dir":  self._default_cache_dir_path(),
-                "default_download_dir": '',
+                "default_download_dir": os.path.join(self._default_cache_dir_path(), 'downloaded_data'),
             },
             "dataset": {},
             "category": {}
