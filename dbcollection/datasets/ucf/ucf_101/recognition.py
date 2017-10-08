@@ -19,7 +19,7 @@ from .extract_frames import extract_video_frames
 
 
 class Recognition(BaseTask):
-    """UCF101 action recognition preprocessing functions """
+    """UCF101 action recognition preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'recognition'
@@ -130,7 +130,7 @@ class Recognition(BaseTask):
                     images_fnames = [fname for fname in images_fnames if fname.endswith('.jpg')]
 
                     # add category + video_name to the file paths
-                    images_fnames = [os.path.join(self.images_dir, category, video_name, fname) for fname in images_fnames]
+                    images_fnames = [os.path.join(self.data_path, self.images_dir, category, video_name, fname) for fname in images_fnames]
                     images_fnames.sort() # sort images
                     image_filenames = image_filenames + images_fnames # add images filenames
                     count_imgs += len(images_fnames)
