@@ -76,7 +76,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     # get task cache file path
     if task=='' or task=='default':
         task = available_datasets_list[name]['default_task']
-    task_cache_path = cache_manager.get_cache_path(name, task)
+    task_cache_path = cache_manager.get_task_cache_path(name, task)
 
     # Create a loader
     dataset_loader = DataLoader(name, task, dset_paths['data_dir'], task_cache_path)

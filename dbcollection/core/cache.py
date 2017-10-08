@@ -8,15 +8,24 @@ import os
 import shutil
 import errno
 import json
+import warnings
 
 
 class CacheManager:
-    """ Class to manage the dbcollection cache data
+    """Class to manage the dbcollection cache data
 
     Attributes
     ----------
-    is_test : bool, optional
+    is_test : bool
         Flag used for tests.
+    cache_filename : str
+        Cache file path + name.
+    cache_dir : str
+        Default directory to store all dataset's metadata files.
+    download_dir : str
+        Default save dir path for downloaded data.
+    data : dict
+        Cache contents.
     """
 
     def __init__(self, is_test=False):
@@ -29,69 +38,81 @@ class CacheManager:
         """
         self.is_test = is_test
 
-        self.home_dir = self._set_home_dir(is_test)
-
-        # setup cache paths
-        self._setup_paths()
-
-        # create cache file (if it does not exist)
-        if not os.path.exists(self.cache_fname):
-            print('Generating the dbcollection\'s package cache file on disk: {}'.format(self.cache_fname))
-            self.write_data_cache(self.empty_data(), self.cache_fname)
+        # setup cache file path+name
+        self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection.json')
+        if not os.path.exists(self.cache_filename):
+            print('Generating the dbcollection\'s package cache file on disk: {}'.format(self.cache_filename))
+            self.write_data_cache(self._empty_data(), self.cache_filename)
 
         # load cache data file
         self.data = self.read_data_cache()
 
-
-    def _setup_paths(self):
-        """Setup the cache/data directories for storing the cache file.
-
-        Creates two paths for the default cache directory for storing the cache data,
-        and the filepath for the dbcollection.json file where the metadata for all datasets
-        is stored.
-        """
-        # cache directory path (should work for all platforms)
-        self.default_cache_dir = os.path.join(self.home_dir, 'dbcollection')
-        self.cache_fname = os.path.join(self.home_dir, 'dbcollection.json')
-
-        # create dir
-        if not os.path.exists(self.default_cache_dir):
-            print('Create cache dir: {}'.format(self.default_cache_dir))
-            os.makedirs(self.default_cache_dir)
+        self._cache_dir = self._get_cache_dir()
 
 
-    def _set_home_dir(self, is_test=None):
-        """Sets the home directory folder for the cache."""
-        home_dir = os.path.expanduser("~")
-        if is_test is None:
-            if self.is_test:
-                home_dir = os.path.join(home_dir, 'tmp')
+    def _set_cache_dir(self, path):
+        """Set the default cache dir to store all metadata files"""
+        #assert path, 'Must input a directory path'
+        self._cache_dir = path
+        self.data['info']['default_cache_dir'] = self._cache_dir
+        self.write_data_cache(self.data)
+
+
+    def _get_cache_dir(self):
+        """Get the default cache dir path."""
+        return self.data['info']['default_cache_dir']
+
+
+    def _default_cache_dir_path(self):
+        """Returns the pre-defined path of the cache_dir."""
+        if self.is_test:
+            default_cache_dir = os.path.join(os.path.expanduser("~"), 'tmp', 'dbcollection')
         else:
-            if is_test:
-                home_dir = os.path.join(home_dir, 'tmp')
-        return home_dir
+            default_cache_dir = os.path.join(os.path.expanduser("~"), 'dbcollection')
+        return default_cache_dir
 
 
-    def _default_cache_dir(self):
-        """Return the default cache directory."""
-        return os.path.join(self.home_dir, 'dbcollection')
+    def reset_cache_dir(self):
+        """Reset the default download dir."""
+        self._set_cache_dir(self._default_cache_dir_path())
+
+    cache_dir = property(_get_cache_dir, _set_cache_dir)
 
 
-    def create_root_dir(self):
+    def create_os_home_dir(self):
         """Create the main dir to store all metadata files."""
-        if not os.path.exists(self.default_cache_dir):
-            os.makedirs(self.default_cache_dir)
+        if not os.path.exists(self._cache_dir):
+            os.makedirs(self._cache_dir)
+
+
+    def _set_download_dir(self, path):
+        """Set the default save dir path for downloaded data."""
+        assert path, 'Must input a non-empty path.'
+        self.data['info']['default_download_dir'] = path
+        self.write_data_cache(self.data)
+
+
+    def _get_download_dir(self):
+        """Get the default save dir path."""
+        return self.data['info']['default_download_dir']
+
+
+    def reset_download_dir(self):
+        """Reset the default download dir."""
+        return self._set_download_dir('')
+
+    download_dir = property(_get_download_dir, _set_download_dir)
 
 
     def clear(self):
         """Delete the cache file + directory from disk."""
         # cache file
-        if os.path.exists(self.cache_fname):
-            self.os_remove(self.cache_fname)
+        if os.path.exists(self.cache_filename):
+            self._os_remove(self.cache_filename)
 
         # cache dir
-        if os.path.exists(self.default_cache_dir):
-            self.os_remove(self.default_cache_dir)
+        if os.path.exists(self._cache_dir):
+            self._os_remove(self._cache_dir)
 
 
     def read_data_cache_file(self):
@@ -106,13 +127,12 @@ class CacheManager:
         ------
         IOError
             If the file cannot be opened.
-
         """
         try:
-            with open(self.cache_fname, 'r') as json_data:
+            with open(self.cache_filename, 'r') as json_data:
                 return json.load(json_data)
         except IOError:
-            raise IOError('Unable to open file: ' + self.cache_fname)
+            raise IOError('Unable to open file: ' + self.cache_filename)
 
 
     def read_data_cache(self):
@@ -122,13 +142,12 @@ class CacheManager:
         -------
         dict
             Data structure of the cache (file).
-
         """
         # check if file exists
-        if os.path.exists(self.cache_fname):
+        if os.path.exists(self.cache_filename):
             return self.read_data_cache_file()
         else:
-            return self.empty_data()
+            return self._empty_data()
 
 
     def write_data_cache(self, data, fname=None):
@@ -145,25 +164,25 @@ class CacheManager:
         ------
         IOError
             If the file cannot be opened.
-
         """
-        filename = fname or self.cache_fname
+        filename = fname or self.cache_filename
         with open(filename, 'w') as file_cache:
             json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
 
 
-    def empty_data(self):
+    def _empty_data(self):
         """Returns an empty (dummy) template of the cache data structure."""
         return {
             "info": {
-                "default_cache_dir": self.default_cache_dir
+                "default_cache_dir":  self._default_cache_dir_path(),
+                "default_download_dir": '',
             },
             "dataset": {},
             "category": {}
         }
 
 
-    def os_remove(self, fname):
+    def _os_remove(self, fname):
         """Remove a file/directory from disk.
 
         Parameters
@@ -175,7 +194,6 @@ class CacheManager:
         ------
         OSError
             If the file does not exist.
-
         """
         try:
             if os.path.exists(fname):
@@ -195,7 +213,6 @@ class CacheManager:
         ----------
         name : str
             Dataset name.
-
         """
         try:
             self.data['dataset'].pop(name)
@@ -216,7 +233,6 @@ class CacheManager:
         ----------
         name : str
             Name of the dataset.
-
         """
         keywords = []
         for keyword in self.data['category']:
@@ -243,7 +259,6 @@ class CacheManager:
             Name of the dataset.
         task : str
             Name of the task
-
         """
         try:
             self.data['dataset'][name]['tasks'].pop(task)
@@ -264,13 +279,12 @@ class CacheManager:
         ----------
         name : str
             Name of the dataset.
-
         """
         # get cache dir path
-        cache_dir_path = os.path.join(self.default_cache_dir, name)
+        cache_dir_path = os.path.join(self._cache_dir, name)
 
         # remove cache dir
-        self.os_remove(cache_dir_path)
+        self._os_remove(cache_dir_path)
 
         # remove entry from the data
         self.delete_entry(name)
@@ -282,11 +296,26 @@ class CacheManager:
         self.write_data_cache(self.data)
 
 
-    def reset_cache(self):
-        """Resets all datasets/categories from cache."""
-        self.data['dataset'] = {}
-        self.data['category'] = {}
-        self.write_data_cache(self.data)
+    def reset_cache(self, force_reset=False):
+        """Resets all datasets/categories from cache.
+
+        Parameters
+        ----------
+        force_reset : bool, optional
+            Forces the cache to be reset (emptied) if True.
+
+        Warning
+        -------
+        UserWarning
+            If force_reset is False, display a warning to the user.
+        """
+        if force_reset:
+            self.write_data_cache(self._empty_data(), self.cache_filename)
+            self.reload_cache()
+        else:
+            msg = 'Warning: All information about stored datasets will be lost if you proceed!' \
+                  + 'Set \'force_reset=True\' to reset the dbcollection.json file.'
+            warnings.warn(msg, UserWarning, stacklevel=2)
 
 
     def check_dataset_name(self, name):
@@ -301,7 +330,6 @@ class CacheManager:
         -------
         bool
             The dataset exists (True) or not (False).
-
         """
         return name in self.data['dataset'].keys()
 
@@ -317,7 +345,6 @@ class CacheManager:
             New data.
         is_append : bool, optional
             Appends the task cache data to existing ones.
-
         """
         if is_append:
             if name in self.data['dataset']:
@@ -337,7 +364,6 @@ class CacheManager:
             Name of the dataset.
         delete_data : bool, optional
             Flag indicating if the data's directory has to be deleted (or skip it).
-
         """
         dset_paths = self.get_dataset_storage_paths(name)
 
@@ -346,7 +372,7 @@ class CacheManager:
 
         # delete data from disk
         if delete_data:
-            self.os_remove(dset_paths['data_dir'])
+            self._os_remove(dset_paths['data_dir'])
 
 
     def is_empty(self):
@@ -366,7 +392,6 @@ class CacheManager:
         -------
         bool
             Return true if the category exists, else return False.
-
         """
         return name in self.data['dataset']
 
@@ -385,7 +410,6 @@ class CacheManager:
         -------
         bool
             Return true if the task exists, else return False.
-
         """
         try:
             return task in self.data['dataset'][name]['tasks']
@@ -414,13 +438,13 @@ class CacheManager:
         try:
             return {
                 "data_dir": self.data['dataset'][name]["data_dir"],
-                "cache_dir": os.path.join(self.default_cache_dir, name)
+                "cache_dir": os.path.join(self._cache_dir, name)
             }
         except KeyError:
             raise KeyError('Dataset name does not exist in cache: {}'.format(name))
 
 
-    def get_cache_path(self, name, task):
+    def get_task_cache_path(self, name, task):
         """Return the cache path of the metadata file of a specific task.
 
         Parameters
@@ -455,14 +479,12 @@ class CacheManager:
             Name of the dataset.
         keywords : list
             Keyword categories of the dataset.
-
         """
         if not isinstance(keywords, list):
             keywords = [keywords]
 
         for keyword in keywords:
             if any(keyword):
-
                 if keyword not in self.data["dataset"][name]["keywords"]:
                     self.data["dataset"][name]["keywords"].append(keyword)
 
@@ -488,9 +510,7 @@ class CacheManager:
             A list of keywords caracterizing the dataset.
         is_append : bool
             Overrides existing cache info data with new data.
-
         """
-
         new_info_dict = {
             "data_dir": data_dir,
             "tasks": cache_tasks,
@@ -574,7 +594,6 @@ class CacheManager:
             Displays the dataset contents.
         show_categories : bool, optional
             Displays the categories information.
-
         """
         # print info header
         if show_paths:
@@ -615,3 +634,9 @@ class CacheManager:
                 for cat_name in self.data['category']:
                     if name in self.data['category'][cat_name]:
                         print('   > {}: '.format(cat_name))
+
+
+    def reload_cache(self):
+        """Reload the cache file contents."""
+        self.data = self.read_data_cache()
+        self._cache_dir = self._get_cache_dir()
