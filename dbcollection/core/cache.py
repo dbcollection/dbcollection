@@ -8,6 +8,7 @@ import os
 import shutil
 import errno
 import json
+import warnings
 
 
 class CacheManager:
@@ -295,11 +296,26 @@ class CacheManager:
         self.write_data_cache(self.data)
 
 
-    def reset_cache(self):
-        """Resets all datasets/categories from cache."""
-        self.data['dataset'] = {}
-        self.data['category'] = {}
-        self.write_data_cache(self.data)
+    def reset_cache(self, force_reset=False):
+        """Resets all datasets/categories from cache.
+
+        Parameters
+        ----------
+        force_reset : bool, optional
+            Forces the cache to be reset (emptied) if True.
+
+        Warning
+        -------
+        UserWarning
+            If force_reset is False, display a warning to the user.
+        """
+        if force_reset:
+            self.write_data_cache(self._empty_data(), self.cache_filename)
+            self.reload_cache()
+        else:
+            msg = 'Warning: All information about stored datasets will be lost if you proceed!' \
+                  + 'Set \'force_reset=True\' to reset the dbcollection.json file.'
+            warnings.warn(msg, UserWarning, stacklevel=2)
 
 
     def check_dataset_name(self, name):
@@ -623,3 +639,4 @@ class CacheManager:
     def reload_cache(self):
         """Reload the cache file contents."""
         self.data = self.read_data_cache()
+        self._cache_dir = self._get_cache_dir()
