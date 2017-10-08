@@ -17,7 +17,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Detection(BaseTask):
-    """Pascal VOC 2007 object detection task class """
+    """Pascal VOC 2007 object detection task class."""
 
     # metadata filename
     filename_h5 = 'detection'
@@ -50,7 +50,7 @@ class Detection(BaseTask):
         Load data of the dataset.
         """
         self.annotations_path = os.path.join(self.data_path, 'VOCdevkit', 'VOC2007', 'Annotations')
-        self.images_path = os.path.join('VOCdevkit', 'VOC2007', 'JPEGImages')
+        self.images_path = os.path.join(self.data_path, 'VOCdevkit', 'VOC2007', 'JPEGImages')
 
         # set id list
         set_filenames = self.get_set_filenames()
