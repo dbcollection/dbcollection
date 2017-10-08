@@ -316,8 +316,8 @@ class CacheManager:
             self.write_data_cache(self._empty_data(), self.cache_filename)
             self.reload_cache()
         else:
-            msg = 'Warning: All information about stored datasets will be lost if you proceed!' \
-                  + 'Set \'force_reset=True\' to reset the dbcollection.json file.'
+            msg = 'All information about stored datasets will be lost if you proceed!' \
+                  + ' Set \'force_reset=True\' to proceed with the reset of the dbcollection.json file.'
             warnings.warn(msg, UserWarning, stacklevel=2)
 
 
@@ -483,8 +483,10 @@ class CacheManager:
         keywords : list
             Keyword categories of the dataset.
         """
-        if not isinstance(keywords, list):
-            keywords = [keywords]
+        if isinstance(keywords, list):
+            keywords = tuple(keywords)
+        elif not isinstance(keywords, tuple):
+            keywords = (keywords)
 
         for keyword in keywords:
             if any(keyword):
