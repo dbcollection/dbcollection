@@ -1,1 +1,1 @@
-.. include:: ../../../dbcollection/datasets/caltech/pedestrian/README.rst
+.. include:: ../../../dbcollection/datasets/caltech/caltech_pedestrian/README.rst

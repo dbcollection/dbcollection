@@ -1,1 +1,1 @@
-.. include:: ../../../dbcollection/datasets/leeds_sports_pose/lsp_extended/README.rst
+.. include:: ../../../dbcollection/datasets/leeds_sports_pose/leeds_sports_pose_extended/README.rst
