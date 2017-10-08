@@ -66,10 +66,10 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
 
     if delete_cache_dir:
         # delete cache dir
-        if os.path.exists(cache_manager.default_dir):
-            shutil.rmtree(cache_manager.default_dir)
+        if os.path.exists(cache_manager.cache_dir):
+            shutil.rmtree(cache_manager.cache_dir)
             if verbose:
-                print('Deleted {} directory.'.format(cache_manager.default_dir))
+                print('Deleted {} directory.'.format(cache_manager.cache_dir))
 
     if delete_cache_file:
         # delete the entire cache
