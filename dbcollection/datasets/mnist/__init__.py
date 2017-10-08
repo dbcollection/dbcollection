@@ -16,13 +16,13 @@ urls = (
     "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
     "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz"
 )
-keywords = ('classification')
+keywords = ('image_processing', 'classification')
 tasks = {"classification": Classification}
 default_task = 'classification'
 
 
 class Dataset(BaseDataset):
-    """ Cifar10 preprocessing/downloading functions """
+    """MNIST preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
     tasks = tasks
