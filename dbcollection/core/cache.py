@@ -19,10 +19,10 @@ class CacheManager:
         Flag used for tests.
     cache_filename : str
         Cache file path + name.
-    default_dir : str
-        Default directory for the cache.
+    cache_dir : str
+        Default directory to store all dataset's metadata files.
     download_dir : str
-        default save dir path for downloaded data.
+        Default save dir path for downloaded data.
     data : dict
         Cache contents.
     """
@@ -37,10 +37,8 @@ class CacheManager:
         """
         self.is_test = is_test
 
-        # setup cache paths
-        self._setup_paths()
-
-        # create cache file (if it does not exist)
+        # setup cache file path+name
+        self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection.json')
         if not os.path.exists(self.cache_filename):
             print('Generating the dbcollection\'s package cache file on disk: {}'.format(self.cache_filename))
             self.write_data_cache(self._empty_data(), self.cache_filename)
@@ -48,55 +46,61 @@ class CacheManager:
         # load cache data file
         self.data = self.read_data_cache()
 
+        self._cache_dir = self._get_cache_dir()
 
-    def _setup_paths(self):
-        """Setup the cache/data directories for storing the cache file.
 
-        Creates two paths for the default cache directory for storing the cache data,
-        and the filepath for the dbcollection.json file where the metadata for all datasets
-        is stored.
-        """
-        # cache directory path (should work for all platforms)
-        os_home_dir = os.path.expanduser("~")
+    def _set_cache_dir(self, path):
+        """Set the default cache dir to store all metadata files"""
+        #assert path, 'Must input a directory path'
+        self._cache_dir = path
+        self.data['info']['default_cache_dir'] = self._cache_dir
+        self.write_data_cache(self.data)
+
+
+    def _get_cache_dir(self):
+        """Get the default cache dir path."""
+        return self.data['info']['default_cache_dir']
+
+
+    def _default_cache_dir_path(self):
+        """Returns the pre-defined path of the cache_dir."""
         if self.is_test:
-            os_home_dir = os.path.join(os_home_dir, 'tmp')
-        self.default_dir = os.path.join(os_home_dir, 'dbcollection')
-        self.cache_filename = os.path.join(os_home_dir, 'dbcollection.json')
+            default_cache_dir = os.path.join(os.path.expanduser("~"), 'tmp', 'dbcollection')
+        else:
+            default_cache_dir = os.path.join(os.path.expanduser("~"), 'dbcollection')
+        return default_cache_dir
 
-        # create dir
-        if not os.path.exists(self.default_dir):
-            print('Create cache dir: {}'.format(self.default_dir))
-            os.makedirs(self.default_dir)
+
+    def reset_cache_dir(self):
+        """Reset the default download dir."""
+        self._set_cache_dir(self._default_cache_dir_path())
+
+    cache_dir = property(_get_cache_dir, _set_cache_dir)
 
 
     def create_os_home_dir(self):
         """Create the main dir to store all metadata files."""
-        if not os.path.exists(self.default_dir):
-            os.makedirs(self.default_dir)
+        if not os.path.exists(self._cache_dir):
+            os.makedirs(self._cache_dir)
 
 
-    def set_download_dir(self, path):
+    def _set_download_dir(self, path):
         """Set the default save dir path for downloaded data."""
         assert path, 'Must input a non-empty path.'
         self.data['info']['default_download_dir'] = path
+        self.write_data_cache(self.data)
+
+
+    def _get_download_dir(self):
+        """Get the default save dir path."""
+        return self.data['info']['default_download_dir']
 
 
     def reset_download_dir(self):
         """Reset the default download dir."""
-        return self.set_download_dir('')
+        return self._set_download_dir('')
 
-
-    @property
-    def download_dir(self):
-        """Default save dir path for downloaded data."""
-        return self.data['info']['default_download_dir']
-
-
-    @download_dir.setter
-    def download_dir(self, path):
-        """Set the default save dir path for downloaded data."""
-        assert isinstance(path, str), 'Invalid input type: {}'.format(type(path))
-        self.set_download_dir(path)
+    download_dir = property(_get_download_dir, _set_download_dir)
 
 
     def clear(self):
@@ -106,8 +110,8 @@ class CacheManager:
             self._os_remove(self.cache_filename)
 
         # cache dir
-        if os.path.exists(self.default_dir):
-            self._os_remove(self.default_dir)
+        if os.path.exists(self._cache_dir):
+            self._os_remove(self._cache_dir)
 
 
     def read_data_cache_file(self):
@@ -169,7 +173,7 @@ class CacheManager:
         """Returns an empty (dummy) template of the cache data structure."""
         return {
             "info": {
-                "default_cache_dir": self.default_dir,
+                "default_cache_dir":  self._default_cache_dir_path(),
                 "default_download_dir": '',
             },
             "dataset": {},
@@ -276,7 +280,7 @@ class CacheManager:
             Name of the dataset.
         """
         # get cache dir path
-        cache_dir_path = os.path.join(self.default_dir, name)
+        cache_dir_path = os.path.join(self._cache_dir, name)
 
         # remove cache dir
         self._os_remove(cache_dir_path)
@@ -418,13 +422,13 @@ class CacheManager:
         try:
             return {
                 "data_dir": self.data['dataset'][name]["data_dir"],
-                "cache_dir": os.path.join(self.default_dir, name)
+                "cache_dir": os.path.join(self._cache_dir, name)
             }
         except KeyError:
             raise KeyError('Dataset name does not exist in cache: {}'.format(name))
 
 
-    def get_cache_path(self, name, task):
+    def get_task_cache_path(self, name, task):
         """Return the cache path of the metadata file of a specific task.
 
         Parameters
