@@ -158,10 +158,10 @@ def test_get_dataset_storage_paths(name, output):
     ('test_dataset2', "classification"),
     ('test_dataset2', "extra"),
 ])
-def test_get_cache_path__succeed(name, task):
+def test_get_task_cache_path__succeed(name, task):
     reset_cache_data()
     task_path = cache.data["dataset"][name]["tasks"][task]
-    assert(task_path == cache.get_cache_path(name, task))
+    assert(task_path == cache.get_task_cache_path(name, task))
 
 
 @pytest.mark.parametrize("name, task", [
@@ -172,10 +172,10 @@ def test_get_cache_path__succeed(name, task):
     ('test_dataset_non_exists', "classification"),
     ('test_dataset_non_exists', "extra"),
 ])
-def test_get_cache_path__fail(name, task):
+def test_get_task_cache_path__fail(name, task):
     reset_cache_data()
     with pytest.raises(Exception):
-        cache.get_cache_path(name, task)
+        cache.get_task_cache_path(name, task)
 
 @pytest.mark.parametrize("name, keywords", [
     ('test_dataset1', "new_kw"),

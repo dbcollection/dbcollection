@@ -102,7 +102,3 @@ def test_info_cache():
 def test_info_datasets():
     info_datasets(is_test=True)
     pass
-
-
-if __name__ == '__main__':
-    test_process('mnist', 'classification', None, True, True, True)
