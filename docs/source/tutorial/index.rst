@@ -6,5 +6,5 @@ TODO
 .. toctree::
    :maxdepth: 1
 
-   create_new_dataset
-   dataset_readme_template
+   user_guide/index
+   developer_guide/index
