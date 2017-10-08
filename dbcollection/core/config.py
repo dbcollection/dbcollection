@@ -80,7 +80,7 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     else:
         if reset_cache:
             # reset the cache file
-            cache_manager.reset_cache()
+            cache_manager.reset_cache(force_reset=True)
         else:
             if not field is None:
                 if verbose:
