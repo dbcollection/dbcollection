@@ -19,7 +19,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Detection(BaseTask):
-    """UCF-Sports action detection preprocessing functions """
+    """UCF-Sports action detection preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'detection'
@@ -142,7 +142,7 @@ class Detection(BaseTask):
                         image_filenames = [fname for fname in all_files if fname.endswith('.jpg')]
 
                     # add the directory path to the image filenames
-                    image_filenames = [os.path.join(self.activities_dir, activity, video, fname) for fname in image_filenames]
+                    image_filenames = [os.path.join(self.data_path, self.activities_dir, activity, video, fname) for fname in image_filenames]
                     image_filenames.sort()
 
                     # load annotations from the .txt files
