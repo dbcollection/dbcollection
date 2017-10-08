@@ -12,9 +12,8 @@ from dbcollection.core.cache import CacheManager
 def get_dirs(cache_manager, name, data_dir):
     """Parse data directory and cache save path."""
     if data_dir is None or data_dir is '':
-        data_dir_ = os.path.join(cache_manager.cache_dir, name, 'data')
+        data_dir_ = os.path.join(cache_manager.download_dir, name, 'data')
     else:
-        #assert os.path.isdir(data_dir), 'Must insert a valid path: data_dir={}'.format(data_dir)
         if not os.path.exists(data_dir):
             print('Creating save directory in disk: ' + data_dir)
             os.makedirs(data_dir)
