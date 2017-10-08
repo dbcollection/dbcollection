@@ -17,10 +17,10 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Keypoints(BaseTask):
-    """MPII Keypoints preprocessing functions """
+    """MPII Keypoints preprocessing functions."""
 
     # metadata filename
-    filename_h5 = 'keypoint'
+    filename_h5 = 'keypoint_clean'
 
     is_full = False
 
@@ -94,7 +94,7 @@ class Keypoints(BaseTask):
                 }
 
             # image annots
-            image_filename = os.path.join('images', str(annotations['RELEASE'][0][0][0][0][ifile][0][0][0][0][0]))
+            image_filename = os.path.join(self.data_path, 'images', str(annotations['RELEASE'][0][0][0][0][ifile][0][0][0][0][0]))
 
             if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
                 frame_sec = int(annotations['RELEASE'][0][0][0][0][ifile][2][0][0])
@@ -251,35 +251,35 @@ class Keypoints(BaseTask):
             print('> Adding data to source group:')
             prgbar = progressbar.ProgressBar(max_value=len(data_))
 
-        hdf5_write_data(hdf5_handler, 'videonames', str2ascii(videonames), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'keypoint_names', str2ascii(self.keypoints_labels), dtype=np.uint8, fillvalue=0)
+        hdf5_handler["videonames"] = str2ascii(videonames)
+        hdf5_handler["keypoint_names"] = str2ascii(self.keypoints_labels)
 
         for i, annot in enumerate(data_):
             file_grp = hdf5_handler.create_group(str(i))
-            hdf5_write_data(file_grp, 'image_filename', str2ascii(annot["image_filename"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(file_grp, 'frame_sec', np.array(annot["frame_sec"], dtype=np.int32), fillvalue=0)
-            hdf5_write_data(file_grp, 'video_idx', np.array(annot["video_idx"], dtype=np.int32), fillvalue=0)
-            hdf5_write_data(file_grp, 'single_person_id', np.array(annot["single_person"], dtype=np.uint8), fillvalue=0)
+            file_grp['image_filename'] = str2ascii(annot["image_filename"])
+            file_grp['frame_sec'] = np.array(annot["frame_sec"], dtype=np.int32)
+            file_grp['video_idx'] = np.array(annot["video_idx"], dtype=np.int32)
+            file_grp['single_person_id'] = np.array(annot["single_person"], dtype=np.uint8)
 
             activity_grp = file_grp.create_group("activity")
-            hdf5_write_data(activity_grp, 'category_name', str2ascii(annot["activity"]["cat_name"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(activity_grp, 'activity_name', str2ascii(annot["activity"]["act_name"]), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(activity_grp, 'activity_id', np.array(annot["activity"]["act_id"], dtype=np.int32), fillvalue=-1)
+            activity_grp['category_name'] = str2ascii(annot["activity"]["cat_name"])
+            activity_grp['activity_name'] = str2ascii(annot["activity"]["act_name"])
+            activity_grp['activity_id'] = np.array(annot["activity"]["act_id"], dtype=np.int32)
 
             if any(annot["poses_annotations"]):
                 pose_annot_grp = file_grp.create_group("pose_annotations")
                 for j in range(len(annot["poses_annotations"])):
                     pose_grp = pose_annot_grp.create_group(str(j))
-                    hdf5_write_data(pose_grp, 'scale', np.array(annot["poses_annotations"][j]["scale"], dtype=np.float), fillvalue=-1)
-                    hdf5_write_data(pose_grp, 'objpos/x', np.array(annot["poses_annotations"][j]["objpos"]["x"], dtype=np.float), fillvalue=-1)
-                    hdf5_write_data(pose_grp, 'objpos/y', np.array(annot["poses_annotations"][j]["objpos"]["y"], dtype=np.float), fillvalue=-1)
+                    pose_grp["scale"] = np.array(annot["poses_annotations"][j]["scale"], dtype=np.float)
+                    pose_grp["objpos/x"] = np.array(annot["poses_annotations"][j]["objpos"]["x"], dtype=np.float)
+                    pose_grp["objpos/y"] = np.array(annot["poses_annotations"][j]["objpos"]["y"], dtype=np.float)
 
                     if "x1" in annot["poses_annotations"][j]:
-                        hdf5_write_data(pose_grp, 'x1', np.array(annot["poses_annotations"][j]["x1"], dtype=np.float), fillvalue=-1)
-                        hdf5_write_data(pose_grp, 'y1', np.array(annot["poses_annotations"][j]["y1"], dtype=np.float), fillvalue=-1)
-                        hdf5_write_data(pose_grp, 'x2', np.array(annot["poses_annotations"][j]["x2"], dtype=np.float), fillvalue=-1)
-                        hdf5_write_data(pose_grp, 'y2', np.array(annot["poses_annotations"][j]["y2"], dtype=np.float), fillvalue=-1)
-                        hdf5_write_data(pose_grp, 'keypoints', np.array(annot["poses_annotations"][j]["keypoints"], dtype=np.float), fillvalue=-1)
+                        pose_grp["x1"] = np.array(annot["poses_annotations"][j]["x1"], dtype=np.float)
+                        pose_grp["y1"] = np.array(annot["poses_annotations"][j]["y1"], dtype=np.float)
+                        pose_grp["x2"] = np.array(annot["poses_annotations"][j]["x2"], dtype=np.float)
+                        pose_grp["y2"] = np.array(annot["poses_annotations"][j]["y2"], dtype=np.float)
+                        pose_grp["keypoints"] = np.array(annot["poses_annotations"][j]["keypoints"], dtype=np.float)
 
             # update progressbar
             if self.verbose:
@@ -428,10 +428,10 @@ class Keypoints(BaseTask):
 
 
 class KeypointsFull(Keypoints):
-    """MPII Keypoints (FULL original annotations) task class """
+    """MPII Keypoints (FULL original annotations) task class."""
 
     # metadata filename
-    filename_h5 = 'keypoint_full'
+    filename_h5 = 'keypoint'
 
     is_full = True
 
