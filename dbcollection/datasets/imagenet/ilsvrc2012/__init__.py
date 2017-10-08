@@ -17,7 +17,7 @@ default_task = 'classification'
 
 
 class Dataset(BaseDataset):
-    """ ImageNet ILSVRC 2012 preprocessing/downloading functions """
+    """ImageNet ILSVRC 2012 preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
     tasks = tasks
