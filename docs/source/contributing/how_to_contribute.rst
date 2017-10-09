@@ -1,16 +1,25 @@
 .. _how_to_contribute:
 
-How to Contribute
+How to contribute
 =================
 
-Contributing to dbcollection
-----------------------------
+This section describes a way to contribute to the project. You are welcome to provide with code or ideas
+to help improve the pool of functionality this package offers. You can also help by answering questions or
+helping out with documentation if you prefer.
 
-There are many ways to contribute to the dbcollection project: logging bugs,
+.. note::
+    The main goal behind contributing to this project is to provide tools for the community to help 
+    accelerate research and share code with others in a simple and easy way.
+
+
+Contributing to the project
+---------------------------
+
+There are many ways to contribute to the dbcollection project: finding bugs,
 submitting pull requests, reporting issues and creating suggestions.
 
 
-Using the Issue Tracker
+Using the issue tracker
 -----------------------
 
 The issue tracker is the preferred channel for :ref:`bug reports <submit_bugs>`,
@@ -21,7 +30,7 @@ to get feedback about your questions.
 
 .. _feature_request:
 
-Feature Requests
+Feature requests
 ----------------
 
 Feature requests are welcome to be filed. The purpose of feature requests is for others who are looking to implement
@@ -32,7 +41,7 @@ on your requests.
 
 .. _pull_request:
 
-Pull Requests
+Pull requests
 -------------
 
 Good pull requests - patches, improvements, new features, new datasets - are a fantastic help.
@@ -90,7 +99,7 @@ You can use the following process to create a pull request for this project:
 #. `Open a Pull Request <https://help.github.com/articles/about-pull-requests/>`_  with a clear title and description.
 
 
-Where to Contribute
+Where to contribute
 ^^^^^^^^^^^^^^^^^^^
 
 Check out the full issues list for a list of all potential areas for contributions (if any).
