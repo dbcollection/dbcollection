@@ -64,7 +64,7 @@ You can use the following process to create a pull request for this project:
     $ # Navigate to the newly cloned directory
     $ cd dbcollection
     $ # Assign the original repo to a remote called "upstream"
-    $ git remote add upstream https://github.com/farrajota/dbcollection.git
+    $ git remote add upstream https://github.com/dbcollection/dbcollection.git
 
 #. If you have cloned the repository a while ago, get the latest changes from upstream::
 
@@ -118,8 +118,8 @@ There are several reasons to not accept a pull request like:
   be discussed with and agreed upon by the feature owner.
 
 To improve the chances to get a pull request merged you should select an issue that is
-labelled with the `help-wanted <https://github.com/farrajota/dbcollection/labels/help-wanted>`_
-or `bug <https://github.com/farrajota/dbcollection/labels/bug>`_ labels. If the issue you want to
+labelled with the `help-wanted <https://github.com/dbcollection/dbcollection/labels/help-wanted>`_
+or `bug <https://github.com/dbcollection/dbcollection/labels/bug>`_ labels. If the issue you want to
 work on is not labelled with ``help-wanted`` or ``bug``, you can start a conversation with the
 issue owner asking whether an external contribution will be considered.
 

@@ -1,13 +1,13 @@
 .. _test_guidelines:
 
-Testing Guidelines
+Testing guidelines
 ==================
 
 First off - thank you for writing test cases - they're really important.
 
 Moreover, testing is an important part of submitted code. You should test your
 code by unit/functional tests following our testing guidelines. Note that we
-are using the ``pytest`` and the ``unittest.mock`` packages for testing, so
+are using the ``pytest`` and the ``mock`` packages for testing, so
 install these packages before writing your code::
 
     $ pip install pytest mock
@@ -19,7 +19,7 @@ Typical imports
 .. code-block:: python
 
     import pytest
-    from unittest import mock
+    import mock
     import dbcollection
 
 
@@ -37,7 +37,7 @@ Also, strive to fully test your code, but don't get too obsess over the coverage
 
 .. _unit_tests:
 
-Unit Tests
+Unit tests
 ----------
 
 We use ``pytest`` for unit testing our code. This framework
@@ -63,7 +63,7 @@ Besides the conventions required by ``pytest``, use these general testing guidel
 
 .. _functional_tests:
 
-Functional Tests
+Functional tests
 ----------------
 
 Functional tests are higher level tests that should be used to test
@@ -84,41 +84,19 @@ Please consider using the following convention when writting your tests:
     Test loading cifar10.
     """
 
-
-    from __future__ import print_function
     import os
-    import dbcollection.manager as dbc
-
-    # storage dir
-    data_dir = os.path.join(os.path.expanduser("~"), 'tmp', 'download_data')
+    from dbcollection.utils.test import TestBaseDB
 
 
-    # delete any existing cache data + dir on disk
-    print('\n==> dbcollection: config_cache()')
-    dbc.config_cache(delete_cache=True, is_test=True)
+    # setup
+    name = 'cifar10'
+    task = 'classification'
+    data_dir = ''
+    verbose = True
 
-    # download/setup dataset
-    print('\n==> dbcollection: load()')
-    cifar10 = dbc.load(name='cifar10',
-                       task='classification',
-                       data_dir=data_dir,
-                       verbose=True,
-                       is_test=True)
-
-    # print data from the loader
-    print('\n==> dbcollection: info()')
-    dbc.info(is_test=True)
-
-    # print data from the loader
-    print('\n######### info #########')
-    print('Dataset: ' + cifar10.name)
-    print('Task: ' + cifar10.task)
-    print('Data path: ' + cifar10.data_dir)
-    print('Metadata cache path: ' + cifar10.cache_path)
-
-    # wipe the generated cache data + dir from the disk
-    print('\n==> dbcollection: config_cache()')
-    dbc.config_cache(delete_cache=True, is_test=True)
+    # Run tester
+    tester = TestBaseDB(name, task, data_dir, verbose)
+    tester.run('load')
 
 
 Hook up travis-ci
