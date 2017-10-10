@@ -108,19 +108,83 @@ Task: detection
 Fields
 ^^^^^^
 
-- ``image_filenames``: image file path+names.
-- ``classes``: class names.
-- ``boxes``: bounding boxes in the format (x1,y1,x2,y2).
-- ``boxesv``: (valid) bounding boxes in the format (x1,y1,x2,y2).
-- ``id``: label ids.
-- ``occlusion``: occlusion percentage.
-- ``object_fields``: array of fields composing the object id list.
-- ``object_ids``: array of field ids.
-- ``list_image_filenames_per_class``: list of image per class.
-- ``list_boxes_per_image``: list of bounding boxes per image.
-- ``list_boxesv_per_image``: list of (valid) bounding boxes per image.
-- ``list_object_ids_per_image``: list of object ids per image.
-- ``list_objects_ids_per_class``: list of object ids per class.
+- ``image_filenames``: image file path+names
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+- ``classes``: class names
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+- ``boxes``: bounding boxes
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: bbox format (x1,y1,x2,y2)
+- ``boxesv``: bounding boxes (visible)
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: bbox format (x1,y1,x2,y2)
+- ``id``: label ids
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: False
+    - ``fill value``: -1
+- ``occlusion``: occlusion percentage
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+- ``object_fields``: list of field names of the object id list
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+    - ``note``: key field (*field name* aggregator)
+- ``object_ids``: list of field ids
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: key field (*field id* aggregator)
+- ``list_image_filenames_per_class``: list of image per class
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_boxes_per_image``: list of bounding boxes per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_boxesv_per_image``: list of (valid) bounding boxes per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_object_ids_per_image``: list of object ids per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_objects_ids_per_class``: list of object ids per class
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
 
 
 Task: detection_10x
@@ -163,19 +227,83 @@ Task: detection_10x
 Fields
 ^^^^^^
 
-- ``image_filenames``: image file path+names.
-- ``classes``: class names.
-- ``boxes``: bounding boxes in the format (x1,y1,x2,y2).
-- ``boxesv``: (valid) bounding boxes in the format (x1,y1,x2,y2).
-- ``id``: label ids.
-- ``occlusion``: occlusion percentage.
-- ``object_fields``: array of fields composing the object id list.
-- ``object_ids``: array of field ids.
-- ``list_image_filenames_per_class``: list of image per class.
-- ``list_boxes_per_image``: list of bounding boxes per image.
-- ``list_boxesv_per_image``: list of (valid) bounding boxes per image.
-- ``list_object_ids_per_image``: list of object ids per image.
-- ``list_objects_ids_per_class``: list of object ids per class.
+- ``image_filenames``: image file path+names
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+- ``classes``: class names
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+- ``boxes``: bounding boxes
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: bbox format (x1,y1,x2,y2)
+- ``boxesv``: bounding boxes (visible)
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: bbox format (x1,y1,x2,y2)
+- ``id``: label ids
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: False
+    - ``fill value``: -1
+- ``occlusion``: occlusion percentage
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+- ``object_fields``: list of field names of the object id list
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+    - ``note``: key field (*field name* aggregator)
+- ``object_ids``: list of field ids
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: key field (*field id* aggregator)
+- ``list_image_filenames_per_class``: list of image per class
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_boxes_per_image``: list of bounding boxes per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_boxesv_per_image``: list of (valid) bounding boxes per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_object_ids_per_image``: list of object ids per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_objects_ids_per_class``: list of object ids per class
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
 
 
 Task: detection_30x
@@ -218,19 +346,83 @@ Task: detection_30x
 Fields
 ^^^^^^
 
-- ``image_filenames``: image file path+names.
-- ``classes``: class names.
-- ``boxes``: bounding boxes in the format (x1,y1,x2,y2).
-- ``boxesv``: (valid) bounding boxes in the format (x1,y1,x2,y2).
-- ``id``: label ids.
-- ``occlusion``: occlusion percentage.
-- ``object_fields``: array of fields composing the object id list.
-- ``object_ids``: array of field ids.
-- ``list_image_filenames_per_class``: list of image per class.
-- ``list_boxes_per_image``: list of bounding boxes per image.
-- ``list_boxesv_per_image``: list of (valid) bounding boxes per image.
-- ``list_object_ids_per_image``: list of object ids per image.
-- ``list_objects_ids_per_class``: list of object ids per class.
+- ``image_filenames``: image file path+names
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+- ``classes``: class names
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+- ``boxes``: bounding boxes
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: bbox format (x1,y1,x2,y2)
+- ``boxesv``: bounding boxes (visible)
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: bbox format (x1,y1,x2,y2)
+- ``id``: label ids
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: False
+    - ``fill value``: -1
+- ``occlusion``: occlusion percentage
+    - ``available in``: train, test
+    - ``dtype``: np.float
+    - ``is padded``: False
+    - ``fill value``: -1
+- ``object_fields``: list of field names of the object id list
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+    - ``note``: key field (*field name* aggregator)
+- ``object_ids``: list of field ids
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: key field (*field id* aggregator)
+- ``list_image_filenames_per_class``: list of image per class
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_boxes_per_image``: list of bounding boxes per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_boxesv_per_image``: list of (valid) bounding boxes per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_object_ids_per_image``: list of object ids per image
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
+- ``list_objects_ids_per_class``: list of object ids per class
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
 
 
 Disclaimer

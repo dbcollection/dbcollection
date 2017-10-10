@@ -26,7 +26,7 @@ Properties
         - ``primary use``: image classification
         - ``description``: Contains image tensors and label annotations for image classification.
         - ``sets``: train, test
-        - ``metadata file size``: 178,3 MB
+        - ``metadata file size in disk``: 178,3 MB
         - ``has annotations``: **yes**
             - ``which``:
                 - labels for each image class/category.
@@ -61,12 +61,41 @@ Task: classification
 Fields
 ^^^^^^
 
-- ``classes``: class descriptions.
-- ``images``: images array.
-- ``labels``: class ids.
-- ``object_fields``: list of fields composing the object id list.
-- ``object_ids``: list of field ids.
-- ``list_images_per_class``: list of image ids per class.
+- ``classes``: class names
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+- ``images``: images tensor
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: False
+    - ``fill value``: -1
+- ``labels``: class ids
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: False
+    - ``fill value``: -1
+- ``object_fields``: list of field names of the object id list
+    - ``available in``: train, test
+    - ``dtype``: np.uint8
+    - ``is padded``: True
+    - ``fill value``: 0
+    - ``note``: strings stored in ASCII format
+    - ``note``: key field (*field name* aggregator)
+- ``object_ids``: list of field ids
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: False
+    - ``fill value``: -1
+    - ``note``: key field (*field id* aggregator)
+- ``list_images_per_class``: list of image ids per class
+    - ``available in``: train, test
+    - ``dtype``: np.int32
+    - ``is padded``: True
+    - ``fill value``: -1
+    - ``note``: pre-ordered list
 
 
 Disclaimer
