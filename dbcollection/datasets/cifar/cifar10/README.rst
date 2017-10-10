@@ -12,6 +12,7 @@ Use cases
 
 Image classification.
 
+
 Properties
 ----------
 
@@ -61,6 +62,7 @@ Fields
 - ``object_fields``: list of fields composing the object id list.
 - ``object_ids``: list of field ids.
 - ``list_images_per_class``: list of image ids per class.
+
 
 Disclaimer
 ----------
