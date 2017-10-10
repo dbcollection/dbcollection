@@ -18,7 +18,7 @@ Properties
 ==========
 
 - ``name``: cifar10
-- ``tasks``: classification
+- ``tasks``: classification **(default)**
 - ``keywords``: image_processing, classification
 - ``sets``: train, test
 - ``description``: Contains image tensors and label annotations for image classification.

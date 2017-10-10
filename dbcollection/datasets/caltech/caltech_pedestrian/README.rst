@@ -23,7 +23,7 @@ Properties
 ==========
 
 - ``name``: caltech_pedestrian
-- ``tasks``: detection, detection_10x, detection_30x
+- ``tasks``: detection **(default)**, detection_10x, detection_30x
 - ``keywords``: image_processing, detection, pedestrian
 - ``sets``: train, test
 - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
