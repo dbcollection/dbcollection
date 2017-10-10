@@ -5,9 +5,9 @@ COCO Keypoints 2016 process functions.
 
 from __future__ import print_function, division
 import os
+from collections import OrderedDict
 import numpy as np
 import progressbar
-from collections import OrderedDict
 
 from dbcollection.core.db import BaseTask
 
@@ -20,7 +20,7 @@ from .load_data_test import load_data_test
 
 
 class Keypoints2016(BaseTask):
-    """ COCO Keypoints (2016) preprocessing functions """
+    """COCO Keypoints (2016) preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'keypoint_2016'
@@ -582,7 +582,10 @@ class Keypoints2016(BaseTask):
                                                (nrows, ncols),
                                                dtype=np.float,
                                                chunks=True,
+                                               compression="gzip",
+                                               compression_opts=4,
                                                fillvalue=-1)
+
             if self.verbose:
                 print('   -- Saving segmentation field to disk (this will take some time to finish)')
                 prgbar = progressbar.ProgressBar(max_value=nrows)
