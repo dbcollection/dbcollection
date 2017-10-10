@@ -1,5 +1,6 @@
 .. _cifar_10_readme:
 
+========
 CIFAR-10
 ========
 
@@ -8,13 +9,13 @@ with 6000 images per class. There are 50000 training images and 10000 test image
 
 
 Use cases
----------
+=========
 
 Image classification.
 
 
 Properties
-----------
+==========
 
 - ``name``: cifar10
 - ``tasks``: classification
@@ -31,7 +32,10 @@ Properties
 
 
 Metadata structure (HDF5)
--------------------------
+=========================
+
+Task: classification
+--------------------
 
 ::
 
@@ -65,7 +69,7 @@ Fields
 
 
 Disclaimer
-----------
+==========
 
 All rights reserved to the original creators of **CIFAR-10**.
 
