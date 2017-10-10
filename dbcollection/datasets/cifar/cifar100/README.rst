@@ -21,17 +21,18 @@ Properties
 ==========
 
 - ``name``: cifar100
-- ``tasks``: classification **(default)**
 - ``keywords``: image_processing, classification
-- ``sets``: train, test
-- ``description``: Contains image tensors and label annotations for image classification.
-- ``is downloadable``: **yes**
 - ``dataset size``: 355,3 MB
-- ``metadata file size``:
-    - **classification**: 177,8 MB
-- ``has annotations``: **yes**
-    - ``which``:
-        - labels for each image class/category.
+- ``is downloadable``: **yes**
+- ``tasks``:
+    - classification: **(default)**
+        - ``primary use``: image classification
+        - ``description``: Contains image tensors and label annotations for image classification.
+        - ``sets``: train, test
+        - ``metadata file size``: 177,8 MB
+        - ``has annotations``: **yes**
+            - ``which``:
+                - labels for each image class/category.
 
 
 Metadata structure (HDF5)

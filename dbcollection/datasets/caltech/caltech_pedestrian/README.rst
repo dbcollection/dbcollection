@@ -23,21 +23,40 @@ Properties
 ==========
 
 - ``name``: caltech_pedestrian
-- ``tasks``: detection **(default)**, detection_10x, detection_30x
 - ``keywords``: image_processing, detection, pedestrian
-- ``sets``: train, test
-- ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
-- ``is downloadable``: **yes**
 - ``dataset size``: 11,9 GB
-- ``metadata file size``:
-    - **detection**: 728,4 kB
-    - **detection_10x**: 6,2 MB
-    - **detection_30x**: 17,4 MB
-- ``has annotations``: **yes**
-    - ``which``:
-        - labels for each class/category.
-        - bounding box of pedestrians.
-        - occlusion % of annotated pedestrians.
+- ``is downloadable``: **yes**
+- ``tasks``:
+    - detection: **(default)**
+        - ``primary use``: object detection
+        - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
+        - ``sets``: train, test
+        - ``metadata file size``: 728,4 kB
+        - ``has annotations``: **yes**
+            - ``which``:
+                - labels for each class/category.
+                - bounding box of pedestrians.
+                - occlusion % of annotated pedestrians.
+    - detection_10x:
+        - ``primary use``: object detection
+        - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
+        - ``sets``: train, test
+        - ``metadata file size``: 6,2 MB
+        - ``has annotations``: **yes**
+            - ``which``:
+                - labels for each class/category.
+                - bounding box of pedestrians.
+                - occlusion % of annotated pedestrians.
+    - detection_30x:
+        - ``primary use``: object detection
+        - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
+        - ``sets``: train, test
+        - ``metadata file size``: 17,4 MB
+        - ``has annotations``: **yes**
+            - ``which``:
+                - labels for each class/category.
+                - bounding box of pedestrians.
+                - occlusion % of annotated pedestrians.
 
 
 .. note:
