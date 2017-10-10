@@ -41,20 +41,20 @@ Task: classification
 
     /
     ├── train/
-    │   ├── classes        # dtype=numpy.uint8, shape=(10,11)  (note: string in ASCII format)
-    │   ├── images         # dtype=numpy.uint8, shape=(50000,32,32,3)
-    │   ├── labels         # dtype=numpy.uint8, shape=(50000,)
-    │   ├── object_fields  # dtype=numpy.uint8, shape=(2,8)    (note: string in ASCII format)
-    │   ├── object_ids     # dtype=numpy.int32, shape=(50000,2)
-    │   └── list_images_per_class    # dtype=numpy.int32, shape=(10,5000))
+    │   ├── classes        # dtype=np.uint8, shape=(10,11)  (note: string in ASCII format)
+    │   ├── images         # dtype=np.uint8, shape=(50000,32,32,3)
+    │   ├── labels         # dtype=np.uint8, shape=(50000,)
+    │   ├── object_fields  # dtype=np.uint8, shape=(2,8)    (note: string in ASCII format)
+    │   ├── object_ids     # dtype=np.int32, shape=(50000,2)
+    │   └── list_images_per_class   # dtype=np.int32, shape=(10,5000))
     │
     └── test/
-        ├── classes        # dtype=numpy.uint8, shape=(10,11)  (note: string in ASCII format)
-        ├── images         # dtype=numpy.uint8, shape=(10000,32,32,3)
-        ├── labels         # dtype=numpy.uint8, shape=(10000,)
-        ├── object_fields  # dtype=numpy.uint8, shape=(2,8)    (note: string in ASCII format)
-        ├── object_ids     # dtype=numpy.int32, shape=(10000,2)
-        └── list_images_per_class    # dtype=numpy.int32, shape=(10,1000))
+        ├── classes        # dtype=np.uint8, shape=(10,11)  (note: string in ASCII format)
+        ├── images         # dtype=np.uint8, shape=(10000,32,32,3)
+        ├── labels         # dtype=np.uint8, shape=(10000,)
+        ├── object_fields  # dtype=np.uint8, shape=(2,8)    (note: string in ASCII format)
+        ├── object_ids     # dtype=np.int32, shape=(10000,2)
+        └── list_images_per_class   # dtype=np.int32, shape=(10,1000))
 
 
 Fields
