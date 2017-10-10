@@ -31,7 +31,7 @@ Properties
         - ``primary use``: object detection
         - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
         - ``sets``: train, test
-        - ``metadata file size``: 728,4 kB
+        - ``metadata file size in disk``: 728,4 kB
         - ``has annotations``: **yes**
             - ``which``:
                 - labels for each class/category.
@@ -41,7 +41,7 @@ Properties
         - ``primary use``: object detection
         - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
         - ``sets``: train, test
-        - ``metadata file size``: 6,2 MB
+        - ``metadata file size in disk``: 6,2 MB
         - ``has annotations``: **yes**
             - ``which``:
                 - labels for each class/category.
@@ -51,7 +51,7 @@ Properties
         - ``primary use``: object detection
         - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
         - ``sets``: train, test
-        - ``metadata file size``: 17,4 MB
+        - ``metadata file size in disk``: 17,4 MB
         - ``has annotations``: **yes**
             - ``which``:
                 - labels for each class/category.
@@ -167,7 +167,7 @@ Fields
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
-- ``list_boxesv_per_image``: list of (valid) bounding boxes per image
+- ``list_boxesv_per_image``: list of (visible) bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
@@ -286,7 +286,7 @@ Fields
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
-- ``list_boxesv_per_image``: list of (valid) bounding boxes per image
+- ``list_boxesv_per_image``: list of (visible) bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
@@ -405,7 +405,7 @@ Fields
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
-- ``list_boxesv_per_image``: list of (valid) bounding boxes per image
+- ``list_boxesv_per_image``: list of (visible) bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
