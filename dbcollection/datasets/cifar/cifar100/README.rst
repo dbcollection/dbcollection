@@ -1,5 +1,6 @@
 .. _cifar_100_readme:
 
+=========
 CIFAR-100
 =========
 
@@ -11,13 +12,13 @@ label (the superclass to which it belongs).
 
 
 Use cases
----------
+=========
 
 Image classification.
 
 
 Properties
-----------
+==========
 
 - ``name``: cifar100
 - ``tasks``: classification
@@ -34,7 +35,10 @@ Properties
 
 
 Metadata structure (HDF5)
--------------------------
+=========================
+
+Task: classification
+--------------------
 
 ::
 
@@ -77,7 +81,7 @@ Fields
 
 
 Disclaimer
-----------
+==========
 
 All rights reserved to the original creators of **CIFAR-100**.
 
