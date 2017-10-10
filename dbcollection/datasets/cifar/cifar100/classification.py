@@ -95,47 +95,9 @@ class Classification(BaseTask):
         return load_pickle(os.path.join(path, self.data_files[0]))
 
 
-    def load_data_train(self):
+    def load_data_set(self, is_test):
         """
-        Load train data.
-        """
-        # merge the path with the extracted folder name
-        data_path_ = os.path.join(self.data_path, 'cifar-100-python')
-
-        # load classes name file
-        class_names = self.get_class_names(data_path_)
-
-        # load train data files
-        train_batch = load_pickle(os.path.join(data_path_, self.data_files[1]))
-
-        train_data = train_batch['data'].reshape((50000, 3, 32, 32))
-        train_data = np.transpose(train_data, (0, 2, 3, 1)) # NxHxWxC
-        train_labels = np.array(train_batch['fine_labels'], dtype=np.uint8)
-        train_coarse_labels = np.array(train_batch['coarse_labels'], dtype=np.uint8)
-        train_object_list = self.get_object_list(train_data, train_labels, train_coarse_labels)
-
-        # organize list of image indexes per class
-        train_images_per_class = []
-        labels = np.unique(train_labels)
-        for label in labels:
-            images_idx = np.where(train_labels == label)[0].tolist()
-            train_images_per_class.append(images_idx)
-
-        return {
-            "object_fields": str2ascii(['images', 'classes', 'superclasses']),
-            "data": train_data,
-            "class_name": str2ascii(self.finer_classes),
-            "coarse_class_name": str2ascii(self.coarse_classes),
-            "labels": train_labels,
-            "coarse_labels": train_coarse_labels,
-            "object_id_list": train_object_list,
-            "list_images_per_class": np.array(pad_list(train_images_per_class, 1), dtype=np.int32)
-        }
-
-
-    def load_data_test(self):
-        """
-        Load test data.
+        Load train/test data.
         """
         # merge the path with the extracted folder name
         data_path_ = os.path.join(self.data_path, 'cifar-100-python')
@@ -144,30 +106,42 @@ class Classification(BaseTask):
         class_names = self.get_class_names(data_path_)
 
         # load test data file
-        test_batch = load_pickle(os.path.join(data_path_, self.data_files[2]))
+        if is_test:
+            batch = load_pickle(os.path.join(data_path_, self.data_files[2]))
+            data = batch['data'].reshape(10000, 3, 32, 32)
+        else:
+            batch = load_pickle(os.path.join(data_path_, self.data_files[1]))
+            data = batch['data'].reshape(50000, 3, 32, 32)
 
-        test_data = test_batch['data'].reshape(10000, 3, 32, 32)
-        test_data = np.transpose(test_data, (0, 2, 3, 1)) # NxHxWxC
-        test_labels = np.array(test_batch['fine_labels'], dtype=np.uint8)
-        test_coarse_labels = np.array(test_batch['coarse_labels'], dtype=np.uint8)
-        test_object_list = self.get_object_list(test_data, test_labels, test_coarse_labels)
+        data = np.transpose(data, (0, 2, 3, 1)) # NxHxWxC
+        labels = np.array(batch['fine_labels'], dtype=np.uint8)
+        coarse_labels = np.array(batch['coarse_labels'], dtype=np.uint8)
+        object_list = self.get_object_list(data, labels, coarse_labels)
 
         # organize list of image indexes per class
-        test_images_per_class = []
-        labels = np.unique(test_labels)
-        for label in labels:
-            images_idx = np.where(test_labels == label)[0].tolist()
-            test_images_per_class.append(images_idx)
+        images_per_class = []
+        unique_labels = np.unique(labels)
+        for label in unique_labels:
+            images_idx = np.where(labels == label)[0].tolist()
+            images_per_class.append(images_idx)
+
+        # organize list of image indexes per superclass
+        images_per_superclass = []
+        unique_coarse_labels = np.unique(coarse_labels)
+        for coarse_label in unique_coarse_labels:
+            images_idx = np.where(coarse_labels == coarse_label)[0].tolist()
+            images_per_superclass.append(images_idx)
 
         return {
             "object_fields": str2ascii(['images', 'classes', 'superclasses']),
-            "data": test_data,
+            "data": data,
             "class_name": str2ascii(self.finer_classes),
             "coarse_class_name": str2ascii(self.coarse_classes),
-            "labels": test_labels,
-            "coarse_labels": test_coarse_labels,
-            "object_id_list": test_object_list,
-            "list_images_per_class": np.array(pad_list(test_images_per_class, 1), dtype=np.int32)
+            "labels": labels,
+            "coarse_labels": coarse_labels,
+            "object_id_list": object_list,
+            "list_images_per_class": np.array(pad_list(images_per_class, 1), dtype=np.int32),
+            "list_images_per_superclass": np.array(pad_list(images_per_superclass, 1), dtype=np.int32),
         }
 
 
@@ -176,23 +150,23 @@ class Classification(BaseTask):
         Load the data from the files.
         """
         # train set
-        yield {"train" : self.load_data_train()}
+        yield {"train" : self.load_data_set(False)}
 
         # test set
-        yield {"test" : self.load_data_test()}
+        yield {"test" : self.load_data_set(True)}
 
 
-    def add_data_to_source(self, hdf5_handler, data, set_name=None):
-        """
-        Store data annotations in a nested tree fashion.
-
-        It closely follows the tree structure of the data.
-        """
-        hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'superclasses', data["coarse_class_name"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'coarse_labels', data["coarse_labels"], dtype=np.uint8, fillvalue=-1)
+    #def add_data_to_source(self, hdf5_handler, data, set_name=None):
+    #    """
+    #    Store data annotations in a nested tree fashion.
+    #
+    #    It closely follows the tree structure of the data.
+    #    """
+    #    hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
+    #    hdf5_write_data(hdf5_handler, 'superclasses', data["coarse_class_name"], dtype=np.uint8, fillvalue=0)
+    #    hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
+    #    hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=-1)
+    #    hdf5_write_data(hdf5_handler, 'coarse_labels', data["coarse_labels"], dtype=np.uint8, fillvalue=-1)
 
 
     def add_data_to_default(self, hdf5_handler, data, set_name=None):
@@ -208,4 +182,5 @@ class Classification(BaseTask):
         hdf5_write_data(hdf5_handler, 'coarse_labels', data["coarse_labels"], dtype=np.uint8, fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'object_ids', data["object_id_list"], dtype=np.int32, fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'object_fields', data["object_fields"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'list_images_per_class', data["list_images_per_class"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'list_images_per_class', data["list_images_per_class"], dtype=np.int32, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'list_images_per_superclass', data["list_images_per_superclass"], dtype=np.int32, fillvalue=0)
