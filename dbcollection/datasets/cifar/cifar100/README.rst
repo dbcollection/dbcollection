@@ -44,26 +44,26 @@ Task: classification
 
     /
     ├── train/
-    │   ├── classes        # dtype=numpy.uint8, shape=(100,18)  (note: string in ASCII format)
-    │   ├── superclasses   # dtype=numpy.uint8, shape=(20,31)   (note: string in ASCII format)
-    │   ├── images         # dtype=numpy.uint8, shape=(50000,32,32,3)
-    │   ├── labels         # dtype=numpy.uint8, shape=(50000,)
-    │   ├── coarse_labels  # dtype=numpy.uint8, shape=(50000,)
-    │   ├── object_fields  # dtype=numpy.uint8, shape=(3,13)    (note: string in ASCII format)
-    │   ├── object_ids     # dtype=numpy.int32, shape=(50000,3)
-    │   ├── list_images_per_class    # dtype=numpy.int32, shape=(100,500))
-    │   └── list_images_per_superclass    # dtype=numpy.int32, shape=(20,2500))
+    │   ├── classes        # dtype=np.uint8, shape=(100,18)  (note: string in ASCII format)
+    │   ├── superclasses   # dtype=np.uint8, shape=(20,31)   (note: string in ASCII format)
+    │   ├── images         # dtype=np.uint8, shape=(50000,32,32,3)
+    │   ├── labels         # dtype=np.uint8, shape=(50000,)
+    │   ├── coarse_labels  # dtype=np.uint8, shape=(50000,)
+    │   ├── object_fields  # dtype=np.uint8, shape=(3,13)    (note: string in ASCII format)
+    │   ├── object_ids     # dtype=np.int32, shape=(50000,3)
+    │   ├── list_images_per_class        # dtype=np.int32, shape=(100,500))
+    │   └── list_images_per_superclass   # dtype=np.int32, shape=(20,2500))
     │
     └── test/
-        ├── classes        # dtype=numpy.uint8, shape=(100,18)  (note: string in ASCII format)
-        ├── superclasses   # dtype=numpy.uint8, shape=(20,31)   (note: string in ASCII format)
-        ├── images         # dtype=numpy.uint8, shape=(10000,32,32,3)
-        ├── labels         # dtype=numpy.uint8, shape=(10000,)
-        ├── coarse_labels  # dtype=numpy.uint8, shape=(10000,)
-        ├── object_fields  # dtype=numpy.uint8, shape=(3,13)    (note: string in ASCII format)
-        ├── object_ids     # dtype=numpy.int32, shape=(10000,3)
-        ├── list_images_per_class         # dtype=numpy.int32, shape=(100,100))
-        └── list_images_per_superclass    # dtype=numpy.int32, shape=(20,500))
+        ├── classes        # dtype=np.uint8, shape=(100,18)  (note: string in ASCII format)
+        ├── superclasses   # dtype=np.uint8, shape=(20,31)   (note: string in ASCII format)
+        ├── images         # dtype=np.uint8, shape=(10000,32,32,3)
+        ├── labels         # dtype=np.uint8, shape=(10000,)
+        ├── coarse_labels  # dtype=np.uint8, shape=(10000,)
+        ├── object_fields  # dtype=np.uint8, shape=(3,13)    (note: string in ASCII format)
+        ├── object_ids     # dtype=np.int32, shape=(10000,3)
+        ├── list_images_per_class        # dtype=np.int32, shape=(100,100))
+        └── list_images_per_superclass   # dtype=np.int32, shape=(20,500))
 
 
 Fields
