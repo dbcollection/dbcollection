@@ -231,6 +231,7 @@ class Recognition(BaseTask):
 
         For each field, the data is organized into a single big matrix.
         """
+        hdf5_write_data(hdf5_handler, 'activities', data["activities"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'videos', data["videos"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'video_filenames', data["video_filenames"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'image_filenames', data["image_filenames"], dtype=np.uint8, fillvalue=0)
