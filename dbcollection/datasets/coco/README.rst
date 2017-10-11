@@ -12,7 +12,7 @@ instances  in  328,000  images.
 Use cases
 =========
 
-Object detection, segmentation, captioning and human pose estimation.
+Object detection, segmentation, captioning and human body joint detection.
 
 
 Properties
