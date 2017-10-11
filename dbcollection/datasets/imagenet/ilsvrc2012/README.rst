@@ -35,7 +35,6 @@ Properties
         - ``metadata file size in disk``: 6,8 MB
         - ``has annotations``: **yes**
             - ``which``:
-                - image filenames
                 - labels for each image class/category.
                 - descriptions for each class/category.
     - raw256:
@@ -45,7 +44,6 @@ Properties
         - ``metadata file size in disk``: 6,8 MB
         - ``has annotations``: **yes**
             - ``which``:
-                - image filenames
                 - labels for each image class/category.
                 - descriptions for each class/category.
 
