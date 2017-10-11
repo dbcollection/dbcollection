@@ -59,7 +59,7 @@ class Keypoints(BaseTask):
             width, height, _ = annot[4][0].tolist()
             moviename = annot[1][0]
             filename = os.path.join(self.data_path, 'FLIC', 'images', annot[3][0])
-            torso_box = annot[6][0].tolist(),  # [x1,y1,x2,y2]
+            torso_box = annot[6][0].squeeze().tolist(),  # [x1,y1,x2,y2]
             parts = [
                 # [x, y, is_visible]
                 [annot[2][0][0], annot[2][1][0], 1],    #-- 1, Left_Shoulder
@@ -168,13 +168,12 @@ class Keypoints(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-
         hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'movienames', str2ascii(movienames), dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'width', np.array(width, dtype=np.int32), fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'height', np.array(height, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'torso_boxes', np.array(torso_boxes, dtype=np.float), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'torso_boxes', np.array(torso_boxes, dtype=np.float).squeeze(), fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'keypoints', np.array(keypoints, dtype=np.float), fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'keypoint_names', str2ascii(self.keypoints_labels), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
