@@ -20,7 +20,7 @@ class Keypoints(BaseTask):
     """MPII Keypoints preprocessing functions."""
 
     # metadata filename
-    filename_h5 = 'keypoint_clean'
+    filename_h5 = 'keypoint'
 
     is_full = False
 
@@ -431,7 +431,7 @@ class KeypointsFull(Keypoints):
     """MPII Keypoints (FULL original annotations) task class."""
 
     # metadata filename
-    filename_h5 = 'keypoint'
+    filename_h5 = 'keypoint_full'
 
     is_full = True
 
