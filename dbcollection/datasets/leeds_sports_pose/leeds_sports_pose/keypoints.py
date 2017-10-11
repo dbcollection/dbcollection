@@ -171,7 +171,7 @@ class KeypointsOriginal(Keypoints):
         """
         Returns the paths of the annotation file and images folder.
         """
-        annot_filepath = annot_filepath = os.path.join(self.data_path, 'joints.mat')
+        annot_filepath = os.path.join(self.data_path, 'joints.mat')
         images_dir = os.path.join(self.data_path, 'images')
 
         return annot_filepath, images_dir
