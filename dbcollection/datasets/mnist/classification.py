@@ -150,5 +150,5 @@ class Classification(BaseTask):
         hdf5_write_data(hdf5_handler, 'images', data["images"], dtype=np.uint8, fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'labels', data=data["labels"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'object_fields', data["object_fields"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'object_ids', data["object_ids"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'object_ids', data["object_ids"], dtype=np.int32, fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'list_images_per_class', data["list_images_per_class"], dtype=np.int32, fillvalue=-1)
