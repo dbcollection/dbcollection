@@ -1,8 +1,8 @@
 .. _lspet_readme:
 
-=======================
+=================================
 LSPe - Leeds Sports Pose Extended
-=======================
+=================================
 
 The **Leeds Sports Pose extended** dataset contains 10,000 images gathered from Flickr
 searches for the tags 'parkour', 'gymnastics', and 'athletics' and consists of poses
