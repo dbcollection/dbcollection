@@ -1,5 +1,6 @@
 .. _feedback_channels:
 
+=================
 Feedback channels
 =================
 
@@ -14,7 +15,7 @@ This project wants to have its presence on more channels than on GitHub but, for
 
 
 `Github issues <https://github.com/dbcollection/dbcollection/issues>`_
-----------------------------------------------------------------------
+======================================================================
 
 `Github issues <https://github.com/dbcollection/dbcollection/issues>`_  should be used for bugs
 and feature requests. How to submit good bugs and feature requests is described in
@@ -27,7 +28,7 @@ and feature requests. How to submit good bugs and feature requests is described 
 
 ..
     `Stack Overflow <https://stackoverflow.com/questions/tagged/dbcollection>`_
-    ---------------------------------------------------------------------------
+    ===========================================================================
 
     `Stack overflow <https://stackoverflow.com/questions/tagged/dbcollection>`_  is one of
     the best places for getting high quality answers. Stack overflow questions without an answer are

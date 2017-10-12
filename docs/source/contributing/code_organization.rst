@@ -1,5 +1,6 @@
 .. _code_organization:
 
+=================
 Code organization
 =================
 
@@ -13,7 +14,7 @@ the :ref:`docs <documentation_sec>` and :ref:`notebooks <notebooks_sec>` directo
 
 
 dbcollection
-------------
+============
 
 The ``dbcollection/`` directory contains the main project's files. It is partitioned into four other
 directories where the :ref:`core api functions <core_subsec>`, :ref:`available datasets <datasets_subsec>`,
@@ -32,7 +33,7 @@ directories where the :ref:`core api functions <core_subsec>`, :ref:`available d
 .. _core_subsec:
 
 core/
-^^^^^
+-----
 
 All api methods and classes are stored in this folder.
 
@@ -40,7 +41,7 @@ All api methods and classes are stored in this folder.
 .. _datasets_subsec:
 
 datasets/
-^^^^^^^^^
+---------
 
 All datasets are stored in this dir, where each dataset is stored in a separate folder with the same name.
 Related datasets may be stored in different subfolders under the same dir. For more information see the `GitHub repository <https://github.com/dbcollection/dbcollection>`_.
@@ -49,7 +50,7 @@ Related datasets may be stored in different subfolders under the same dir. For m
 .. _tests_subsec:
 
 tests/
-^^^^^^
+------
 
 All tests are organized under the ``tests/`` directory by language and functionality. The project uses two
 types of tests to check for bugs: `unit tests <https://stackoverflow.com/questions/652292/what-is-unit-testing-and-how-do-you-do-it>`_
@@ -94,7 +95,7 @@ It has the following structure:
 .. _utils_subsec:
 
 utils/
-^^^^^^
+------
 
 The utility functions dir contains methods to load files, download urls, extract data, parse strings, manage cache data, etc.
 Additional functionality should be added in this folder.
@@ -103,7 +104,7 @@ Additional functionality should be added in this folder.
 .. _documentation_sec:
 
 Documentation
--------------
+=============
 
 The ``docs/`` directory contains the documentation files. We use `Sphinx <http://www.sphinx-doc.org/en/stable/>`_ to build
 our documentation and `Read The Docs <https://readthedocs.org/>`_ to host it.
@@ -121,7 +122,7 @@ The structure of ``docs/`` is similar to most docs using Sphinx:
 .. _notebooks_sec:
 
 Notebooks
----------
+=========
 
 The ``notebooks/`` directory contains tutorials/demos/guides on using ``dbcollection`` as a `IPython <https://ipython.org/ipython-doc/3/notebook/>`_/`Jupyter Notebook <http://jupyter.readthedocs.io/en/latest/install.html>`_.
 These notebooks show how to use the package and show how it can be integrated with your code/research without

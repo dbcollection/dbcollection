@@ -1,5 +1,6 @@
 .. _code_guidelines:
 
+=================
 Coding guidelines
 =================
 
@@ -13,7 +14,7 @@ all Python code. The following sections describe key aspects of how the code is 
 
 
 Cross-compatible code
----------------------
+=====================
 
 Not all functions are available between versions, so it's important to
 write code that will be compatible from Python 2.7 through the most
@@ -21,13 +22,13 @@ recent version of Python 3.
 
 
 Indentation
------------
+===========
 
 Use 4 spaces for identation. Don't use tabs.
 
 
 Names
------
+=====
 
 - Variables, functions, methods, packages, modules
     - ``lower_case_with_underscores``
@@ -41,7 +42,7 @@ Names
     - ``ALL_CAPS_WITH_UNDERSCORES``
 
 DocStrings
-----------
+==========
 
 We follow `Numpy's docstring style <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html>`_ for documenting methods and classes.
 For core API functions and methods, please try to follow as close as possible the conventions used in the code.
