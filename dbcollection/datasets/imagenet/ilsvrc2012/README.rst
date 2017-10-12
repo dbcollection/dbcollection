@@ -1,15 +1,15 @@
 .. _imagenet_ilsvrc2012_readme:
 
-===================
-ImageNet ILSVRC2012
-===================
+===================================================================
+ILSVRC2012 - Imagenet Large Scale Visual Recognition Challenge 2012
+===================================================================
 
 **ImageNet** is an image database organized according to the **WordNet** hierarchy
-(currently only the nouns), in which each node of the hierarchy is depicted by 
+(currently only the nouns), in which each node of the hierarchy is depicted by
 hundreds and thousands of images.
 
 The **Large Scale Visual Recognition Challenge 2012 (ILSVRC2012)** is a subset of
-the large hand-labeled ImageNet dataset (10,000,000 labeled images depicting 10,000+ object categories). 
+the large hand-labeled ImageNet dataset (10,000,000 labeled images depicting 10,000+ object categories).
 The training data is a subset of **ImageNet** containing the 1000 categories and 1.2 million images
 
 
