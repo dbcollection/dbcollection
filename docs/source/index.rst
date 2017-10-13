@@ -55,3 +55,8 @@ Contents:
    contributing/index
    license
 
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
