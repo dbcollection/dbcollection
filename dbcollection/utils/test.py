@@ -10,34 +10,32 @@ import dbcollection as dbc
 class TestBaseDB:
     """ Test Class for loading datasets.
 
+    Parameters
+    ----------
+    name : str
+        Name of the dataset.
+    task : str
+        Name of the task.
+    data_dir : str
+        Path of the dataset's data directory on disk.
+    verbose : bool, optional
+        Be verbose.
+
     Attributes
     ----------
     name : str
         Name of the dataset.
     task : str
         Name of the task.
-     data_dir : str
+    data_dir : str
         Path of the dataset's data directory on disk.
     verbose : bool
         Be verbose.
+
     """
 
     def __init__(self, name, task, data_dir, verbose=True):
-        """
-        Initialize class.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        task : str
-            Name of the task.
-         data_dir : str
-            Path of the dataset's data directory on disk.
-        verbose : bool, optional
-            Be verbose.
-
-        """
+        """Initialize class."""
         assert name, "Must insert input arg: name"
         assert task, "Must insert input arg: task"
         assert data_dir, "Must insert input arg: data_dir"
@@ -61,16 +59,28 @@ class TestBaseDB:
 
 
     def print_info(self, loader):
-        """Print information about the dataset to the screen"""
+        """Print information about the dataset to the screen
+
+        Parameters
+        ----------
+        loader : DataLoader
+            Data loader object of a dataset.
+        """
         print('\n######### info #########')
-        print('Dataset: ' + loader.name)
+        print('Dataset: ' + loader.db_name)
         print('Task: ' + loader.task)
         print('Data path: ' + loader.data_dir)
         print('Metadata cache path: ' + loader.cache_path)
 
 
     def load(self):
-        """Load dataset to memory"""
+        """Return a data loader object for a dataset.
+
+        Returns
+        -------
+        DataLoader
+            A data loader object of a dataset.
+        """
         print('\n==> dbcollection: load()')
         return dbc.load(name=self.name,
                         task=self.task,
@@ -80,7 +90,13 @@ class TestBaseDB:
 
 
     def download(self, extract_data=True):
-        """Download dataset to memory"""
+        """Download a dataset to disk.
+
+        Parameters
+        ----------
+        extract_data : bool
+            Flag signaling to extract data to disk (if True).
+        """
         print('\n==> dbcollection: download()')
         dbc.download(name=self.name,
                      data_dir=self.data_dir,
@@ -99,7 +115,18 @@ class TestBaseDB:
 
 
     def run(self, mode):
-        """Run the test script"""
+        """Run the test script.
+
+        Parameters
+        ----------
+        mode : str
+            Task name to execute.
+
+        Raises
+        ------
+        Exception
+            If an invalid mode was inserted.
+        """
         assert mode, 'Must insert input arg: mode'
 
         # delete all cache data + dir

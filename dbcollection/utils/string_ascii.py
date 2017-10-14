@@ -1,13 +1,13 @@
 """
-String-to-ascii and ascii-to-string convertion functions.
+String-to-ascii and ascii-to-string convertion methods.
 """
 
 
 import numpy as np
 
 
-def _str_to_ascii(input_str):
-    """Convert string to ascii numpy array.
+def str_to_ascii(input_str):
+    """Converts a string to an ascii encoded numpy array.
 
     Converts a single string of characters into a numpy array
     coded as ascii.
@@ -19,27 +19,27 @@ def _str_to_ascii(input_str):
 
     Returns
     -------
-    numpy.uint8
-       Single numpy array.
+    np.ndarray
+        Uni-dimensional array of char values encoded in ASCII format.
 
     Examples
     --------
     Convert a string to numpy array.
 
-    >>> from dbcollection.utils.string_ascii import _str_to_ascii
-    >>> _str_to_ascii('string1')
+    >>> from dbcollection.utils.string_ascii import str_to_ascii
+    >>> str_to_ascii('string1')
     array([115, 116, 114, 105, 110, 103,  49], dtype=uint8)
 
     """
     return np.array([ord(c) for c in input_str], dtype=np.uint8)
 
 
-def _ascii_to_str(input_array):
-    """Convert ascii numpy array to a string.
+def ascii_to_str(input_array):
+    """Converts an ascii encoded numpy array to a string.
 
     Parameters
     ----------
-    input_array : numpy.array
+    input_array : np.ndarray
         Input array vector (should be of type dtype=numpy.uint8)
 
     Returns
@@ -52,8 +52,8 @@ def _ascii_to_str(input_array):
     Convert a numpy array to string.
 
     >>> import numpy as np
-    >>> from dbcollection.utils.string_ascii import _ascii_to_str
-    >>> _ascii_to_str(np.array([115, 116, 114, 105, 110, 103,  49], dtype=uint8))
+    >>> from dbcollection.utils.string_ascii import ascii_to_str
+    >>> ascii_to_str(np.array([115, 116, 114, 105, 110, 103,  49], dtype=uint8))
     'string1'
 
     """
@@ -61,7 +61,7 @@ def _ascii_to_str(input_array):
 
 
 def convert_str_to_ascii(inp_str):
-    """Convert a list of strings into a numpy array (uint8).
+    """Convert a list of strings into an ascii encoded numpy array.
 
     Converts a string or list of strings to a numpy array. The array size is
     defined by the size of string plus one. This is needed for ascii to str
@@ -79,21 +79,21 @@ def convert_str_to_ascii(inp_str):
 
     Returns
     -------
-    numpy.uint8
-        Array containing all strings converted to numpy arrays in ascii format.
+    np.ndarray
+        Single/multi-dimensional array of ASCII encoded strings.
 
     Examples
     --------
-    Example1: Convert a string to ASCII as a `numpy` array.
+    Example1: Convert a string to a numpy array encoded into ASCII values.
 
-    >>> from dbcollection.utils.string_ascii import convert_str_to_ascii
-    >>> convert_str_to_ascii('string1')
+    >>> from dbcollection.utils.string_ascii import convertstr_to_ascii
+    >>> convertstr_to_ascii('string1')
     array([115, 116, 114, 105, 110, 103,  49,   0], dtype=uint8)
 
-    Example2: Convert a list of strings to ASCII as a `numpy` array.
+    Example2: Convert a list of lists into an ASCII array.
 
-    >>> from dbcollection.utils.string_ascii import convert_str_to_ascii
-    >>> convert_str_to_ascii(['string1', 'string2', 'string3'])
+    >>> from dbcollection.utils.string_ascii import convertstr_to_ascii
+    >>> convertstr_to_ascii(['string1', 'string2', 'string3'])
     array([[115, 116, 114, 105, 110, 103,  49,   0],
         [115, 116, 114, 105, 110, 103,  50,   0],
         [115, 116, 114, 105, 110, 103,  51,   0]], dtype=uint8)
@@ -111,7 +111,7 @@ def convert_str_to_ascii(inp_str):
 
     # iteratively copy data to the array
     for i, val in enumerate(inp_str):
-        ascii_array[i, :len(val)] = _str_to_ascii(val)
+        ascii_array[i, :len(val)] = str_to_ascii(val)
 
     if len(inp_str) > 1:
         return ascii_array
@@ -124,8 +124,8 @@ def convert_ascii_to_str(input_array):
 
     Parameters
     ----------
-    input_array : numpy.uint8
-        Numpy array in ascii format.
+    input_array : np.ndarray
+        Array of strings encoded in ASCII format.
 
     Returns
     -------
@@ -134,17 +134,17 @@ def convert_ascii_to_str(input_array):
 
     Examples
     --------
-    Convert a `numpy` array to string.
+    Convert a numpy array to a string.
 
-    >>> from dbcollection.utils.string_ascii import convert_ascii_to_str
+    >>> from dbcollection.utils.string_ascii import convertascii_to_str
     >>> import numpy as np
     >>> tensor = np.array([[115, 116, 114, 105, 110, 103, 49, 0]], dtype=np.uint8)  # ascii format of 'string1'
-    >>> convert_ascii_to_str(tensor)
+    >>> convertascii_to_str(tensor)
     ['string1']
 
     """
     list_str = input_array.tolist()
     if input_array.ndim > 1:
-        return [_ascii_to_str(list(filter(lambda x: x > 0, str_))) for str_ in list_str]
+        return [ascii_to_str(list(filter(lambda x: x > 0, str_))) for str_ in list_str]
     else:
-        return _ascii_to_str(list(filter(lambda x: x > 0, list_str)))
+        return ascii_to_str(list(filter(lambda x: x > 0, list_str)))

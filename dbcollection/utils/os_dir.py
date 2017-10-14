@@ -1,5 +1,5 @@
 """
-OS functions.
+This module contains methods for parsing directories
 """
 
 
@@ -22,7 +22,7 @@ def dir_get_size(dir_path):
     Parameters
     ----------
     dir_path : str
-        Directory path on disk.
+        Directory path.
 
     Returns
     -------
@@ -49,8 +49,8 @@ def construct_set_from_dir(dir_path, verbose=True):
     Parameters
     ----------
     dir_path : str
-        Directory path on disk to create the set structure.
-    verbose : bool
+        Directory path to create the set structure from.
+    verbose : bool, optional
         Prints messages to the screen (if True).
 
     Returns
@@ -111,8 +111,8 @@ def construct_dataset_from_dir(dir_path, verbose=True):
     Parameters
     ----------
     dir_path : str
-        Directory path on disk to create the dataset structure.
-    verbose : bool
+        Directory path to create the dataset structure from.
+    verbose : bool, optional
         Prints messages to the screen (if True).
 
     Returns
