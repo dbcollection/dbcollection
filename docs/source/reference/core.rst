@@ -15,6 +15,7 @@ API methods
 .. autofunction:: dbcollection.core.api.remove
 .. autofunction:: dbcollection.core.api.config_cache
 .. autofunction:: dbcollection.core.api.query
+.. autofunction:: dbcollection.core.api.info_cache
 .. autofunction:: dbcollection.core.api.info_datasets
 .. autofunction:: dbcollection.core.db.fetch_list_datasets
 
