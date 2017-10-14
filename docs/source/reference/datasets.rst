@@ -5,10 +5,7 @@ Datasets
 .. automodule:: dbcollection.datasets
 
 
-Constructors: Datasets
---------------------------------
-
-Constructors: Base classes
+Constructors: Classes
 --------------------------------
 
 BaseDataset
