@@ -1,4 +1,13 @@
-Reference Manual
+.. _reference_manual_index:
+
+================
+Reference manual
 ================
 
-TODO
+
+.. toctree::
+   :maxdepth: 2
+
+   core
+   datasets
+   utils

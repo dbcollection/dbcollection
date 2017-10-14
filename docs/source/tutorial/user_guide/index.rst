@@ -1,12 +1,11 @@
-User Guide
-==========
+.. _user_guide_index:
 
-TODO
+User guide
+==========
 
 .. toctree::
    :maxdepth: 1
 
-   getting_started
    managing_datasets
    fetching_data
    cache_management

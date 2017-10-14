@@ -1,4 +1,4 @@
-.. _fetching_data:
+.. _user_fetching_data:
 
 Fetching data
 =============

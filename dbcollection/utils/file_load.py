@@ -1,5 +1,5 @@
 """
-Data loading functions from files.
+Library to load different types of file into memory.
 """
 
 
@@ -19,8 +19,8 @@ def load_txt(fname, mode='r'):
     Parameters
     ----------
     fname : str
-        File name + path on disk.
-    mode : str
+        File name + path.
+    mode : str, optional
         File open mode.
 
     Returns
@@ -42,7 +42,7 @@ def load_matlab(fname):
     Parameters
     ----------
     fname : str
-        File name + path on disk.
+        File name + path.
 
     Returns
     -------
@@ -51,7 +51,7 @@ def load_matlab(fname):
 
     Raises
     ------
-    IOError
+    IOError, OSError
         If the file cannot be opened.
     """
     try:
@@ -66,7 +66,7 @@ def load_json(fname):
     Parameters
     ----------
     fname : str
-        File name + path on disk.
+        File name + path.
 
     Returns
     -------
@@ -90,7 +90,7 @@ def load_pickle(fname):
     Parameters
     ----------
     fname : str
-        File name + path on disk.
+        File name + path.
 
     Returns
     -------
@@ -99,7 +99,7 @@ def load_pickle(fname):
 
     Raises
     ------
-    IOError
+    IOError, OSError
         If the file cannot be opened.
     """
     try:
@@ -117,6 +117,11 @@ def load_xml(fname):
     Parameters
     ----------
     fname : str
-        File name + path on disk.
+        File name + path.
+
+    Returns
+    -------
+    dict
+        Dictionary of the input file's data structure.
     """
     return xmltodict.parse(open(fname, mode='r').read())

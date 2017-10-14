@@ -1,4 +1,4 @@
-.. _cache_management:
+.. _user_cache_management:
 
 Managing the cache
 ==================

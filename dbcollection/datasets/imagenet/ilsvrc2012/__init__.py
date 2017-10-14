@@ -11,7 +11,7 @@ urls = ()
 keywords = ('image_processing', 'classification')
 tasks = {
     "classification": Classification,
-    "raw256": Raw256
+    "raw256": Raw256,
 }
 default_task = 'classification'
 

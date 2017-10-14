@@ -1,6 +1,6 @@
-.. _utility_methods:
+.. _user_utility_methods:
 
-Utility Methods
+Utility methods
 ===============
 
 TODO

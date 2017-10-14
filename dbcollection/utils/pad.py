@@ -1,5 +1,6 @@
 """
-Padding functions.
+Library of methods for padding/unpadding lists or
+lists of lists with fill values.
 """
 
 
@@ -13,9 +14,9 @@ def pad_list(listA, val=-1, length=None):
     ----------
     listA : list
         List of lists of different sizes.
-    val : number
+    val : number, optional
         Value to pad the lists.
-    length : number
+    length : number, optional
         Total length of the list.
 
     Returns
@@ -59,7 +60,7 @@ def unpad_list(listA, val=-1):
     ----------
     listA : list
         List of lists of equal sizes.
-    val : number
+    val : number, optional
         Value to unpad the lists.
 
     Returns
@@ -100,7 +101,7 @@ def squeeze_list(listA, val=-1):
     ----------
     listA : list
         List of lists.
-    val : number
+    val : number, optional
         Value to separate the lists.
 
     Returns
@@ -130,21 +131,19 @@ def unsqueeze_list(listA, val=-1):
     'val'. Empty lists resulting of trailing values at the
     end of the list are discarded.
 
+    Source: https://stackoverflow.com/questions/4322705/split-a-list-into-nested-lists-on-a-value
+
     Parameters
     ----------
     listA : list
         A list.
-    val : number
+    val : int/float, optional
         Value to separate the lists.
 
     Returns
     -------
     list
         A list of lists.
-
-    Source
-    ------
-    https://stackoverflow.com/questions/4322705/split-a-list-into-nested-lists-on-a-value
 
     Examples
     --------

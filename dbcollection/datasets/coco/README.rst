@@ -12,7 +12,7 @@ instances  in  328,000  images.
 Use cases
 =========
 
-Object detection, segmentation, captioning and human pose estimation.
+Object detection, segmentation, captioning and human body joint detection.
 
 
 Properties
@@ -30,9 +30,11 @@ Properties
         - ``metadata file size in disk``: 243,6 MB
         - ``has annotations``: **yes**
             - ``which``:
-                - labels for each class/category.
+                - image filenames
+                - object categories and supercategories
                 - bounding box of pedestrians.
                 - occlusion % of annotated pedestrians.
+                - segmentation masks
     - detection_2016:
         - ``primary use``: object detection
         - ``description``: Contains image filenames, classes, bounding box and segmentation mask annotations for object detection in images.
@@ -40,29 +42,29 @@ Properties
         - ``metadata file size in disk``: 244,7 MB
         - ``has annotations``: **yes**
             - ``which``:
-                - labels for each class/category.
+                - image filenames
+                - object categories and supercategories
                 - bounding box of pedestrians.
                 - occlusion % of annotated pedestrians.
+                - segmentation masks
     - caption_2015:
         - ``primary use``: image captioning
-        - ``description``: Contains image filenames, classes, bounding box and segmentation mask annotations for object detection in images.
+        - ``description``: Contains image filenames and captions for image captioning.
         - ``sets``: train, val, test
         - ``metadata file size in disk``: 21,9 MB
         - ``has annotations``: **yes**
             - ``which``:
-                - labels for each class/category.
-                - bounding box of pedestrians.
-                - occlusion % of annotated pedestrians.
+                - image filenames
+                - captions
     - caption_2016:
         - ``primary use``: image captioning
-        - ``description``: Contains image filenames, classes, bounding box and segmentation mask annotations for object detection in images.
+        - ``description``: Contains image filenames and captions for image captioning.
         - ``sets``: train, val, test, test_dev
         - ``metadata file size in disk``: 23,0 MB
         - ``has annotations``: **yes**
             - ``which``:
-                - labels for each class/category.
-                - bounding box of pedestrians.
-                - occlusion % of annotated pedestrians.
+                - image filenames
+                - captions
     - keypoints_2016:
         - ``primary use``: human body joint detection
         - ``description``: Contains image filenames, classes, bounding box and segmentation mask annotations for object detection in images.
@@ -70,9 +72,13 @@ Properties
         - ``metadata file size in disk``: 106,6 MB
         - ``has annotations``: **yes**
             - ``which``:
-                - labels for each class/category.
+                - image filenames
+                - object categories and supercategories
                 - bounding box of pedestrians.
                 - occlusion % of annotated pedestrians.
+                - segmentation masks
+                - body joint keypoints
+                - skeleton
 
 
 .. note:
@@ -239,9 +245,7 @@ Fields
     - ``dtype``: np.float
     - ``is padded``: True
     - ``fill value``: -1
-    - ``note``: the masks come formatted in 3 different ways, but they are basically lists or lists of lists.
-        These have been 'stringified' into a single list to fit into a field. To unpack these, use the ``unsqueeze_list()``
-        method in dbcollection.utils.pad.
+    - ``note``: the masks come in 3 different formats, but they are mostly lists of lists. These have been packed (vectorized) into an array with a single dimension in order to be stored in the HDF5 metadata file. To unpack these arrays to their original format, use the ``unsqueeze_list()`` method in ``dbcollection.utils.pad``.
 - ``area``: object area
     - ``available in``: train, val
     - ``dtype``: np.int32
@@ -470,9 +474,7 @@ Fields
     - ``dtype``: np.float
     - ``is padded``: True
     - ``fill value``: -1
-    - ``note``: the masks come formatted in 3 different ways, but they are basically lists or lists of lists.
-        These have been 'stringified' into a single list to fit into a field. To unpack these, use the ``unsqueeze_list()``
-        method in dbcollection.utils.pad.
+    - ``note``: the masks come in 3 different formats, but they are mostly lists of lists. These have been packed (vectorized) into an array with a single dimension in order to be stored in the HDF5 metadata file. To unpack these arrays to their original format, use the ``unsqueeze_list()`` method in ``dbcollection.utils.pad``.
 - ``area``: object area
     - ``available in``: train, val
     - ``dtype``: np.int32
@@ -998,9 +1000,7 @@ Fields
     - ``dtype``: np.float
     - ``is padded``: True
     - ``fill value``: -1
-    - ``note``: the masks come formatted in 3 different ways, but they are basically lists or lists of lists.
-        These have been 'stringified' into a single list to fit into a field. To unpack these, use the ``unsqueeze_list()``
-        method in dbcollection.utils.pad.
+    - ``note``: the masks come in 3 different formats, but they are mostly lists of lists. These have been packed (vectorized) into an array with a single dimension in order to be stored in the HDF5 metadata file. To unpack these arrays to their original format, use the ``unsqueeze_list()`` method in ``dbcollection.utils.pad``.
 - ``area``: object area
     - ``available in``: train, val
     - ``dtype``: np.int32

@@ -1,5 +1,6 @@
 .. _test_guidelines:
 
+==================
 Testing guidelines
 ==================
 
@@ -14,7 +15,7 @@ install these packages before writing your code::
 
 
 Typical imports
----------------
+===============
 
 .. code-block:: python
 
@@ -24,7 +25,7 @@ Typical imports
 
 
 Making your tests behave well
------------------------------
+=============================
 
 Test cases are run after every change (as does Travis),
 so it's important that you make your tests well-behaved.
@@ -38,7 +39,7 @@ Also, strive to fully test your code, but don't get too obsess over the coverage
 .. _unit_tests:
 
 Unit tests
-----------
+==========
 
 We use ``pytest`` for unit testing our code. This framework
 makes it easy to write small tests and it has an automatic test discovery mechanism.
@@ -64,7 +65,7 @@ Besides the conventions required by ``pytest``, use these general testing guidel
 .. _functional_tests:
 
 Functional tests
-----------------
+================
 
 Functional tests are higher level tests that should be used to test
 new dataset implementations to check for errors, and are necessary
@@ -100,7 +101,7 @@ Please consider using the following convention when writting your tests:
 
 
 Hook up travis-ci
------------------
+=================
 
 We use travis for testings the entire library across various python versions.
 If you `hook up your fork to run travis <https://docs.travis-ci.com/user/getting-started/>`_,
