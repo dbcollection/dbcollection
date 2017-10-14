@@ -49,6 +49,7 @@ Contents:
 
    introduction
    install
+   getting_started
    tutorial/index
    reference/index
    available_datasets

@@ -1,8 +1,12 @@
-.. _user_getting_started:
+.. _getting_started:
 
 ===============
 Getting started
 ===============
+
+In this chapter you'll be introduced to the basic usage of **dbcollection** and
+its most commonly used features. More advanced methods and features will be addressed in the next chapters,
+but for now lets take a quick look at how we can start using this package.
 
 Before you start using this package, there are a few things you should be aware
 in order to improve your experience when managing datasets. First, :ref:`setting up
@@ -273,5 +277,5 @@ the size of a field. The purpose of these methods is to mearly serve as informat
 the user.
 
 With this information, you should be able to have a sufficient understanding of how ``dbcollection`` works
-and how to take advantage of its features. In the following sections we'll dive deeper on more
-advanced features and use cases that can help you get more from this module.
+and how to take advantage of its features. In the tutorial we'll dive deeper on more
+advanced features and use cases that can help you get more out of this module.
