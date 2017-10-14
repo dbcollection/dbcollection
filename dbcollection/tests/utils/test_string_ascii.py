@@ -5,8 +5,8 @@ Test dbcollection/utils/string_ascii.py.
 
 import pytest
 import numpy as np
-from dbcollection.utils.string_ascii import (_str_to_ascii,
-                                             _ascii_to_str,
+from dbcollection.utils.string_ascii import (str_to_ascii,
+                                             ascii_to_str,
                                              convert_str_to_ascii,
                                              convert_ascii_to_str)
 
@@ -33,19 +33,17 @@ testdata_multiple_strings = [
                                 [98, 108, 101, 110, 100, 63, 0]])
 ]
 
-# _str_to_ascii
+
 @pytest.mark.parametrize("sample, output", testdata_single_string)
-def test__str_to_ascii(sample, output):
-    res = _str_to_ascii(sample)
+def test_str_to_ascii(sample, output):
+    res = str_to_ascii(sample)
     assert(output == res.tolist())
 
-# _ascii_to_str
 @pytest.mark.parametrize("output, sample", testdata_single_string)
-def test__ascii_to_str(sample, output):
-    res = _ascii_to_str(np.array(sample, dtype=np.uint8))
+def test_ascii_to_str(sample, output):
+    res = ascii_to_str(np.array(sample, dtype=np.uint8))
     assert(output == res)
 
-# convert_str_to_ascii
 @pytest.mark.parametrize("sample, output", testdata_single_string)
 def test_convert_str_to_ascii_single_string(sample, output):
     res = convert_str_to_ascii(sample)
@@ -56,7 +54,6 @@ def test_convert_str_to_ascii_multiple_strings(sample, output):
     res = convert_str_to_ascii(sample)
     assert(output == res.tolist())
 
-#  convert_ascii_to_str
 @pytest.mark.parametrize("output, sample", testdata_single_string)
 def test_convert_ascii_to_str_single_string(sample, output):
     res = convert_ascii_to_str(np.array(sample, dtype=np.uint8))
