@@ -1,5 +1,14 @@
-Available Datasets
+.. _available_datasets:
+
 ==================
+Available datasets
+==================
+
+Several datasets are available for users to load/download via this package. The majority of these datasets
+are for computer vision tasks, but more datasets for tasks such as natural language processing are being added.
+
+The following list of datasets contains detailed information about how datasets are stored,
+along with other properties that you may find useful to know about any available dataset.
 
 .. toctree::
    :glob:
@@ -8,15 +17,17 @@ Available Datasets
    datasets/*
 
 .. note::
-    All datasets have been parsed by hand and they contain the most of the original raw annotations and, for some, there is
-    available cleaned annotations as well. Some annotations have been discarded because they are not useful enough to the
-    task which the dataset has been designed for and offer mostly context information (like urls), so check out the datasets info
-    for more information about which annotations a dataset contains.
+    All datasets have been parsed by hand and they contain most of the important annotations. For some, there are also
+    available versions where bad annotations have been removed/discarded. This may be due to wrongly annotated data or
+    because some fields don't provide any useful information. If you'd like to know more, check out the datasets information
+    available here on this page or the source websites of the datasets you are looking for.
+
+
 
 .. warning::
-    Most datasets store the original data in a nested folder format in the ``source`` group in the ``hdf5`` metadata file.
-    For some APIS, due to the size of the dataset, this nested folder may contain alot of data stored in a nested format,
-    which causes some APIs to load the nested structured as the file is loaded to memory (``lua/torch7`` API suffers from
-    this issue). To overcome this problem, all tasks have a version withouth this group in their metadata file.
-    To load this version, simply append to the end of the task name the suffix ``_d``. Loading times should improve for this
-    case.
+    Many datasets have a tree structure of folder of how their annotations is stored.
+    Of the available datasets provided by this project, this sturctured information is available
+    in the form of ``HDF5`` groups in each set under a main group named ``raw/``. By default, 
+    this information is disabled, so in order to grab this information you can use a special suffix 
+    attached at the end of a task name to enable this. To do so, simply append to the end of the task name the suffix ``_s``.
+    Note that if a dataset does not have this data setup, it will simply skip this step.

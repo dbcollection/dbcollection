@@ -1,32 +1,34 @@
 .. _code_guidelines:
 
-Coding Guidelines
+=================
+Coding guidelines
 =================
 
-Here we use `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ as our basic style guideline for
-all Python code.
+We follow `PEP8 <https://www.python.org/dev/peps/pep-0008/>`_ as our basic style guideline for
+all Python code. The following sections describe key aspects of how the code is structured.
 
-For other languages, we try to follow a similar style like in ``PEP8``.
-Exception to this rule goes to languages where the general trend diverges too much from the basic guideline used here (e.g., Java),
-so adopting those conventions is allowed.
+.. note::
+    For other languages, we try to follow a similar style like in ``PEP8``.
+    Exception to this rule goes to languages where the general trend diverges too much from the basic guideline used here (e.g., Java),
+    so adopting those conventions is allowed.
 
 
 Cross-compatible code
----------------------
+=====================
 
-Not all functions are available between versions. It's important to
-write code that will be compatible from Python 2.6 through the most
+Not all functions are available between versions, so it's important to
+write code that will be compatible from Python 2.7 through the most
 recent version of Python 3.
 
 
 Indentation
------------
+===========
 
 Use 4 spaces for identation. Don't use tabs.
 
 
 Names
------
+=====
 
 - Variables, functions, methods, packages, modules
     - ``lower_case_with_underscores``
@@ -40,7 +42,7 @@ Names
     - ``ALL_CAPS_WITH_UNDERSCORES``
 
 DocStrings
-----------
+==========
 
 We follow `Numpy's docstring style <http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_numpy.html>`_ for documenting methods and classes.
 For core API functions and methods, please try to follow as close as possible the conventions used in the code.

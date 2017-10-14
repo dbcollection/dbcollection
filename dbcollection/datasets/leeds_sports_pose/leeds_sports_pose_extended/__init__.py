@@ -10,10 +10,10 @@ urls = (
     'http://sam.johnson.io/research/lspet_dataset.zip',
     {
         'url': 'http://sam.johnson.io/research/lsp_dataset.zip',
-        'extract_dir': 'lsp_dataset'
+        'extract_dir': 'lsp_dataset',
     },
 )
-keywords = ('image_processing', 'detection', 'human pose', 'keypoints')
+keywords = ('image_processing', 'detection', 'human_pose', 'keypoints')
 tasks = {"keypoints": Keypoints}
 default_task = 'keypoints'
 

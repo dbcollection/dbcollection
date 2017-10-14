@@ -20,7 +20,7 @@ from .load_data_test import load_data_test
 
 
 class Detection2015(BaseTask):
-    """ COCO Detection (2015) preprocessing functions """
+    """COCO Detection (2015) preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'detection_2015'
@@ -572,7 +572,7 @@ class Detection2015(BaseTask):
 #---------------------------------------------------------
 
 class Detection2016(Detection2015):
-    """ COCO Detection (2015) preprocessing functions """
+    """COCO Detection (2016) preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'detection_2016'
@@ -581,12 +581,12 @@ class Detection2016(Detection2015):
         "train" : 'train2014',
         "val" : 'val2014',
         "test" : 'test2015',
-        "test-dev" : "test2015"
+        "test_dev" : "test2015"
     }
 
     annotation_path = {
         "train" : os.path.join('annotations', 'instances_train2014.json'),
         "val" : os.path.join('annotations', 'instances_val2014.json'),
         "test" : os.path.join('annotations', 'image_info_test2015.json'),
-        "test-dev" : os.path.join('annotations', 'image_info_test-dev2015.json')
+        "test_dev" : os.path.join('annotations', 'image_info_test-dev2015.json')
     }

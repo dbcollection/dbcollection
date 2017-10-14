@@ -1,17 +1,27 @@
 .. _how_to_contribute:
 
-How to Contribute
+=================
+How to contribute
 =================
 
-Contributing to dbcollection
-----------------------------
+This section describes a way to contribute to the project. You are welcome to provide with code or ideas
+to help improve the pool of functionality this package offers. You can also help by answering questions or
+helping out with documentation if you prefer.
 
-There are many ways to contribute to the dbcollection project: logging bugs,
+.. note::
+    The main goal behind contributing to this project is to provide tools for the community to help 
+    accelerate research and share code with others in a simple and easy way.
+
+
+Contributing to the project
+===========================
+
+There are many ways to contribute to the dbcollection project: finding bugs,
 submitting pull requests, reporting issues and creating suggestions.
 
 
-Using the Issue Tracker
------------------------
+Using the issue tracker
+=======================
 
 The issue tracker is the preferred channel for :ref:`bug reports <submit_bugs>`,
 :ref:`features requests <feature_request>` and :ref:`submitting pull requests <pull_request>`.
@@ -21,8 +31,8 @@ to get feedback about your questions.
 
 .. _feature_request:
 
-Feature Requests
-----------------
+Feature requests
+================
 
 Feature requests are welcome to be filed. The purpose of feature requests is for others who are looking to implement
 a feature are aware of the interest in the feature. At the time of writting, this project is solely
@@ -32,8 +42,8 @@ on your requests.
 
 .. _pull_request:
 
-Pull Requests
--------------
+Pull requests
+=============
 
 Good pull requests - patches, improvements, new features, new datasets - are a fantastic help.
 They should remain focused in scope and avoid containing unrelated commits.
@@ -55,7 +65,7 @@ You can use the following process to create a pull request for this project:
     $ # Navigate to the newly cloned directory
     $ cd dbcollection
     $ # Assign the original repo to a remote called "upstream"
-    $ git remote add upstream https://github.com/farrajota/dbcollection.git
+    $ git remote add upstream https://github.com/dbcollection/dbcollection.git
 
 #. If you have cloned the repository a while ago, get the latest changes from upstream::
 
@@ -90,8 +100,8 @@ You can use the following process to create a pull request for this project:
 #. `Open a Pull Request <https://help.github.com/articles/about-pull-requests/>`_  with a clear title and description.
 
 
-Where to Contribute
-^^^^^^^^^^^^^^^^^^^
+Where to contribute
+-------------------
 
 Check out the full issues list for a list of all potential areas for contributions (if any).
 Note that just because an issue exists in the repository does not mean we will accept every contribution to the core project.
@@ -109,15 +119,14 @@ There are several reasons to not accept a pull request like:
   be discussed with and agreed upon by the feature owner.
 
 To improve the chances to get a pull request merged you should select an issue that is
-labelled with the `help-wanted <https://github.com/farrajota/dbcollection/labels/help-wanted>`_
-or `bug <https://github.com/farrajota/dbcollection/labels/bug>`_ labels. If the issue you want to
+labelled with the `help-wanted <https://github.com/dbcollection/dbcollection/labels/help-wanted>`_
+or `bug <https://github.com/dbcollection/dbcollection/labels/bug>`_ labels. If the issue you want to
 work on is not labelled with ``help-wanted`` or ``bug``, you can start a conversation with the
 issue owner asking whether an external contribution will be considered.
 
 
-
 Suggestions
------------
+===========
 
 We're also interested in your feedback for the future of this project.
 You can submit a suggestion or feature request through the issue

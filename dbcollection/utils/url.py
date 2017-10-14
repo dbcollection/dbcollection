@@ -38,7 +38,20 @@ def get_hash_value(fname):
 
 
 def check_url_exists(url):
-    """Check if an url exists."""
+    """Check if an url exists.
+
+    Parameters
+    ----------
+    url : str
+        Url path.
+
+    Returns
+    -------
+    bool
+        True if url exists, False otherwise
+    str
+        A message if a url request succeeded or failed.
+    """
     request = requests.head(url, allow_redirects=False)
     if request.status_code == 200:
         return True, ''
@@ -47,7 +60,7 @@ def check_url_exists(url):
 
 
 def download_url_requests(url, fname, verbose=False):
-    """Download a file (no display text).
+    """Downloads a file from an url.
 
     Parameters
     ----------
@@ -55,9 +68,15 @@ def download_url_requests(url, fname, verbose=False):
         URL location.
     fname : str
         File name + path to store in disk.
-    verbose : bool
+    verbose : bool, optional
         Display progress bar
 
+    Returns
+    -------
+    bool
+        True if the url is valid, False otherwise.
+    str
+        A message if a url request succeeded or failed.
     """
 
     status, err = check_url_exists(url)
@@ -96,9 +115,15 @@ def download_url_google_drive(file_id, filename, verbose=False):
         File ID in the google drive.
     filename : str
         File name + path to store in disk.
-    verbose : bool
+    verbose : bool, optional
         Display messages + progress bar on screen when downloading the file.
 
+    Returns
+    -------
+    bool
+        True if the url is valid, False otherwise.
+    str
+        A message if a url request succeeded or failed.
     """
 
     def get_confirm_token(response):
@@ -139,7 +164,7 @@ def download_url_google_drive(file_id, filename, verbose=False):
 
 
 def download_url(url, filename, method, verbose=False):
-    """Download a single url data into a file.
+    """Downloads a single url into a file.
 
     Parameters
     ----------
@@ -149,13 +174,20 @@ def download_url(url, filename, method, verbose=False):
         File name + path to save the url to disk.
     method : str
         Download method (requests or googledrive)
-    verbose : bool
+    verbose : bool, optional
         Display messages + progress bar on screen when downloading the file.
+
+    Returns
+    -------
+    bool
+        True if the url is valid, False otherwise.
+    str
+        A message if a url request succeeded or failed.
 
     Raises
     ------
     Exception
-        If the method does not exit.
+        If the input download method is invalid.
 
     """
 
@@ -180,7 +212,32 @@ def download_url(url, filename, method, verbose=False):
 
 
 def parse_url(url):
-    """Returns the url, md5hash and dir strings from a tupple"""
+    """Returns the url, md5hash and dir strings from a tupple.
+
+    Parameters
+    ----------
+    url : str
+        Url path.
+
+    Returns
+    -------
+    str
+        Url path.
+    str
+        Md5 Hash string.
+    str
+        Url's file name.
+    str
+        Dir to store/extract the file
+    str
+        Download method (googledrive, requests, etc.).
+
+    Raises
+    ------
+    TypeError
+        If an url is invalid.
+
+    """
 
     def get_field_value(d, field):
         """Check if field exists and return its value from a dictionary. Else, return None."""
@@ -215,11 +272,20 @@ def parse_url(url):
 
 
 def md5_checksum(filename, md5hash):
-    """Check file integrity using a checksum."""
+    """Check file integrity using a checksum.
+
+    Parameters
+    ----------
+    filename : str
+        File path + name.
+    md5hash : str
+        Md5 hash string.
+    """
     file_hash = get_hash_value(filename)
     if not file_hash == md5hash:
-        print('**WARNING**: md5 checksum does not match for file: {}'.format(filename))
-        print('Checksum expected: {}, got: {}'.format(md5hash, file_hash))
+        msg = '**WARNING**: md5 checksum does not match for file: {}'.format(filename) \
+              + '\nChecksum expected: {}, got: {}'.format(md5hash, file_hash)
+        print(msg)
 
 
 def download_extract_all(urls, dir_save, extract_data=True, verbose=True):
@@ -230,23 +296,20 @@ def download_extract_all(urls, dir_save, extract_data=True, verbose=True):
 
     Parameters
     ----------
-    urls : list
-        List of URL paths.
-    md5sum : list
-        List of md5 checksum strings for each url.
+    urls : list/tuple
+        List/tuple of URL paths.
     dir_save : str
-        Directory path to store the data.
-    extract_data : bool
+        Directory to store the downloaded data.
+    extract_data : bool, optional
         Extracts/unpacks the data files (if true).
-    verbose : bool
-        Display messages on screen.
+    verbose : bool, optional
+        Display messages on screen if set to True.
 
     Raises
     ------
     Exception
         If it is an invalid url type.
-    KeyError
-        If the download method is invalid.
+
     """
     # Check if urls is a str
     if isinstance(urls, str):

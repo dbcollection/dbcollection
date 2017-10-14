@@ -1,1 +1,1 @@
-.. include:: ../../../dbcollection/datasets/ucf/ucf101/README.rst
+.. include:: ../../../dbcollection/datasets/ucf/ucf_101/README.rst

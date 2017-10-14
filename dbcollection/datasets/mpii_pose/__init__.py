@@ -10,10 +10,10 @@ urls = (
     'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz',
     'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1_u12_2.zip',
 )
-keywords = ('image_processing', 'detection', 'human pose', 'keypoints')
+keywords = ('image_processing', 'detection', 'human_pose', 'keypoints')
 tasks = {
-    "keypoints": KeypointsFull,    # Contains all the original annotations
-    "keypoints_clean": Keypoints,  # clean version (removes invalid annotations)
+    "keypoints": Keypoints,           # clean version (removes invalid annotations)
+    "keypoints_full": KeypointsFull,  # Contains all the original annotations
 }
 default_task = 'keypoints'
 

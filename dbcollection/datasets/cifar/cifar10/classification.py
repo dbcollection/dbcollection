@@ -52,69 +52,9 @@ class Classification(BaseTask):
         return load_pickle(os.path.join(path, self.data_files[0]))
 
 
-    def load_data_train(self):
+    def load_data_set(self, is_test):
         """
-        Fetch the training data.
-        """
-        # merge the path with the extracted folder name
-        data_path_ = os.path.join(self.data_path, 'cifar-10-batches-py')
-
-        class_names = self.get_class_names(data_path_)
-
-        # load train data files
-        train_batch1 = load_pickle(os.path.join(data_path_, self.data_files[1]))
-        train_batch2 = load_pickle(os.path.join(data_path_, self.data_files[2]))
-        train_batch3 = load_pickle(os.path.join(data_path_, self.data_files[3]))
-        train_batch4 = load_pickle(os.path.join(data_path_, self.data_files[4]))
-        train_batch5 = load_pickle(os.path.join(data_path_, self.data_files[5]))
-
-        # concatenate data
-        train_data = np.concatenate(
-            (
-                train_batch1['data'],
-                train_batch2['data'],
-                train_batch3['data'],
-                train_batch4['data'],
-                train_batch5['data']
-            ),
-            axis=0
-        )
-
-        train_labels = np.concatenate(
-            (
-                train_batch1['labels'],
-                train_batch2['labels'],
-                train_batch3['labels'],
-                train_batch4['labels'],
-                train_batch5['labels']
-            ),
-            axis=0
-        )
-
-        train_data = train_data.reshape((50000, 3, 32, 32))
-        train_data = np.transpose(train_data, (0, 2, 3, 1)) # NxHxWxC
-        train_object_list = self.get_object_list(train_data, train_labels)
-
-        # organize list of image indexes per class
-        train_images_per_class = []
-        labels = np.unique(train_labels)
-        for label in labels:
-            images_idx = np.where(train_labels == label)[0].tolist()
-            train_images_per_class.append(images_idx)
-
-        return {
-            "object_fields": str2ascii(['images', 'classes']),
-            "class_name": str2ascii(class_names['label_names']),
-            "data": train_data,
-            "labels": train_labels,
-            "object_ids": train_object_list,
-            "list_images_per_class": np.array(pad_list(train_images_per_class, 1), dtype=np.int32)
-        }
-
-
-    def load_data_test(self):
-        """
-        Fetch the testing data.
+        Fetch train/test data.
         """
         # merge the path with the extracted folder name
         data_path_ = os.path.join(self.data_path, 'cifar-10-batches-py')
@@ -122,27 +62,58 @@ class Classification(BaseTask):
         class_names = self.get_class_names(data_path_)
 
         # load test data file
-        test_batch = load_pickle(os.path.join(data_path_, self.data_files[6]))
+        if is_test:
+            batch = load_pickle(os.path.join(data_path_, self.data_files[6]))
+            data = batch['data'].reshape(10000, 3, 32, 32)
+            labels = np.array(batch['labels'], dtype=np.uint8)
+        else:
+            batch1 = load_pickle(os.path.join(data_path_, self.data_files[1]))
+            batch2 = load_pickle(os.path.join(data_path_, self.data_files[2]))
+            batch3 = load_pickle(os.path.join(data_path_, self.data_files[3]))
+            batch4 = load_pickle(os.path.join(data_path_, self.data_files[4]))
+            batch5 = load_pickle(os.path.join(data_path_, self.data_files[5]))
 
-        test_data = test_batch['data'].reshape(10000, 3, 32, 32)
-        test_data = np.transpose(test_data, (0, 2, 3, 1)) # NxHxWxC
-        test_labels = np.array(test_batch['labels'], dtype=np.uint8)
-        test_object_list = self.get_object_list(test_data, test_labels)
+            # concatenate data
+            data = np.concatenate(
+                (
+                    batch1['data'],
+                    batch2['data'],
+                    batch3['data'],
+                    batch4['data'],
+                    batch5['data']
+                ),
+                axis=0,
+            )
+            data = data.reshape((50000, 3, 32, 32))
+
+            labels = np.concatenate(
+                (
+                    batch1['labels'],
+                    batch2['labels'],
+                    batch3['labels'],
+                    batch4['labels'],
+                    batch5['labels']
+                ),
+                axis=0,
+            )
+
+        data = np.transpose(data, (0, 2, 3, 1)) # NxHxWxC
+        object_list = self.get_object_list(data, labels)
 
         # organize list of image indexes per class
-        test_images_per_class = []
-        labels = np.unique(test_labels)
-        for label in labels:
-            images_idx = np.where(test_labels == label)[0].tolist()
-            test_images_per_class.append(images_idx)
+        images_per_class = []
+        unique_labels = np.unique(labels)
+        for label in unique_labels:
+            images_idx = np.where(labels == label)[0].tolist()
+            images_per_class.append(images_idx)
 
         return {
             "object_fields": str2ascii(['images', 'classes']),
             "class_name": str2ascii(class_names['label_names']),
-            "data": test_data,
-            "labels": test_labels,
-            "object_ids": test_object_list,
-            "list_images_per_class": np.array(pad_list(test_images_per_class, 1), dtype=np.int32)
+            "data": data,
+            "labels": labels,
+            "object_ids": object_list,
+            "list_images_per_class": np.array(pad_list(images_per_class, 1), dtype=np.int32)
         }
 
 
@@ -151,21 +122,21 @@ class Classification(BaseTask):
         Load the data from the files.
         """
         # train set
-        yield {"train" : self.load_data_train()}
+        yield {"train" : self.load_data_set(False)}
 
         # test set
-        yield {"test" : self.load_data_test()}
+        yield {"test" : self.load_data_set(True)}
 
 
-    def add_data_to_source(self, hdf5_handler, data, set_name=None):
-        """
-        Store data annotations in a nested tree fashion.
-
-        It closely follows the tree structure of the data.
-        """
-        hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=1)
+    #def add_data_to_source(self, hdf5_handler, data, set_name=None):
+    #    """
+    #    Store data annotations in a nested tree fashion.
+    #
+    #    It closely follows the tree structure of the data.
+    #    """
+    #    hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
+    #    hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
+    #    hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=1)
 
 
     def add_data_to_default(self, hdf5_handler, data, set_name=None):
@@ -178,5 +149,5 @@ class Classification(BaseTask):
         hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=1)
         hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'object_ids', data["object_ids"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', data["object_fields"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields', data["object_fields"], dtype=np.uint8, fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'list_images_per_class', data["list_images_per_class"], dtype=np.int32, fillvalue=-1)

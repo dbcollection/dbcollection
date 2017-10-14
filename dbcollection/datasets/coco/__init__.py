@@ -21,7 +21,7 @@ urls = (
     'http://msvocds.blob.core.windows.net/annotations-1-0-3/person_keypoints_trainval2014.zip',
     'http://msvocds.blob.core.windows.net/annotations-1-0-3/captions_train-val2014.zip',
     'http://msvocds.blob.core.windows.net/annotations-1-0-4/image_info_test2014.zip',
-    'http://msvocds.blob.core.windows.net/annotations-1-0-4/image_info_test2015.zip'
+    'http://msvocds.blob.core.windows.net/annotations-1-0-4/image_info_test2015.zip',
 )
 keywords = ('image_processing', 'detection', 'keypoint', 'captions', 'human', 'pose')
 tasks = {

@@ -25,7 +25,7 @@ keywords = ('image_processing', 'detection', 'pedestrian')
 tasks = {
     "detection" : Detection,
     "detection_10x" : Detection10x,
-    "detection_30x" : Detection30x
+    "detection_30x" : Detection30x,
 }
 default_task = 'detection'
 

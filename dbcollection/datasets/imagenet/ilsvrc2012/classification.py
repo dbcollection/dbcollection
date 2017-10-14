@@ -236,7 +236,7 @@ class Classification(BaseTask):
             range_ini = len(filenames)
 
             for filename in data[cname]:
-                filenames.append(os.path.join(set_name, cname, filename))
+                filenames.append(os.path.join(self.data_path, set_name, cname, filename))
                 object_ids.append([count_fname, class_id])
                 count_fname += 1
 
@@ -251,8 +251,8 @@ class Classification(BaseTask):
             "labels": str2ascii(label_list),
             "image_filenames": str2ascii(filenames),
             "descriptions": str2ascii(description_list),
-            "object_ids": np.array(object_ids, dtype=np.int32),
             "object_fields": str2ascii(['image_filenames', 'classes']),
+            "object_ids": np.array(object_ids, dtype=np.int32),
             "list_image_filenames_per_class": np.array(list_image_filenames_per_class, dtype=np.int32)
         }
 
@@ -273,9 +273,9 @@ class Classification(BaseTask):
         For each field, the data is organized into a single big matrix.
         """
         data_array = self.convert_data_to_arrays(data, set_name)
+        hdf5_write_data(hdf5_handler, 'image_filenames', data_array["image_filenames"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'classes', data_array["classes"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'labels', data_array["labels"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'image_filenames', data_array["image_filenames"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'descriptions', data_array["descriptions"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'object_ids', data_array["object_ids"], dtype=np.int32, fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'object_fields', data_array["object_fields"], dtype=np.uint8, fillvalue=-1)

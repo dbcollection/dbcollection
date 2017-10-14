@@ -10,11 +10,10 @@
 [![Anaconda-Server Badge](https://anaconda.org/farrajota/dbcollection/badges/version.svg)](https://anaconda.org/farrajota/dbcollection)
 
 
-
 dbcollection is a python module for loading/managing
 datasets with a very simple set of commands with
 cross-platform and cross-language support in mind and it
-is distributed under a MIT license. With this package,
+is distributed under the MIT license. With this package,
 you'll have access (in a quick and simple way) to a
 collection of datasets for a variety of tasks such as
 object classification, detection, human pose estimation,
@@ -26,7 +25,7 @@ This package is available for Windows, Linux and MacOs.
 
 - Python (>=2.7 or >=3.5)
 - Lua/Torch7 ([link](https://github.com/dbcollection/dbcollection-torch7))
-- [Matlab (>=2014a) ([link](https://github.com/dbcollection/dbcollection-matlab))
+- Matlab (>=2014a) ([link](https://github.com/dbcollection/dbcollection-matlab))
 
 
 ## Package installation
@@ -68,7 +67,7 @@ python setup.py install
 
 ## Getting started
 
-### Usage
+### Basic usage
 
 Using the module is pretty straight-forward. To import it just do:
 
@@ -76,38 +75,39 @@ Using the module is pretty straight-forward. To import it just do:
 import dbcollection as dbc
 ```
 
-To load a dataset, you need to use `dbc` API `load()` method.
-
-> Note: by default, the `MNIST` dataset is already
-included in the package, so loading it does not need to
-download/setup any data. However, this may not be valid
-for most datasets.
+To load a dataset, you only need to use a single method that returns a data loader object which can then be used to fetch data from.
 
 ```python
-mnist = dbc.load('mnist')
+>>> mnist = dbc.load('mnist')
 ```
 
-This returns a loader API class which contains information
-about the dataset's name, task, data and cache paths, sets,
-the HDF5 file handler and four methods to retrieve data
-from the file: `get()`, `size()`, `object()` and `list()`.
+This data loader object contains information
+about the dataset's name, task, data, cache paths, set splits, and some methods for querying and loading data from the `HDF5` metadata file.
 
-Finally, to retrieve data from the `MNIST` data loader and
-display it you can do the following:
+For example, if you want to know how the data is structured inside the metadata file, you can simply do the following:
 
 ```python
-# display mnist's data info
-print('######### info #########\n')
-print('Dataset: ' + mnist.name)
-print('Task: ' + mnist.task)
-print('Data path: ' + mnist.data_dir)
-print('Metadata cache path: ' + mnist.cache_path)
-print('Sets: ', mnist.sets)
+>>> mnist.info()
 
-# plot the first data sample from the train set
-import matplotlib.pyplot as plt
-plt.imshow(mnist.get("train", "images", 0))
-plt.show()
+> Set: test
+   - classes,        shape = (10, 2),          dtype = uint8
+   - images,         shape = (10000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+   - labels,         shape = (10000,),         dtype = uint8,  (in 'object_ids', position = 1)
+   - object_fields,  shape = (2, 7),           dtype = uint8
+   - object_ids,     shape = (10000, 2),       dtype = uint8
+
+   (Pre-ordered lists)
+   - list_images_per_class,  shape = (10, 1135),  dtype = int32
+
+> Set: train
+   - classes,        shape = (10, 2),          dtype = uint8
+   - images,         shape = (60000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+   - labels,         shape = (60000,),         dtype = uint8,  (in 'object_ids', position = 1)
+   - object_fields,  shape = (2, 7),           dtype = uint8
+   - object_ids,     shape = (60000, 2),       dtype = uint8
+
+   (Pre-ordered lists)
+   - list_images_per_class,  shape = (10, 6742),  dtype = int32
 ```
 
 > Note: For a more detailed overview of how to use this
@@ -146,4 +146,4 @@ For now, use the [Github issues](https://github.com/dbcollection/dbcollection/is
 
 ## License
 
-MIT license (see the [LICENSE](LICENSE.txt) file)
+Licensed under the [MIT](LICENSE.txt) license.

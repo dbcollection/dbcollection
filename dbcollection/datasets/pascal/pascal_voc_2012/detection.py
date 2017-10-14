@@ -339,19 +339,19 @@ class Detection(BaseTask):
             hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
                             np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32),
                             fillvalue=pad_value)
-            hdf5_write_data(hdf5_handler, 'list_objects_ids_per_class',
+            hdf5_write_data(hdf5_handler, 'list_object_ids_per_class',
                             np.array(pad_list(list_objects_ids_per_class, -1), dtype=np.int32),
                             fillvalue=pad_value)
-            hdf5_write_data(hdf5_handler, 'list_objects_ids_no_difficult',
+            hdf5_write_data(hdf5_handler, 'list_object_ids_no_difficult',
                             np.array(list_objects_ids_no_difficult, dtype=np.int32),
                             fillvalue=pad_value)
-            hdf5_write_data(hdf5_handler, 'list_objects_ids_difficult',
+            hdf5_write_data(hdf5_handler, 'list_object_ids_difficult',
                             np.array(list_objects_ids_difficult, dtype=np.int32),
                             fillvalue=pad_value)
-            hdf5_write_data(hdf5_handler, 'list_objects_ids_no_truncated',
+            hdf5_write_data(hdf5_handler, 'list_object_ids_no_truncated',
                             np.array(list_objects_ids_no_truncated, dtype=np.int32),
                             fillvalue=pad_value)
-            hdf5_write_data(hdf5_handler, 'list_objects_ids_truncated',
+            hdf5_write_data(hdf5_handler, 'list_object_ids_truncated',
                             np.array(list_objects_ids_truncated, dtype=np.int32),
                             fillvalue=pad_value)
         else:

@@ -1,10 +1,15 @@
+.. _tutorial_index:
+
+========
 Tutorial
 ========
 
-TODO
+This section provides a tutorial of how to use the package
+and how to create a new dataset setup.
+
 
 .. toctree::
    :maxdepth: 1
 
-   create_new_dataset
-   dataset_readme_template
+   user_guide/index
+   developer_guide/index

@@ -1,1 +1,1 @@
-.. include:: ../../../dbcollection/datasets/ucf/ucfsports/README.rst
+.. include:: ../../../dbcollection/datasets/ucf/ucf_sports/README.rst
