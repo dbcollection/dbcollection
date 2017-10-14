@@ -1,4 +1,6 @@
-Developer Guide
+.. _dev_index:
+
+Developer guide
 ===============
 
 TODO
