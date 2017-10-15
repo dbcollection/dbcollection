@@ -9,9 +9,14 @@ from dbcollection.utils.string_ascii import convert_ascii_to_str
 class FieldLoader(object):
     """Field metadata loader class.
 
-    This class contains several methods to fetch data from a specific 
+    This class contains several methods to fetch data from a specific
     field of a set (group) in a hdf5 file. It contains useful information
     about the field and also several methods to fetch data.
+
+    Parameters
+    ----------
+    hdf5_field : h5py._hl.dataset.Dataset
+        hdf5 field object handler.
 
     Attributes
     ----------
@@ -29,16 +34,11 @@ class FieldLoader(object):
         Value used to pad arrays when storing the data in the hdf5 file.
     obj_id : int
         Identifier of the field if contained in the 'object_ids' list.
+
     """
 
     def __init__(self, hdf5_field, obj_id=None):
-        """Initialize class.
-
-        Parameters
-        ----------
-        hdf5_field : h5py._hl.dataset.Dataset
-            hdf5 field object handler.
-        """
+        """Initialize class."""
         assert hdf5_field, 'Must input a valid hdf5 dataset.'
         self.data = hdf5_field
         s = hdf5_field.name.split('/')
@@ -56,15 +56,15 @@ class FieldLoader(object):
     def get(self, idx=None):
         """Retrieves data of the field from the dataset's hdf5 metadata file.
 
-        This method retrieves the i'th data from the hdf5 file. Also, it is 
-        possible to retrieve multiple values by inserting a list/tuple of 
+        This method retrieves the i'th data from the hdf5 file. Also, it is
+        possible to retrieve multiple values by inserting a list/tuple of
         number values as indexes.
 
         Parameters
         ----------
-		idx : int/list/tuple, optional
-            Index number of the field. If it is a list, returns the data
-            for all the value indexes of that list.
+	    idx : int/list/tuple, optional
+             Index number of he field. If it is a list, returns the data
+             for all the value indexes of that list.
 
         Returns
         -------
@@ -72,6 +72,7 @@ class FieldLoader(object):
             Numpy array containing the field's data.
         list
             List of numpy arrays if using a list of indexes.
+
         """
         if idx:
             data = self.data[idx]
@@ -85,8 +86,8 @@ class FieldLoader(object):
 
         Returns the number of the elements of the field.
 
-        Returns:
-        --------
+        Returns
+        -------
         list
             Returns the size of the field.
         """
@@ -120,10 +121,27 @@ class FieldLoader(object):
                   .format(self.name, str(self.shape), str(self.type)))
 
 
-    def __getitem__(self, x):
-        return self.data[x]
+    def __getitem__(self, index):
+        """
+        Parameters
+        ----------
+        index : int
+            Index
+
+        Returns
+        -------
+        np.ndarray
+            Numpy data array
+        """
+        return self.data[index]
 
     def __len__(self):
+        """
+        Returns
+        -------
+        int
+            Number of samples
+        """
         return self.shape[0]
 
     def __str__(self):
@@ -137,9 +155,14 @@ class FieldLoader(object):
 class SetLoader(object):
     """Set metadata loader class.
 
-    This class contains several methods to fetch data from a specific 
+    This class contains several methods to fetch data from a specific
     set (group) in a hdf5 file. It contains useful information about a
     specific group and also several methods to fetch data.
+
+    Parameters
+    ----------
+    hdf5_group : h5py._hl.group.Group
+        hdf5 group object handler.
 
     Attributes
     ----------
@@ -153,16 +176,11 @@ class SetLoader(object):
         List of all field names of the set contained by the 'object_ids' list.
     nelems : int
         Number of rows in 'object_ids'.
+
     """
 
     def __init__(self, hdf5_group):
-        """Initialize class.
-
-        Parameters
-        ----------
-        hdf5_group : h5py._hl.group.Group
-            hdf5 group object handler.
-        """
+        """Initialize class."""
         assert hdf5_group, 'Must input a valid hdf5 group'
         self.data = hdf5_group
         self.set = hdf5_group.name.split('/')[-1]
@@ -190,7 +208,7 @@ class SetLoader(object):
         ----------
         field : str
             Field name.
-		idx : int/list/tuple, optional
+        idx : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
 
@@ -237,7 +255,7 @@ class SetLoader(object):
 
         # convert idx into a tuple (in case it is a number)
         if not isinstance(idx, tuple):
-            idx = (idx)
+            idx = (idx,)
 
         # fetch the field names composing 'object_ids'
         fields = self._object_fields
@@ -284,8 +302,8 @@ class SetLoader(object):
             If False, outputs a list of indexes. If True,
             it outputs a list of arrays/values instead of indexes.
 
-        Returns:
-        --------
+        Returns
+        -------
         list
             Returns a list of indexes or, if convert_to_value is True,
             a list of data arrays/values.
@@ -317,8 +335,8 @@ class SetLoader(object):
         field : str, optional
             Name of the field in the metadata file.
 
-        Returns:
-        --------
+        Returns
+        -------
         list
             Returns the size of a field.
         """
@@ -427,6 +445,15 @@ class SetLoader(object):
                 print(s_name + s_shape + s_type)
 
 
+    def __len__(self):
+        """
+        Returns
+        -------
+        int
+            Number of elements
+        """
+        return self.nelems
+
     def __str__(self):
         s = 'SetLoader: set<{}>, len<{}>' \
             .format(self.set, self.nelems)
@@ -435,15 +462,23 @@ class SetLoader(object):
     def __repr__(self):
         return str(self)
 
-    def __len__(self):
-        return self.nelems
-
 
 class DataLoader(object):
     """Dataset metadata loader class.
 
     This class contains several methods to fetch data from a hdf5 file
     by using simple, easy to use functions for (meta)data handling.
+
+    Parameters
+    ----------
+    name : str
+        Name of the dataset.
+    task : str
+        Name of the task.
+    data_dir : str
+        Path of the dataset's data directory on disk.
+    hdf5_filepath : str
+        Path of the metadata cache file stored on disk.
 
     Attributes
     ----------
@@ -455,7 +490,7 @@ class DataLoader(object):
         Path of the dataset's data directory on disk.
     hdf5_filepath : str
         Path of the hdf5 metadata file stored on disk.
-    file : h5py._hl.files.File
+    hdf5_file : h5py._hl.files.File
         hdf5 file object handler.
     root_path : str
         Default data group of the hdf5 file.
@@ -463,22 +498,11 @@ class DataLoader(object):
         List of names of set splits (e.g. train, test, val, etc.)
     object_fields : dict
         Data field names for each set split.
+
     """
 
     def __init__(self, name, task, data_dir, hdf5_filepath):
-        """Initialize class.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        task : str
-            Name of the task.
-        data_dir : str
-            Path of the dataset's data directory on disk.
-        hdf5_filepath : str
-            Path of the metadata cache file stored on disk.
-        """
+        """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
         assert task, 'Must input a valid task name: {}'.format(task)
         assert data_dir, 'Must input a valid path for the data directory: {}'.format(data_dir)
@@ -491,18 +515,18 @@ class DataLoader(object):
         self.hdf5_filepath = hdf5_filepath
 
         # create a handler for the cache file
-        self.file = h5py.File(self.hdf5_filepath, 'r', libver='latest')
+        self.hdf5_file = h5py.File(self.hdf5_filepath, 'r', libver='latest')
         self.root_path = '/'
 
         # make links for all groups (train/val/test/etc) for easier access
-        self.sets = tuple( self.file['/'].keys())
+        self.sets = tuple(self.hdf5_file['/'].keys())
         for set_name in self.sets:
-            setattr(self, set_name, SetLoader(self.file[set_name]))
+            setattr(self, set_name, SetLoader(self.hdf5_file[set_name]))
 
         # fetch list of field names that compose the object list.
         self.object_fields = {}
         for set_name in self.sets:
-            data = self.file['/{}/object_fields'.format(set_name)].value
+            data = self.hdf5_file['/{}/object_fields'.format(set_name)].value
             self.object_fields[set_name] = tuple(convert_ascii_to_str(data))
 
 
@@ -559,11 +583,12 @@ class DataLoader(object):
             If False, outputs a list of indexes. If True,
             it outputs a list of arrays/values instead of indexes.
 
-        Returns:
-        --------
+        Returns
+        -------
         list
             Returns a list of indexes or, if convert_to_value is True,
             a list of data arrays/values.
+
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
         assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
@@ -572,28 +597,34 @@ class DataLoader(object):
         return set_obj.object(idx, convert_to_value)
 
 
-    def size(self, set_name, field='object_ids'):
+    def size(self, set_name=None, field='object_ids'):
         """Size of a field.
 
         Returns the number of the elements of a field.
 
         Parameters
         ----------
-        set_name : str
+        set_name : str, optional
             Name of the set.
         field : str, optional
             Name of the field in the metadata file.
 
-        Returns:
-        --------
+        Returns
+        -------
         list
             Returns the size of a field.
         """
-        assert set_name, 'Must input a valid set name: {}'.format(set_name)
-        assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
+        if set_name is None:
+            out = {}
+            for set_name_ in self.sets:
+                set_obj = getattr(self, set_name_)
+                out.update({set_name_: set_obj.size(field)})
+            return out
+        else:
+            assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
                                       .format(set_name)
-        set_obj = getattr(self, set_name)
-        return set_obj.size(field)
+            set_obj = getattr(self, set_name)
+            return set_obj.size(field)
 
 
     def list(self, set_name=None):
@@ -674,7 +705,7 @@ class DataLoader(object):
             set_obj = getattr(self, set_name)
             set_obj.info()
         else:
-            for set_name in self.sets:
+            for set_name in sorted(self.sets):
                 set_obj = getattr(self, set_name)
                 set_obj.info()
 
