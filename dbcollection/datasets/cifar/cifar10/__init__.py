@@ -3,7 +3,7 @@ Cifar10 download/process functions.
 """
 
 
-from dbcollection.core.db import BaseDataset
+from dbcollection.datasets import BaseDataset
 from .classification import Classification
 
 

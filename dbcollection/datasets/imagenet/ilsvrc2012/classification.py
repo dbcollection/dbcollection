@@ -10,7 +10,7 @@ import PIL
 from PIL import Image
 import progressbar
 
-from dbcollection.core.db import BaseTask
+from dbcollection.datasets import BaseTask
 
 from dbcollection.utils.file_load import load_txt, load_matlab
 from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
