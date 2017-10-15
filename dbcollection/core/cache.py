@@ -14,6 +14,11 @@ import warnings
 class CacheManager:
     """Class to manage the dbcollection cache data
 
+    Parameters
+    ----------
+    is_test : bool
+        Flag used for tests.
+
     Attributes
     ----------
     is_test : bool
@@ -29,13 +34,7 @@ class CacheManager:
     """
 
     def __init__(self, is_test=False):
-        """Initialize class.
-
-        Parameters
-        ----------
-        is_test : bool
-            Flag used for tests.
-        """
+        """Initialize class."""
         self.is_test = is_test
 
         # setup cache file path+name
