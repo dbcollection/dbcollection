@@ -15,29 +15,24 @@ dataset every time.
 """
 
 
-#from dbcollection import manager, utils
+# API methods
+from dbcollection.core.api import (download,
+                                   process,
+                                   load,
+                                   add,
+                                   remove,
+                                   config_cache,
+                                   query,
+                                   info_cache,
+                                   info_datasets,
+                                   fetch_list_datasets)
 
-
-# load API methods
-from dbcollection.core.download import download
-from dbcollection.core.process import process
-from dbcollection.core.load import load
-from dbcollection.core.add import add
-from dbcollection.core.remove import remove
-from dbcollection.core.config import config_cache
-from dbcollection.core.query import query
-from dbcollection.core.info import info_cache, info_datasets
-
-# open/load the cache file
+# load the cache file
 from dbcollection.core.cache import CacheManager
 cache = CacheManager()
 
-# load information about the available datasets for download
-from dbcollection.core.db import fetch_list_datasets
-available_datasets_list = fetch_list_datasets()
-
-# get package version
+# package version
 from ._version import __version__
 
-
-
+# load information about the available datasets for download
+available_datasets_list = fetch_list_datasets()
