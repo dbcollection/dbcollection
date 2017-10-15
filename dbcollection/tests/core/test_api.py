@@ -4,19 +4,25 @@ Test dbcollection main API methods
 
 
 import pytest
-from dbcollection.core.download import download
-from dbcollection.core.process import process
-from dbcollection.core.load import load
-from dbcollection.core.add import add
-from dbcollection.core.remove import remove
-from dbcollection.core.config import config_cache
-from dbcollection.core.query import query
-from dbcollection.core.info import info_cache, info_datasets
+from dbcollection.core.api import (download,
+                                   process,
+                                   load,
+                                   add,
+                                   remove,
+                                   config_cache,
+                                   query,
+                                   info_cache,
+                                   info_datasets,
+                                   fetch_list_datasets)
 
 
 testdata = [
     ('mnist', 'classification', None, True, True, True),
 ]
+
+def test_fetch_list_datasets():
+    db_list = fetch_list_datasets()
+    assert 'mnist' in db_list
 
 @pytest.mark.parametrize("name, task, data_dir, extract_data, verbose, is_test",
                          testdata)

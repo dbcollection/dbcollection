@@ -5,7 +5,7 @@ Test dbcollection/utils/loader.py.
 
 import pytest
 import dbcollection as dbc
-from dbcollection.core.config import config_cache
+from dbcollection.core.api import config_cache
 from dbcollection.utils.string_ascii import convert_ascii_to_str as tostr_
 
 
