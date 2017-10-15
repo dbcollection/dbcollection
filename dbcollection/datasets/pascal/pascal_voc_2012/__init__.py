@@ -3,7 +3,7 @@ Pascal VOC 2012 download/process functions.
 """
 
 
-from dbcollection.core.db import BaseDataset
+from dbcollection.datasets import BaseDataset
 from .detection import Detection
 
 urls = ('http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar',)

@@ -3,7 +3,7 @@ Caltech Pedestrian Dataset download/process functions.
 """
 
 
-from dbcollection.core.db import BaseDataset
+from dbcollection.datasets import BaseDataset
 from .detection import Detection, Detection10x, Detection30x
 
 

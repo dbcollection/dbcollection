@@ -3,7 +3,7 @@ Inria Pedestrian Dataset download/process functions.
 """
 
 
-from dbcollection.core.db import BaseDataset
+from dbcollection.datasets import BaseDataset
 from .detection import Detection
 
 urls = (
