@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 
 # set version
-VERSION = '0.1.7'
+VERSION = '0.1.8'
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 version_path = os.path.join(cwd, 'dbcollection', '_version.py')
