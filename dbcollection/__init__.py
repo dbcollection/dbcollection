@@ -1,7 +1,8 @@
 """
-Dataset collection package.
+A collection of popular datasets for deep learning
+==================================================
 
-dbcollection is a library for downloading/parsing/managing datasets via simple methods.
+**dbcollection** is a library for downloading/parsing/managing datasets via simple methods.
 It was built from the ground up to be cross-platform (Windows, Linux, MacOS) and
 cross-language (Python, Lua, Matlab, etc.). This is achieved by using the popular HDF5
 file format to store (meta)data of manually parsed datasets and Python for scripting.
@@ -17,8 +18,10 @@ dataset each time they hack some code. This lets users focus on more important t
 fast prototyping without having to spend time managing datasets or creating/modyfing
 scripts to load/fetch data from disk.
 
-
 Main features
+-------------
+
+Here are some of key features dbcollection provides:
 
 - Simple API to load/download/setup/manage datasets
 - Simple API to fetch data of a dataset
@@ -30,9 +33,10 @@ Main features
 - Diverse list of popular datasets are available for use
 - All datasets were manually parsed by someone, meaning that some of the quirks were
   already solved for you
-
 """
 
+
+import pkg_resources
 
 # API methods
 from dbcollection.core.api import (download,
@@ -51,7 +55,7 @@ from dbcollection.core.cache import CacheManager
 cache = CacheManager()
 
 # package version
-from ._version import __version__
+__version__ = pkg_resources.get_distribution('dbcollection').version
 
 # load information about the available datasets for download
 available_datasets_list = fetch_list_datasets()
