@@ -3,12 +3,27 @@
 
 """
 Deploy dbcollection to pypi and conda.
+
+Warning: run this script from the root dir of the project.
 """
 
 
+from __future__ import print_function
 import os
 import shutil
 import subprocess
+
+
+cwd = os.path.dirname(os.path.abspath(__file__))
+build_dir = os.path.join(cwd, 'build')
+if os.path.exists(build_dir):
+    print('Removing dir: {}'.format(build_dir))
+    shutil.rmtree(build_dir, ignore_errors=True)
+
+dist_dir = os.path.join(cwd, 'dist')
+if os.path.exists(dist_dir):
+    print('Removing dir: {}'.format(dist_dir))
+    shutil.rmtree(dist_dir, ignore_errors=True)
 
 
 # PyPi
@@ -16,6 +31,7 @@ print('PyPi: Upload sdist...')
 msg1 = subprocess.run(["python", 'setup.py', 'sdist', 'upload'], stdout=subprocess.PIPE)
 print('PyPi: Upload bdist_wheel...')
 msg2 = subprocess.run(["python", 'setup.py', 'bdist_wheel', 'upload'], stdout=subprocess.PIPE)
+
 
 # Conda
 python_versions = ["2.7", "3.5", "3.6"]
@@ -60,6 +76,14 @@ for i, pyver in enumerate(python_versions):
                     msg = subprocess.run(["anaconda", 'upload', root + '/' + fname], stdout=subprocess.PIPE)
 
 
-print('\nRemoving temp dir: {}'.format(temp_output_dir))
 if os.path.exists(temp_output_dir):
+    print('\nRemoving temp dir: {}'.format(temp_output_dir))
     shutil.rmtree(temp_output_dir, ignore_errors=True)
+
+if os.path.exists(build_dir):
+    print('\nRemoving temp dir: {}'.format(build_dir))
+    shutil.rmtree(build_dir, ignore_errors=True)
+
+if os.path.exists(dist_dir):
+    print('\nRemoving temp dir: {}'.format(dist_dir))
+    shutil.rmtree(dist_dir, ignore_errors=True)
