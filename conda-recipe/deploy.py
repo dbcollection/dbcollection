@@ -20,6 +20,12 @@ if os.path.exists(build_dir):
     print('Removing dir: {}'.format(build_dir))
     shutil.rmtree(build_dir, ignore_errors=True)
 
+dist_dir = os.path.join(cwd, 'dist')
+if os.path.exists(dist_dir):
+    print('Removing dir: {}'.format(dist_dir))
+    shutil.rmtree(dist_dir, ignore_errors=True)
+
+
 # PyPi
 print('PyPi: Upload sdist...')
 msg1 = subprocess.run(["python", 'setup.py', 'sdist', 'upload'], stdout=subprocess.PIPE)
@@ -77,3 +83,7 @@ if os.path.exists(temp_output_dir):
 if os.path.exists(build_dir):
     print('\nRemoving temp dir: {}'.format(build_dir))
     shutil.rmtree(build_dir, ignore_errors=True)
+
+if os.path.exists(dist_dir):
+    print('\nRemoving temp dir: {}'.format(dist_dir))
+    shutil.rmtree(dist_dir, ignore_errors=True)
