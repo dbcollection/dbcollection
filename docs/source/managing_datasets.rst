@@ -34,10 +34,7 @@ Downloading data files from online resources
 =================================================
 
 One use of **dbcollection** is to download data files
-from online sources. This is achieved by using the following method:
-
-.. autofunction:: dbcollection.core.api.download
-
+from online sources.
 
 
 
