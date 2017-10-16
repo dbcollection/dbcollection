@@ -4,7 +4,7 @@
 Managing datasets
 =================
 
-In the (:ref:`Getting started <user_getting_started>`) chapter you've seen how to
+In the (:ref:`Getting started <getting_started>`) chapter you've seen how to
 do basic operations for loading a dataset, to check what datasets are available in
 **dbcollection** and how to fetch data using it. In the next sections we'll explore other
 methods for managing your datasets that might come in handy for some situations.
@@ -34,10 +34,7 @@ Downloading data files from online resources
 =================================================
 
 One use of **dbcollection** is to download data files
-from online sources. This is achieved by using the following method:
-
-.. autofunction:: dbcollection.core.api.download
-
+from online sources.
 
 
 

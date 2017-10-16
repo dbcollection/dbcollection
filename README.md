@@ -72,7 +72,7 @@ python setup.py install
 Using the module is pretty straight-forward. To import it just do:
 
 ```python
-import dbcollection as dbc
+>>> import dbcollection as dbc
 ```
 
 To load a dataset, you only need to use a single method that returns a data loader object which can then be used to fetch data from.
@@ -110,23 +110,28 @@ For example, if you want to know how the data is structured inside the metadata 
    - list_images_per_class,  shape = (10, 6742),  dtype = int32
 ```
 
-> Note: For a more detailed overview of how to use this
-module check the documentation or the available tutorials.
+To fetch data samples from a field, its is as easy as calling a method with the set and field names and the row id(s) you want to select. For example, to retrieve the 10 first images all you need to do is the following:
+
+```python
+>>> imgs = mnist.get('train', 'images', range(10))
+>>> imgs.shape
+(10, 28, 28)
+```
+
+> Note: For more information about using this module, please check the documentation or the available notebooks for guidance.
 
 
 ### Notebooks
 
-A more detailed tutorial on using the **dbcollection**
-module main APIs for dataset managing and data loading is
-provided as a python notebook format [here](todo).
+For a more pratical introduction to **dbcollection's** module for managing datasets and fetching data,
+there are some python notebooks available in the `notebooks/` folder for a more hands-on tutorial on how to use this package.
 
 
 ## Documentation
 
 The package documentation is hosted on [Read The Docs](http://dbcollection.readthedocs.io/en/latest/).
 
-The documentation should provide a good starting point for
-learning how to use the library.
+It provides a more detailed guide on how to use this package as well as additional information that you might find relevant about this project.
 
 
 ## Contributing
@@ -136,7 +141,7 @@ improvements, enhancements and ideas are welcome. If you would like to see addit
 project.
 
 If you are interested in fixing issues and contributing
-directly to the code base, please see the document [How to Contribute](https://github.com/dbcollection/dbcollection/wiki/How-to-Contribute).
+directly to the code base, please see the document [How to Contribute](https://github.com/dbcollection/dbcollection/blob/master/docs/source/contributing/how_to_contribute.rst).
 
 
 ## Feedback
@@ -146,4 +151,4 @@ For now, use the [Github issues](https://github.com/dbcollection/dbcollection/is
 
 ## License
 
-Licensed under the [MIT](LICENSE.txt) license.
+[MIT License](LICENSE.txt)

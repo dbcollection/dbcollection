@@ -50,7 +50,10 @@ Contents:
    introduction
    install
    getting_started
-   tutorial/index
+   managing_datasets
+   fetching_data
+   cache_management
+   create_new_dataset
    reference/index
    available_datasets
    contributing/index
