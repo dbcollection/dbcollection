@@ -9,7 +9,7 @@ By doing so, this library can target any platform that supports Python and any l
 that has bindings for HDF5.
 
 This package allows to easily manage and load datasets in an easy and simple
-way by using hdf5 files as metadata storage. By storing all the necessary metadata
+way by using HDF5 files as metadata storage. By storing all the necessary metadata
 to disk, it allows for huge datasets to be used in systems with reduced
 memory usage. Also, once a dataset is setup, it is setup forever! Users can reuse it
 as many times as they want/need for a myriad of tasks without having to setup a
