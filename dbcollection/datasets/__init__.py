@@ -50,18 +50,17 @@ class BaseDataset(object):
     """
 
     # download url
-    urls = () # list of urls to download
+    urls = ()  # list of urls to download
 
     # some keywords. These are used to classify datasets for easier
     # categorization in the cache file.
     keywords = ()
 
     # init tasks
-    tasks = {} # dictionary of available tasks to process
-            # Example: tasks = {'classification':Classification}
-    default_task = '' # Should define a default class!
-                      # Example: default_task='classification'
-
+    tasks = {}  # dictionary of available tasks to process
+    # Example: tasks = {'classification':Classification}
+    default_task = ''  # Should define a default class!
+    # Example: default_task='classification'
 
     def __init__(self, data_path, cache_path, extract_data=True, verbose=True):
         """Initialize class."""
@@ -72,7 +71,6 @@ class BaseDataset(object):
         self.extract_data = extract_data
         self.verbose = verbose
 
-
     def download(self):
         """
         Download and extract files to disk.
@@ -81,12 +79,12 @@ class BaseDataset(object):
         -------
         tuple
             A list of keywords.
+
         """
         # download + extract data and remove temporary files
         download_extract_all(self.urls, self.data_path, self.extract_data, self.verbose)
 
         return self.keywords
-
 
     def parse_task_name(self, task):
         """Parses the task string to look for key suffixes.
@@ -100,12 +98,12 @@ class BaseDataset(object):
         -------
         str
             Returns a task name without the '_s' suffix.
+
         """
         if task.endswith('_s'):
             return task[:-2], '_s'
         else:
             return task, None
-
 
     def get_task_constructor(self, task):
         """Returns the class constructor for the input task.
@@ -133,7 +131,6 @@ class BaseDataset(object):
             task_, suffix = self.parse_task_name(task)
         return task_, suffix, self.tasks[task_]
 
-
     def process(self, task='default'):
         """Processes the metadata of a task.
 
@@ -154,13 +151,13 @@ class BaseDataset(object):
         task_loader = task_constructor(self.data_path, self.cache_path, suffix, self.verbose)
         task_filename = task_loader.run()
         if suffix:
-            return {task_+suffix: task_filename}
+            return {task_ + suffix: task_filename}
         else:
             return {task_: task_filename}
 
 
 class BaseTask(object):
-    """ Base class for processing a task of a dataset.
+    """Base class for processing a task of a dataset.
 
     Parameters
     ----------
@@ -191,7 +188,6 @@ class BaseTask(object):
     # name of the task file
     filename_h5 = 'task'
 
-
     def __init__(self, data_path, cache_path, suffix=None, verbose=True):
         """Initialize class."""
         assert data_path
@@ -201,16 +197,15 @@ class BaseTask(object):
         self.suffix = suffix
         self.verbose = verbose
 
-
     def load_data(self):
         """
         Load data of the dataset (create a generator).
 
         Load data from annnotations and split it to corresponding
         sets (train, val, test, etc.)
+
         """
         pass  # stub
-
 
     def add_data_to_source(self, hdf5_handler, data, set_name=None):
         """
@@ -230,7 +225,6 @@ class BaseTask(object):
         """
         pass  # stub
 
-
     def add_data_to_default(self, handler, data, set_name=None):
         """
         Add data of a set to the default group.
@@ -248,7 +242,6 @@ class BaseTask(object):
 
         """
         pass  # stub
-
 
     def process_metadata(self):
         """
@@ -288,7 +281,6 @@ class BaseTask(object):
 
         # return information of the task + cache file
         return file_name
-
 
     def run(self):
         """Run task processing."""
