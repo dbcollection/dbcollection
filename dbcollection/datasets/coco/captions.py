@@ -10,7 +10,6 @@ import numpy as np
 import progressbar
 
 from dbcollection.datasets import BaseTask
-
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_json
@@ -36,7 +35,6 @@ class Caption2015(BaseTask):
         "val": os.path.join('annotations', 'captions_val2014.json'),
         "test": os.path.join('annotations', 'image_info_test2014.json')
     }
-
 
     def load_data_trainval(self, set_name, image_dir, annotation_path):
         """
@@ -66,7 +64,6 @@ class Caption2015(BaseTask):
                 "id": annot['id'],
                 "coco_url": annot['coco_url']
             }
-
 
         if self.verbose:
             print('  > Processing data annotations... ')
@@ -100,7 +97,6 @@ class Caption2015(BaseTask):
         return {set_name: [OrderedDict(sorted(data.items())),
                            annotations]}
 
-
     def load_data(self):
         """
         Load data of the dataset (create a generator).
@@ -110,7 +106,7 @@ class Caption2015(BaseTask):
                 print('\n> Loading data files for the set: ' + set_name)
 
             # image dir
-            image_dir =  os.path.join(self.data_path, self.image_dir_path[set_name])
+            image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
 
             # annotation file path
             annot_filepath = os.path.join(self.data_path, self.annotation_path[set_name])
@@ -119,7 +115,6 @@ class Caption2015(BaseTask):
                 yield load_data_test(set_name, image_dir, annot_filepath, self.verbose)
             else:
                 yield self.load_data_trainval(set_name, image_dir, annot_filepath)
-
 
     def add_data_to_source(self, hdf5_handler, data, set_name):
         """
@@ -148,7 +143,7 @@ class Caption2015(BaseTask):
             file_grp = image_grp.create_group(str(i))
             file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
             file_grp['coco_url'] = str2ascii(annot["coco_url"])
-            file_grp['width'] =  np.array(annot["width"], dtype=np.int32)
+            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
             file_grp['height'] = np.array(annot["height"], dtype=np.int32)
             file_grp['id'] = np.array(annot["id"], dtype=np.int32)
 
@@ -198,7 +193,6 @@ class Caption2015(BaseTask):
         # update progressbar
         if self.verbose:
             prgbar.finish()
-
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
@@ -302,31 +296,56 @@ class Caption2015(BaseTask):
         if is_test:
             coco_categories_ids = list(range(len(category)))
 
-        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_urls', str2ascii(coco_urls), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'width', np.array(width, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'height', np.array(height, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'image_id', np.array(image_id, dtype=np.int32), fillvalue=-1)
-
-        hdf5_write_data(hdf5_handler, 'coco_images_ids', np.array(coco_images_ids, dtype=np.int32), fillvalue=-1)
-
-        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
-
-        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image', np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'image_filenames',
+                        str2ascii(image_filenames), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'coco_urls',
+                        str2ascii(coco_urls), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'width',
+                        np.array(width, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'height',
+                        np.array(height, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'image_id',
+                        np.array(image_id, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'coco_images_ids',
+                        np.array(coco_images_ids, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids',
+                        np.array(object_id, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields',
+                        str2ascii(object_fields), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
+                        np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32),
+                        fillvalue=-1)
 
         if not is_test:
-            hdf5_write_data(hdf5_handler, 'captions', str2ascii(caption), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'list_captions_per_image', np.array(pad_list(list_captions_per_image, -1), dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'captions',
+                            str2ascii(caption), dtype=np.uint8,
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'list_captions_per_image',
+                            np.array(pad_list(list_captions_per_image, -1), dtype=np.int32),
+                            fillvalue=-1)
         else:
-            hdf5_write_data(hdf5_handler, 'category', str2ascii(category), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(supercategory), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'coco_categories_ids', np.array(coco_categories_ids, dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'category',
+                            str2ascii(category), dtype=np.uint8,
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'supercategory',
+                            str2ascii(supercategory), dtype=np.uint8,
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'coco_categories_ids',
+                            np.array(coco_categories_ids, dtype=np.int32),
+                            fillvalue=-1)
 
 
-#---------------------------------------------------------
-# Captions 2016
-#---------------------------------------------------------
+# ---------------------------------------------------------
+#  Captions 2016
+# ---------------------------------------------------------
 
 class Caption2016(Caption2015):
     """COCO Caption (2016) preprocessing functions."""
@@ -335,15 +354,15 @@ class Caption2016(Caption2015):
     filename_h5 = 'caption_2016'
 
     image_dir_path = {
-        "train" : 'train2014',
-        "val" : 'val2014',
-        "test" : 'test2015',
-        "test_dev" : "test2015"
+        "train": 'train2014',
+        "val": 'val2014',
+        "test": 'test2015',
+        "test_dev": "test2015"
     }
 
     annotation_path = {
-        "train" : os.path.join('annotations', 'captions_train2014.json'),
-        "val" : os.path.join('annotations', 'captions_val2014.json'),
-        "test" : os.path.join('annotations', 'image_info_test2015.json'),
-        "test_dev" : os.path.join('annotations', 'image_info_test-dev2015.json')
+        "train": os.path.join('annotations', 'captions_train2014.json'),
+        "val": os.path.join('annotations', 'captions_val2014.json'),
+        "test": os.path.join('annotations', 'image_info_test2015.json'),
+        "test_dev": os.path.join('annotations', 'image_info_test-dev2015.json')
     }
