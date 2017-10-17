@@ -107,7 +107,7 @@ def convert_str_to_ascii(inp_str):
     max_size = max([len(a) for a in inp_str])
 
     # allocate array
-    ascii_array = np.zeros([len(inp_str), max_size+1], dtype=np.uint8)
+    ascii_array = np.zeros([len(inp_str), max_size + 1], dtype=np.uint8)
 
     # iteratively copy data to the array
     for i, val in enumerate(inp_str):
@@ -138,7 +138,8 @@ def convert_ascii_to_str(input_array):
 
     >>> from dbcollection.utils.string_ascii import convertascii_to_str
     >>> import numpy as np
-    >>> tensor = np.array([[115, 116, 114, 105, 110, 103, 49, 0]], dtype=np.uint8)  # ascii format of 'string1'
+    >>> # ascii format of 'string1'
+    >>> tensor = np.array([[115, 116, 114, 105, 110, 103, 49, 0]], dtype=np.uint8)
     >>> convertascii_to_str(tensor)
     ['string1']
 

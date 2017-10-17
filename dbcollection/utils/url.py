@@ -90,7 +90,8 @@ def download_url_requests(url, fname, verbose=False):
                     f.write(r.content)
                 else:
                     chunk_size = 1024
-                    progbar = progressbar.ProgressBar(maxval=int(total_length/chunk_size)).start()
+                    progbar_length = int(total_length / chunk_size)
+                    progbar = progressbar.ProgressBar(maxval=progbar_length).start()
                     i = 0
                     for data in r.iter_content(chunk_size=chunk_size):
                         if data:
@@ -106,7 +107,7 @@ def download_url_requests(url, fname, verbose=False):
     return status, err
 
 
-def download_url_google_drive(file_id, filename, verbose=False):
+def download_url_google_drive(file_id, filename):
     """Download a single url from google drive into a file.
 
     Parameters
@@ -115,8 +116,6 @@ def download_url_google_drive(file_id, filename, verbose=False):
         File ID in the google drive.
     filename : str
         File name + path to store in disk.
-    verbose : bool, optional
-        Display messages + progress bar on screen when downloading the file.
 
     Returns
     -------
@@ -131,7 +130,6 @@ def download_url_google_drive(file_id, filename, verbose=False):
         for key, value in response.cookies.items():
             if key.startswith('download_warning'):
                 return value
-
         return None
 
     def save_response_content(response, destination):
@@ -140,19 +138,18 @@ def download_url_google_drive(file_id, filename, verbose=False):
 
         with open(destination, "wb") as f:
             for chunk in response.iter_content(CHUNK_SIZE):
-                if chunk: # filter out keep-alive new chunks
+                if chunk:  # filter out keep-alive new chunks
                     f.write(chunk)
-
 
     URL = "https://docs.google.com/uc?export=download"
 
     session = requests.Session()
 
-    response = session.get(URL, params={'id' : file_id}, stream=True)
+    response = session.get(URL, params={'id': file_id}, stream=True)
     token = get_confirm_token(response)
 
     if token:
-        params = {'id' : file_id, 'confirm' : token}
+        params = {'id': file_id, 'confirm': token}
         response = session.get(URL, params=params, stream=True)
         status, err = True, ''
     else:
@@ -200,7 +197,7 @@ def download_url(url, filename, method, verbose=False):
     if method == 'requests':
         status, err = download_url_requests(url, tmpfile, verbose)
     elif method == 'googledrive':
-        status, err = download_url_google_drive(url, tmpfile, verbose)
+        status, err = download_url_google_drive(url, tmpfile)
     else:
         status, err = False, 'Invalid method: {}'.format(method)
 
@@ -239,10 +236,10 @@ def parse_url(url):
 
     """
 
-    def get_field_value(d, field):
+    def get_field_value(dict_url, field):
         """Check if field exists and return its value from a dictionary. Else, return None."""
-        if field in d:
-            return d[field]
+        if field in dict_url:
+            return dict_url[field]
         else:
             return None
 
@@ -322,7 +319,7 @@ def download_extract_all(urls, dir_save, extract_data=True, verbose=True):
     # download + extract data and remove temporary files
     for i, url in enumerate(urls):
         if verbose:
-            print('\nDownload url ({}/{}): {}'.format(i+1, len(urls), url))
+            print('\nDownload url ({}/{}): {}'.format(i + 1, len(urls), url))
 
         url, md5hash, filename, extract_dir, method = parse_url(url)
 
