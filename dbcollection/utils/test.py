@@ -45,18 +45,15 @@ class TestBaseDB:
         self.data_dir = data_dir
         self.verbose = verbose
 
-
     def delete_cache(self):
         """Delete all cache data + dir"""
         print('\n==> dbcollection: config_cache()')
         dbc.config_cache(delete_cache=True, is_test=True)
 
-
     def list_datasets(self):
         """Print dbcollection info"""
         print('\n==> dbcollection: info()')
         dbc.info_cache(is_test=True)
-
 
     def print_info(self, loader):
         """Print information about the dataset to the screen
@@ -71,7 +68,6 @@ class TestBaseDB:
         print('Task: ' + loader.task)
         print('Data path: ' + loader.data_dir)
         print('Metadata cache path: ' + loader.cache_path)
-
 
     def load(self):
         """Return a data loader object for a dataset.
@@ -88,7 +84,6 @@ class TestBaseDB:
                         verbose=self.verbose,
                         is_test=True)
 
-
     def download(self, extract_data=True):
         """Download a dataset to disk.
 
@@ -104,7 +99,6 @@ class TestBaseDB:
                      verbose=self.verbose,
                      is_test=True)
 
-
     def process(self):
         """Process dataset"""
         print('\n==> dbcollection: process()')
@@ -112,7 +106,6 @@ class TestBaseDB:
                     task=self.task,
                     verbose=self.verbose,
                     is_test=True)
-
 
     def run(self, mode):
         """Run the test script.

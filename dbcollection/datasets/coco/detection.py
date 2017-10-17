@@ -37,7 +37,6 @@ class Detection2015(BaseTask):
         "test": os.path.join('annotations', 'image_info_test2014.json')
     }
 
-
     def parse_image_annotations(self, image_dir, annotations):
         """
         Parse image annotations data to a dictionary and  lists
@@ -63,7 +62,6 @@ class Detection2015(BaseTask):
 
         return filename_ids, images_annot_by_fname, images_fname_by_id
 
-
     def parse_category_annotations(self, annotations):
         """
         Parse category annotations data to a dictionary and  lists
@@ -83,7 +81,6 @@ class Detection2015(BaseTask):
 
         return categories, category_list, supercategory_list, category_id
 
-
     def load_data_trainval(self, set_name, image_dir, annotation_path):
         """
         Load train+val data
@@ -99,21 +96,20 @@ class Detection2015(BaseTask):
         if self.verbose:
             prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
 
-
-        #---------------------------------------------------------
-        # parse annotations
-        #---------------------------------------------------------
+        # ---------------------------------------------------------
+        #  parse annotations
+        # ---------------------------------------------------------
 
         if self.verbose:
             print('  > Processing image annotations... ')
         # get all image filenames + ids into a list
-        filename_ids, images_annot_by_fname, images_fname_by_id = self.parse_image_annotations(image_dir, annotations)
-
+        filename_ids, images_annot_by_fname, images_fname_by_id = self.parse_image_annotations(
+            image_dir, annotations)
 
         if self.verbose:
             print('  > Processing category annotations... ')
-        categories, category_list, supercategory_list, category_id = self.parse_category_annotations(annotations)
-
+        parsed_annots = self.parse_category_annotations(annotations)
+        categories, category_list, supercategory_list, category_id = parsed_annots
 
         if self.verbose:
             print('  > Processing object annotations... ')
@@ -133,10 +129,10 @@ class Detection2015(BaseTask):
                 segmentation = annot["segmentation"]
 
             # convert from [x,y,w,h] to [xmin,ymin,xmax,ymax]
-            bbox = [annot['bbox'][0], #xmin
-                    annot['bbox'][1], #ymin
-                    annot['bbox'][0] + annot['bbox'][2] -1, #ymax
-                    annot['bbox'][1] + annot['bbox'][3] -1] #ymax
+            bbox = [annot['bbox'][0],  # xmin
+                    annot['bbox'][1],  # ymin
+                    annot['bbox'][0] + annot['bbox'][2] - 1,  # ymax
+                    annot['bbox'][1] + annot['bbox'][3] - 1]  # ymax
 
             obj = {
                 "category": category_annot['name'],
@@ -165,15 +161,14 @@ class Detection2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        return {set_name : [OrderedDict(sorted(images_annot_by_fname.items())),
-                            annotations,
-                            annotation_id_dict,
-                            category_list,
-                            supercategory_list,
-                            category_id,
-                            filename_ids,
-                            images_fname_by_id]}
-
+        return {set_name: [OrderedDict(sorted(images_annot_by_fname.items())),
+                           annotations,
+                           annotation_id_dict,
+                           category_list,
+                           supercategory_list,
+                           category_id,
+                           filename_ids,
+                           images_fname_by_id]}
 
     def load_data(self):
         """
@@ -193,7 +188,6 @@ class Detection2015(BaseTask):
                 yield load_data_test(set_name, image_dir, annot_filepath, self.verbose)
             else:
                 yield self.load_data_trainval(set_name, image_dir, annot_filepath)
-
 
     def add_data_to_source(self, hdf5_handler, data, set_name):
         """
@@ -306,7 +300,6 @@ class Detection2015(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
@@ -408,7 +401,8 @@ class Detection2015(BaseTask):
                         # bbox, area, iscrowd, segmentation,
                         # "image_id", "category_id", "annotation_id"]
                         object_id.append([i, i, i, i,
-                                          category.index(obj["category"]), supercategory.index(obj["supercategory"]),
+                                          category.index(obj["category"]), supercategory.index(
+                                              obj["supercategory"]),
                                           counter, counter, obj["iscrowd"], counter,
                                           i, category.index(obj["category"]), counter])
 
@@ -420,7 +414,6 @@ class Detection2015(BaseTask):
                         # update counter
                         counter += 1
 
-
                 list_boxes_per_image.append(boxes_per_image)
                 list_object_ids_per_image.append(boxes_per_image)
 
@@ -431,7 +424,6 @@ class Detection2015(BaseTask):
         # update progressbar
         if self.verbose:
             prgbar.finish()
-
 
         if self.verbose:
             print('> Processing coco lists:')
@@ -467,7 +459,6 @@ class Detection2015(BaseTask):
             if self.verbose:
                 prgbar.finish()
 
-
         # process lists
         if not is_test:
             if self.verbose:
@@ -500,29 +491,56 @@ class Detection2015(BaseTask):
             if self.verbose:
                 print('> Done.')
 
-        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_urls', str2ascii(coco_urls), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'width', np.array(width, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'height', np.array(height, dtype=np.int32), fillvalue=-1)
-
-        hdf5_write_data(hdf5_handler, 'category', str2ascii(category), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'supercategory', str2ascii(supercategory), dtype=np.uint8, fillvalue=0)
-
-        hdf5_write_data(hdf5_handler, 'image_id', np.array(image_id, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'category_id', np.array(category_id, dtype=np.int32), fillvalue=-1)
-
-        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
-
-        hdf5_write_data(hdf5_handler, 'coco_images_ids', np.array(coco_images_ids, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'coco_categories_ids', np.array(coco_categories_ids, dtype=np.int32), fillvalue=-1)
-
-        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image', np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'image_filenames',
+                        str2ascii(image_filenames), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'coco_urls',
+                        str2ascii(coco_urls), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'width',
+                        np.array(width, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'height',
+                        np.array(height, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'category',
+                        str2ascii(category), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'supercategory',
+                        str2ascii(supercategory), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_id',
+                        np.array(image_id, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'category_id',
+                        np.array(category_id, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids',
+                        np.array(object_id, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields',
+                        str2ascii(object_fields), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'coco_images_ids',
+                        np.array(coco_images_ids, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'coco_categories_ids',
+                        np.array(coco_categories_ids, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
+                        np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32),
+                        fillvalue=-1)
 
         if not is_test:
-            hdf5_write_data(hdf5_handler, 'annotation_id', np.array(annotation_id, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'boxes', np.array(bbox, dtype=np.float), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'iscrowd', np.array(iscrowd, dtype=np.uint8), fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'annotation_id',
+                            np.array(annotation_id, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'boxes',
+                            np.array(bbox, dtype=np.float),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'iscrowd',
+                            np.array(iscrowd, dtype=np.uint8),
+                            fillvalue=0)
 
             nrows = len(segmentation)
             ncols = max([len(l) for l in segmentation])
@@ -534,7 +552,7 @@ class Detection2015(BaseTask):
                                                compression_opts=4,
                                                fillvalue=-1)
             if self.verbose:
-                print('   -- Saving segmentation field to disk (this will take some time to finish)')
+                print('   -- Saving segmentation masks to disk (this will take some time)')
                 prgbar = progressbar.ProgressBar(max_value=nrows)
             for i in range(nrows):
                 dset[i, :len(segmentation[i])] = np.array(segmentation[i], dtype=np.float)
@@ -544,32 +562,38 @@ class Detection2015(BaseTask):
             if self.verbose:
                 prgbar.finish()
 
-            hdf5_write_data(hdf5_handler, 'area', np.array(area, dtype=np.int32), fillvalue=-1)
-
-            hdf5_write_data(hdf5_handler, 'coco_annotations_ids', np.array(coco_annotations_ids, dtype=np.int32),
+            hdf5_write_data(hdf5_handler, 'area',
+                            np.array(area, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'coco_annotations_ids',
+                            np.array(coco_annotations_ids, dtype=np.int32),
                             fillvalue=-1)
 
             pad_value = -1
             hdf5_write_data(hdf5_handler, 'list_image_filenames_per_category',
-                            np.array(pad_list(list_image_filenames_per_category, pad_value), dtype=np.int32),
+                            np.array(pad_list(list_image_filenames_per_category,
+                                              pad_value), dtype=np.int32),
                             fillvalue=pad_value)
             hdf5_write_data(hdf5_handler, 'list_image_filenames_per_supercategory',
-                            np.array(pad_list(list_image_filenames_per_supercategory, pad_value), dtype=np.int32),
+                            np.array(pad_list(list_image_filenames_per_supercategory,
+                                              pad_value), dtype=np.int32),
                             fillvalue=pad_value)
             hdf5_write_data(hdf5_handler, 'list_boxes_per_image',
                             np.array(pad_list(list_boxes_per_image, pad_value), dtype=np.int32),
                             fillvalue=pad_value)
             hdf5_write_data(hdf5_handler, 'list_objects_ids_per_category',
-                            np.array(pad_list(list_objects_ids_per_category, pad_value), dtype=np.int32),
+                            np.array(pad_list(list_objects_ids_per_category,
+                                              pad_value), dtype=np.int32),
                             fillvalue=pad_value)
             hdf5_write_data(hdf5_handler, 'list_objects_ids_per_supercategory',
-                            np.array(pad_list(list_objects_ids_per_supercategory, pad_value), dtype=np.int32),
+                            np.array(pad_list(list_objects_ids_per_supercategory,
+                                              pad_value), dtype=np.int32),
                             fillvalue=pad_value)
 
 
-#---------------------------------------------------------
-# Detection 2016
-#---------------------------------------------------------
+# ---------------------------------------------------------
+#  Detection 2016
+# ---------------------------------------------------------
 
 class Detection2016(Detection2015):
     """COCO Detection (2016) preprocessing functions."""
@@ -578,15 +602,15 @@ class Detection2016(Detection2015):
     filename_h5 = 'detection_2016'
 
     image_dir_path = {
-        "train" : 'train2014',
-        "val" : 'val2014',
-        "test" : 'test2015',
-        "test_dev" : "test2015"
+        "train": 'train2014',
+        "val": 'val2014',
+        "test": 'test2015',
+        "test_dev": "test2015"
     }
 
     annotation_path = {
-        "train" : os.path.join('annotations', 'instances_train2014.json'),
-        "val" : os.path.join('annotations', 'instances_val2014.json'),
-        "test" : os.path.join('annotations', 'image_info_test2015.json'),
-        "test_dev" : os.path.join('annotations', 'image_info_test-dev2015.json')
+        "train": os.path.join('annotations', 'instances_train2014.json'),
+        "val": os.path.join('annotations', 'instances_val2014.json'),
+        "test": os.path.join('annotations', 'image_info_test2015.json'),
+        "test_dev": os.path.join('annotations', 'image_info_test-dev2015.json')
     }

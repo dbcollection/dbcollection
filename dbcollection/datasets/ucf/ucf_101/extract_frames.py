@@ -13,8 +13,9 @@ def get_filepaths_names(root_path):
     for root, _, files in os.walk(root_path, topdown=True):
         if any(files):
             filenames = filenames + [os.path.join(root, fname) for fname in files]
-            video_names = video_names + [os.path.splitext(fname)[0] for fname in files if fname.endswith('.avi')]
-            categories = categories + [os.path.basename(root)]*len(files)
+            vid_names = [os.path.splitext(fname)[0] for fname in files if fname.endswith('.avi')]
+            video_names = video_names + vid_names
+            categories = categories + [os.path.basename(root)] * len(files)
     return filenames, categories, video_names
 
 
@@ -38,7 +39,7 @@ def extract_video_frames(root_path, verbose=True):
 
     # setup stdout suppression for subprocess
     try:
-        from subprocess import DEVNULL # py3k
+        from subprocess import DEVNULL  # py3k
     except ImportError:
         DEVNULL = open(os.devnull, 'wb')
 
@@ -53,7 +54,8 @@ def extract_video_frames(root_path, verbose=True):
 
         # extract image frames from the videos
         try:
-            subprocess.Popen('ffmpeg -i {} -f image2 {}-%04d.jpg'.format(filenames[i], os.path.join(save_path, 'image')),
+            subprocess.Popen('ffmpeg -i {} -f image2 {}-%04d.jpg'
+                             .format(filenames[i], os.path.join(save_path, 'image')),
                              shell=True, stdout=DEVNULL, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError:
             raise Exception('\n\nError occurred when parsing {}\n'.format(filenames[i]))

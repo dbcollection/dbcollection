@@ -10,7 +10,6 @@ import numpy as np
 import progressbar
 
 from dbcollection.datasets import BaseTask
-
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list, squeeze_list
 from dbcollection.utils.file_load import load_json
@@ -40,27 +39,26 @@ class Keypoints2016(BaseTask):
     }
 
     keypoints_list = {
-        'nose',             #-- 1
-        'left_eye',         #-- 2
-        'right_eye',        #-- 3
-        'left_ear',         #-- 4
-        'right_ear',        #-- 5
+        'nose',       # -- 1
+        'left_eye',   # -- 2
+        'right_eye',  # -- 3
+        'left_ear',   # -- 4
+        'right_ear',  # -- 5
 
-        'left_shoulder',    #-- 6
-        'right_shoulder',   #-- 7
-        'left_elbow',       #-- 8
-        'right_elbow',      #-- 9
-        'left_wrist',       #-- 10
-        'right_wrist',      #-- 11
+        'left_shoulder',   # -- 6
+        'right_shoulder',  # -- 7
+        'left_elbow',      # -- 8
+        'right_elbow',     # -- 9
+        'left_wrist',      # -- 10
+        'right_wrist',     # -- 11
 
-        'left_hip',         #-- 12
-        'right_hip',        #-- 13
-        'left_knee',        #-- 14
-        'right_knee',       #-- 15
-        'left_ankle',       #-- 16
-        'right_ankle'       #-- 17
+        'left_hip',    # -- 12
+        'right_hip',   # -- 13
+        'left_knee',   # -- 14
+        'right_knee',  # -- 15
+        'left_ankle',  # -- 16
+        'right_ankle'  # -- 17
     }
-
 
     def parse_image_annotations(self, image_dir, annotations):
         """
@@ -80,13 +78,13 @@ class Keypoints2016(BaseTask):
                 "id": annot['id'],
                 "coco_url": annot['coco_url'],
             }
+
         # order image data by file id
         images_fname_by_id = {}
         for i, annot in enumerate(annotations['images']):
             images_fname_by_id[annot['id']] = annot['file_name']
 
         return filename_ids, images_annot_by_fname, images_fname_by_id
-
 
     def parse_category_annotations(self, annotations):
         """
@@ -106,7 +104,6 @@ class Keypoints2016(BaseTask):
         supercategory_list = list(set(supercategory_list))
 
         return categories, category_list, supercategory_list, category_id
-
 
     def load_data_trainval(self, set_name, image_dir, annotation_path):
         """
@@ -128,14 +125,15 @@ class Keypoints2016(BaseTask):
         if self.verbose:
             print('  > Processing image annotations... ')
         # get all image filenames + ids into a list
-        filename_ids, images_annot_by_fname, images_fname_by_id = self.parse_image_annotations(image_dir, annotations)
+        filename_ids, images_annot_by_fname, images_fname_by_id = self.parse_image_annotations(
+            image_dir, annotations)
 
         if self.verbose:
             print('  > Processing category annotations... ')
-        categories, category_list, supercategory_list, category_id = self.parse_category_annotations(annotations)
+        parsed_annots = self.parse_category_annotations(annotations)
+        categories, category_list, supercategory_list, category_id = parsed_annots
         skeleton = annotations['categories'][0]['skeleton']
         keypoints = annotations['categories'][0]['keypoints']
-
 
         if self.verbose:
             print('  > Processing data annotations... ')
@@ -155,10 +153,10 @@ class Keypoints2016(BaseTask):
                 segmentation = annot["segmentation"]
 
             # convert from [x,y,w,h] to [xmin,ymin,xmax,ymax]
-            bbox = [annot['bbox'][0], #xmin
-                    annot['bbox'][1], #ymin
-                    annot['bbox'][0] + annot['bbox'][2] -1, #ymax
-                    annot['bbox'][1] + annot['bbox'][3] -1] #ymax
+            bbox = [annot['bbox'][0],  # xmin
+                    annot['bbox'][1],  # ymin
+                    annot['bbox'][0] + annot['bbox'][2] - 1,  # ymax
+                    annot['bbox'][1] + annot['bbox'][3] - 1]  # ymax
 
             obj = {
                 "category": category_annot['name'],
@@ -186,7 +184,6 @@ class Keypoints2016(BaseTask):
             if self.verbose:
                 prgbar.update(i)
 
-
         # reset progressbar
         if self.verbose:
             prgbar.finish()
@@ -201,7 +198,6 @@ class Keypoints2016(BaseTask):
                            images_fname_by_id,
                            skeleton,
                            keypoints]}
-
 
     def load_data(self):
         """
@@ -221,7 +217,6 @@ class Keypoints2016(BaseTask):
                 yield load_data_test(set_name, image_dir, annot_filepath, self.verbose)
             else:
                 yield self.load_data_trainval(set_name, image_dir, annot_filepath)
-
 
     def add_data_to_source(self, hdf5_handler, data, set_name):
         """
@@ -259,7 +254,6 @@ class Keypoints2016(BaseTask):
         if self.verbose:
             print('>>> Adding data to group: images')
             prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
-
 
         # images - original
         image_grp = hdf5_handler.create_group('images')
@@ -356,13 +350,12 @@ class Keypoints2016(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
         """
         image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
-        if 'test' in  set_name:
+        if 'test' in set_name:
             is_test = True
             data_ = data[0]
             filename_ids = data[1]
@@ -399,7 +392,7 @@ class Keypoints2016(BaseTask):
         area = []
         iscrowd = [0, 1]
         segmentation = []
-        num_keypoints = list(range(0, 17+1))
+        num_keypoints = list(range(0, 17 + 1))
         keypoints_list = []
         bbox = []
         object_id = []
@@ -425,15 +418,13 @@ class Keypoints2016(BaseTask):
         list_keypoints_per_image = []
         list_object_ids_per_image = []
         list_image_filenames_per_num_keypoints = []
-        list_object_ids_per_keypoint = [] # body part
+        list_object_ids_per_keypoint = []  # body part
 
         if self.verbose:
             print('> Adding data to default group:')
             prgbar = progressbar.ProgressBar(max_value=len(data_))
 
-
         counter = 0
-        segmentation_t1_counter, segmentation_t2_counter = 0, 0
         tmp_coco_annotations_ids = {}
 
         for i, key in enumerate(data_):
@@ -461,7 +452,6 @@ class Keypoints2016(BaseTask):
                         segmentation.append(obj["segmentation"])
                         keypoints_list.append(obj["keypoints"])
 
-
                         # *** object_id ***
                         # [filename, coco_url, width, height,
                         # category, supercategory,
@@ -469,10 +459,11 @@ class Keypoints2016(BaseTask):
                         # "image_id", "category_id", "annotation_id"
                         # "num_keypoints", "keypoints"]
                         object_id.append([i, i, i, i,
-                                        category.index(obj["category"]), supercategory.index(obj["supercategory"]),
-                                        counter, counter, obj["iscrowd"], counter,
-                                        i, category.index(obj["category"]), counter,
-                                        obj["num_keypoints"], counter])
+                                          category.index(obj["category"]), supercategory.index(
+                                              obj["supercategory"]),
+                                          counter, counter, obj["iscrowd"], counter,
+                                          i, category.index(obj["category"]), counter,
+                                          obj["num_keypoints"], counter])
 
                         boxes_per_image.append(counter)
 
@@ -493,7 +484,6 @@ class Keypoints2016(BaseTask):
         # update progressbar
         if self.verbose:
             prgbar.finish()
-
 
         if self.verbose:
             print('> Processing coco lists:')
@@ -529,7 +519,6 @@ class Keypoints2016(BaseTask):
             if self.verbose:
                 prgbar.finish()
 
-
         # process lists
         if not is_test:
             if self.verbose:
@@ -537,44 +526,73 @@ class Keypoints2016(BaseTask):
 
             for i in range(len(keypoints)):
                 imgs_per_num = [val[0] for _, val in enumerate(object_id) if val[8] == i]
-                imgs_per_num = list(set(imgs_per_num)) # get unique values
+                imgs_per_num = list(set(imgs_per_num))  # get unique values
                 imgs_per_num.sort()
                 list_image_filenames_per_num_keypoints.append(imgs_per_num)
 
             for i in range(len(keypoints)):
-                objs_per_keypoint = [j for j, val in enumerate(keypoints_list) if val[i*3] > 0 or val[i*3+1] > 0]
-                objs_per_keypoint = list(set(objs_per_keypoint)) # get unique values
+                objs_per_keypoint = [j for j, val in enumerate(
+                    keypoints_list) if val[i * 3] > 0 or val[i * 3 + 1] > 0]
+                objs_per_keypoint = list(set(objs_per_keypoint))  # get unique values
                 objs_per_keypoint.sort()
                 list_object_ids_per_keypoint.append(objs_per_keypoint)
 
-
-        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_urls', str2ascii(coco_urls), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'width', np.array(width, dtype=np.int32), dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'height', np.array(height, dtype=np.int32), dtype=np.uint8, fillvalue=-1)
-
-        hdf5_write_data(hdf5_handler, 'category', category_, dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'supercategory', supercategory_, dtype=np.uint8, fillvalue=0)
-
-        hdf5_write_data(hdf5_handler, 'image_id', np.array(image_id, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'category_id', np.array(category_id, dtype=np.int32), fillvalue=-1)
-
-        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
-
-        hdf5_write_data(hdf5_handler, 'coco_images_ids', np.array(coco_images_ids, dtype=np.int32), fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'coco_categories_ids', np.array(coco_categories_ids, dtype=np.int32), fillvalue=-1)
-
+        hdf5_write_data(hdf5_handler, 'image_filenames',
+                        str2ascii(image_filenames), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'coco_urls',
+                        str2ascii(coco_urls), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'width',
+                        np.array(width, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'height',
+                        np.array(height, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'category',
+                        category_, dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'supercategory',
+                        supercategory_, dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_id',
+                        np.array(image_id, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'category_id',
+                        np.array(category_id, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids',
+                        np.array(object_id, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields',
+                        str2ascii(object_fields), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'coco_images_ids',
+                        np.array(coco_images_ids, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'coco_categories_ids',
+                        np.array(coco_categories_ids, dtype=np.int32),
+                        fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
                         np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32),
                         fillvalue=-1)
 
         if not is_test:
-            hdf5_write_data(hdf5_handler, 'annotation_id', np.array(annotation_id, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'keypoint_names', keypoints_, dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'skeleton', skeleton_, dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'boxes', np.array(bbox, dtype=np.float), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'iscrowd', np.array(iscrowd, dtype=np.uint8), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'annotation_id',
+                            np.array(annotation_id, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'keypoint_names',
+                            keypoints_, dtype=np.uint8,
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'skeleton',
+                            skeleton_, dtype=np.uint8,
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'boxes',
+                            np.array(bbox, dtype=np.float),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'iscrowd',
+                            np.array(iscrowd, dtype=np.uint8),
+                            fillvalue=-1)
 
             nrows = len(segmentation)
             ncols = max([len(l) for l in segmentation])
@@ -587,7 +605,7 @@ class Keypoints2016(BaseTask):
                                                fillvalue=-1)
 
             if self.verbose:
-                print('   -- Saving segmentation field to disk (this will take some time to finish)')
+                print('   -- Saving segmentation masks to disk (this will take some time)')
                 prgbar = progressbar.ProgressBar(max_value=nrows)
             for i in range(nrows):
                 dset[i, :len(segmentation[i])] = np.array(segmentation[i], dtype=np.float)
@@ -597,11 +615,18 @@ class Keypoints2016(BaseTask):
             if self.verbose:
                 prgbar.finish()
 
-            hdf5_write_data(hdf5_handler, 'area', np.array(area, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'num_keypoints', np.array(num_keypoints, dtype=np.uint8), fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'keypoints', np.array(keypoints_list, dtype=np.int32), fillvalue=0)
-
-            hdf5_write_data(hdf5_handler, 'coco_annotations_ids', np.array(coco_annotations_ids, dtype=np.int32), fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'area',
+                            np.array(area, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'num_keypoints',
+                            np.array(num_keypoints, dtype=np.uint8),
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'keypoints',
+                            np.array(keypoints_list, dtype=np.int32),
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'coco_annotations_ids',
+                            np.array(coco_annotations_ids, dtype=np.int32),
+                            fillvalue=-1)
 
             pad_value = -1
             hdf5_write_data(hdf5_handler, 'list_boxes_per_image',
@@ -611,8 +636,10 @@ class Keypoints2016(BaseTask):
                             np.array(pad_list(list_keypoints_per_image, pad_value), dtype=np.int32),
                             fillvalue=pad_value)
             hdf5_write_data(hdf5_handler, 'list_image_filenames_per_num_keypoints',
-                            np.array(pad_list(list_image_filenames_per_num_keypoints, pad_value), dtype=np.int32),
+                            np.array(pad_list(list_image_filenames_per_num_keypoints,
+                                              pad_value), dtype=np.int32),
                             fillvalue=pad_value)
             hdf5_write_data(hdf5_handler, 'list_object_ids_per_keypoint',
-                            np.array(pad_list(list_object_ids_per_keypoint, pad_value), dtype=np.int32),
+                            np.array(pad_list(list_object_ids_per_keypoint,
+                                              pad_value), dtype=np.int32),
                             fillvalue=pad_value)

@@ -15,6 +15,7 @@ Users should be able to take advantage of most functionality by using only these
 functions to manage and query their datasets in a simple and easy way.
 """
 
+
 from __future__ import print_function
 import os
 import sys
@@ -28,10 +29,11 @@ from dbcollection.core.loader import DataLoader
 
 
 def get_dataset_attributes(name):
+    """Loads a module, checks for key attributes and returns them."""
     __import__(name)
     module = sys.modules[name]
     try:
-        db_fields =  {
+        db_fields = {
             "urls": getattr(module, 'urls'),
             "keywords": getattr(module, 'keywords'),
             "tasks": getattr(module, 'tasks'),
@@ -54,9 +56,9 @@ def fetch_list_datasets():
         a dataset.
     """
     db_list = {}
-    for importer, modname, ispkg in pkgutil.walk_packages(path=datasets.__path__,
-                                                          prefix=datasets.__name__ + '.',
-                                                          onerror=lambda x: None):
+    for _, modname, ispkg in pkgutil.walk_packages(path=datasets.__path__,
+                                                   prefix=datasets.__name__ + '.',
+                                                   onerror=lambda x: None):
         if ispkg:
             paths = modname.split('.')
             db = get_dataset_attributes(modname)
@@ -105,7 +107,7 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
         Directory path to store the downloaded data.
     extract_data : bool, optional
         Extracts/unpacks the data files (if true).
-	verbose : bool, optional
+    verbose : bool, optional
         Displays text information (if true).
     is_test : bool, optional
         Flag used for tests.
@@ -118,7 +120,7 @@ def download(name=None, data_dir=None, extract_data=True, verbose=True, is_test=
     >>> dbc.download('cifar10')
 
     """
-    assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+    assert name is not None, 'Must input a valid dataset name: {}'.format(name)
 
     available_datasets_list = fetch_list_datasets()
 
@@ -164,11 +166,7 @@ def exists_task(available_datasets_list, name, task):
         task_ = task[:-2]
     else:
         task_ = task
-
-    if task_ in available_datasets_list[name]['tasks']:
-        return True
-    else:
-        return False
+    return task_ in available_datasets_list[name]['tasks']
 
 
 def process(name, task='default', verbose=True, is_test=False):
@@ -200,7 +198,7 @@ def process(name, task='default', verbose=True, is_test=False):
     >>> dbc.process('cifar10', task='classification', verbose=False)
 
     """
-    assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+    assert name is not None, 'Must input a valid dataset name: {}'.format(name)
 
     available_datasets_list = fetch_list_datasets()
 
@@ -215,7 +213,7 @@ def process(name, task='default', verbose=True, is_test=False):
     data_dir = dset_paths['data_dir']
     cache_save_path = dset_paths['cache_dir']
 
-     # setup dataset class
+    # setup dataset class
     constructor = available_datasets_list[name]['constructor']
     db = constructor(data_path=data_dir,
                      cache_path=cache_save_path,
@@ -224,7 +222,7 @@ def process(name, task='default', verbose=True, is_test=False):
 
     # check if task exists in the list
     if not exists_task(available_datasets_list, name, task):
-        raise KeyError('The task \'{\' does not exists for loading/processing.'.format(task))
+        raise KeyError('The task \'{}\' does not exists for loading/processing.'.format(task))
 
     if not os.path.exists(cache_save_path):
         os.makedirs(cache_save_path)
@@ -253,7 +251,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
         Name of the task to load.
     data_dir : str, optional
         Directory path to store the downloaded data.
-	verbose : bool, optional
+    verbose : bool, optional
         Displays text information (if true).
     is_test : bool, optional
         Flag used for tests.
@@ -278,7 +276,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     Dataset name:  mnist
 
     """
-    assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+    assert name is not None, 'Must input a valid dataset name: {}'.format(name)
 
     available_datasets_list = fetch_list_datasets()
 
@@ -288,18 +286,18 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
-    if task=='' or task=='default':
+    if task == '' or task == 'default':
         task = available_datasets_list[name]['default_task']
 
     # check if dataset exists. If not attempt to download the dataset
     if not cache_manager.exists_dataset(name):
         download(name, data_dir, True, verbose, is_test)
-        cache_manager = CacheManager(is_test) # reopen the cache file
+        cache_manager = CacheManager(is_test)  # reopen the cache file
 
     # check if the task exists inf cache
     if not cache_manager.exists_task(name, task):
         process(name, task, verbose, is_test)
-        cache_manager = CacheManager(is_test) # reopen the cache file
+        cache_manager = CacheManager(is_test)  # reopen the cache file
 
     # get data + cache dir paths
     dset_paths = cache_manager.get_dataset_storage_paths(name)
@@ -314,7 +312,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     return dataset_loader
 
 
-def add(name, task, data_dir, file_path, keywords=[], is_test=False):
+def add(name, task, data_dir, file_path, keywords=(), is_test=False):
     """Add a dataset/task to the list of available datasets for loading.
 
     Parameters
@@ -339,7 +337,8 @@ def add(name, task, data_dir, file_path, keywords=[], is_test=False):
     >>> import dbcollection as dbc
     >>> dbc.add('new_db', 'new_task', 'new/path/db', 'newdb.h5', ['new_category'])
     >>> dbc.query('new_db')
-    {'new_db': {'tasks': {'new_task': 'newdb.h5'}, 'data_dir': 'new/path/db', 'keywords': ['new_category']}}
+    {'new_db': {'tasks': {'new_task': 'newdb.h5'}, 'data_dir': 'new/path/db', 'keywords':
+    ['new_category']}}
 
     """
     assert name, "Must input a valid name: {}".format(name)
@@ -382,16 +381,18 @@ def remove(name, task=None, delete_data=False, is_test=False):
     Remove a dataset from the list.
 
     >>> import dbcollection as dbc
-    >>> dbc.add('new_db', 'new_task', 'new/path/db', 'newdb.h5', ['new_category'])  # add a dataset
+    >>> # add a dataset
+    >>> dbc.add('new_db', 'new_task', 'new/path/db', 'newdb.h5', ['new_category'])
     >>> dbc.query('new_db')
-    {'new_db': {'tasks': {'new_task': 'newdb.h5'}, 'data_dir': 'new/path/db', 'keywords': ['new_category']}}
+    {'new_db': {'tasks': {'new_task': 'newdb.h5'}, 'data_dir': 'new/path/db',
+    'keywords': ['new_category']}}
     >>> dbc.remove('new_db')  # remove the dataset
     Removed 'new_db' dataset: cache=True, disk=False
     >>> dbc.query('new_db')  # check if the dataset info was removed (retrieves an empty dict)
     {}
 
     """
-    assert not name is None, 'Must input a valid dataset name: {}'.format(name)
+    assert name is not None, 'Must input a valid dataset name: {}'.format(name)
 
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
@@ -407,7 +408,8 @@ def remove(name, task=None, delete_data=False, is_test=False):
             print('Removed \'{}\' dataset: cache=True, disk={}'.format(name, delete_data))
         else:
             if cache_manager.delete_task(name, task):
-                print('Removed the task \'{}\' from the \'{}\' dataset: cache=True'.format(task, name))
+                print('Removed the task \'{}\' from the \'{}\' dataset: cache=True'
+                      .format(task, name))
             else:
                 print('Do nothing.')
     else:
@@ -487,7 +489,7 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
             # reset the cache file
             cache_manager.reset_cache(force_reset=True)
         else:
-            if not field is None:
+            if field is not None:
                 if verbose:
                     print(cache_manager.modify_field(field, value))
 
@@ -513,27 +515,27 @@ def query(pattern='info', is_test=False):
 
     # check info / dataset lists first
     if pattern in cache_manager.data:
-        query_list.update({pattern : cache_manager.data[pattern]})
+        query_list.update({pattern: cache_manager.data[pattern]})
 
     # match default paths
     if pattern in cache_manager.data['info']:
-        query_list.update({pattern : cache_manager.data['info'][pattern]})
+        query_list.update({pattern: cache_manager.data['info'][pattern]})
 
     # match datasets/tasks
     if pattern in cache_manager.data['dataset']:
-        query_list.update({pattern : cache_manager.data['dataset'][pattern]})
+        query_list.update({pattern: cache_manager.data['dataset'][pattern]})
 
     # match datasets/tasks
     if pattern in cache_manager.data['category']:
-        query_list.update({pattern : list(cache_manager.data['category'][pattern].keys())})
+        query_list.update({pattern: list(cache_manager.data['category'][pattern].keys())})
 
     for name in cache_manager.data['dataset']:
         if pattern in cache_manager.data['dataset'][name]:
-            query_list.update({pattern : cache_manager.data['dataset'][name][pattern]})
+            query_list.update({pattern: cache_manager.data['dataset'][name][pattern]})
         if pattern in cache_manager.data['dataset'][name]['tasks']:
-            query_list.update({pattern : cache_manager.data['dataset'][name]['tasks'][pattern]})
+            query_list.update({pattern: cache_manager.data['dataset'][name]['tasks'][pattern]})
         if pattern in cache_manager.data['dataset'][name]['keywords']:
-            query_list.update({pattern : cache_manager.data['dataset'][name]['keywords'][pattern]})
+            query_list.update({pattern: cache_manager.data['dataset'][name]['keywords'][pattern]})
 
     return query_list
 
@@ -569,13 +571,13 @@ def print_categories_info(data, names=None):
         if names:
             max_size_name = max([len(name) for name in names]) + 7
             for name in names:
-                print("{:{}}".format('   > {}: '.format(name), max_size_name)
-                    + "{}".format(sorted(data['category'][name])))
+                print("{:{}}".format('   > {}: '.format(name), max_size_name) +
+                      "{}".format(sorted(data['category'][name])))
         else:
             max_size_name = max([len(name) for name in data['category']]) + 7
             for name in data['category']:
-                    print("{:{}}".format('   > {}: '.format(name), max_size_name)
-                        + "{}".format(sorted(data['category'][name])))
+                print("{:{}}".format('   > {}: '.format(name), max_size_name) +
+                      "{}".format(sorted(data['category'][name])))
         print('')
 
 

@@ -50,7 +50,7 @@ def pad_list(listA, val=-1, length=None):
         max_size = len(max(listA, key=len))
 
     # pad all lists with the a padding value
-    return [l + [val]*int(max_size-len(l)) for l in listA]
+    return [l + [val] * int(max_size - len(l)) for l in listA]
 
 
 def unpad_list(listA, val=-1):
@@ -154,4 +154,4 @@ def unsqueeze_list(listA, val=-1):
     [[1, 2], [3], [4, 5, 6]]
 
     """
-    return [list(g) for k,g in itertools.groupby(listA, lambda x:x in (val, )) if not k]
+    return [list(g) for k, g in itertools.groupby(listA, lambda x:x in (val, )) if not k]

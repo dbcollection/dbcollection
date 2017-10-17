@@ -6,10 +6,11 @@ Inria Pedestrian Dataset download/process functions.
 from dbcollection.datasets import BaseDataset
 from .detection import Detection
 
+url_path = 'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/'
 urls = (
-    'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/INRIA/set00.tar',
-    'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/INRIA/set01.tar',
-    'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/Image_Datasets/CaltechPedestrians/datasets/INRIA/annotations.zip',
+    url_path + 'Image_Datasets/CaltechPedestrians/datasets/INRIA/set00.tar',
+    url_path + 'Image_Datasets/CaltechPedestrians/datasets/INRIA/set01.tar',
+    url_path + 'Image_Datasets/CaltechPedestrians/datasets/INRIA/annotations.zip',
 )
 keywords = ('image_processing', 'detection', 'pedestrian')
 tasks = {"detection": Detection}

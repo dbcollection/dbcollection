@@ -34,3 +34,12 @@ after_success:
     - echo "Upload code coverage to codecov"
     - ls -lha
     - bash <(curl -s https://codecov.io/bash)
+
+matrix:
+    fast_finish: true
+    include:
+        env: LINT_CHECK
+        python: "3.6"
+        addons: true
+        install: pip install flake8
+        script: flake8

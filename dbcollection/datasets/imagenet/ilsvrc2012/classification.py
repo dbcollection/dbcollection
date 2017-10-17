@@ -28,7 +28,6 @@ class Classification(BaseTask):
     dirnames_train = ['ILSVRC2012_img_train', 'train']
     dirnames_val = ['ILSVRC2012_img_val', 'val']
 
-
     def get_file_path(self, fname):
         """
         Get file path for a file from the the root tree.
@@ -39,13 +38,11 @@ class Classification(BaseTask):
 
         raise Exception('Could not find file {} in {}'.format(fname, self.data_path))
 
-
     def load_annotations_groundtruth(self):
         """
         Load ILSVRC2012 ground truth indexes.
         """
         return load_txt(self.get_file_path('ILSVRC2012_validation_ground_truth.txt'))
-
 
     def load_annotations_mat(self):
         """
@@ -54,7 +51,6 @@ class Classification(BaseTask):
         # load annotation file
         filename = self.get_file_path('meta.mat')
         return load_matlab(filename)
-
 
     def get_annotations(self):
         """
@@ -76,7 +72,6 @@ class Classification(BaseTask):
 
         return annotations
 
-
     def get_dir_path(self, dirname):
         """
         Check if a dir or list of dirs exists
@@ -88,7 +83,6 @@ class Classification(BaseTask):
                 return train_dir
 
         raise Exception('Cannot find dir: {}'.format(dirname))
-
 
     def fetch_val_dir_data(self, dirname):
         """
@@ -112,7 +106,7 @@ class Classification(BaseTask):
         set_data = {}
         for i, filename in enumerate(filenames):
             filename_ = os.path.join(self.data_path, filename)
-            idx = indexes[i] - 1 # matlab data is 1-indexed
+            idx = indexes[i] - 1  # matlab data is 1-indexed
             class_name = annot['synsets'][idx][0][1].tolist()[0]
 
             # add filename and class
@@ -133,7 +127,6 @@ class Classification(BaseTask):
 
         return set_data
 
-
     def sort(self, data):
         """
         Sort the data's filenames.
@@ -142,13 +135,11 @@ class Classification(BaseTask):
             data[cname].sort()
         return data
 
-
     def setup_dirs(self):
         """
         Resize all images in a directory.
         """
         # do nothing
-
 
     def load_data(self):
         """
@@ -164,8 +155,8 @@ class Classification(BaseTask):
 
         # get correct set paths
         dir_paths = {
-            "train" : self.get_dir_path(self.dirnames_train),
-            "val" : self.get_dir_path(self.dirnames_val)
+            "train": self.get_dir_path(self.dirnames_train),
+            "val": self.get_dir_path(self.dirnames_val)
         }
 
         # cycle the train and val data
@@ -184,8 +175,7 @@ class Classification(BaseTask):
             # sort filenames
             data = self.sort(data)
 
-            yield {set_name : data}
-
+            yield {set_name: data}
 
     def store_data_source(self, hdf5_handler, data, set_name):
         """
@@ -202,7 +192,8 @@ class Classification(BaseTask):
         for cname in data:
             images_filenames = [os.path.join(set_name, cname, fname) for fname in data[cname]]
             images_filenames.sort()
-            hdf5_write_data(sourceg, cname + '/' + 'image_filenames', str2ascii(images_filenames), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(sourceg, cname + '/' + 'image_filenames',
+                            str2ascii(images_filenames), dtype=np.uint8, fillvalue=0)
 
             # update progress bar
             if self.verbose:
@@ -212,7 +203,6 @@ class Classification(BaseTask):
         # force progressbar to 100%
         if self.verbose:
             prgbar.finish()
-
 
     def convert_data_to_arrays(self, data, set_name):
         """
@@ -253,9 +243,9 @@ class Classification(BaseTask):
             "descriptions": str2ascii(description_list),
             "object_fields": str2ascii(['image_filenames', 'classes']),
             "object_ids": np.array(object_ids, dtype=np.int32),
-            "list_image_filenames_per_class": np.array(list_image_filenames_per_class, dtype=np.int32)
+            "list_image_filenames_per_class": np.array(list_image_filenames_per_class,
+                                                       dtype=np.int32)
         }
-
 
     def add_data_to_source(self, hdf5_handler, data, set_name=None):
         """
@@ -265,7 +255,6 @@ class Classification(BaseTask):
         """
         self.store_data_source(hdf5_handler, data, set_name)
 
-
     def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
         Add data of a set to the default group.
@@ -273,18 +262,23 @@ class Classification(BaseTask):
         For each field, the data is organized into a single big matrix.
         """
         data_array = self.convert_data_to_arrays(data, set_name)
-        hdf5_write_data(hdf5_handler, 'image_filenames', data_array["image_filenames"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_filenames',
+                        data_array["image_filenames"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'classes', data_array["classes"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'labels', data_array["labels"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'descriptions', data_array["descriptions"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'object_ids', data_array["object_ids"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', data_array["object_fields"], dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_class', data_array["list_image_filenames_per_class"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'descriptions',
+                        data_array["descriptions"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'object_ids',
+                        data_array["object_ids"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields',
+                        data_array["object_fields"], dtype=np.uint8, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_class',
+                        data_array["list_image_filenames_per_class"], dtype=np.int32, fillvalue=-1)
 
 
-#---------------------------------------------------------
-# Resized images to 256px
-#---------------------------------------------------------
+# ---------------------------------------------------------
+#  Resized images to 256px
+# ---------------------------------------------------------
 
 class Raw256(Classification):
     """ImageNet ILSVRC 2012 Classification raw256 preprocessing functions."""
@@ -297,7 +291,6 @@ class Raw256(Classification):
 
     dirnames_train = ['ILSVRC2012_img_train', 'train']
     dirnames_val = ['ILSVRC2012_img_val', 'val']
-
 
     def dir_resize_images(self, new_data_dir, data_dir):
         """
@@ -351,7 +344,6 @@ class Raw256(Classification):
             progbar.finish()
             print('')
 
-
     def setup_dirs(self):
         """
         Setup new train/val directories and resize all images.
@@ -360,8 +352,8 @@ class Raw256(Classification):
             print('==> Setup resized data dirs + images:')
 
         sets = {
-            "train" : [self.new_dir_train, self.dirnames_train],
-            "val" : [self.new_dir_val, self.dirnames_val]
+            "train": [self.new_dir_train, self.dirnames_train],
+            "val": [self.new_dir_val, self.dirnames_val]
         }
 
         for set_name in sets:
@@ -370,7 +362,7 @@ class Raw256(Classification):
             if not os.path.exists(new_data_dir):
                 os.makedirs(new_data_dir)
             else:
-                continue # skip this set
+                continue  # skip this set
 
             # resize all images and save into the new directory
             if self.verbose:

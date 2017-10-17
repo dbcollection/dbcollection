@@ -2,6 +2,7 @@
 Dataset's metadata loader class.
 """
 
+
 import h5py
 from dbcollection.utils.string_ascii import convert_ascii_to_str
 
@@ -52,7 +53,6 @@ class FieldLoader(object):
         else:
             self.obj_id = None
 
-
     def get(self, idx=None):
         """Retrieves data of the field from the dataset's hdf5 metadata file.
 
@@ -62,9 +62,9 @@ class FieldLoader(object):
 
         Parameters
         ----------
-	    idx : int/list/tuple, optional
-             Index number of he field. If it is a list, returns the data
-             for all the value indexes of that list.
+        idx : int/list/tuple, optional
+            Index number of he field. If it is a list, returns the data
+            for all the value indexes of that list.
 
         Returns
         -------
@@ -80,7 +80,6 @@ class FieldLoader(object):
             data = self.data.value
         return data
 
-
     def size(self):
         """Size of the field.
 
@@ -92,7 +91,6 @@ class FieldLoader(object):
             Returns the size of the field.
         """
         return self.shape
-
 
     def object_field_id(self):
         """Retrieves the index position of the field in the 'object_ids' list.
@@ -107,19 +105,17 @@ class FieldLoader(object):
         """
         return self.obj_id
 
-
     def info(self):
         """Prints information about the field.
 
         Displays information like name, size and shape of the field.
         """
         if hasattr(self, 'obj_id'):
-            print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})' \
+            print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})'
                   .format(self.name, str(self.shape), str(self.type), self.obj_id))
         else:
-            print('Field: {},  shape = {},  dtype = {}' \
+            print('Field: {},  shape = {},  dtype = {}'
                   .format(self.name, str(self.shape), str(self.type)))
-
 
     def __getitem__(self, index):
         """
@@ -196,7 +192,6 @@ class SetLoader(object):
                 obj_id = None
             setattr(self, field, FieldLoader(hdf5_group[field], obj_id))
 
-
     def get(self, field, idx=None):
         """Retrieves data from the dataset's hdf5 metadata file.
 
@@ -229,7 +224,6 @@ class SetLoader(object):
                 idx = list(idx)
             return self.data[field][idx]
 
-
     def _convert(self, idx):
         """Retrieve data from the dataset's hdf5 metadata file in the original format.
 
@@ -239,7 +233,7 @@ class SetLoader(object):
 
         Parameters
         ----------
-		idx : int/list/tuple
+        idx : int/list/tuple
             Index number of the field. If it is a list, returns the data
             for all the indexes of that list as values.
 
@@ -282,7 +276,6 @@ class SetLoader(object):
         else:
             return output
 
-
     def object(self, idx=None, convert_to_value=False):
         """Retrieves a list of all fields' indexes/values of an object composition.
 
@@ -324,7 +317,6 @@ class SetLoader(object):
         else:
             return self.get('object_ids', idx)
 
-
     def size(self, field='object_ids'):
         """Size of a field.
 
@@ -344,7 +336,6 @@ class SetLoader(object):
                                      .format(field, self.set)
         return tuple(self.data[field].shape)
 
-
     def list(self):
         """List of all field names.
 
@@ -354,7 +345,6 @@ class SetLoader(object):
             List of all data fields of the dataset.
         """
         return self.fields
-
 
     def object_field_id(self, field):
         """Retrieves the index position of a field in the 'object_ids' list.
@@ -377,7 +367,6 @@ class SetLoader(object):
             return self._object_fields.index(field)
         else:
             raise ValueError('Field \'{}\' is not contained in \'object_fields\'.'.format(field))
-
 
     def info(self):
         """Prints information about the data fields of a set.
@@ -423,13 +412,13 @@ class SetLoader(object):
         maxsize_type = max([len(d["type"]) for d in fields_info]) + 3
 
         for i, info in enumerate(fields_info):
-            s_name  = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
+            s_name = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
             s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
-            s_obj   = info["obj"]
+            s_obj = info["obj"]
             if any(s_obj):
-                s_type  = '{:{}}'.format('{},'.format(info["type"]), maxsize_type)
+                s_type = '{:{}}'.format('{},'.format(info["type"]), maxsize_type)
             else:
-                s_type  = '{:{}}'.format('{}'.format(info["type"]), maxsize_type)
+                s_type = '{:{}}'.format('{}'.format(info["type"]), maxsize_type)
             print(s_name + s_shape + s_type + s_obj)
 
         if any(lists_info):
@@ -439,11 +428,10 @@ class SetLoader(object):
             maxsize_shape = max([len(d["shape"]) for d in lists_info]) + 3
 
             for i, info in enumerate(lists_info):
-                s_name  = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
+                s_name = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
                 s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
-                s_type  = info["type"]
+                s_type = info["type"]
                 print(s_name + s_shape + s_type)
-
 
     def __len__(self):
         """
@@ -529,7 +517,6 @@ class DataLoader(object):
             data = self.hdf5_file['/{}/object_fields'.format(set_name)].value
             self.object_fields[set_name] = tuple(convert_ascii_to_str(data))
 
-
     def get(self, set_name, field, idx=None):
         """Retrieves data from the dataset's hdf5 metadata file.
 
@@ -543,7 +530,7 @@ class DataLoader(object):
             Name of the set.
         field : str
             Field name.
-		idx : int/list/tuple, optional
+        idx : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
 
@@ -560,7 +547,6 @@ class DataLoader(object):
         assert field, 'Must input a valid field name: {}'.format(field)
         set_obj = getattr(self, set_name)
         return set_obj.get(field, idx)
-
 
     def object(self, set_name, idx=None, convert_to_value=False):
         """Retrieves a list of all fields' indexes/values of an object composition.
@@ -596,7 +582,6 @@ class DataLoader(object):
         set_obj = getattr(self, set_name)
         return set_obj.object(idx, convert_to_value)
 
-
     def size(self, set_name=None, field='object_ids'):
         """Size of a field.
 
@@ -622,10 +607,9 @@ class DataLoader(object):
             return out
         else:
             assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
-                                      .format(set_name)
+                                          .format(set_name)
             set_obj = getattr(self, set_name)
             return set_obj.size(field)
-
 
     def list(self, set_name=None):
         """List of all field names of a set.
@@ -642,7 +626,7 @@ class DataLoader(object):
         """
         if set_name:
             assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
-                                           .format(set_name)
+                                          .format(set_name)
             set_obj = getattr(self, set_name)
             return set_obj.list()
         else:
@@ -651,7 +635,6 @@ class DataLoader(object):
                 set_obj = getattr(self, set_name_)
                 out.update({set_name_: set_obj.list()})
             return out
-
 
     def object_field_id(self, set_name, field):
         """Retrieves the index position of a field in the 'object_ids' list.
@@ -677,7 +660,6 @@ class DataLoader(object):
         assert field, 'Must input a valid field name: {}'.format(field)
         set_obj = getattr(self, set_name)
         return set_obj.object_field_id(field)
-
 
     def info(self, set_name=None):
         """Prints information about all data fields of a set.
@@ -708,7 +690,6 @@ class DataLoader(object):
             for set_name in sorted(self.sets):
                 set_obj = getattr(self, set_name)
                 set_obj.info()
-
 
     def __str__(self):
         s = 'DataLoader: "{}" ({} task)' \

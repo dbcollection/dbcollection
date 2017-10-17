@@ -83,8 +83,8 @@ def construct_set_from_dir(dir_path, verbose=True):
             continue
 
         # cycle all elems in a dir
-        for root, _, fnames in sorted(os.walk(subdir_path)):
-            class_name = dname #os.path.split(root)[-1] # folder name
+        for _, _, fnames in sorted(os.walk(subdir_path)):
+            class_name = dname
             set_data[class_name] = []
 
             # cycle all files inside the dir

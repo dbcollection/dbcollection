@@ -9,7 +9,6 @@ import numpy as np
 import progressbar
 
 from dbcollection.datasets import BaseTask
-
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_matlab
@@ -25,30 +24,30 @@ class Keypoints(BaseTask):
     is_full = False
 
     keypoints_labels = [
-        'right ankle',      #-- 1
-        'right knee',       #-- 2
-        'right hip',        #-- 3
-        'left hip',         #-- 4
-        'left knee',        #-- 5
-        'left ankle',       #-- 6
-        'pelvis',           #-- 7
-        'thorax',           #-- 8
-        'upper neck',       #-- 9
-        'head top',         #-- 10
-        'right wrist',      #-- 11
-        'right elbow',      #-- 12
-        'right shoulder',   #-- 13
-        'left shoulder',    #-- 14
-        'left elbow',       #-- 15
-        'left wrist'        #-- 16
+        'right ankle',  # -- 1
+        'right knee',  # -- 2
+        'right hip',  # -- 3
+        'left hip',  # -- 4
+        'left knee',  # -- 5
+        'left ankle',  # -- 6
+        'pelvis',  # -- 7
+        'thorax',  # -- 8
+        'upper neck',  # -- 9
+        'head top',  # -- 10
+        'right wrist',  # -- 11
+        'right elbow',  # -- 12
+        'right shoulder',  # -- 13
+        'left shoulder',  # -- 14
+        'left elbow',  # -- 15
+        'left wrist'  # -- 16
     ]
-
 
     def load_annotations(self):
         """
         Load annotations from file and split them to train and test sets.
         """
-        annot_filepath = os.path.join(self.data_path, 'mpii_human_pose_v1_u12_2', 'mpii_human_pose_v1_u12_1.mat')
+        annot_filepath = os.path.join(
+            self.data_path, 'mpii_human_pose_v1_u12_2', 'mpii_human_pose_v1_u12_1.mat')
 
         if self.verbose:
             print('\n> Loading annotations file: {}'.format(annot_filepath))
@@ -65,10 +64,9 @@ class Keypoints(BaseTask):
             prgbar = progressbar.ProgressBar(max_value=nfiles)
 
         data = {
-            "train" : [],
-            "test" : []
+            "train": [],
+            "test": []
         }
-
 
         # cycle all files
         for ifile in range(nfiles):
@@ -77,7 +75,6 @@ class Keypoints(BaseTask):
             else:
                 set_name = 'train'
 
-
             # single person
             single_person = [0]
             if any(annotations['RELEASE'][0][0][3][ifile][0]):
@@ -85,16 +82,17 @@ class Keypoints(BaseTask):
                     single_person.append(int(annotations['RELEASE'][0][0][3][ifile][0][i][0]))
 
             # activity/action id
-            act = {"cat_name" : '', "act_name" : '', "act_id" : -1}
+            act = {"cat_name": '', "act_name": '', "act_id": -1}
             if any(annotations['RELEASE'][0][0][4][ifile][0][0]):
                 act = {
-                    "cat_name" : str(annotations['RELEASE'][0][0][4][ifile][0][0][0]),
-                    "act_name" : str(annotations['RELEASE'][0][0][4][ifile][0][1][0]),
-                    "act_id" : int(annotations['RELEASE'][0][0][4][ifile][0][2][0][0])
+                    "cat_name": str(annotations['RELEASE'][0][0][4][ifile][0][0][0]),
+                    "act_name": str(annotations['RELEASE'][0][0][4][ifile][0][1][0]),
+                    "act_id": int(annotations['RELEASE'][0][0][4][ifile][0][2][0][0])
                 }
 
             # image annots
-            image_filename = os.path.join(self.data_path, 'images', str(annotations['RELEASE'][0][0][0][0][ifile][0][0][0][0][0]))
+            image_filename = os.path.join(self.data_path, 'images', str(
+                annotations['RELEASE'][0][0][0][0][ifile][0][0][0][0][0]))
 
             if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
                 frame_sec = int(annotations['RELEASE'][0][0][0][0][ifile][2][0][0])
@@ -107,12 +105,12 @@ class Keypoints(BaseTask):
                 pnames = annotations['RELEASE'][0][0][0][0][ifile][1][0].dtype.names
             except IndexError:
                 data[set_name].append({
-                    "image_filename" : image_filename,
-                    "frame_sec" : frame_sec,
-                    "video_idx" : video_idx,
-                    "poses_annotations" : [],
-                    "activity" : act,
-                    "single_person" : single_person
+                    "image_filename": image_filename,
+                    "frame_sec": frame_sec,
+                    "video_idx": video_idx,
+                    "poses_annotations": [],
+                    "activity": act,
+                    "single_person": single_person
                 })
                 continue  # skip rest
 
@@ -146,10 +144,14 @@ class Keypoints(BaseTask):
                         keypoints = [[0, 0, 0]] * 16  # [x, y, is_visible]
 
                     try:
-                        x1 = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('x1')][0][0])
-                        y1 = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('y1')][0][0])
-                        x2 = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('x2')][0][0])
-                        y2 = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('y2')][0][0])
+                        x1 = float(annotations['RELEASE'][0][0][0][0][ifile]
+                                   [1][0][i][pnames.index('x1')][0][0])
+                        y1 = float(annotations['RELEASE'][0][0][0][0][ifile]
+                                   [1][0][i][pnames.index('y1')][0][0])
+                        x2 = float(annotations['RELEASE'][0][0][0][0][ifile]
+                                   [1][0][i][pnames.index('x2')][0][0])
+                        y2 = float(annotations['RELEASE'][0][0][0][0][ifile]
+                                   [1][0][i][pnames.index('y2')][0][0])
                     except ValueError:
                         if set_name == 'test' or self.is_full:
                             x1, y1, x2, y2 = -1, -1, -1, -1
@@ -157,57 +159,73 @@ class Keypoints(BaseTask):
                             continue  # skip this annotation
 
                     try:
-                        objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0].dtype.names
-                        scale = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('scale')][0][0])
+                        annot_ptr = annotations['RELEASE'][0][0][0][0][ifile][1][0]
+                        objnames = annot_ptr[i][pnames.index('objpos')][0].dtype.names
+                        # objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i]
+                        # [pnames.index('objpos')][0].dtype.names
+                        scale = float(annotations['RELEASE'][0][0][0][0]
+                                      [ifile][1][0][i][pnames.index('scale')][0][0])
                         objpos = {
-                            "x" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('x')][0][0]),
-                            "y" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('y')][0][0])
+                            "x": float(annotations['RELEASE'][0][0][0][0]
+                                       [ifile][1][0][i][pnames.index('objpos')][0][0]
+                                       [objnames.index('x')][0][0]),
+                            "y": float(annotations['RELEASE'][0][0][0][0]
+                                       [ifile][1][0][i][pnames.index('objpos')][0][0]
+                                       [objnames.index('y')][0][0])
                         }
                     except (ValueError, IndexError):
                         if set_name == 'test' or self.is_full:
                             scale = -1
-                            objpos = {"x" : -1, "y" : -1}
+                            objpos = {"x": -1, "y": -1}
                         else:
                             continue  # skip this annotation
 
                     poses_annots.append({
-                        "x1" : x1,
-                        "y1" : y1,
-                        "x2" : x2,
-                        "y2" : y2,
-                        "keypoints" : keypoints,
-                        "scale" : scale,
-                        "objpos" : objpos
+                        "x1": x1,
+                        "y1": y1,
+                        "x2": x2,
+                        "y2": y2,
+                        "keypoints": keypoints,
+                        "scale": scale,
+                        "objpos": objpos
                     })
             else:
                 if set_name == 'test' or self.is_full:
                     for i in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0])):
                         try:
-                            objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0].dtype.names
-                            scale = float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('scale')][0][0])
+                            annot_ptr = annotations['RELEASE'][0][0][0][0][ifile][1][0]
+                            objnames = annot_ptr[i][pnames.index('objpos')][0].dtype.names
+                            # objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i]
+                            # [pnames.index('objpos')][0].dtype.names
+                            scale = float(annotations['RELEASE'][0][0][0][0]
+                                          [ifile][1][0][i][pnames.index('scale')][0][0])
                             objpos = {
-                                "x" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('x')][0][0]),
-                                "y" : float(annotations['RELEASE'][0][0][0][0][ifile][1][0][i][pnames.index('objpos')][0][0][objnames.index('y')][0][0])
+                                "x": float(annotations['RELEASE'][0][0][0][0]
+                                           [ifile][1][0][i][pnames.index('objpos')][0][0]
+                                           [objnames.index('x')][0][0]),
+                                "y": float(annotations['RELEASE'][0][0][0][0]
+                                           [ifile][1][0][i][pnames.index('objpos')][0][0]
+                                           [objnames.index('y')][0][0])
                             }
                         except (IndexError, ValueError, AttributeError):
                             scale = -1
-                            objpos = {"x" : -1, "y" : -1}
+                            objpos = {"x": -1, "y": -1}
 
                         poses_annots.append({
-                            "scale" : scale,
-                            "objpos" : objpos
+                            "scale": scale,
+                            "objpos": objpos
                         })
                 else:
                     continue  # skip this annotation
 
             # add fields to data
             data[set_name].append({
-                "image_filename" : image_filename,
-                "frame_sec" : frame_sec,
-                "video_idx" : video_idx,
-                "poses_annotations" : poses_annots,
-                "activity" : act,
-                "single_person" : single_person
+                "image_filename": image_filename,
+                "frame_sec": frame_sec,
+                "video_idx": video_idx,
+                "poses_annotations": poses_annots,
+                "activity": act,
+                "single_person": single_person
             })
 
             # update progressbar
@@ -225,7 +243,6 @@ class Keypoints(BaseTask):
 
         return data, videonames
 
-
     def load_data(self):
         """
         Load data of the dataset (create a generator).
@@ -237,8 +254,7 @@ class Keypoints(BaseTask):
             if self.verbose:
                 print('\n> Loading data files for the set: ' + set_name)
 
-            yield {set_name : [annotations[set_name], videonames]}
-
+            yield {set_name: [annotations[set_name], videonames]}
 
     def add_data_to_source(self, hdf5_handler, data, set_name):
         """
@@ -270,16 +286,24 @@ class Keypoints(BaseTask):
                 pose_annot_grp = file_grp.create_group("pose_annotations")
                 for j in range(len(annot["poses_annotations"])):
                     pose_grp = pose_annot_grp.create_group(str(j))
-                    pose_grp["scale"] = np.array(annot["poses_annotations"][j]["scale"], dtype=np.float)
-                    pose_grp["objpos/x"] = np.array(annot["poses_annotations"][j]["objpos"]["x"], dtype=np.float)
-                    pose_grp["objpos/y"] = np.array(annot["poses_annotations"][j]["objpos"]["y"], dtype=np.float)
+                    pose_grp["scale"] = np.array(
+                        annot["poses_annotations"][j]["scale"], dtype=np.float)
+                    pose_grp["objpos/x"] = np.array(annot["poses_annotations"]
+                                                    [j]["objpos"]["x"], dtype=np.float)
+                    pose_grp["objpos/y"] = np.array(annot["poses_annotations"]
+                                                    [j]["objpos"]["y"], dtype=np.float)
 
                     if "x1" in annot["poses_annotations"][j]:
-                        pose_grp["x1"] = np.array(annot["poses_annotations"][j]["x1"], dtype=np.float)
-                        pose_grp["y1"] = np.array(annot["poses_annotations"][j]["y1"], dtype=np.float)
-                        pose_grp["x2"] = np.array(annot["poses_annotations"][j]["x2"], dtype=np.float)
-                        pose_grp["y2"] = np.array(annot["poses_annotations"][j]["y2"], dtype=np.float)
-                        pose_grp["keypoints"] = np.array(annot["poses_annotations"][j]["keypoints"], dtype=np.float)
+                        pose_grp["x1"] = np.array(annot["poses_annotations"]
+                                                  [j]["x1"], dtype=np.float)
+                        pose_grp["y1"] = np.array(annot["poses_annotations"]
+                                                  [j]["y1"], dtype=np.float)
+                        pose_grp["x2"] = np.array(annot["poses_annotations"]
+                                                  [j]["x2"], dtype=np.float)
+                        pose_grp["y2"] = np.array(annot["poses_annotations"]
+                                                  [j]["y2"], dtype=np.float)
+                        pose_grp["keypoints"] = np.array(
+                            annot["poses_annotations"][j]["keypoints"], dtype=np.float)
 
             # update progressbar
             if self.verbose:
@@ -288,7 +312,6 @@ class Keypoints(BaseTask):
         # update progressbar
         if self.verbose:
             prgbar.finish()
-
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
@@ -305,10 +328,10 @@ class Keypoints(BaseTask):
         image_filenames = []
         frame_sec = []
         video_idx = []
-        #single_person_id_list = []
+        # single_person_id_list = []
         category_name, activity_name, activity_id = [], [], []
         scale = []
-        objpos = [] # [x, y]
+        objpos = []  # [x, y]
         head_bbox = []
         keypoints = []
 
@@ -329,7 +352,6 @@ class Keypoints(BaseTask):
         if self.verbose:
             print('> Adding data to default group:')
             prgbar = progressbar.ProgressBar(max_value=len(data_))
-
 
         obj_per_img_counter = 0
         for i, annot in enumerate(data_):
@@ -361,7 +383,7 @@ class Keypoints(BaseTask):
                     objpos.append([pose_annot["objpos"]["x"],
                                    pose_annot["objpos"]["y"]])
 
-                    if j+1 in annot["single_person"]:
+                    if j + 1 in annot["single_person"]:
                         single_person_per_image.append(obj_per_img_counter)
 
                     if is_train:
@@ -398,14 +420,27 @@ class Keypoints(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'scale', np.array(scale, dtype=np.float), fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'objpos', np.array(objpos, dtype=np.float), fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'video_names', str2ascii(videonames), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'keypoint_names', str2ascii(self.keypoints_labels), dtype=np.uint8, fillvalue=0)
-
+        hdf5_write_data(hdf5_handler, 'image_filenames',
+                        str2ascii(image_filenames), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'scale',
+                        np.array(scale, dtype=np.float),
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'objpos',
+                        np.array(objpos, dtype=np.float),
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'object_ids',
+                        np.array(object_id, dtype=np.int32),
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'object_fields',
+                        str2ascii(object_fields), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'video_names',
+                        str2ascii(videonames), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'keypoint_names',
+                        str2ascii(self.keypoints_labels), dtype=np.uint8,
+                        fillvalue=0)
         hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
                         np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32),
                         fillvalue=-1)
@@ -414,14 +449,27 @@ class Keypoints(BaseTask):
                         fillvalue=-1)
 
         if is_train:
-            hdf5_write_data(hdf5_handler, 'frame_sec', np.array(frame_sec, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'video_idx', np.array(video_idx, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'category_name', str2ascii(category_name), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'activity_name', str2ascii(activity_name), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'activity_id', np.array(activity_id, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'head_bbox', np.array(head_bbox, dtype=np.float), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'keypoints', np.array(keypoints, dtype=np.float), fillvalue=-1)
-
+            hdf5_write_data(hdf5_handler, 'frame_sec',
+                            np.array(frame_sec, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'video_idx',
+                            np.array(video_idx, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'category_name',
+                            str2ascii(category_name), dtype=np.uint8,
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'activity_name',
+                            str2ascii(activity_name), dtype=np.uint8,
+                            fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'activity_id',
+                            np.array(activity_id, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'head_bbox',
+                            np.array(head_bbox, dtype=np.float),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'keypoints',
+                            np.array(keypoints, dtype=np.float),
+                            fillvalue=-1)
             hdf5_write_data(hdf5_handler, 'list_keypoints_per_image',
                             np.array(pad_list(list_keypoints_per_image, -1), dtype=np.int32),
                             fillvalue=-1)

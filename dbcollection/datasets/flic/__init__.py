@@ -8,7 +8,7 @@ from .keypoints import Keypoints
 
 urls = ({'googledrive': '0B4K3PZp8xXDJN0Fpb0piVjQ3Y3M', 'save_name': 'flic.zip'},)
 keywords = ('image_processing', 'detection', 'human_pose', 'keypoints')
-tasks = {"keypoints" : Keypoints}
+tasks = {"keypoints": Keypoints}
 default_task = 'keypoints'
 
 

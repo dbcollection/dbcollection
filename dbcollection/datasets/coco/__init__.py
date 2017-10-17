@@ -25,11 +25,11 @@ urls = (
 )
 keywords = ('image_processing', 'detection', 'keypoint', 'captions', 'human', 'pose')
 tasks = {
-    "detection_2015" : Detection2015,
-    "detection_2016" : Detection2016,
-    "caption_2015" : Caption2015,
-    "caption_2016" : Caption2016,
-    "keypoints_2016" : Keypoints2016,
+    "detection_2015": Detection2015,
+    "detection_2016": Detection2016,
+    "caption_2015": Caption2015,
+    "caption_2016": Caption2016,
+    "keypoints_2016": Keypoints2016,
 }
 default_task = 'detection_2015'
 
