@@ -27,29 +27,27 @@ class Detection(BaseTask):
     classes = ["diving", "golf_swing", "kicking", "lifting", "riding_horse",
                "running", "skateboarding", "swing_bench", "swing_side", "walking"]
 
-
     def get_activity_name(self, cname):
         """
         Get the activity by matching a string with a similar name.
         """
         dir_class = {
-            "Diving-Side" : "diving",
-            "Kicking-Front" : "kicking",
-            "Run-Side" : "running",
-            "Walk-Front" : "walking",
-            "Golf-Swing-Back" : "golf_swing",
-            "Kicking-Side" : "kicking",
-            "SkateBoarding-Front" : "skateboarding",
-            "Golf-Swing-Front" : "golf_swing",
-            "Lifting" : "lifting",
-            "Swing-Bench" : "swing_bench",
-            "Golf-Swing-Side" : "golf_swing",
-            "Riding-Horse" : "riding_horse",
-            "Swing-SideAngle" : "swing_side"
+            "Diving-Side": "diving",
+            "Kicking-Front": "kicking",
+            "Run-Side": "running",
+            "Walk-Front": "walking",
+            "Golf-Swing-Back": "golf_swing",
+            "Kicking-Side": "kicking",
+            "SkateBoarding-Front": "skateboarding",
+            "Golf-Swing-Front": "golf_swing",
+            "Lifting": "lifting",
+            "Swing-Bench": "swing_bench",
+            "Golf-Swing-Side": "golf_swing",
+            "Riding-Horse": "riding_horse",
+            "Swing-SideAngle": "swing_side"
         }
 
         return dir_class[cname]
-
 
     def extract_video_frames(self, video_filename, video_name, save_dir):
         """
@@ -61,7 +59,7 @@ class Detection(BaseTask):
 
         # setup stdout suppression for subprocess
         try:
-            from subprocess import DEVNULL # py3k
+            from subprocess import DEVNULL  # py3k
         except ImportError:
             DEVNULL = open(os.devnull, 'wb')
 
@@ -74,15 +72,13 @@ class Detection(BaseTask):
         except subprocess.CalledProcessError:
             raise Exception('\n\nError occurred when parsing {}\n'.format(video_filename))
 
-
     def load_annotation(self, fname):
         """
         Load the annotations from a file.
         """
         data = load_txt(fname)
-        data = data[0].split('\t')[:-1] # discard the last element
+        data = data[0].split('\t')[:-1]  # discard the last element
         return [int(s) for s in data]
-
 
     def load_files_annotations(self):
         """
@@ -127,6 +123,7 @@ class Detection(BaseTask):
                     all_files.sort()
                     image_filenames = [fname for fname in all_files if fname.endswith('.jpg')]
                     video_filename = [vname for vname in all_files if vname.endswith('.avi')]
+                    video_path = os.path.join(self.data_path, self.activities_dir, activity, video)
                     if not any(video_filename):
                         video_filename = 'not_available'
                     else:
@@ -142,22 +139,23 @@ class Detection(BaseTask):
                         image_filenames = [fname for fname in all_files if fname.endswith('.jpg')]
 
                     # add the directory path to the image filenames
-                    image_filenames = [os.path.join(self.data_path, self.activities_dir, activity, video, fname) for fname in image_filenames]
+
+                    image_filenames = [os.path.join(video_path, fname) for fname in image_filenames]
                     image_filenames.sort()
 
                     # load annotations from the .txt files
                     gt_files = os.listdir(os.path.join(self.root_dir_imgs, activity, video, 'gt'))
                     gt_files = [fname for fname in gt_files if fname.endswith('.txt')]
-                    gt_files = [os.path.join(self.root_dir_imgs, activity, video, 'gt', fname) for fname in gt_files]
+                    gt_files = [os.path.join(self.root_dir_imgs, activity, video, 'gt', fname)
+                                for fname in gt_files]
                     gt_files.sort()
                     annotations = [self.load_annotation(f) for _, f in enumerate(gt_files)]
 
-
                     # assign data to dict
                     data[activity_][video] = {
-                        "video_filename" : os.path.join(self.activities_dir, activity, video, video_filename),
-                        "image_filenames" : image_filenames,
-                        "image_annotations" : annotations
+                        "video_filename": os.path.join(video_path, video_filename),
+                        "image_filenames": image_filenames,
+                        "image_annotations": annotations
                     }
 
                     # update progress bar
@@ -169,24 +167,23 @@ class Detection(BaseTask):
 
         return data
 
-
-    def split_dataset_generator(self, data, train_percent=2/3, num_splits=5):
+    def split_dataset_generator(self, data, train_percent=2 / 3, num_splits=5):
         """
         Divide dataset into train and test splits
         """
         random.seed(4)
 
-        for i in range(1, num_splits+1):
+        for i in range(1, num_splits + 1):
             if self.verbose:
-                print(' > Generating random dataset splits ({}/{}): train percentage={}, num splits={}'
-                      .format(i, num_splits, train_percent, num_splits))
+                print(' > Generating random dataset splits ({}/{}): '.format(i, num_splits) +
+                      'train percentage={}, num splits={}'.format(train_percent, num_splits))
 
             train_set_name = 'train0' + str(i)
             test_set_name = 'test0' + str(i)
 
             out_data = {
-                train_set_name : {},
-                test_set_name : {}
+                train_set_name: {},
+                test_set_name: {}
             }
 
             for activity in data:
@@ -197,7 +194,7 @@ class Detection(BaseTask):
 
                 # determine splits
                 num_videos = len(videos)
-                tr_num_vids = int(num_videos*train_percent)
+                tr_num_vids = int(num_videos * train_percent)
 
                 # train set
                 out_data[train_set_name][activity] = {}
@@ -209,9 +206,7 @@ class Detection(BaseTask):
                 for video in videos[tr_num_vids:]:
                     out_data[test_set_name][activity][video] = data[activity][video]
 
-
             yield out_data
-
 
     def load_data(self):
         """
@@ -221,12 +216,11 @@ class Detection(BaseTask):
         data = self.load_files_annotations()
 
         # divide dataset into train and test splits
-        train_percent = 2/3
+        train_percent = 2 / 3
         num_splits = 5
         splits_gen = self.split_dataset_generator(data, train_percent, num_splits)
 
         return splits_gen
-
 
     def convert_data_to_arrays(self, data):
         """
@@ -253,7 +247,7 @@ class Detection(BaseTask):
                 num_imgs = len(img_fnames)
                 total_frames.append(num_imgs)
 
-                videos.append(video_name) # add video name
+                videos.append(video_name)  # add video name
                 video_filenames.append(data[activity][video_name]['video_filename'])
 
                 image_filenames = image_filenames + img_fnames
@@ -272,29 +266,33 @@ class Detection(BaseTask):
                     list_videos_per_class[activity_id] = [count_video]
 
                 # add data to 'object_ids'
-                # [video, video_filename, list_images_per_video, list_annotations_per_video, activity, total_imgs]
-                object_ids.append([count_video, count_video, count_video, count_video, activity_id, num_imgs])
+                # [video, video_filename, list_images_per_video,
+                # list_annotations_per_video, activity, total_imgs]
+                object_ids.append([count_video, count_video, count_video,
+                                   count_video, activity_id, num_imgs])
 
                 # update video counter
                 count_video += 1
 
         return {
-            "object_fields" : str2ascii(['videos', 'video_filenames',
-                                         'list_image_filenames_per_video',
-                                         'list_annotations_per_video',
-                                         'activities', 'total_frames']),
-            "object_ids" : np.array(object_ids, dtype=np.int32),
-            "videos" : str2ascii(videos),
-            "video_filenames" : str2ascii(video_filenames),
-            "activities" : str2ascii(self.classes),
-            "image_filenames" : str2ascii(image_filenames),
-            "annotations" :np.array(annotations, dtype=np.int32),
-            "total_frames" : np.array(total_frames, dtype=np.int32),
-            "list_videos_per_activity" : np.array(pad_list(list(list_videos_per_class.values()), -1), dtype=np.int32),
-            "list_image_filenames_per_video" : np.array(pad_list(list_image_filenames_per_video, -1), dtype=np.int32),
-            "list_annotations_per_video" : np.array(pad_list(list_annotations_per_video, -1), dtype=np.int32)
+            "object_fields": str2ascii(['videos', 'video_filenames',
+                                        'list_image_filenames_per_video',
+                                        'list_annotations_per_video',
+                                        'activities', 'total_frames']),
+            "object_ids": np.array(object_ids, dtype=np.int32),
+            "videos": str2ascii(videos),
+            "video_filenames": str2ascii(video_filenames),
+            "activities": str2ascii(self.classes),
+            "image_filenames": str2ascii(image_filenames),
+            "annotations": np.array(annotations, dtype=np.int32),
+            "total_frames": np.array(total_frames, dtype=np.int32),
+            "list_videos_per_activity": np.array(pad_list(list(list_videos_per_class.values()), -1),
+                                                 dtype=np.int32),
+            "list_image_filenames_per_video": np.array(pad_list(list_image_filenames_per_video, -1),
+                                                       dtype=np.int32),
+            "list_annotations_per_video": np.array(pad_list(list_annotations_per_video, -1),
+                                                   dtype=np.int32)
         }
-
 
     def add_data_to_source(self, hdf5_handler, data, set_name=None):
         """
@@ -307,10 +305,12 @@ class Detection(BaseTask):
             for video_name in data[activity]:
                 video_grp = activity_grp.create_group(video_name)
                 set_data = data[activity][video_name]
-                video_grp.create_dataset('image_filenames', data=str2ascii(set_data['image_filenames']), dtype=np.uint8)
-                video_grp.create_dataset('video_filename', data=str2ascii(set_data['video_filename']), dtype=np.uint8)
-                video_grp.create_dataset('annotations', data=np.array(set_data['image_annotations']), dtype=np.int32)
-
+                video_grp.create_dataset('image_filenames', data=str2ascii(
+                    set_data['image_filenames']), dtype=np.uint8)
+                video_grp.create_dataset('video_filename', data=str2ascii(
+                    set_data['video_filename']), dtype=np.uint8)
+                video_grp.create_dataset('annotations', data=np.array(
+                    set_data['image_annotations']), dtype=np.int32)
 
     def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
@@ -319,19 +319,38 @@ class Detection(BaseTask):
         For each field, the data is organized into a single big matrix.
         """
         data_array = self.convert_data_to_arrays(data)
-        hdf5_write_data(hdf5_handler, 'videos', data_array["videos"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'video_filenames', data_array["video_filenames"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'activities', data_array["activities"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'image_filenames', data_array["image_filenames"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'annotations', data_array["annotations"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'total_frames', data_array["total_frames"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids', data_array["object_ids"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', data_array["object_fields"], dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'videos',
+                        data_array["videos"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'video_filenames',
+                        data_array["video_filenames"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'activities',
+                        data_array["activities"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_filenames',
+                        data_array["image_filenames"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'annotations',
+                        data_array["annotations"],
+                        dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'total_frames',
+                        data_array["total_frames"],
+                        dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids',
+                        data_array["object_ids"],
+                        dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields',
+                        data_array["object_fields"],
+                        dtype=np.uint8, fillvalue=0)
 
         pad_value = -1
-        hdf5_write_data(hdf5_handler, 'list_videos_per_activity', data_array["list_videos_per_activity"], dtype=np.int32,
+        hdf5_write_data(hdf5_handler, 'list_videos_per_activity',
+                        data_array["list_videos_per_activity"], dtype=np.int32,
                         fillvalue=pad_value)
-        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_video', data_array["list_image_filenames_per_video"], dtype=np.int32,
+        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_video',
+                        data_array["list_image_filenames_per_video"], dtype=np.int32,
                         fillvalue=pad_value)
-        hdf5_write_data(hdf5_handler, 'list_annotations_per_video', data_array["list_annotations_per_video"], dtype=np.int32,
+        hdf5_write_data(hdf5_handler, 'list_annotations_per_video',
+                        data_array["list_annotations_per_video"], dtype=np.int32,
                         fillvalue=pad_value)

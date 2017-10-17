@@ -24,7 +24,6 @@ class Recognition(BaseTask):
     # metadata filename
     filename_h5 = 'recognition'
 
-
     def load_classes(self):
         """
         Load action classes from the annotation files.
@@ -33,7 +32,6 @@ class Recognition(BaseTask):
         data = load_txt(filename)
         return [row_str.split(' ')[1] for row_str in data if any(row_str)]
 
-
     def load_file(self, fname):
         """
         Load data from a .txt file.
@@ -41,7 +39,6 @@ class Recognition(BaseTask):
         filename = os.path.join(self.data_path, 'ucfTrainTestlist', fname)
         data = load_txt(filename)
         return [row_str.split(' ')[0] for row_str in data if any(row_str)]
-
 
     def convert_to_dict(self, data):
         """
@@ -64,7 +61,6 @@ class Recognition(BaseTask):
 
         return out_dict
 
-
     def load_train_test_splits(self):
         """
         Load train+test index lists from the annotation files.
@@ -83,7 +79,6 @@ class Recognition(BaseTask):
             splits_idx[names[1]] = self.convert_to_dict(data)
 
         return splits_idx
-
 
     def get_set_data(self, set_split, class_list):
         """
@@ -106,10 +101,11 @@ class Recognition(BaseTask):
             total_frames = []
             list_videos_per_class = {}
             list_image_filenames_per_video = []
-            source_data = {} # stores the folder tree of the classes + videos + image files
+            source_data = {}  # stores the folder tree of the classes + videos + image files
 
             if self.verbose:
-                total_vids = sum([len(set_split[set_name][category]) for category in set_split[set_name]])
+                total_vids = sum([len(set_split[set_name][category])
+                                  for category in set_split[set_name]])
                 progbar = progressbar.ProgressBar(maxval=total_vids).start()
                 i = 0
 
@@ -117,9 +113,9 @@ class Recognition(BaseTask):
             count_video, count_imgs = 0, 0
             for class_id, category in enumerate(class_list):
                 source_data[category] = {}
-                #class_id = class_list.index(category)
+                # class_id = class_list.index(category)
                 for _, video_name in enumerate(set_split[set_name][category]):
-                    videos.append(video_name) # add video name
+                    videos.append(video_name)  # add video name
                     video_dir = os.path.join(self.root_dir_imgs, category, video_name)
                     video_filenames.append(os.path.join('UCF-101', category, video_name + '.avi'))
 
@@ -130,21 +126,22 @@ class Recognition(BaseTask):
                     images_fnames = [fname for fname in images_fnames if fname.endswith('.jpg')]
 
                     # add category + video_name to the file paths
-                    images_fnames = [os.path.join(self.data_path, self.images_dir, category, video_name, fname) for fname in images_fnames]
-                    images_fnames.sort() # sort images
-                    image_filenames = image_filenames + images_fnames # add images filenames
+                    images_fnames = [os.path.join(self.data_path, self.images_dir,
+                                                  category, video_name, fname)
+                                     for fname in images_fnames]
+                    images_fnames.sort()  # sort images
+                    image_filenames = image_filenames + images_fnames  # add images filenames
                     count_imgs += len(images_fnames)
                     total_frames.append(count_imgs)
 
                     # add image filenames to source
                     source_data[category][video_name] = {
-                        "images" : str2ascii(images_fnames),
-                        "video" : str2ascii(video_filenames[-1])
+                        "images": str2ascii(images_fnames),
+                        "video": str2ascii(video_filenames[-1])
                     }
 
-
                     # add to list of images per video
-                    list_range = list(range(count_imgs-len(images_fnames), count_imgs))
+                    list_range = list(range(count_imgs - len(images_fnames), count_imgs))
                     list_image_filenames_per_video.append(list_range)
 
                     # add to list of videos per class
@@ -153,8 +150,11 @@ class Recognition(BaseTask):
                     except KeyError:
                         list_videos_per_class[class_id] = [count_video]
 
-                    # add data to 'object_ids' [video, video_filename, list_images_per_video, class (activity), total_imgs]
-                    object_ids.append([count_video, count_video, count_video, class_id, count_video])
+                    # add data to 'object_ids'
+                    # [video, video_filename, list_images_per_video,
+                    # class (activity), total_imgs]
+                    object_ids.append(
+                        [count_video, count_video, count_video, class_id, count_video])
 
                     # update video counter
                     count_video += 1
@@ -168,23 +168,23 @@ class Recognition(BaseTask):
             progbar.finish()
 
             out[set_name] = {
-                "object_fields" : str2ascii(['videos', 'video_filenames',
+                "object_fields": str2ascii(['videos', 'video_filenames',
                                             'list_image_filenames_per_video',
                                             'activities', 'total_frames']),
-                "object_ids" : np.array(object_ids, dtype=np.int32),
-                "videos" : str2ascii(videos),
-                "video_filenames" : str2ascii(video_filenames),
-                "activities" : str2ascii(class_list),
-                "image_filenames" : str2ascii(image_filenames),
-                "total_frames" : np.array(total_frames, dtype=np.int32),
-                "list_videos_per_activity" : np.array(pad_list(list(list_videos_per_class.values()), -1), dtype=np.int32),
-                "list_image_filenames_per_video" : np.array(pad_list(list_image_filenames_per_video, -1),
-                                                            dtype=np.int32),
-                "source_data" : source_data
+                "object_ids": np.array(object_ids, dtype=np.int32),
+                "videos": str2ascii(videos),
+                "video_filenames": str2ascii(video_filenames),
+                "activities": str2ascii(class_list),
+                "image_filenames": str2ascii(image_filenames),
+                "total_frames": np.array(total_frames, dtype=np.int32),
+                "list_videos_per_activity": np.array(pad_list(list(list_videos_per_class.values()),
+                                                              -1), dtype=np.int32),
+                "list_image_filenames_per_video": np.array(pad_list(list_image_filenames_per_video,
+                                                                    -1), dtype=np.int32),
+                "source_data": source_data
             }
 
         return out
-
 
     def load_data(self):
         """
@@ -210,7 +210,6 @@ class Recognition(BaseTask):
 
         yield set_splits_data
 
-
     def add_data_to_source(self, hdf5_handler, data, set_name=None):
         """
         Store data annotations in a nested tree fashion.
@@ -221,9 +220,10 @@ class Recognition(BaseTask):
             category_grp = hdf5_handler.create_group(category)
             for video_name in data[set_name]['source_data'][category]:
                 video_grp = category_grp.create_group(video_name)
-                video_grp.create_dataset('images_path', data=data['source_data'][category][video_name]['images'])
-                video_grp.create_dataset('video_path', data=data['source_data'][category][video_name]['video'])
-
+                video_grp.create_dataset(
+                    'images_path', data=data['source_data'][category][video_name]['images'])
+                video_grp.create_dataset(
+                    'video_path', data=data['source_data'][category][video_name]['video'])
 
     def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
@@ -231,12 +231,30 @@ class Recognition(BaseTask):
 
         For each field, the data is organized into a single big matrix.
         """
-        hdf5_write_data(hdf5_handler, 'activities', data["activities"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'videos', data["videos"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'video_filenames', data["video_filenames"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'image_filenames', data["image_filenames"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'total_frames', data["total_frames"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids', data["object_ids"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', data["object_fields"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'list_videos_per_activity', data["list_videos_per_activity"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_video', data["list_image_filenames_per_video"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'activities',
+                        data["activities"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'videos',
+                        data["videos"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'video_filenames',
+                        data["video_filenames"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_filenames',
+                        data["image_filenames"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'total_frames',
+                        data["total_frames"],
+                        dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids',
+                        data["object_ids"],
+                        dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields',
+                        data["object_fields"],
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'list_videos_per_activity',
+                        data["list_videos_per_activity"],
+                        dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'list_image_filenames_per_video',
+                        data["list_image_filenames_per_video"],
+                        dtype=np.int32, fillvalue=-1)
