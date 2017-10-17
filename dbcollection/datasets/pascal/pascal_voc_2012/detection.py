@@ -29,7 +29,6 @@ class Detection(BaseTask):
 
     parts = ['head', 'hand', 'foot']
 
-
     def get_set_fnames_fids(self):
         """
         Return the train/val/trainval/test set filenames + fileids.
@@ -46,12 +45,11 @@ class Detection(BaseTask):
         test_ids = list(range(len(test_fnames)))
 
         return {
-            'train' : [train_fnames, train_ids],
-            'val' : [val_fnames, val_ids],
-            'trainval' : [trainval_fnames, trainval_ids],
-            'test' : [test_fnames, test_ids]
+            'train': [train_fnames, train_ids],
+            'val': [val_fnames, val_ids],
+            'trainval': [trainval_fnames, trainval_ids],
+            'test': [test_fnames, test_ids]
         }
-
 
     def load_data(self):
         """
@@ -108,8 +106,7 @@ class Detection(BaseTask):
             if self.verbose:
                 prgbar.finish()
 
-            yield {set_name : data}
-
+            yield {set_name: data}
 
     def add_data_to_source(self, hdf5_handler, data, set_name):
         """
@@ -129,7 +126,7 @@ class Detection(BaseTask):
             hdf5_handler['bndbox/xmax'] = anno['bndbox']['xmax']
             hdf5_handler['bndbox/ymax'] = anno['bndbox']['ymax']
 
-            #if anno['part']:
+            # if anno['part']:
             #    if isinstance(anno['part'], list):
             #        part_list = anno['part']
             #    else:
@@ -178,7 +175,6 @@ class Detection(BaseTask):
         if self.verbose:
             prgbar.finish()
 
-
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
@@ -192,8 +188,8 @@ class Detection(BaseTask):
         object_id = []
 
         obj_id = []  # for mscoco
-        image_id = [] # for mscoco
-        category_id = list(range(1, len(self.classes)+1)) # for mscoco
+        image_id = []  # for mscoco
+        category_id = list(range(1, len(self.classes) + 1))  # for mscoco
 
         list_image_filenames_per_class = []
         list_boxes_per_image = []
@@ -203,7 +199,6 @@ class Detection(BaseTask):
         list_objects_ids_difficult = []
         list_objects_ids_no_truncated = []
         list_objects_ids_truncated = []
-
 
         if self.verbose:
             print('> Adding data to default group...')
@@ -233,9 +228,9 @@ class Detection(BaseTask):
                     class_id = self.classes.index(obj['name'])
                     obj_id.append(obj_counter)
                     bbox.append([obj['bndbox']['xmin'], obj['bndbox']['ymin'],
-                                obj['bndbox']['xmax'], obj['bndbox']['ymax']])
+                                 obj['bndbox']['xmax'], obj['bndbox']['ymax']])
 
-                    #if annotation['annotation']['part']:
+                    # if annotation['annotation']['part']:
                     #    if isinstance(annotation['annotation']['part'], list):
                     #        part_list = annotation['annotation']['part']
                     #    else:
@@ -253,7 +248,7 @@ class Detection(BaseTask):
                         object_id.append([i, class_id, obj_counter, i,
                                           difficult.index(int(obj['difficult'])),
                                           difficult.index(int(obj['truncated']))])
-                    #else:
+                    # else:
                     #    object_id.append([i, class_id, obj_counter, i])
 
                     # increment counter
@@ -277,25 +272,25 @@ class Detection(BaseTask):
             # process lists
             for i in range(len(self.classes)):
                 imgs_per_class = [val[0] for j, val in enumerate(object_id) if val[1] == i]
-                imgs_per_class = list(set(imgs_per_class)) # get unique values
+                imgs_per_class = list(set(imgs_per_class))  # get unique values
                 imgs_per_class.sort()
                 list_image_filenames_per_class.append(imgs_per_class)
 
             for i in range(len(image_filenames)):
                 boxes_per_img = [val[2] for j, val in enumerate(object_id) if val[0] == i]
-                boxes_per_img = list(set(boxes_per_img)) # get unique values
+                boxes_per_img = list(set(boxes_per_img))  # get unique values
                 boxes_per_img.sort()
                 list_boxes_per_image.append(boxes_per_img)
 
             for i in range(len(image_filenames)):
                 objs_per_img = [j for j, val in enumerate(object_id) if val[0] == i]
-                objs_per_img = list(set(objs_per_img)) # get unique values
+                objs_per_img = list(set(objs_per_img))  # get unique values
                 objs_per_img.sort()
                 list_object_ids_per_image.append(objs_per_img)
 
             for i in range(len(self.classes)):
                 objs_per_class = [j for j, val in enumerate(object_id) if val[1] == i]
-                objs_per_class = list(set(objs_per_class)) # get unique values
+                objs_per_class = list(set(objs_per_class))  # get unique values
                 objs_per_class.sort()
                 list_objects_ids_per_class.append(objs_per_class)
 
@@ -307,7 +302,7 @@ class Detection(BaseTask):
             objs_difficult.sort()
             list_objects_ids_difficult = objs_difficult
 
-            objs_no_truncated= [j for j, val in enumerate(object_id) if val[5] == 0]
+            objs_no_truncated = [j for j, val in enumerate(object_id) if val[5] == 0]
             objs_no_truncated.sort()
             list_objects_ids_no_truncated = objs_no_truncated
 
@@ -315,19 +310,40 @@ class Detection(BaseTask):
             objs_truncated.sort()
             list_objects_ids_truncated = objs_truncated
 
-
-        hdf5_write_data(hdf5_handler, 'image_filenames', str2ascii(image_filenames), dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'id', np.array(obj_id, dtype=np.int32), fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'image_filenames',
+                        str2ascii(image_filenames),
+                        dtype=np.uint8, fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'id',
+                        np.array(obj_id, dtype=np.int32),
+                        fillvalue=-1)
         if not set_name == 'test':
-            hdf5_write_data(hdf5_handler, 'image_id', np.array(image_id, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'category_id', np.array(category_id, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'sizes', np.array(size, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'classes', str2ascii(self.classes), dtype=np.uint8, fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'boxes', np.array(bbox, dtype=np.float), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'truncated', np.array(truncated, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'difficult', np.array(difficult, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(object_fields), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'image_id',
+                            np.array(image_id, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'category_id',
+                            np.array(category_id, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'sizes',
+                            np.array(size, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'classes',
+                            str2ascii(self.classes),
+                            dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'boxes',
+                            np.array(bbox, dtype=np.float),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'truncated',
+                            np.array(truncated, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'difficult',
+                            np.array(difficult, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'object_ids',
+                            np.array(object_id, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'object_fields',
+                            str2ascii(object_fields),
+                            dtype=np.uint8, fillvalue=0)
 
             pad_value = -1
             hdf5_write_data(hdf5_handler, 'list_image_filenames_per_class',
@@ -355,5 +371,9 @@ class Detection(BaseTask):
                             np.array(list_objects_ids_truncated, dtype=np.int32),
                             fillvalue=pad_value)
         else:
-            hdf5_write_data(hdf5_handler, 'object_ids', np.array(object_id, dtype=np.int32), fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'object_fields', str2ascii(['image_filenames']), dtype=np.uint8, fillvalue=0)
+            hdf5_write_data(hdf5_handler, 'object_ids',
+                            np.array(object_id, dtype=np.int32),
+                            fillvalue=-1)
+            hdf5_write_data(hdf5_handler, 'object_fields',
+                            str2ascii(['image_filenames']), dtype=np.uint8,
+                            fillvalue=0)
