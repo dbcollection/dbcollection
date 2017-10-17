@@ -32,25 +32,22 @@ class Classification(BaseTask):
         "test_batch"
     ]
 
-
     def get_object_list(self, data, labels):
         """
         Groups the data + labels info in a 'list' of indexes.
         """
-        #object_id = np.ndarray((data.shape[0], 2), dtype=np.uint16)
+        # object_id = np.ndarray((data.shape[0], 2), dtype=np.uint16)
         object_id = np.ndarray((data.shape[0], 2), dtype=int)
         for i in range(data.shape[0]):
             object_id[i][0] = i
             object_id[i][1] = labels[i]
         return object_id
 
-
     def get_class_names(self, path):
         """
         Returns the class names/labels.
         """
         return load_pickle(os.path.join(path, self.data_files[0]))
-
 
     def load_data_set(self, is_test):
         """
@@ -97,7 +94,7 @@ class Classification(BaseTask):
                 axis=0,
             )
 
-        data = np.transpose(data, (0, 2, 3, 1)) # NxHxWxC
+        data = np.transpose(data, (0, 2, 3, 1))  # NxHxWxC
         object_list = self.get_object_list(data, labels)
 
         # organize list of image indexes per class
@@ -116,19 +113,17 @@ class Classification(BaseTask):
             "list_images_per_class": np.array(pad_list(images_per_class, 1), dtype=np.int32)
         }
 
-
     def load_data(self):
         """
         Load the data from the files.
         """
         # train set
-        yield {"train" : self.load_data_set(False)}
+        yield {"train": self.load_data_set(False)}
 
         # test set
-        yield {"test" : self.load_data_set(True)}
+        yield {"test": self.load_data_set(True)}
 
-
-    #def add_data_to_source(self, hdf5_handler, data, set_name=None):
+    # def add_data_to_source(self, hdf5_handler, data, set_name=None):
     #    """
     #    Store data annotations in a nested tree fashion.
     #
@@ -137,7 +132,6 @@ class Classification(BaseTask):
     #    hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
     #    hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
     #    hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=1)
-
 
     def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
@@ -148,6 +142,9 @@ class Classification(BaseTask):
         hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
         hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=1)
         hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids', data["object_ids"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields', data["object_fields"], dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'list_images_per_class', data["list_images_per_class"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_ids',
+                        data["object_ids"], dtype=np.int32, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'object_fields',
+                        data["object_fields"], dtype=np.uint8, fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'list_images_per_class',
+                        data["list_images_per_class"], dtype=np.int32, fillvalue=-1)
