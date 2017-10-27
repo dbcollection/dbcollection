@@ -29,6 +29,7 @@ install:
 script:
     - source activate dbcollection
     - pytest --cov=dbcollection dbcollection/tests/
+    - pytest --cov=dbcollection dbcollection/tests/datasets/__test_check_urls.py
 
 after_success:
     - echo "Upload code coverage to codecov"
