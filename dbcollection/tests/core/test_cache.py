@@ -78,6 +78,12 @@ def test_delete_dataset_raise(name, delete_cache, cache_manager):
     with pytest.raises(Exception):
         cache_manager.delete_dataset(name, delete_cache)
 
+@pytest.mark.parametrize("name, task", [
+    ('test_dataset2', 'extra'),
+])
+def test_delete_task(name, task, cache_manager):
+    cache_manager.delete_task(name, task)
+
 
 @pytest.mark.parametrize("name, output", [
     ('test_dataset1', True),
