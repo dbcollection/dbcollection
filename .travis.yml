@@ -43,3 +43,8 @@ matrix:
         addons: true
         install: pip install flake8
         script: flake8
+    include:
+        env: URL_STATUS_CHECK
+        python: "3.6"
+        addons: true
+        script: pytest dbcollection/tests/datasets/__test_check_urls.py
