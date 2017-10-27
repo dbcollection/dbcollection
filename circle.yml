@@ -19,3 +19,4 @@ dependencies:
 test:
   override:
     - tox
+    - pytest dbcollection/tests/datasets/__test_check_urls.py

@@ -38,11 +38,6 @@ after_success:
 matrix:
     fast_finish: true
     include:
-        env: URL_STATUS_CHECK
-        python: "3.6"
-        addons: true
-        script: pytest dbcollection/tests/datasets/__test_check_urls.py
-    include:
         env: LINT_CHECK
         python: "3.6"
         addons: true
