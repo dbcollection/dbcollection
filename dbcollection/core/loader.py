@@ -76,10 +76,13 @@ class FieldLoader(object):
             List of numpy arrays if using a list of indexes.
 
         """
-        if idx:
-            data = self.data[idx]
+        if idx is None:
+            if self._in_memory:
+                data = self.data
+            else:
+                data = self.data.value
         else:
-            data = self.data.value
+            data = self.data[idx]
         return data
 
     def size(self):
