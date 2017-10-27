@@ -9,16 +9,6 @@ python:
 
 matrix:
     fast_finish: true
-    include:
-        env: URL_STATUS_CHECK
-        python: "3.6"
-        addons: true
-        install:
-            - echo "install start"
-            - chmod +x ci/travis_install.sh
-            - ci/travis_install.sh
-            - echo "install done"
-        script: pytest dbcollection/tests/datasets/__test_check_urls.py
 
 before_install:
     - echo "before_install"
@@ -47,6 +37,11 @@ after_success:
 
 matrix:
     fast_finish: true
+    include:
+        env: URL_STATUS_CHECK
+        python: "3.6"
+        addons: true
+        script: pytest dbcollection/tests/datasets/__test_check_urls.py
     include:
         env: LINT_CHECK
         python: "3.6"
