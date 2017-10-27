@@ -142,7 +142,15 @@ class FieldLoader(object):
         self._in_memory = is_in_memory
 
     def _get_to_memory(self):
-        """Modifies how data is accessed and stored. If True, allocates data to memory. Otherwise, keeps it in disk."""
+        """Modifies how data is accessed and stored.
+
+        Accessing data from a field can be done in two ways: memory or disk.
+        To enable data allocation and access from memory requires the user to
+        specify a boolean. If set to True, data is allocated to a numpy ndarray
+        and all accesses are done in memory. Otherwise, data is kept in disk and
+        accesses are done using the HDF5 object handler.
+
+        """
         return self._in_memory
 
     to_memory = property(_get_to_memory, _set_to_memory)
