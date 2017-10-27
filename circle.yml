@@ -10,14 +10,12 @@ checkout:
 dependencies:
   override:
     - pip install --upgrade pip
-    - pip install -U tox pytest
+    - pip install -U tox
     - pip --version
     - tox --version
-    - pytest --version
     - pip install tox-pyenv
     - pyenv local 2.7.11 3.4.3 3.5.1 3.6.1
 
 test:
   override:
     - tox
-    - pytest dbcollection/tests/datasets/__test_check_urls.py
