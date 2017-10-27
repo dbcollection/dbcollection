@@ -31,6 +31,7 @@ class CacheManager:
         Default save dir path for downloaded data.
     data : dict
         Cache contents.
+
     """
 
     def __init__(self, is_test=False):
@@ -119,6 +120,7 @@ class CacheManager:
         ------
         IOError
             If the file cannot be opened.
+
         """
         try:
             with open(self.cache_filename, 'r') as json_data:
@@ -133,6 +135,7 @@ class CacheManager:
         -------
         dict
             Data structure of the cache (file).
+
         """
         # check if file exists
         if os.path.exists(self.cache_filename):
@@ -183,12 +186,13 @@ class CacheManager:
         Raises
         ------
         OSError
-            If the file does not exist.
+            If an error occurred when deleting a file.
+
         """
         try:
             if os.path.exists(fname):
                 if os.path.isdir(fname):
-                    shutil.rmtree(fname, ignore_errors=True)
+                    shutil.rmtree(fname)
                 else:
                     os.remove(fname)
         except OSError as err:
@@ -202,6 +206,7 @@ class CacheManager:
         ----------
         name : str
             Dataset name.
+
         """
         try:
             self.data['dataset'].pop(name)
@@ -221,6 +226,7 @@ class CacheManager:
         ----------
         name : str
             Name of the dataset.
+
         """
         keywords = []
         for keyword in self.data['category']:
@@ -246,12 +252,17 @@ class CacheManager:
             Name of the dataset.
         task : str
             Name of the task
+
         """
         try:
+            task_filename = self.data['dataset'][name]['tasks'][task]
             self.data['dataset'][name]['tasks'].pop(task)
 
             # update cache file on disk
             self.write_data_cache(self.data)
+
+            # remove file from disk
+            self._os_remove(task_filename)
 
             return True
         except KeyError:
@@ -265,6 +276,7 @@ class CacheManager:
         ----------
         name : str
             Name of the dataset.
+
         """
         # get cache dir path
         cache_dir_path = os.path.join(self._cache_dir, name)
@@ -293,6 +305,7 @@ class CacheManager:
         -------
         UserWarning
             If force_reset is False, display a warning to the user.
+
         """
         if force_reset:
             self.write_data_cache(self._empty_data(), self.cache_filename)
@@ -314,6 +327,7 @@ class CacheManager:
         -------
         bool
             The dataset exists (True) or not (False).
+
         """
         return name in self.data['dataset'].keys()
 
@@ -328,6 +342,7 @@ class CacheManager:
             New data.
         is_append : bool, optional
             Appends the task cache data to existing ones.
+
         """
         if is_append:
             if name in self.data['dataset']:
@@ -346,6 +361,7 @@ class CacheManager:
             Name of the dataset.
         delete_data : bool, optional
             Flag indicating if the data's directory has to be deleted (or skip it).
+
         """
         dset_paths = self.get_dataset_storage_paths(name)
 
@@ -372,6 +388,7 @@ class CacheManager:
         -------
         bool
             Return true if the category exists, else return False.
+
         """
         return name in self.data['dataset']
 
@@ -389,6 +406,7 @@ class CacheManager:
         -------
         bool
             Return true if the task exists, else return False.
+
         """
         try:
             return task in self.data['dataset'][name]['tasks']
@@ -412,6 +430,7 @@ class CacheManager:
         ------
         KeyError
             If the dataset name does not exist in cache.
+
         """
         try:
             return {
@@ -439,7 +458,8 @@ class CacheManager:
         Raises
         ------
         KeyError
-            In case the dataset name
+            In case the dataset name.
+
         """
         try:
             return self.data['dataset'][name]['tasks'][task]
@@ -456,6 +476,7 @@ class CacheManager:
             Name of the dataset.
         keywords : list
             Keyword categories of the dataset.
+
         """
         if isinstance(keywords, list):
             keywords = tuple(keywords)
@@ -488,6 +509,7 @@ class CacheManager:
             A list of keywords caracterizing the dataset.
         is_append : bool
             Overrides existing cache info data with new data.
+
         """
         new_info_dict = {
             "data_dir": data_dir,
@@ -527,6 +549,7 @@ class CacheManager:
         ------
         Exception
             If the input field is not valid.
+
         """
         assert field, 'Invalid field: {}'.format(field)
         assert value, 'Invalid value: {}'.format(value)
@@ -570,6 +593,7 @@ class CacheManager:
             Displays the dataset contents.
         show_categories : bool, optional
             Displays the categories information.
+
         """
         # print info header
         if show_paths:
