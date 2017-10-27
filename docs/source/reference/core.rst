@@ -17,7 +17,7 @@ API methods
 .. autofunction:: dbcollection.core.api.query
 .. autofunction:: dbcollection.core.api.info_cache
 .. autofunction:: dbcollection.core.api.info_datasets
-.. autofunction:: dbcollection.core.db.fetch_list_datasets
+.. autofunction:: dbcollection.core.api.fetch_list_datasets
 
 Cache management
 --------------------------------

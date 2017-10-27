@@ -42,6 +42,8 @@ class FieldLoader(object):
         """Initialize class."""
         assert hdf5_field, 'Must input a valid hdf5 dataset.'
         self.data = hdf5_field
+        self.hdf5_handler = hdf5_field
+        self._in_memory = False
         s = hdf5_field.name.split('/')
         self.set = s[1]
         self.name = s[-1]
@@ -74,10 +76,13 @@ class FieldLoader(object):
             List of numpy arrays if using a list of indexes.
 
         """
-        if idx:
-            data = self.data[idx]
+        if idx is None:
+            if self._in_memory:
+                data = self.data
+            else:
+                data = self.data.value
         else:
-            data = self.data.value
+            data = self.data[idx]
         return data
 
     def size(self):
@@ -89,6 +94,7 @@ class FieldLoader(object):
         -------
         list
             Returns the size of the field.
+
         """
         return self.shape
 
@@ -102,6 +108,7 @@ class FieldLoader(object):
         -------
         int
             Index of the field in the 'object_ids' list.
+
         """
         return self.obj_id
 
@@ -109,6 +116,7 @@ class FieldLoader(object):
         """Prints information about the field.
 
         Displays information like name, size and shape of the field.
+
         """
         if hasattr(self, 'obj_id'):
             print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})'
@@ -116,6 +124,36 @@ class FieldLoader(object):
         else:
             print('Field: {},  shape = {},  dtype = {}'
                   .format(self.name, str(self.shape), str(self.type)))
+
+    def _set_to_memory(self, is_in_memory):
+        """"Stores the contents of the field in a numpy array if True.
+
+        Parameters
+        ----------
+        is_in_memory : bool
+            Move the data to memory (if True).
+
+        """
+        assert isinstance(is_in_memory, bool), 'Invalid input. Must insert a boolean type.'
+        if is_in_memory:
+            self.data = self.hdf5_handler.value
+        else:
+            self.data = self.hdf5_handler
+        self._in_memory = is_in_memory
+
+    def _get_to_memory(self):
+        """Modifies how data is accessed and stored.
+
+        Accessing data from a field can be done in two ways: memory or disk.
+        To enable data allocation and access from memory requires the user to
+        specify a boolean. If set to True, data is allocated to a numpy ndarray
+        and all accesses are done in memory. Otherwise, data is kept in disk and
+        accesses are done using the HDF5 object handler.
+
+        """
+        return self._in_memory
+
+    to_memory = property(_get_to_memory, _set_to_memory)
 
     def __getitem__(self, index):
         """
@@ -127,7 +165,8 @@ class FieldLoader(object):
         Returns
         -------
         np.ndarray
-            Numpy data array
+            Numpy data array.
+
         """
         return self.data[index]
 
@@ -137,6 +176,7 @@ class FieldLoader(object):
         -------
         int
             Number of samples
+
         """
         return self.shape[0]
 
@@ -213,6 +253,7 @@ class SetLoader(object):
             Numpy array containing the field's data.
         list
             List of numpy arrays if using a list of indexes.
+
         """
         assert field, 'Must input a valid field name: {}'.format(field)
         assert field in self.fields, 'Field \'{}\' does not exist in the \'{}\' set.' \
@@ -241,6 +282,7 @@ class SetLoader(object):
         -------
         str/int/list
             Value/list of a field from the metadata cache file.
+
         """
         if isinstance(idx, list) or isinstance(idx, tuple):
             assert min(idx) >= 0, 'list/tuple must have indexes >= 0: {}'.format(idx)
@@ -300,6 +342,7 @@ class SetLoader(object):
         list
             Returns a list of indexes or, if convert_to_value is True,
             a list of data arrays/values.
+
         """
         if idx is None:
             idx = tuple(range(0, self.nelems))
@@ -331,6 +374,7 @@ class SetLoader(object):
         -------
         list
             Returns the size of a field.
+
         """
         assert field in self.fields, 'Field \'{}\' does not exist in the \'{}\' set.' \
                                      .format(field, self.set)
@@ -343,6 +387,7 @@ class SetLoader(object):
         -------
         list
             List of all data fields of the dataset.
+
         """
         return self.fields
 
@@ -361,6 +406,7 @@ class SetLoader(object):
         -------
         int
             Index of the field in the 'object_ids' list.
+
         """
         assert field, 'Must input a valid field: {}'.format(field)
         if field in self._object_fields:
@@ -377,6 +423,7 @@ class SetLoader(object):
 
         This method provides the necessary information about a data set
         internals to help determine how to use/handle a specific field.
+
         """
         print('\n> Set: {}'.format(self.set))
 
@@ -439,6 +486,7 @@ class SetLoader(object):
         -------
         int
             Number of elements
+
         """
         return self.nelems
 
@@ -540,6 +588,7 @@ class DataLoader(object):
             Numpy array containing the field's data.
         list
             List of numpy arrays if using a list of indexes.
+
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
         assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
@@ -598,6 +647,7 @@ class DataLoader(object):
         -------
         list
             Returns the size of a field.
+
         """
         if set_name is None:
             out = {}
@@ -623,6 +673,7 @@ class DataLoader(object):
         -------
         list
             List of all data fields of the dataset.
+
         """
         if set_name:
             assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
@@ -653,6 +704,7 @@ class DataLoader(object):
         -------
         int
             Index of the field in the 'object_ids' list.
+
         """
         assert set_name, 'Must input a valid set name: {}'.format(set_name)
         assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
@@ -680,6 +732,7 @@ class DataLoader(object):
         ----------
         set_name : str, optional
             Name of the set.
+
         """
         if set_name:
             assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
