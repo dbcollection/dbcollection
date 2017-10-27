@@ -63,6 +63,8 @@ class CacheManager:
         """Get the default cache dir path."""
         return self.data['info']['default_cache_dir']
 
+    cache_dir = property(_get_cache_dir, _set_cache_dir)
+
     def _default_cache_dir_path(self):
         """Returns the pre-defined path of the cache_dir."""
         if self.is_test:
@@ -74,8 +76,6 @@ class CacheManager:
     def reset_cache_dir(self):
         """Reset the default download dir."""
         self._set_cache_dir(self._default_cache_dir_path())
-
-    cache_dir = property(_get_cache_dir, _set_cache_dir)
 
     def create_os_home_dir(self):
         """Create the main dir to store all metadata files."""
