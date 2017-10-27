@@ -157,6 +157,7 @@ class CacheManager:
         ------
         IOError
             If the file cannot be opened.
+
         """
         filename = fname or self.cache_filename
         with open(filename, 'w') as file_cache:
