@@ -10,9 +10,10 @@ checkout:
 dependencies:
   override:
     - pip install --upgrade pip
-    - pip install -U tox
+    - pip install -U tox pytest
     - pip --version
     - tox --version
+    - pytest --version
     - pip install tox-pyenv
     - pyenv local 2.7.11 3.4.3 3.5.1 3.6.1
 
