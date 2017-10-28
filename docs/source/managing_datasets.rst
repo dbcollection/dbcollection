@@ -636,6 +636,83 @@ This method also allows you to select information about a single or multiple dat
 Displaying information about available datasets
 ===============================================
 
+Some important information about **dbcollection** is the list of available datasets for load + download. Also, information about what tasks are available per dataset is of great interest.
+
+This is achieved via the :ref:`info_datasets() <core_reference_api_info_datasets>` method that lists what datasets are available for load in your system and what datasets and tasks are available for download.
+
+.. code-block:: python
+   
+   >>> dbc.info_datasets()
+   ----------------------------------------
+     Available datasets in cache for load 
+   ----------------------------------------
+     - cifar10  ['classification']
+     - cifar100  ['classification']
+     - mnist  ['classification']
+
+   -----------------------------------
+     Available datasets for download 
+   -----------------------------------
+     - caltech_pedestrian  ['detection', 'detection_10x', 'detection_30x']
+     - cifar10  ['classification']
+     - cifar100  ['classification']
+     - coco  ['caption_2015', 'caption_2016', 'detection_2015', 'detection_2016', 'keypoints_2016']
+     - flic  ['keypoints']
+     - ilsvrc2012  ['classification', 'raw256']
+     - inria_pedestrian  ['detection']
+     - leeds_sports_pose  ['keypoints', 'keypoints_original']
+     - leeds_sports_pose_extended  ['keypoints']
+     - mnist  ['classification']
+     - mpii_pose  ['keypoints', 'keypoints_full']
+     - pascal_voc_2007  ['detection']
+     - pascal_voc_2012  ['detection']
+     - ucf_101  ['recognition']
+     - ucf_sports  ['recognition']
+
+You can define what information you want to print to the screen via the args ``show_downloaded`` and ``show_available``.
+
+.. code-block:: python
+   
+   >>> dbc.info_datasets(show_available=False)
+   ----------------------------------------
+     Available datasets in cache for load 
+   ----------------------------------------
+     - cifar10  ['classification']
+     - cifar100  ['classification']
+     - mnist  ['classification']
+
+
+   >>> dbc.info_datasets(show_downloaded=False)
+   -----------------------------------
+     Available datasets for download 
+   -----------------------------------
+     - caltech_pedestrian  ['detection', 'detection_10x', 'detection_30x']
+     - cifar10  ['classification']
+     - cifar100  ['classification']
+     - coco  ['caption_2015', 'caption_2016', 'detection_2015', 'detection_2016', 'keypoints_2016']
+     - flic  ['keypoints']
+     - ilsvrc2012  ['classification', 'raw256']
+     - inria_pedestrian  ['detection']
+     - leeds_sports_pose  ['keypoints', 'keypoints_original']
+     - leeds_sports_pose_extended  ['keypoints']
+     - mnist  ['classification']
+     - mpii_pose  ['keypoints', 'keypoints_full']
+     - pascal_voc_2007  ['detection']
+     - pascal_voc_2012  ['detection']
+     - ucf_101  ['recognition']
+     - ucf_sports  ['recognition']
+
+Also, you can list only the datasets that match a certain pattern.
+
+.. code-block:: python
+   
+   >>> dbc.info_datasets('pascal', show_downloaded=False)
+   -----------------------------------
+     Available datasets for download 
+   -----------------------------------
+     - pascal_voc_2007  ['detection']
+     - pascal_voc_2012  ['detection']
+
 
 .. _user_managing_datasets_best_practices:
 
