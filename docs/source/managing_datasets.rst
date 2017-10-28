@@ -272,6 +272,30 @@ You can also use the ``add()`` method to assign the path of the data files for a
 Removing a dataset or task
 ==========================
 
+Removing datasets or tasks is pretty simple. With :ref:`remove() <core_reference_api_remove>`, all you need to do to remove a dataset is to provide the name of the dataset you want to remove from the cache. 
+
+.. code-block:: python
+
+   >>> dbc.remove('cifar100')
+
+If you just want to delete a task from a dataset you need to specify both the name of the dataset you want to remove from and the name of the task:
+
+.. code-block:: python
+
+   >>> dbc.remove('cifar100', 'classification')
+
+This removes the ``classification`` task entry from the cache registry and it also deletes the metadata file associated to it.
+
+However, this will not remove the data files from disk. For that, you must use the ``delete_data`` argument and set it to ``True``.
+
+.. code-block:: python
+
+   >>> dbc.remove('cifar100', 'classification', delete_data=True)
+
+.. warning::
+
+   This will permanently remove the data files stored in the ``data_dir`` path associated with the dataset in the cache. 
+
 
 .. _user_managing_datasets_config_cache:
 
