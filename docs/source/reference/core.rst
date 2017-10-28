@@ -1,14 +1,16 @@
 .. _core_reference:
 
 
+.. _core_reference_api:
 core
 ================================
 .. automodule:: dbcollection.core
 
 API methods
 --------------------------------
-.. autofunction:: dbcollection.core.api
+.. automodule:: dbcollection.core.api
 .. autofunction:: dbcollection.core.api.load
+.. _core_reference_api_download:
 .. autofunction:: dbcollection.core.api.download
 .. autofunction:: dbcollection.core.api.process
 .. autofunction:: dbcollection.core.api.add
