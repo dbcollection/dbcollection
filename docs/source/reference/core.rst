@@ -9,10 +9,12 @@ core
 API methods
 --------------------------------
 .. automodule:: dbcollection.core.api
-.. autofunction:: dbcollection.core.api.load
 .. _core_reference_api_download:
 .. autofunction:: dbcollection.core.api.download
+.. _core_reference_api_process:
 .. autofunction:: dbcollection.core.api.process
+.. _core_reference_api_load:
+.. autofunction:: dbcollection.core.api.load
 .. autofunction:: dbcollection.core.api.add
 .. autofunction:: dbcollection.core.api.remove
 .. autofunction:: dbcollection.core.api.config_cache

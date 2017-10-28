@@ -41,6 +41,12 @@ of warning though: users must take into consideration the implications of some o
 Downloading data files from online resources
 =================================================
 
+.. warning::
+   This section deals with manually downloading source data files of datasets. 
+   For most users this information may not be necessary or relevant, and you can skip this section altogether and move to the one which deals with :ref:`loading datasets <user_managing_datasets_load>`.
+
+   This is because the ``load()`` method automatically downloads or processes any dataset that has not been previously setup, and it is not required to manually download data files in order to load a dataset.
+
 One use of **dbcollection** is to download data files from online sources. This removes the need
 to search where to get the data files from and to locate which specific resources are required. 
 In some cases is not a very challenging task to do, but in other it can be a daunting task. By 
@@ -84,13 +90,59 @@ An important aspect to mention about using this method is that, when using it to
 Parsing annotations / metadata of datasets
 =================================================
 
+.. warning::
+   This section deals with manually parsing annotations of datasets. 
+   For most users this information is not relevant and you can skip this section altogether and move to the next one which deals with :ref:`loading datasets <user_managing_datasets_load>`.
 
+   This is because the ``load()`` method automatically downloads or processes any dataset that has not been previously setup, and it is not required to manually parse annotations of tasks of datasets in order to load a dataset.
+
+Arguably, one of the most important functionalities of **dbcollection** is automatically processing data annotations. 
+It is well known that manually parsing data files + annotations of different datasets is no fun.
+Moreover, it is time consuming, annoying and repetitive. 
+Also, it usually results in disks littered with various cache files which are used to store portions of the annotations accross multiple directories for some specific tasks.  
+
+**dbcollection** provides a way to deal with these issues. Hand-crafted scripts were developed to parse data annotations of specific tasks of datasets for you.  These annotations are stored in a common format and in a single place on your disk that you can easily track.
+
+.. note::
+   Not all annotations are necessary for day to day use, so only the most useful ones are stored. If you happen to need an annotation that is not available in our scripts for any particular reason, please feel free to fill an `issue on GitHub <https://github.com/dbcollection/dbcollection/issues>`_ describing what annotation you need, why and for what task + dataset or, better yet, :ref:`contribute with a pull request <pull_request>`. 
+
+Processing metadata of dataset's annotations is done by using the :ref:`process() <core_reference_api_process>` method. 
+Continuing with the previous section example, lets process the metadata files for the ``cifar10`` dataset:
+
+.. code-block:: python
+
+   >>> dbc.process('cifar10')
+
+The method will process the data annotations of this dataset and stores the resulting metadata into an ``HDF5`` file stored in disk. By default, all metadata files are stored in your home directory in ``~/dbcollection/<dataset>/<task>.h5``. 
+
+This directory is used to centralize all metadata files in disk and its path can be accessed via ``dbc.cache.cache_dir``. To change the default path, simply assign a new path to it: ``dbc.cache.cache_dir = new/cache/path/``. 
+
+Many datasets have many tasks to choose from and these can be listed by the ``info_datasets()`` method described in :ref:`this section <user_managing_datasets_list_datasets>`. To specify which task to process, we must use the ``task`` input argument and assign it a task name:
+
+.. code-block:: python
+
+   >>> dbc.process('cifar10', task='classification')
+
+This processes the annotations of the ``classification`` task and registers them to cache. 
+
+We must point out that this example is not the most illustrative of them all because ``cifar10`` only has one task which is ``classification``. 
+
+Every dataset has a default task and it is not required to explicitly define one. But, if you want to select a different task, you will need to provide a valid task name for processing.
+
+.. note::
+   The ``process()`` method requires that the data files of a dataset have been previously downloaded and registered in the cache. 
+
+   If you have not done this, please see the previous section which explains how to download data files of a dataset or see the section further on this page about manually configuring the cache if you happen to have the necessary data files in disk but on a different folder.
+
+The next section covers the ``load()`` method which deals with loading datasets as data loader objects for extracting (meta)data.
 
 
 .. _user_managing_datasets_load:
 
 Loading a dataset as a data loader object
 =================================================
+
+
 
 
 .. _user_managing_datasets_add:
