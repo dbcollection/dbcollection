@@ -369,14 +369,12 @@ Or do it in one sweep:
 
 .. note::
 
-   The ``config_cache`` method is somewhat limited in its scope compared with other ways to change the cache contents (like directly modifying the cache file manually) but it has the necessary functionality to do the most common operations you might want to do like changing some fields or deleting / reseting the cache.
+   The ``config_cache()`` method is somewhat limited in its scope compared with other ways to change the cache contents (like directly modifying the cache file manually) but it has the necessary functionality to do the most common operations you might want to do like changing some fields or deleting / reseting the cache.
 
 
 .. warning::
 
-   The ``config_cache`` method should be used with extreme caution in order to not permanently delete your configurations. If you are going to use this method, please be aware of dangers of doing so.
-
-
+   The ``config_cache()`` method should be used with extreme caution in order to not permanently delete your configurations. If you are going to use this method, please be aware of dangers of doing so.
 
 
 .. _user_managing_datasets_query_cache:
@@ -384,6 +382,54 @@ Or do it in one sweep:
 Querying the cache
 ==================
 
+Sometimes you just need to search for some keywords in the cache and you don't want to take the effort to do it with a terminal. 
+
+The :ref:`query() <core_reference_api_query>` method allows to search for a pattern in the cache file and returns the contents of that pattern for any match. This means it can return multiple values depending on the the pattern and the configurations registered in your cache file.
+
+For example, you might want to know what are the default paths for the cache and download dirs in your system. To retrieve this information, you can use the ``query()`` method and search for the ``info`` pattern like this:
+
+.. code-block:: python
+
+   >>> dbc.query('info')
+   [{'info': {'default_cache_dir': '/home/mf/dbcollection', 'default_download_dir': 
+   '/home/mf/dbcollection/data/'}}]
+
+We can also list all categories listed in the cache file:
+
+.. code-block:: python
+
+   >>> dbc.query('category')
+   [{'category': {'classification': ['mnist', 'cifar10'], 'detection':
+   ['leeds_sports_pose'], 'human pose': ['leeds_sports_pose'], 
+   'image_processing': ['leeds_sports_pose', 'cifar10'], 'keypoints':
+   ['leeds_sports_pose']}}]
+
+This can also be useful to locate the contents of a dataset.
+
+.. code-block:: python
+
+   >>> dbc.query('mnist')
+   [{'mnist': {'data_dir': '/home/mf/dbcollection/mnist/data', 'keywords':
+   ['classification'], 'tasks': {'classification': '/home/mf/dbcollection/mnist/
+   classification.h5'}}}]
+
+If the pattern was not found in the cache file, it return an empty dictionary.
+
+.. code-block:: python
+
+   >>> dbc.query('cifar1000')
+   []
+
+We can also retrieve information of all datasets that have the same keyword. 
+
+.. code-block:: python
+
+   >>> dbc.query('classification')
+   [{'dataset': {'cifar10': {'keywords': ['classification']}}}, {'dataset': 
+   {'mnist': {'keywords': ['classification']}}}]
+
+
+The ``query()`` method is ment to do simple searches of patterns. It is always much more useful to take a look at the cache file itself, but for its scope it may provide the necessary functionality you might need. 
 
 .. _user_managing_datasets_print_cache:
 
