@@ -21,7 +21,7 @@ it have will be covered as well.
 
 
 Main operations
-================================
+===============
 
 You have a set of operations at your disposal using the **dbcollection's** API to
 manage your datasets. These operations are:
@@ -46,7 +46,7 @@ You should check the section of :ref:`Best practices <user_managing_datasets_bes
 .. _user_managing_datasets_download:
 
 Downloading data files from online resources
-=================================================
+============================================
 
 .. warning::
    This section deals with manually downloading source data files of datasets. 
@@ -100,7 +100,7 @@ So, next time you want to load that dataset, you don't need to explicitly tell w
 .. _user_managing_datasets_process:
 
 Parsing annotations / metadata of datasets
-=================================================
+==========================================
 
 .. warning::
    This section deals with manually parsing annotations of datasets. 
@@ -156,7 +156,7 @@ The next section covers the ``load()`` method which deals with loading datasets 
 .. _user_managing_datasets_load:
 
 Loading a dataset as a data loader object
-=================================================
+=========================================
 
 Loading a dataset's metadata is quite simple. For that, we need to use the :ref:`load() <core_reference_api_load>` method
 and select a dataset to import. Lets load the ``cifar10`` dataset:
@@ -222,48 +222,84 @@ The returned object contains the information of the selected task in its ``__str
 The ``load()`` method is probably the only method you'll ever need to use to load datasets. The Chapter :ref:`Fetching data <user_fetching_data>` continues where this section stopped about dealing with (meta)data. In the following sections deal with adding and removing datasets to / from the cache and what their uses are. 
 
 .. note::
-   The :ref:`Best practices <user_managing_datasets_best_practices>` section at the end of this page provides some tips about how to setup **dbcollection** in your system in order to never have the need to look at any other method at all besides ``load()`` for dealing with datasets.
+   The :ref:`Best practices <user_managing_datasets_best_practices>` section at the end of this page provides some tips about how to setup **dbcollection** in your system in order to never have the need to look at any other method besides ``load()`` for dealing with datasets.
 
 
 .. _user_managing_datasets_add:
 
 Adding a custom dataset
-=================================================
+=======================
+
+The :ref:`add() <core_reference_api_add>` method is used to add custom datasets to the cache. 
+
+To add a custom dataset, you need to provide information about the ``name``, ``task``, ``data_dir`` and ``file_path``.
+Optionally, you can add a list of ``keywords`` to categorize the dataset. 
+
+Lets add a custom dataset to the available datasets list for load in cache:
+
+.. code-block:: python
+
+   >>> dbc.add(name='new_dataset', 
+               task='new_task', 
+               data_dir='some/path/data', 
+               file_path='other/path/metadata/file.h5',
+	       keywords=('image_processing', 'classification'))
+
+When loading this dataset, the ``name`` and ``task`` args are required in order to select the dataset. Then, the ``HDF5`` file containing the metadata is loaded as a ``DataLoader`` object and all data files are available in the directory path provided by ``data_dir``.
+
+This method can also be used to add additional tasks to existing datasets. For example, if we wanted to enhance the ``cifar10`` dataset with an extra task which contains custom metadata, you could do something like the following:
+
+.. code-block:: python
+
+   >>> dbc.add(name='cifar10', 
+               task='custom_classification', 
+               data_dir='default/path/dir/cifar10', 
+               file_path='path/to/new/metadata/file.h5')
+
+You can also use the ``add()`` method to assign the path of the data files for a dataset. This would tell the ``load()`` method to search for the data files in a specific path before attempting to execute the code path to download data files.
+
+.. code-block:: python
+
+   >>> dbc.add(name='mnist', 
+               data_dir='default/path/dir/cifar10',	 
+               task='',  # skips adding the task name
+               file_path='')  # skips adding the file path for the task
+
 
 
 .. _user_managing_datasets_remove:
 
 Removing a dataset or task
-=================================================
+==========================
 
 
 .. _user_managing_datasets_config_cache:
 
 Modifying the cache
-=================================================
+===================
 
 .. _user_managing_datasets_query_cache:
 
 Querying the cache
-=================================================
+==================
 
 
 .. _user_managing_datasets_print_cache:
 
 Displaying cache information
-=================================================
+============================
 
 
 .. _user_managing_datasets_list_datasets:
 
 Displaying information about available datasets
-=================================================
+===============================================
 
 
 .. _user_managing_datasets_best_practices:
 
 Best practices
-=================================================
+==============
 
 
 
