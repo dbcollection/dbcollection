@@ -302,6 +302,83 @@ However, this will not remove the data files from disk. For that, you must use t
 Modifying the cache
 ===================
 
+There are several ways to manage / modify the cache contents in ``~/dbcollection.json`` or to delete / reset the cache file.
+
+The :ref:`config_cache() <core_reference_api_config_cache>` allows users to do the following operations:
+
+- Change values of fields;
+- Delete the cache file / directory;
+- Delete the ``~/dbcollection.json`` cache file;
+- Reset the cache file.
+
+Lets look at some examples.
+
+First, we can change the default cache directory path and assign it a new path:
+
+.. code-block:: python
+
+   >>> dbc.config_cache('default_cache_dir', 'new/path/cache/')
+
+Or we could change the default directory where data files are downloaded:
+
+.. code-block:: python
+
+   >>> dbc.config_cache('default_download_dir', 'new/path/download/')
+
+Or both at the same time:
+
+.. code-block:: python
+
+   >>> dbc.config_cache(field='info', 
+                        value={'default_cache_dir', 'new/path/cache/', 
+                               'default_download_dir': 'new/path/download/'})
+
+Any field can be changed in the cache file just by specifying its name and the new value you want to change it with. The ``field`` arg looks for a string in the cache file and, if it finds a valid match, it replaces the first found match with the value provided with the ``value`` arg. 
+
+Other operations this method allows is to delete folders associated with the cache file or even the cache file itself. To remove just the cache folder where all the metadata ``HDF5`` files are stored, you need to do the following: 
+
+.. code-block:: python
+
+   >>> dbc.config_cache(delete_cache_dir=True)
+
+
+If you just want to remove or reset the cache file you can do the following:
+
+.. code-block:: python
+
+   >>> # Remove the cache file
+   >>> dbc.config_cache(delete_cache_file=True)
+
+   >>> # Reset the cache file (empty data)
+   >>> dbc.config_cache(reset_cache=True)
+
+You can also bundle these arguments together to delete the cache dir and file:
+
+.. code-block:: python
+
+   >>> # Remove the cache file + dir
+   >>> dbc.config_cache(delete_cache_file=True, delete_cache_dir=True)
+
+Or do it in one sweep:
+
+.. code-block:: python
+
+   >>> # Remove the cache file + dir
+   >>> dbc.config_cache(delete_cache=True)
+
+
+.. note::
+
+   The ``config_cache`` method is somewhat limited in its scope compared with other ways to change the cache contents (like directly modifying the cache file manually) but it has the necessary functionality to do the most common operations you might want to do like changing some fields or deleting / reseting the cache.
+
+
+.. warning::
+
+   The ``config_cache`` method should be used with extreme caution in order to not permanently delete your configurations. If you are going to use this method, please be aware of dangers of doing so.
+
+
+
+
 .. _user_managing_datasets_query_cache:
 
 Querying the cache
