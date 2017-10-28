@@ -719,7 +719,67 @@ Also, you can list only the datasets that match a certain pattern.
 Best practices
 ==============
 
+These are some of the recommended practices when dealing with managing datasets using the **dbcollection** package. 
+
+There are several ways to achieve the same result and these are some of the most common practices that you might encounter when using this package.
 
 
+Before downloading / loading a dataset
+--------------------------------------
 
-TODO
+There are some things you should do prior to use the ``download()`` and ``load()`` methods if you don't like the default setup. For example, it is always useful to specify where you want the data files to be stored in your system. 
+
+It is best practice to store all your files in the same directory. If you have an SSD drive but you don't want to store eveything there, it is best to use the ``data_dir`` argument tom specify uses cases, while keeping everything else under the same directory.
+
+To do this, set the paths for the ``default_download_dir`` in your cache file. The recommended way to do this is the following:
+
+.. code-block:: python
+   
+   >>> dbc.cache.download_dir = 'new/path/to/download/data/'
+
+You can also do this for the cache dir where the metadata files are stored, but it shouldn't be a big deal unless you are really keen for quick data accesses. Likewise, you should use the following way to set the path of the cache dir:
+
+.. code-block:: python
+   
+   >>> dbc.cache.cache_dir = 'new/path/to/cache/metadata/'
+
+
+Removing datasets from cache
+----------------------------
+
+The easiest and the less error prone way to remove a dataset from cache is by using the ``remove()`` method. This will parse the cache file and remove any information regarding the specific dataset you are looking to remove.
+
+The same is valid for removing a task of a dataset. Or the data files in your system. 
+
+Resetting / deleting the cache file
+-----------------------------------
+
+If you must delete or reset the contents of your file, there are two recommended ways for you to do this:
+
+#. Using the ``config_cache()`` method; 
+#. Manually deleting the file from your filesystem.
+
+Both will accomplish the same goal, so feel free to chose the one that fits you best.
+
+
+Changing fields / values of the cache
+-------------------------------------
+
+Here I strongly recommend you to do this process by hand. This means opening the ``~/dbcollection.json`` file and manually changing the field or value you want. This may be easier to do or to understand what is actually being changed, and it should be less error prone for most users.
+
+Also, this isn't a common operation todo, so take this advice with a grain of salt.
+
+
+Checking the contents of the cache file
+---------------------------------------
+
+The contents of the ``~/dbcollection.json`` cache file may be hard to read when you have many many datasets registered, so it is best to use the ``info_cache()`` because it produces much nicer outputs for the cache, and you always define what data you want to visualize.
+
+
+Checking what datasets are available for download
+-------------------------------------------------
+
+I strongly recommend you to check the documentation in order to see what datasets are available for download / use. 
+
+The ``info_datasets()`` does list all available datasets + tasks in the **dbcollection** package and it is fine to see the list of available datasets. However, the documentation has much more information about them.
+
