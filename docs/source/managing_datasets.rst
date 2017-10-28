@@ -431,10 +431,204 @@ We can also retrieve information of all datasets that have the same keyword.
 
 The ``query()`` method is ment to do simple searches of patterns. It is always much more useful to take a look at the cache file itself, but for its scope it may provide the necessary functionality you might need. 
 
+
 .. _user_managing_datasets_print_cache:
 
 Displaying cache information
 ============================
+
+You can display the contents of you cache file into the screen by using the :ref:`info_cache() <core_reference_api_info_cache>` method. 
+
+It prints the cache file contents in a structured way for easier visualization.
+
+.. code-block:: python
+
+   >>> dbc.info_cache()
+   --------------
+     Paths info 
+   --------------
+   {
+       "default_cache_dir": "/home/mf/dbcollection",
+       "default_download_dir": "/home/mf/dbcollection/data/"
+   }
+   
+   ----------------
+     Dataset info 
+   ----------------
+   {
+       "cifar10": {
+           "data_dir": "/home/mf/dbcollection/data/cifar10/data",
+           "keywords": [
+               "image_processing",
+               "classification"
+           ],
+           "tasks": {
+	       "classification": "/home/mf/dbcollection/cifar10/classification.h5"
+           }
+       },
+       "cifar100": {
+           "data_dir": "/home/mf/dbcollection/data/cifar100/data",
+           "keywords": [
+               "image_processing",
+               "classification"
+           ],
+           "tasks": {
+	       "classification": "/home/mf/dbcollection/cifar100/classification.h5"
+           }
+       },
+       "mnist": {
+           "data_dir": "/home/mf/dbcollection/mnist/data",
+           "keywords": [
+               "classification"
+           ],
+           "tasks": {
+               "classification": "/home/mf/dbcollection/mnist/classification.h5"
+           }
+       }
+   }
+
+   ------------------------
+     Datasets by category 
+   ------------------------
+
+      > classification:   ['cifar10', 'cifar100', 'mnist']
+      > image_processing: ['cifar10', 'cifar100']
+
+You can select what sections you want to display by using the ``paths_info``, ``datasets_info`` and ``categories_info`` args.
+
+.. code-block:: python
+
+   >>> dbc.info_cache(datasets_info=False, categories_info=False)
+   --------------
+     Paths info 
+   --------------
+   {
+       "default_cache_dir": "/home/mf/dbcollection",
+       "default_download_dir": "/home/mf/dbcollection/data/"
+   }
+   
+   >>> dbc.info_cache(paths_info=False, categories_info=False)
+   ----------------
+     Dataset info 
+   ----------------
+   {
+       "cifar10": {
+           "data_dir": "/home/mf/dbcollection/data/cifar10/data",
+           "keywords": [
+               "image_processing",
+               "classification"
+           ],
+           "tasks": {
+	       "classification": "/home/mf/dbcollection/cifar10/classification.h5"
+           }
+       },
+       "cifar100": {
+           "data_dir": "/home/mf/dbcollection/data/cifar100/data",
+           "keywords": [
+               "image_processing",
+               "classification"
+           ],
+           "tasks": {
+	       "classification": "/home/mf/dbcollection/cifar100/classification.h5"
+           }
+       },
+       "mnist": {
+           "data_dir": "/home/mf/dbcollection/mnist/data",
+           "keywords": [
+               "classification"
+           ],
+           "tasks": {
+               "classification": "/home/mf/dbcollection/mnist/classification.h5"
+           }
+       }
+   }
+
+   >>> dbc.info_cache(paths_info=False, datasets_info=False)
+   ------------------------
+     Datasets by category 
+   ------------------------
+
+      > classification:   ['cifar10', 'cifar100', 'mnist']
+      > image_processing: ['cifar10', 'cifar100']
+
+This method also allows you to select information about a single or multiple datasets.
+
+.. code-block:: python
+
+   >>> dbc.info_cache('cifar10')
+   --------------
+     Paths info 
+   --------------
+   {
+       "default_cache_dir": "/home/mf/dbcollection",
+       "default_download_dir": "/home/mf/dbcollection/data/"
+   }
+   
+   ----------------
+     Dataset info 
+   ----------------
+   {
+       "cifar10": {
+           "data_dir": "/home/mf/dbcollection/data/cifar10/data",
+           "keywords": [
+               "image_processing",
+               "classification"
+           ],
+           "tasks": {
+	       "classification": "/home/mf/dbcollection/cifar10/classification.h5"
+           }
+       }
+   }
+
+   ------------------------
+     Datasets by category 
+   ------------------------
+
+      > classification:   ['cifar10']
+      > image_processing: ['cifar10']
+
+
+   >>> dbc.info_cache(['cifar10', 'cifar100'])
+   --------------
+     Paths info 
+   --------------
+   {
+       "default_cache_dir": "/home/mf/dbcollection",
+       "default_download_dir": "/home/mf/dbcollection/data/"
+   }
+   
+   ----------------
+     Dataset info 
+   ----------------
+   {
+       "cifar10": {
+           "data_dir": "/home/mf/dbcollection/data/cifar10/data",
+           "keywords": [
+               "image_processing",
+               "classification"
+           ],
+           "tasks": {
+	       "classification": "/home/mf/dbcollection/cifar10/classification.h5"
+           }
+       },
+       "cifar100": {
+           "data_dir": "/home/mf/dbcollection/data/cifar100/data",
+           "keywords": [
+               "image_processing",
+               "classification"
+           ],
+           "tasks": {
+	       "classification": "/home/mf/dbcollection/cifar100/classification.h5"
+           }
+       }
+   }
+
+   ------------------------
+     Datasets by category 
+   ------------------------
+
+      > classification:   ['cifar10', 'cifar100']
+      > image_processing: ['cifar10', 'cifar100']
 
 
 .. _user_managing_datasets_list_datasets:
