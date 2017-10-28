@@ -32,3 +32,18 @@ which causes some APIs to load the nested structured as the file is loaded to me
 this issue). To overcome this problem, all tasks have a version withouth this group in their metadata file.
 To load this version, simply append to the end of the task name the suffix ``_d``. Loading times should improve for this
 case.
+
+
+managing datasets
+------------------------
+
+Best practices
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+- antes de fazer o download/load dos dados, convem definir ah priori as pasta de download e de cache
+   - especificar default download dir
+   - manter os metadados numa mesma pasta
+      - nao costumam ser ficheiros mto grandes, mas o ideal é mante-los num disco ou pasta que tenha acesso rapido
+- usar a funcao de remover datasets em vez de alterar ah mao (apagar registos) o ficheiro de cache
+
+

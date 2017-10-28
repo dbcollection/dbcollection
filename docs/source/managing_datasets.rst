@@ -4,11 +4,15 @@
 Managing datasets
 =================
 
-In the :ref:`Getting started <getting_started>` chapter you've seen basic operations
+In the previous Chapter :ref:`Getting started <getting_started>`, you've seen basic operations
 on how to load a dataset, check what available datasets are in **dbcollection** and 
-to fetch data like image tensors and labels. In the following sections, we'll explore 
+to fetch data like image tensors and labels. 
+
+In the following sections, we'll explore 
 in more detail how to use the **dbcollection** dataset management API to deal with loading,
-adding or removing datasets with some simple commands. Furthermore, other functionality like 
+adding or removing datasets with some simple commands.
+
+Furthermore, other functionality like 
 managing the cache file, finding which datasets are available for download or which tasks does 
 it have will be covered as well. 
 
@@ -32,8 +36,11 @@ manage your datasets. These operations are:
 - :ref:`Displaying cache information <user_managing_datasets_print_cache>`
 - :ref:`Displaying information about available datasets <user_managing_datasets_list_datasets>`
 
-These operations allows users to do (pretty much) anything needed for managing data files. A word
-of warning though: users must take into consideration the implications of some of these operations like removing datasets data or modyfing the cache may result in permanent data loss. You should check the section of :ref:`Best practices <user_managing_datasets_best_practices>` if you are unclear on how to proceed in some cases in order to avoid undesired results.
+These operations allows users to do (pretty much) anything needed for managing data files. 
+
+A word of warning for **new users**: you must take into consideration the implications of some of these operations like removing datasets data or modyfing the cache may result in permanent data loss. 
+
+You should check the section of :ref:`Best practices <user_managing_datasets_best_practices>` if you are unclear on how to proceed in some cases in order to avoid undesired results.
 
 
 .. _user_managing_datasets_download:
@@ -43,14 +50,16 @@ Downloading data files from online resources
 
 .. warning::
    This section deals with manually downloading source data files of datasets. 
+
    For most users this information may not be necessary or relevant, and you can skip this section altogether and move to the one which deals with :ref:`loading datasets <user_managing_datasets_load>`.
 
    This is because the ``load()`` method automatically downloads or processes any dataset that has not been previously setup, and it is not required to manually download data files in order to load a dataset.
 
 One use of **dbcollection** is to download data files from online sources. This removes the need
 to search where to get the data files from and to locate which specific resources are required. 
-In some cases is not a very challenging task to do, but in other it can be a daunting task. By 
-having the necessary resources defined and ready you can save quite time some time in dealing
+
+In some cases, it is not a very challenging thing to do, but in others it can be a daunting task. By 
+having the necessary resources defined and ready for use, you can save quite some time when dealing
 with this process. 
 
 To download a dataset you simply need to use the :ref:`download() <core_reference_api_download>` method from the :ref:`core API <core_reference_api>` methods and provide the name of the dataset you want to download. For example, lets download the ``cifar10`` dataset's data files:
@@ -71,9 +80,10 @@ This will also create a folder with the same name as the dataset. This is import
 **dbcollection** searches for this dir names when loading the data files. If the names don't
 match then it proceeds to download the source files. 
 
-After all files have been downloaded, by default, they are extracted into the same folder where they have been stored. Most source files are compressed for distribution. The ``download()`` method allows to extract these compressed files to disk without you having to manually do it yourself. 
-If the source data files are all what you want to retrieve, then set the 
-``extract_data`` input argument to ``False``:
+After all files have been downloaded, by default, they are extracted into the same folder where they have been stored. 
+
+Most source files are compressed for distribution. The ``download()`` method allows to extract these compressed files to disk without you having to manually do it yourself. 
+If the source data files are all what you want to retrieve, then set the ``extract_data`` input argument to ``False``:
 
 .. code-block:: python
 
@@ -82,7 +92,9 @@ If the source data files are all what you want to retrieve, then set the
 .. note::
    This package uses the `patool <https://pypi.python.org/pypi/patool>`_ module for file extraction which supports most data compression formats like TAR, ZIP or RAR.
 
-An important aspect to mention about using this method is that, when using it to download data files of a dataset, it automatically registers in cache where the files are located for that dataset. So, next time you want to load that dataset you don't need to explicitly specify where the data is located in disk (if the files still exist of course).
+An important aspect to mention about using this method is that, when using it to download data files of a dataset, it automatically registers in cache where the files are located for that dataset. 
+
+So, next time you want to load that dataset, you don't need to explicitly tell where the data is located in disk (if the files still exist of course).
 
 
 .. _user_managing_datasets_process:
@@ -92,19 +104,23 @@ Parsing annotations / metadata of datasets
 
 .. warning::
    This section deals with manually parsing annotations of datasets. 
+
    For most users this information is not relevant and you can skip this section altogether and move to the next one which deals with :ref:`loading datasets <user_managing_datasets_load>`.
 
    This is because the ``load()`` method automatically downloads or processes any dataset that has not been previously setup, and it is not required to manually parse annotations of tasks of datasets in order to load a dataset.
 
 Arguably, one of the most important functionalities of **dbcollection** is automatically processing data annotations. 
 It is well known that manually parsing data files + annotations of different datasets is no fun.
+
 Moreover, it is time consuming, annoying and repetitive. 
 Also, it usually results in disks littered with various cache files which are used to store portions of the annotations accross multiple directories for some specific tasks.  
 
 **dbcollection** provides a way to deal with these issues. Hand-crafted scripts were developed to parse data annotations of specific tasks of datasets for you.  These annotations are stored in a common format and in a single place on your disk that you can easily track.
 
 .. note::
-   Not all annotations are necessary for day to day use, so only the most useful ones are stored. If you happen to need an annotation that is not available in our scripts for any particular reason, please feel free to fill an `issue on GitHub <https://github.com/dbcollection/dbcollection/issues>`_ describing what annotation you need, why and for what task + dataset or, better yet, :ref:`contribute with a pull request <pull_request>`. 
+   Not all annotations are necessary for day to day use, so only the most useful ones are stored.
+
+   If you happen to need an annotation that is not available in our scripts for any particular reason, please feel free to fill an `issue on GitHub <https://github.com/dbcollection/dbcollection/issues>`_ describing what annotation you need, why and for what task + dataset or, better yet, :ref:`contribute with a pull request <pull_request>`. 
 
 Processing metadata of dataset's annotations is done by using the :ref:`process() <core_reference_api_process>` method. 
 Continuing with the previous section example, lets process the metadata files for the ``cifar10`` dataset:
@@ -142,7 +158,71 @@ The next section covers the ``load()`` method which deals with loading datasets 
 Loading a dataset as a data loader object
 =================================================
 
+Loading a dataset's metadata is quite simple. For that, we need to use the :ref:`load() <core_reference_api_load>` method
+and select a dataset to import. Lets load the ``cifar10`` dataset:
 
+.. code-block:: python
+
+   >>> cifar10 = dbc.load('cifar10')
+
+To load a dataset we just need to specify its name and in return we'll get a ``DataLoader`` object.
+
+.. code-block:: python
+
+   >>> cifar10
+   DataLoader: "cifar10" (classification task)
+
+This object contains methods to retrieve data from and attributes with information about the dataset's name, task, metadata file path, sets and other kinds of information.
+
+.. code-block:: python
+
+   >>> cifar10.
+   cifar10.data_dir          cifar10.list(             cifar10.size(
+   cifar10.db_name           cifar10.object(           cifar10.task
+   cifar10.get(              cifar10.object_field_id(  cifar10.test
+   cifar10.hdf5_file         cifar10.object_fields     cifar10.train
+   cifar10.hdf5_filepath     cifar10.root_path         
+   cifar10.info(             cifar10.sets
+
+With this ``DataLoader`` object, fetching data like labels, bounding boxes, images filenames, etc., is trivial. 
+
+.. note::
+
+   A more detailed look on how (meta)data is stored and retrieved will be described in the Chapter :ref:`Fetching data <user_fetching_data>`.
+
+When loading a dataset for the first time that is not available in disk, the ``load()`` method will download the dataset's data files and parse the annotations into an ``HDF5`` metadata file. The data and metadata files will be stored in the dirs defined in ``dbc.cache.download_dir`` and ``dbc.cache.cache_dir``, respectively. These dirs' paths can me modified by assigning new values to them.
+
+In cases where ou might want to download your data files into a separate directory or you have the dataset's data files available in another directory, you can use the ``data_dir`` input argument to specify which path to use.
+
+Lets load the ``cifar100`` dataset, but this time lets store the data files into a new directory:
+
+.. code-block:: python
+
+   >>> cifar100 = dbc.load('cifar100', data_dir='some/new/path/')
+
+If you haven't downloaded/loaded it yet, it will proceed to download and extract the files to the ``some/new/path/`` path provided in ``data_dir`` and process the default task for this dataset.
+
+When loading/downloading a dataset for the first time, the dataset's information about where the data and the cache files are stored is registered in the ``~/dbcollection.json`` cache file, so that next time you load a specific dataset you'll only need to specify its name without having to provide the path where the data files are stored.
+
+Now, lets talk about tasks of datasets. In the previous examples we've dimissed any references about which task to load in order to keep the examples simple. For some simple datasets, often there's only one task available to use, but for cases like ``coco`` for example, there are many different tasks that have different types of fields. For these cases, it is important to specify which task to use.
+
+To load a specific task, you need to use the ``task`` input argument and assign a name of the task you want to load. If no task is specified, the default task ``task="default"`` is used. For the previous example, we could have done this by specifying the task name as ``classification``:
+
+.. code-block:: python
+
+   >>> cifar100_cls = dbc.load('cifar100', task='classification')
+
+The returned object contains the information of the selected task in its ``__str__()`` method:
+
+.. code-block:: python
+
+   >>> cifar100_cls
+   DataLoader: "cifar10" (classification task)
+
+The ``load()`` method is probably the only method you'll ever need to use to load datasets. The Chapter :ref:`Fetching data <user_fetching_data>` continues where this section stopped about dealing with (meta)data. In the following sections deal with adding and removing datasets to / from the cache and what their uses are. 
+
+.. note::
+   The :ref:`Best practices <user_managing_datasets_best_practices>` section at the end of this page provides some tips about how to setup **dbcollection** in your system in order to never have the need to look at any other method at all besides ``load()`` for dealing with datasets.
 
 
 .. _user_managing_datasets_add:
@@ -184,5 +264,8 @@ Displaying information about available datasets
 
 Best practices
 =================================================
+
+
+
 
 TODO
