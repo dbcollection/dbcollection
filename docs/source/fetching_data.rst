@@ -348,7 +348,7 @@ To fetch data samples from ``FieldLoader`` objects, you can use common slicing o
    >>> mnist.train.classes.get(0)
    array([ 97, 105, 114, 112, 108,  97, 110, 101,   0,   0,   0], dtype=uint8)
 
-All slicing operations used for **numpy** arrays are supported because **h5py** used **numpy** as the backend. Therefore, you can apply any operations to the output sample.
+All slicing operations used with **numpy** arrays are supported. This is because **h5py** uses **numpy** as the backend. Therefore, you can apply any operations to the output sample that you would do with **numpy** arrays.
 
 .. code-block:: python
 
@@ -377,9 +377,9 @@ All slicing operations used for **numpy** arrays are supported because **h5py** 
 
 At this point, you should be have mastered everything you may need to know about fetching data using **dbcollection**.
 
-Up until now, we've been focusing on retrieving data samples. However, most of the times you are using tis packages APIs is trying to understand / visualize how is data structured and what type of data a field is composed of.
+Up until now, we've been focusing on retrieving data samples. However, most of the times you are using this package's API methods is to try to understand / visualize how data is structured and what type is a field composed of.
 
-In the next section, we'll see some handy methods to visualize data in the terminal.
+In the next section, we'll see some handy methods that enables us to visualize how data is structured in a comprehensible format using the REPL.
    
 
 Visualizing information about sets and data fields
