@@ -102,6 +102,8 @@ DataLoader
 .. autoclass:: dbcollection.core.loader.DataLoader
    :members:
 
+.. _core_reference_setloader:
+
 SetLoader
 ^^^^^^^^^
 .. autoclass:: dbcollection.core.loader.SetLoader

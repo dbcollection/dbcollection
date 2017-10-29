@@ -263,56 +263,137 @@ These methods are quite flexible about what format of inputs they receive, just 
 Fetching data by accessing data fields directly
 -----------------------------------------------
 
-There is another way to fetch data besides using the 
+There is another way to fetch data besides using ``get()`` and ``object()``. This is done by accessing directly the data fields themselves. To explain this better lets take a look again at the attributes of the ``DataLoader`` object that we've seen before.
 
+.. code-block:: python
 
-Getting information about sets or data fields
----------------------------------------------
+   >>> mnist.
+   mnist.data_dir          mnist.list(             mnist.size(
+   mnist.db_name           mnist.object(           mnist.task
+   mnist.get(              mnist.object_field_id(  mnist.test  <---
+   mnist.hdf5_file         mnist.object_fields     mnist.train  <---
+   mnist.hdf5_filepath     mnist.root_path         
+   mnist.info(             mnist.sets 
+
+Note these two attributes highlighted here. These attributes refer to the set splits of the dataset, and are object of type :ref:`SetLoader <core_reference_setloader>`:
+
+.. code-block:: python
+
+   >>> mnist.sets
+   ('train', 'test')
+   >>> mnist.train
+   SetLoader: set<train>, len<60000>
+   >>> mnist.test
+   SetLoader: set<test>, len<10000>
+
+The set groups in an ``HDF5`` file are converted when loading a ``DataLoader`` object into attributes objects of type ``SetLoader``. These also contain their own set of attributes and methods:
+
+.. code-block:: python
+
+   >>> mnist.train.
+   mnist.train.classes                mnist.train.list_images_per_class
+   mnist.train.data                   mnist.train.nelems
+   mnist.train.fields                 mnist.train.object(
+   mnist.train.get(                   mnist.train.object_field_id(
+   mnist.train.images                 mnist.train.object_fields
+   mnist.train.info(                  mnist.train.object_ids
+   mnist.train.labels                 mnist.train.set
+   mnist.train.list(                  mnist.train.size(
+
+As you can see, these objects also contain the same methods available in ``DataLoader`` objects and some other attributes that are the data fields of this set.
+
+The only difference between these methods and the ones from ``DataLoader`` is that these do not require you to specify the set name to select data from:
+
+.. code-block:: python
+
+   >>> img = mnist.train.get('images', 0)
+   >>> img.shape
+   (28, 28)
+
+The attribute fields of ``SetLoader`` objects like, for example, ``mnist.train.classes`` or ``mnist.train.list_images_per_class`` are also special objects of type ``FieldLoader``. 
+
+Lets look at the ``classes`` field:
+
+.. code-block:: python
+
+   >>> train.mnist.classes
+   FieldLoader: <HDF5 dataset "classes": shape (10, 11), type "|u1">
+
+   >>> mnist.train.classes.
+   mnist.train.classes.data              mnist.train.classes.object_field_id(
+   mnist.train.classes.fillvalue         mnist.train.classes.set
+   mnist.train.classes.get(              mnist.train.classes.shape
+   mnist.train.classes.info(             mnist.train.classes.size(
+   mnist.train.classes.name              mnist.train.classes.type
+   mnist.train.classes.obj_id
+
+Two important things to mention here. First, when printing the data field, you can see it is of type ``HDF5 dataset``, which means that this field's data is retrieved from disk. Second, some methods available in ``DataLoader`` and ``SetLoader`` are also available here.
+
+.. note:: 
+
+   For more information about how to transfer data to memory see the :ref:`Allocating data to memory <user_fetching_data_to_memory>` section at the end of this page.
+
+The ``FieldLoader`` object contains all necessary information about a data field like ``shape``, ``type``, ``fillvalue`` (used for padding arrays), among others. The ``data`` attribute stores the data buffer that is used to fetch data samples.
+
+To fetch data samples from ``FieldLoader`` objects, you can use common slicing operations like with ``numpy.ndarrays`` or ``HDF5 dataset``:
+
+.. code-block:: python
+
+   >>> mnist.train.classes[0]
+   array([ 97, 105, 114, 112, 108,  97, 110, 101,   0,   0,   0], dtype=uint8)
+
+   >>> mnist.train.classes.data[0]
+   array([ 97, 105, 114, 112, 108,  97, 110, 101,   0,   0,   0], dtype=uint8)
+
+   >>> mnist.train.classes.get(0)
+   array([ 97, 105, 114, 112, 108,  97, 110, 101,   0,   0,   0], dtype=uint8)
+
+All slicing operations used for **numpy** arrays are supported because **h5py** used **numpy** as the backend. Therefore, you can apply any operations to the output sample.
+
+.. code-block:: python
+
+   >>> mnist.train.classes[0:5]
+   array([[ 97, 105, 114, 112, 108,  97, 110, 101,   0,   0,   0],
+       [ 97, 117, 116, 111, 109, 111,  98, 105, 108, 101,   0],
+       [ 98, 105, 114, 100,   0,   0,   0,   0,   0,   0,   0],
+       [ 99,  97, 116,   0,   0,   0,   0,   0,   0,   0,   0],
+       [100, 101, 101, 114,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
+
+   >>> mnist.train.classes[0:5][1:3]
+   array([[ 97, 117, 116, 111, 109, 111,  98, 105, 108, 101,   0],
+          [ 98, 105, 114, 100,   0,   0,   0,   0,   0,   0,   0]], dtype=uint8)
+
+   >>> mnist.train.classes[:, 1:2]
+   array([[105],
+          [117],
+          [105],
+          [ 97],
+          [101],
+          [111],
+          [114],
+          [111],
+          [104],
+          [114]], dtype=uint8)
+
+At this point, you should be have mastered everything you may need to know about fetching data using **dbcollection**.
+
+Up until now, we've been focusing on retrieving data samples. However, most of the times you are using tis packages APIs is trying to understand / visualize how is data structured and what type of data a field is composed of.
+
+In the next section, we'll see some handy methods to visualize data in the terminal.
+   
+
+Visualizing information about sets and data fields
+==================================================
 
 list()
-^^^^^^
+------
 
 size()
-^^^^^^
+------
 
 info()
-^^^^^^
+------
 
-
-The SetLoader object
---------------------
-
-
-The FieldLoader object
-----------------------
-
-
-
-
-
-
-Retrieving data from a dataset
-==============================
-
-There are two ways to fetch data samples from a daatset:
-
-- Via API method calls;
-- By accessing the data fields directly.
-
-API methods
------------
-
-get()
-^^^^^
-
-object()
-^^^^^^^^
-
-object_field_id()
-^^^^^^^^^^^^^^^^^
-
-Accessing data fields contents
-------------------------------
 
 
 Parsing data
@@ -325,19 +406,10 @@ String<->ASCII convertion
 -------------------------
 
 
+.. _user_fetching_data_to_memory:
 
-Information about a specific set or data field
-==============================================
-
-list()
-------
-
-size()
-------
-
-info()
-------
-
+Allocating data to memory
+=========================
 
 Best practices
 ==============
