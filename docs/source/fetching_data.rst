@@ -385,16 +385,118 @@ In the next section, we'll see some handy methods that enables us to visualize h
 Visualizing information about sets and data fields
 ==================================================
 
-list()
-------
+A good way to see how a dataset is structured is to use the ``info()`` method. 
 
-size()
-------
+The ``info()`` method displays information about the sets that compose the dataset and the data fields of each set. It shows the ``shape`` and ``type`` of the fields, and also it the fields are **linked** in ``object_ids`` and in which position.
 
-info()
-------
+.. code-block:: python
+
+   >>> mnist.info()
+
+   > Set: test
+      - classes,        shape = (10, 2),          dtype = uint8   
+      - images,         shape = (10000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+      - labels,         shape = (10000,),         dtype = uint8,  (in 'object_ids', position = 1)
+      - object_fields,  shape = (2, 7),           dtype = uint8   
+      - object_ids,     shape = (10000, 2),       dtype = uint8   
+
+      (Pre-ordered lists)
+      - list_images_per_class,  shape = (10, 1135),  dtype = int32
+
+   > Set: train
+      - classes,        shape = (10, 2),          dtype = uint8   
+      - images,         shape = (60000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+      - labels,         shape = (60000,),         dtype = uint8,  (in 'object_ids', position = 1)
+      - object_fields,  shape = (2, 7),           dtype = uint8   
+      - object_ids,     shape = (60000, 2),       dtype = uint8   
+
+      (Pre-ordered lists)
+      - list_images_per_class,  shape = (10, 6742),  dtype = int32
+
+With this method, you can display information of a single set if you want. For that, you need to pass the name of the set as input:
+
+.. code-block:: python
+
+   >>> mnist.info('test')
+
+   > Set: test
+      - classes,        shape = (10, 2),          dtype = uint8   
+      - images,         shape = (10000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+      - labels,         shape = (10000,),         dtype = uint8,  (in 'object_ids', position = 1)
+      - object_fields,  shape = (2, 7),           dtype = uint8   
+      - object_ids,     shape = (10000, 2),       dtype = uint8   
+
+      (Pre-ordered lists)
+      - list_images_per_class,  shape = (10, 1135),  dtype = int32
+
+If you are calling this method from an attribute field that is a ``SetLoader`` object, you don't need to specify the name of the set.
+
+.. code-block:: python
+
+   >>> mnist.test.info()
+
+   > Set: test
+      - classes,        shape = (10, 2),          dtype = uint8   
+      - images,         shape = (10000, 28, 28),  dtype = uint8,  (in 'object_ids', position = 0)
+      - labels,         shape = (10000,),         dtype = uint8,  (in 'object_ids', position = 1)
+      - object_fields,  shape = (2, 7),           dtype = uint8   
+      - object_ids,     shape = (10000, 2),       dtype = uint8   
+
+      (Pre-ordered lists)
+      - list_images_per_class,  shape = (10, 1135),  dtype = int32
+
+You can even use this method on data fields!
+
+.. code-block:: python
+
+   >>> mnist.test.images.info()
+   Field: images,  shape = (10000, 28, 28),  dtype = uint8,  (in 'object_ids', position = None)
+
+   >>> mnist.test.labels.info()
+   Field: labels,  shape = (10000,),  dtype = uint8,  (in 'object_ids', position = 1)
 
 
+Along with the ``info()`` method, you have access to two additional methods: ``size()`` and ``list()``. 
+
+``size()`` returns a dictionary or a tuple of the ``shape`` of a data field. As with the ``info()`` method, you can use it in several ways:
+
+.. code-block:: python
+
+   >>> mnist.size()
+   {'train': (60000, 2), 'test': (10000, 2)}
+
+   >>> mnist.size('train')
+   (60000, 2)
+
+   >>> mnist.size('train', 'images')
+   (60000, 28, 28)
+
+   >>> mnist.test.size()
+   (10000, 2)
+
+   >>> mnist.test.images.size()
+   (10000, 28, 28)
+
+
+The ``list()`` method also returns a dictionary or a tuple, but it contains the names of all data fields of a set or sets.
+
+.. code-block:: python
+
+   >>> mnist.list()
+   {'train': ('classes', 'labels', 'object_fields', 'object_ids', 'images', 
+   'list_images_per_class'), 'test': ('classes', 'labels', 'object_fields', 
+   'object_ids', 'images', 'list_images_per_class')}
+
+   >>> mnist.list('train')
+   ('classes', 'labels', 'object_fields', 'object_ids', 'images', 
+   'list_images_per_class')
+
+These three methods enables you to quickly visualize the structure of a dataset and its data, and also to get the shape or names of some data fields with these simple commands.
+
+Next comes the :ref:`Parsing data <user_fetching_data_parsing_data>` section. This section shows how to deal with some quirks of the way data is stored in ``HDF5`` files. This is very important w.r.t. **dbcollection** because some trade-offs had to be made regarding data allocation into arrays.
+
+
+.. _user_fetching_data_parsing_data:
 
 Parsing data
 ============
