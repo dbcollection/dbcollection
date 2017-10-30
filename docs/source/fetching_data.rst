@@ -501,20 +501,153 @@ Next comes the :ref:`Parsing data <user_fetching_data_parsing_data>` section. Th
 Parsing data
 ============
 
-Unpadding lists
----------------
+.. warning::
+
+   This section contains valuable information about how data itself is stored inside ``HDF5`` files. 
+
+   It is important that you read this section so you know why some data is stored the way it is and how to parse it correctly using some utility methods provided by the **dbcollection** package.
+
+Since **dbcollection** uses **h5py** to store data into files in the ``HDF5`` format, some arrays my contain padding values. 
+
+Because of some technicalities in dealing with strings or lists, storing information into **numpy** arrays required us to use some form of padding in order to have evenly shaped arrays.
+
+This did not impact the size of the metadata files with the extra information, but you still have to remove this padding effects from data in order to have the correct information. 
+
+Regarding strings and list of strings, these had to be converted into ASCII format in order to be stored. This information is explicitly available within the package / API itself, but it is well documented in the :ref:`Available datasets <available_datasets>` Chapter for each available dataset on this package.
+
+
+Unpadding data
+--------------
+
+Lets look how we can remove padding values from data. For example, lets consider that we have a data sample that is a **numpy** array and it contains some padding elements in it:
+
+.. code-block:: python
+
+   >>> import numpy as np
+   >>> my_list = np.array([[1,2,3,-1,-1],[5,6,-1,-1,-1],[1,-1,-1,-1,-1]], dtype=np.int32)
+   >>> my_list
+   array([[ 1,  2,  3, -1, -1],
+          [ 5,  6, -1, -1, -1],
+          [ 1, -1, -1, -1, -1]], dtype=int32)
+
+In order to remove padding effects from this list (or data in general), you first need to know which padding value was used to fill it. This information can be obtain from the documentation or you can get this from the ``fillvalue`` field of ``FieldLoader`` objects.
+
+.. code-block:: python
+
+   >>> # for example
+   >>> mnist.train.classes.fillvalue
+   0
+
+In this example, lets assume we know the fill value. Also, we can see that the fill value ``-1`` was used to pad this array because *1)* it sits at the right-hand side of the array and *2)* there are several of them in a sequence. This is a strong indicator that this value might be used for padding an array.
+
+To remove this padding information, there is a method you can use from the ``dbcollection.utils.pad`` module for unpadding lists: :ref:`unpad_list() <utils_reference_unpad_list>`. It receives a list and a value as input and outputs a parsed list.
+
+.. code-block:: python
+
+   >>> # import the method
+   >>> from dbcollection.utils.pad import unpad_list
+
+   >>> # same list as in the previous example
+   >>> my_list.tolist()
+   [[1,2,3,-1,-1],[5,6,-1,-1,-1],[1,-1,-1,-1,-1]]
+
+   >>> # unpad the list
+   >>> unpad_list(my_list.tolist(), -1)  # input must be a list
+   [[1, 2, 3], [5, 6], [1]]
+
+That's it. We removed the padding effect off of a list. 
+
+Removing padding information from data is not hard, but it is necessary. In the next sub-section, we'll take a look at converting / decoding ASCII data to strings, which is something you'll be doing more frequently.
+
+.. note::
+
+   For more information about utility methods available in this package, see the :ref:`Utils reference section <utils_reference>`.
+
 
 String<->ASCII convertion
 -------------------------
 
+String data is the most ubiquitous annotation information available. Class names, category names, file path + names, etc., exists in some for or shape in pretty much all datasets annotations. 
+
+Since we encoded string data to ASCII, we need to convert it back to string format in order to have any utility for our use.
+
+In the ``dbcollection.utils.string_ascii`` module there are methods available for converting strings to ASCII and vice-versa. Here we'll only need to use the :ref:`convert_ascii_to_str() <utils_reference_convert_ascii_to_str>` method. It receives a ``numpy.ndarray`` as input and returns a string or list of strings.
+
+Lets use the ``classes`` field from the ``mnist`` dataset as example:
+
+.. code-block:: python
+
+   >>> mnist.train.classes[:]
+   array([[48,  0],
+          [49,  0],
+          [50,  0],
+          [51,  0],
+          [52,  0],
+          [53,  0],
+          [54,  0],
+          [55,  0],
+          [56,  0],
+          [57,  0]], dtype=uint8)
+
+ASCII encoded strings are always of type ``np.uint8`` and are padded with zeros. To convert this array back to strings, we must import the method from the ``dbcollection.utils`` module:
+
+.. code-block:: python
+
+   >>> from dbcollection.utils.string_ascii import convert_ascii_to_str as tostr_
+
+This is usually the alias this method is given for being shorter to type. Finally, lets convert the array back to a string.
+
+.. code-block:: python
+
+   >>> tostr_(mnist.train.classes[:])
+   ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
+That's it. Converting ASCII to string is easy and there are tool available at your disposal to make this process as trivial as possible.
+
 
 .. _user_fetching_data_to_memory:
 
-Allocating data to memory
-=========================
+Moving data from memory<->disk 
+==============================
+
+An extra feature at your disposal is the ability to allocate a data field into memory. For cases where the dataset is very small (``mnist``, ``cifar10``), you can simply move the data to RAM. To do this you just need to set the ``to_memory`` attribute to ``True`` of ``FielLoader`` data objects.
+
+.. code-block:: python
+
+   >>> # in disk
+   >>> mnist.train.images
+   FieldLoader: <HDF5 dataset "images": shape (60000, 28, 28), type "|u1">
+
+   >>> # move data to memory
+   >>> mnist.train.images.to_memory = True
+   
+   >>> # in memory
+   >>> mnist.train.images
+   FieldLoader: <numpy.ndarray "images": shape (60000, 28, 28), type uint8>
+
+To revert the process you just need to set ``to_memory`` to ``False``.
+
+.. code-block:: python
+
+   >>> # move data back to disk
+   >>> mnist.train.images.to_memory = False
+   
+   >>> # in disk
+   >>> mnist.train.images
+   FieldLoader: <HDF5 dataset "images": shape (60000, 28, 28), type "|u1">
 
 Best practices
 ==============
 
+Here's a list of best practices you might want to consider when fetching data:
 
+- Use the ``get()`` and ``object()`` API methods for fetching data. They are simple to use and your code will be easier to understand. Also, when fetching data between different sets, all you need to do is use a different set name and your code remains the same.
+
+- Check the documentation first if you are new to **dbcollection**. When you become more confortable using this package, then you'll probably only need to use the ``info()`` method for visualizing data.
+
+- Before parsing a field, use the available information about the particular dataset you are working with in the :ref:`Available datasets <available_datasets>` Chapter in the documentation. Each dataset has its own manual which provides detailed information about what fields it has, what's their shape, what padding value do they have, their purpose of use, the type of data, or even if it is a string encoded as ASCII.
+
+- Concerning allocating data into memory, check the size of the data field before loading it into memory. All data fields in ``HDF5`` files are compressed and the size they occupy in disk may be misleading. Proceed with caution!
+
+- The documentation is your friend! :)
 
