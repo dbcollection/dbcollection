@@ -62,7 +62,8 @@ for i, pyver in enumerate(python_versions):
 
     # convert to all platforms
     print(' > Convert artifact to all platforms...')
-    msg = subprocess.run(["conda", 'convert', "-p", "all", artifact_fname, "-o", temp_output_dir], stdout=subprocess.PIPE)
+    msg = subprocess.run(["conda", 'convert', "-p", "all", artifact_fname, "-o", temp_output_dir],
+                         stdout=subprocess.PIPE)
 
     # upload to anaconda
     print(' > Upload all artifact to all platforms...')
@@ -73,7 +74,8 @@ for i, pyver in enumerate(python_versions):
             for fname in files:
                 if fname.endswith('.tar.bz2'):
                     print('   -- Uploading artifact: {} '.format(root + '/' + fname))
-                    msg = subprocess.run(["anaconda", 'upload', root + '/' + fname], stdout=subprocess.PIPE)
+                    msg = subprocess.run(["anaconda", 'upload', root + '/' + fname],
+                                         stdout=subprocess.PIPE)
 
 
 if os.path.exists(temp_output_dir):
