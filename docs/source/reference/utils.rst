@@ -32,6 +32,7 @@ Padding
 --------------------------------
 .. automodule:: dbcollection.utils.pad
 .. autofunction:: pad_list
+.. _utils_reference_unpad_list:
 .. autofunction:: unpad_list
 .. autofunction:: squeeze_list
 .. autofunction:: unsqueeze_list
@@ -41,6 +42,7 @@ String<->ASCII
 --------------------------------
 .. automodule:: dbcollection.utils.string_ascii
 .. autofunction:: convert_str_to_ascii
+.. _utils_reference_convert_ascii_to_str:
 .. autofunction:: convert_ascii_to_str
 .. autofunction:: str_to_ascii
 .. autofunction:: ascii_to_str
