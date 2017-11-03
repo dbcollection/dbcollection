@@ -72,18 +72,15 @@ def fetch_list_datasets():
 def get_dirs(cache_manager, name, data_dir):
     """Parse data directory and cache save path."""
     if data_dir is None or data_dir is '':
-        data_dir_ = os.path.join(cache_manager.download_dir, name, 'data')
+        data_dir_ = os.path.join(cache_manager.download_dir, name)
     else:
         if not os.path.exists(data_dir):
-            print('Creating save directory in disk: ' + data_dir)
-            os.makedirs(data_dir)
-
-        if os.path.split(data_dir)[1] == name:
-            data_dir_ = data_dir
-        else:
             data_dir_ = os.path.join(data_dir, name)
+        else:
+            data_dir_ = data_dir
 
     if not os.path.exists(data_dir_):
+        print('Creating save directory in disk: ' + data_dir_)
         os.makedirs(data_dir_)
 
     cache_save_path = os.path.join(cache_manager.cache_dir, name)
@@ -273,7 +270,7 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
 
     >>> import dbcollection as dbc
     >>> mnist = dbc.load('mnist')
-    >>> print('Dataset name: ', mnist.name)
+    >>> print('Dataset name: ', mnist.db_name)
     Dataset name:  mnist
 
     """
@@ -293,12 +290,12 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     # check if dataset exists. If not attempt to download the dataset
     if not cache_manager.exists_dataset(name):
         download(name, data_dir, True, verbose, is_test)
-        cache_manager = CacheManager(is_test)  # reopen the cache file
+        cache_manager.reload_cache()  # reload the cache's data
 
     # check if the task exists inf cache
     if not cache_manager.exists_task(name, task):
         process(name, task, verbose, is_test)
-        cache_manager = CacheManager(is_test)  # reopen the cache file
+        cache_manager.reload_cache()  # reload the cache's
 
     # get data + cache dir paths
     dset_paths = cache_manager.get_dataset_storage_paths(name)

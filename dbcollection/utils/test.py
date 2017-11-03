@@ -67,7 +67,7 @@ class TestBaseDB:
         print('Dataset: ' + loader.db_name)
         print('Task: ' + loader.task)
         print('Data path: ' + loader.data_dir)
-        print('Metadata cache path: ' + loader.cache_path)
+        print('Metadata cache path: ' + loader.hdf5_filepath)
 
     def load(self):
         """Return a data loader object for a dataset.
