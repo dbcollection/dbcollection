@@ -633,7 +633,7 @@ def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=T
         print_categories_info(data, names)
 
 
-def info_datasets(db_pattern='', show_downloaded=True, show_available=True, is_test=True):
+def info_datasets(db_pattern='', show_downloaded=True, show_available=True, is_test=False):
     """Prints information about available and downloaded datasets.
 
     Parameters
