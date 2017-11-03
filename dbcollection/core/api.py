@@ -567,7 +567,7 @@ def query(pattern='info', is_test=False):
         })
     for category in cache_manager.data['category']:
         if pattern in cache_manager.data['category'][category]:
-            query_list.append({'category': {category: [pattern,]}})
+            query_list.append({'category': {category: [pattern, ]}})
 
     return query_list
 
