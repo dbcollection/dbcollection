@@ -74,7 +74,7 @@ class CacheManager:
         return default_cache_dir
 
     def reset_cache_dir(self):
-        """Reset the default download dir."""
+        """Reset the default cache directory path."""
         self._set_cache_dir(self._default_cache_dir_path())
 
     def create_os_home_dir(self):
@@ -144,7 +144,7 @@ class CacheManager:
             return self._empty_data()
 
     def write_data_cache(self, data, fname=None):
-        """Write data to the dbcollection cache file.
+        """Write data to the cache file (dbcollection.json).
 
         Parameters
         ----------
@@ -162,6 +162,7 @@ class CacheManager:
         filename = fname or self.cache_filename
         with open(filename, 'w') as file_cache:
             json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
+        self.reload_cache()  # reload the data
 
     def _empty_data(self):
         """Returns an empty (dummy) template of the cache data structure."""
@@ -310,7 +311,6 @@ class CacheManager:
         """
         if force_reset:
             self.write_data_cache(self._empty_data(), self.cache_filename)
-            self.reload_cache()
         else:
             msg = 'All information about stored datasets will be lost if you proceed! ' + \
                   'Set \'force_reset=True\' to proceed with the reset of dbcollection.json.'
@@ -496,7 +496,7 @@ class CacheManager:
                     self.data['category'][keyword] = [name]
 
     def update(self, name, data_dir, cache_tasks, cache_keywords, is_append=True):
-        """Update the cache file with new/updated data for a dataset.
+        """Modify/add data of a dataset in the cache file.
 
         Parameters
         ----------
