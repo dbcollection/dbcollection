@@ -556,8 +556,8 @@ def print_datasets_info(data, names=None):
     print('  Dataset info ')
     print('----------------')
     if names:
-        for name in names:
-            print(json.dumps(data['dataset'][name], sort_keys=True, indent=4))
+        for name in sorted(names):
+            print(json.dumps({name: data['dataset'][name]}, sort_keys=True, indent=4))
     else:
         print(json.dumps(data['dataset'], sort_keys=True, indent=4))
     print('')
@@ -569,13 +569,17 @@ def print_categories_info(data, names=None):
         print('------------------------')
         print('  Datasets by category ')
         print('------------------------\n')
+        max_size_name = max([len(name) for name in data['category']]) + 7
         if names:
-            max_size_name = max([len(name) for name in names]) + 7
-            for name in names:
-                print("{:{}}".format('   > {}: '.format(name), max_size_name) +
-                      "{}".format(sorted(data['category'][name])))
+            for category in data['category']:
+                list_datasets = []
+                for name in names:
+                    if name in data['category'][category]:
+                        list_datasets.append(name)
+                if any(list_datasets):
+                    print("{:{}}".format('   > {}: '.format(category), max_size_name) +
+                          "{}".format(sorted(list_datasets)))
         else:
-            max_size_name = max([len(name) for name in data['category']]) + 7
             for name in data['category']:
                 print("{:{}}".format('   > {}: '.format(name), max_size_name) +
                       "{}".format(sorted(data['category'][name])))
@@ -609,7 +613,7 @@ def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=T
     if name:
         # filter info about the datasets
         if isinstance(name, str):
-            names = (name)
+            names = (name,)
         elif isinstance(name, list) or isinstance(name, tuple):
             names = tuple(name)
         else:
@@ -629,7 +633,7 @@ def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=T
         print_categories_info(data, names)
 
 
-def info_datasets(db_pattern='', show_downloaded=True, show_available=True, is_test=True):
+def info_datasets(db_pattern='', show_downloaded=True, show_available=True, is_test=False):
     """Prints information about available and downloaded datasets.
 
     Parameters
