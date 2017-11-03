@@ -136,11 +136,11 @@ def convert_ascii_to_str(input_array):
     --------
     Convert a numpy array to a string.
 
-    >>> from dbcollection.utils.string_ascii import convertascii_to_str
+    >>> from dbcollection.utils.string_ascii import convert_ascii_to_str
     >>> import numpy as np
     >>> # ascii format of 'string1'
     >>> tensor = np.array([[115, 116, 114, 105, 110, 103, 49, 0]], dtype=np.uint8)
-    >>> convertascii_to_str(tensor)
+    >>> convert_ascii_to_str(tensor)
     ['string1']
 
     """
