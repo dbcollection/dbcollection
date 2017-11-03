@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 
 # set version
-VERSION = '0.1.8'
+VERSION = '0.1.10'
 
 # Load requirements
 requirements = []
