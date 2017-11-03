@@ -508,35 +508,66 @@ def query(pattern='info', is_test=False):
         Flag used for tests.
 
     """
+    assert isinstance(pattern, str), 'Must insert a string value as input. ' + \
+                                     'Expected "str", got "{}"'.format(pattern)
     # Load a cache manager object
     cache_manager = CacheManager(is_test)
 
     # init list
-    query_list = {}
+    query_list = []
 
     # check info / dataset lists first
     if pattern in cache_manager.data:
-        query_list.update({pattern: cache_manager.data[pattern]})
+        query_list.append({pattern: cache_manager.data[pattern]})
 
     # match default paths
     if pattern in cache_manager.data['info']:
-        query_list.update({pattern: cache_manager.data['info'][pattern]})
+        query_list.append({'info': {pattern: cache_manager.data['info'][pattern]}})
 
     # match datasets/tasks
     if pattern in cache_manager.data['dataset']:
-        query_list.update({pattern: cache_manager.data['dataset'][pattern]})
-
-    # match datasets/tasks
-    if pattern in cache_manager.data['category']:
-        query_list.update({pattern: list(cache_manager.data['category'][pattern].keys())})
+        query_list.append({'dataset': {pattern: cache_manager.data['dataset'][pattern]}})
 
     for name in cache_manager.data['dataset']:
         if pattern in cache_manager.data['dataset'][name]:
-            query_list.update({pattern: cache_manager.data['dataset'][name][pattern]})
+            query_list.append({
+                'dataset': {
+                    name: {
+                        pattern: cache_manager.data['dataset'][name][pattern]
+                    }
+                }
+            })
         if pattern in cache_manager.data['dataset'][name]['tasks']:
-            query_list.update({pattern: cache_manager.data['dataset'][name]['tasks'][pattern]})
+            query_list.append({
+                'dataset': {
+                    name: {
+                        'tasks': {
+                            pattern: cache_manager.data['dataset'][name]['tasks'][pattern]
+                        }
+                    }
+                }
+            })
         if pattern in cache_manager.data['dataset'][name]['keywords']:
-            query_list.update({pattern: cache_manager.data['dataset'][name]['keywords'][pattern]})
+            query_list.append({
+                'dataset': {
+                    name: {
+                        'keywords': {
+                            pattern: cache_manager.data['dataset'][name]['keywords']
+                        }
+                    }
+                }
+            })
+
+    # match category
+    if pattern in cache_manager.data['category']:
+        query_list.append({
+            'category': {
+                pattern: list(cache_manager.data['category'][pattern])
+            }
+        })
+    for category in cache_manager.data['category']:
+        if pattern in cache_manager.data['category'][category]:
+            query_list.append({'category': {category: [pattern, ]}})
 
     return query_list
 
