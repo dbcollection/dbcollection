@@ -5,12 +5,7 @@ include LICENSE.txt
 include requirements.txt
 
 # include mnist data
-include dbcollection/datasets/mnist/data/t10k-images.idx3-ubyte
-include dbcollection/datasets/mnist/data/t10k-labels.idx1-ubyte
-include dbcollection/datasets/mnist/data/train-images.idx3-ubyte
-include dbcollection/datasets/mnist/data/train-labels.idx1-ubyte
-
-# include the docs
+recursive-include dbcollection/datasets/mnist/data/*-ubyte
 
 #include README.rst
 #recursive-exclude * __pycache__

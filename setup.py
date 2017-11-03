@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 
 # set version
-VERSION = '0.1.10'
+VERSION = '0.1.11'
 
 # Load requirements
 requirements = []
@@ -81,4 +81,5 @@ setup(
                                     'conda-recipe',
                                     'dbcollection.tests']),
     install_requires=requirements,
+    include_package_data=True,
 )
