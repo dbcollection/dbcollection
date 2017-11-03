@@ -181,7 +181,11 @@ class FieldLoader(object):
         return self.shape[0]
 
     def __str__(self):
-        s = 'FieldLoader: ' + self.data.__str__()
+        if self._in_memory:
+            s = 'FieldLoader: <numpy.ndarray "{}": shape {}, type "{}">' \
+                .format(self.name, self.data.shape, self.data.dtype)
+        else:
+            s = 'FieldLoader: ' + self.data.__str__()
         return s
 
     def __repr__(self):
