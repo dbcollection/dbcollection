@@ -62,13 +62,82 @@ The ``datasets`` section stores the metadata information for each dataset loaded
 The ``category`` section contains all categories defined in the ``keywords`` field of each dataset and groups them by name. The main purpose for this section is to help find similar datasets for a certain category.
 
 
-Accessing the cache
-===================
+Accessing the cache's contents
+==============================
 
-ways of accessing the contents of the cache file
+To access the cache's contents you can:
 
-Displaying information about its contents
-=========================================
+- Open the ``~/dbcollection.json`` cache file in the filesystem;
+- Use the ``config_cache()``, ``query()`` and ``info_cache()`` methods;
+- Use the ``.cache`` attribute which is loaded when importing the package.
+
+Opening the cache file is the easiest way to visualize and modify the contents of the cache. 
+
+The ``config_cache()``, ``query()`` and ``info_cache()`` methods are useful when simple operations like displaying the cache contents or modifying a field is required.
+
+The last way to access the cache is by accessing the ``.cache`` attribute of the package. When importing **dbcollection**, the cache file is automatically loaded into memory as a :ref:`CacheManager <core_reference_cache_management>` object. 
+
+.. code-block:: python
+
+   >>> import dbcollection as dbc
+   >>> dbc.cache
+   <dbcollection.core.cache.CacheManager object at 0x7f2875878550>
+
+This object contains methods attributes and methods for managing the cache in a deeper level compared to the previous ways to deal with the cache registry.
+
+Here is the list of attributes and methods that compose the ``CacheManager`` object:
+
+.. code-block:: python
+
+   >>> dbc.cache.
+   dbc.cache.__class__(                  dbc.cache._set_download_dir(
+   dbc.cache.__delattr__(                dbc.cache.add_data(
+   dbc.cache.__dict__                    dbc.cache.add_keywords(
+   dbc.cache.__dir__(                    dbc.cache.cache_dir
+   dbc.cache.__doc__                     dbc.cache.cache_filename
+   dbc.cache.__eq__(                     dbc.cache.check_dataset_name(
+   dbc.cache.__format__(                 dbc.cache.clear(
+   dbc.cache.__ge__(                     dbc.cache.create_os_home_dir(
+   dbc.cache.__getattribute__(           dbc.cache.data
+   dbc.cache.__gt__(                     dbc.cache.delete_category_entry(
+   dbc.cache.__hash__(                   dbc.cache.delete_dataset(
+   dbc.cache.__init__(                   dbc.cache.delete_dataset_cache(
+   dbc.cache.__le__(                     dbc.cache.delete_entry(
+   dbc.cache.__lt__(                     dbc.cache.delete_task(
+   dbc.cache.__module__                  dbc.cache.download_dir
+   dbc.cache.__ne__(                     dbc.cache.exists_dataset(
+   dbc.cache.__new__(                    dbc.cache.exists_task(
+   dbc.cache.__reduce__(                 dbc.cache.get_dataset_storage_paths(
+   dbc.cache.__reduce_ex__(              dbc.cache.get_task_cache_path(
+   dbc.cache.__repr__(                   dbc.cache.info(
+   dbc.cache.__setattr__(                dbc.cache.is_empty(
+   dbc.cache.__sizeof__(                 dbc.cache.is_test
+   dbc.cache.__str__(                    dbc.cache.modify_field(
+   dbc.cache.__subclasshook__(           dbc.cache.read_data_cache(
+   dbc.cache.__weakref__                 dbc.cache.read_data_cache_file(
+   dbc.cache._cache_dir                  dbc.cache.reload_cache(
+   dbc.cache._default_cache_dir_path(    dbc.cache.reset_cache(
+   dbc.cache._empty_data(                dbc.cache.reset_cache_dir(
+   dbc.cache._get_cache_dir(             dbc.cache.reset_download_dir(
+   dbc.cache._get_download_dir(          dbc.cache.update(
+   dbc.cache._os_remove(                 dbc.cache.write_data_cache(
+   dbc.cache._set_cache_dir(
+
+The cache's contents are stored in a dictionary under the ``.data`` attribute. Although this way of accessing the contents of the cache is a bit more complex than the other two, it does provide some functionality that is very useful for certain cases.
+
+In the following sections we'll take a look at the most common operations that you might need to know to manage **dbcollection**'s cache like adding, modifying or deleting a dataset or task or reseting path defaults. 
+
+.. note::
+
+   The ``CacheManager`` object contains many methods for specific actions, and, to learn more about them, it is encouraged to take a look at the **reference manual** for more details about them. Only the most important ones will be covered in this Chapter.
+
+
+Displaying the cache's contents
+===============================
+
+
+
+
 
 Basic operations
 ================

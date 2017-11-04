@@ -81,6 +81,8 @@ fetch_list_datasets
 .. autofunction:: dbcollection.core.api.fetch_list_datasets
 
 
+.. _core_reference_cache_management:
+
 Cache management
 ----------------
 .. automodule:: dbcollection.core.cache
