@@ -135,58 +135,226 @@ In the following sections we'll take a look at the most common operations that y
 Displaying the cache's contents
 ===============================
 
+To visualize the cache's contents you can:
 
+- Open the cache file in your filesystem;
+- Use ``dbc.info_cache()`` or ``dbc.cache.info()`` methods to display the contents to the screen;
 
+These two methods display the same information about the cache, so use whichever method you prefer.
 
 
 Basic operations
 ================
 
+The most common operations you may need are *adding*, *modifying*, *deleting* and *querying* the cache. 
+
+There are other available operations you can do, but on this section we'll focus on these four basic operations which should cover most use cases when dealing with the cache registry.
+
+.. note::
+
+   All following operations can be done by manually  opening the file modyfing its contents. Here, we'll only focus on doing these operations using the available attributes / methods in **dbcollection**.
+
+
 Getting information about a dataset 
 -----------------------------------
 
-Adding datasets
+To fetch the cache's contents about a dataset, you can access the ``.data`` attribute. For example, to fetch the data about the ``mnist`` dataset, you can do the following:
+
+.. code-block:: python
+
+   >>> dbc.cache.data['dataset']['mnist']
+   {'data_dir': '/home/mf/dbcollection/downloaded_data/mnist/data', 'tasks': 
+   {'classification': '/home/mf/dbcollection/mnist/classification.h5'}, 'keywords': 
+   'classification'}
+   
+
+Adding a dataset
+----------------
+
+Inserting a data into the cache is done by using the ``add_data()`` method. It requires the name and the data in order to insert it into the registry. This will create an entry under the ``datasets`` and ``category`` sections. 
+
+.. code-block:: python
+
+   >>> # add a custom dataset
+   >>> dbc.cache.add_data('new_dataset', 
+                          {'data_dir': '/some/new/dir', 
+                           'tasks': {'some_task': '/path/to/task/some_task.h5'}, 
+                           'keywords': ['list', 'of', 'keywords']})
+
+
+Adding a task
+-------------
+
+To add a task to an existing dataset, you can proceed in two ways.
+
+#. The first way is to use the ``.data`` attribute field and insert a new task into the dictionary:
+
+   .. code-block:: python
+
+      >>> # add a new task to mnist
+      >>> dbc.cache.data['dataset']['mnist']['tasks'].update({'new_task': 'path/to/new/task.h5'})
+      >>> dbc.cache.write_data_cache(dbc.cache.data)  # write the changes to disk
+
+#. The second way is by using the ``.add_data()`` method:
+
+   .. code-block:: python
+
+      >>> # get mnist data
+      >>> mnist_metadata = dbc.cache.data['dataset']['mnist']
+      >>> # add a new task
+      >>> mnist_metadata['tasks'].update({'new_task': 'path/to/new/task.h5'})
+      >>> dbc.cache.add_data('mnist', mnist_metadata, is_append=True) 
+
+
+Removing a dataset
+------------------
+
+Removing dataset entrys is pretty simple. To do this use the ``delete_dataset()`` method to remove the dataset from the cache:
+
+.. code-block:: python
+
+   >>> dbc.cache.delete_dataset('mnist')
+
+Please note that this will also remove the dataset's directory in disk.
+
+.. warning::
+
+   You cannot remove a dataset simply by removing the entry from ``.data``'s dictionary. This would require you to write the changes to disk and you would also need to remove all the registries of the dataset from ``category``. 
+
+
+Removing a task
 ---------------
 
-Adding tasks
-------------
+Just like removing datasets, to remove a task you simply need to call the ``delete_task()`` method. This method requires you to specify the dataset's name and the task you want to remove. This will remove the task entry from the cache and its file from disk.
 
-Removing datasets
------------------
+.. code-block:: python
 
-Adding tasks
-------------
+   >>> dbc.cache.delete_dataset('mnist', 'classification')
+
 
 Modifying data
 --------------
 
+The process of modifying data is simillar to assigning new information to the cache. 
+
+The easiest way to do this is by changing the contents of ``.data`` and writting the changes back to disk:
+
+.. code-block:: python
+
+   >>> # do stuff to data
+   >>> dbc.cache.data['info']['default_download_dir'] = 'new/save/dir'
+   >>> # write changes to disk
+   >>> dbc.cache.write_data_cache(dbc.cache.data)
+
+
 Reset the cache
 ---------------
+
+There might come a time where you need to reset the configurations of your cache. 
+
+For whatever reason you may need to do this, you just need to use the ``reset_cache()`` method and it will reset the contents of your cache file, leaving it empty of information about datasets and restoring the default paths for the cache downloaded files diretories.
+
+.. code-block:: python
+
+   >>> dbc.cache.reset_cache(force_reset=True)
+
+.. note::
+
+   You have to explicitly set ``force_reset`` to ``True``. This is a failsafe mechanism to avoid unintended resets of the cache.
+
 
 Check if a dataset exists
 -------------------------
 
+To see if a dataset exists you can:
+
+#. Check if the name exists in ``.data``.
+
+   .. code-block:: python
+
+      >>> 'mnist' in dbc.cache.data['datasets']
+      True
+
+#. Use the ``exists_dataset()`` method.
+
+   .. code-block:: python
+
+      >>> dbc.cache.exists_dataset('mnist')
+      True
+
+
 Check if a task exists
 ----------------------
 
+To check if a task exists for a dataset you can:
+
+#. Transverse the dataset's metadata in ``.data`` and look for a particular task name.
+
+   .. code-block:: python
+
+      >>> 'classification' in dbc.cache.data['datasets']['mnist']['tasks']
+      True
+
+#. Use the ``exists_task()`` method.
+
+   .. code-block:: python
+
+      >>> dbc.cache.exists_task('mnist', 'classification')
+      True
 
 
 Other useful operations
 =======================
 
+Here are a few other operations that will be very useful for you to use. 
+
 Change the default metadata cache directory
 -------------------------------------------
 
-reset to the default value
+Changing the directory where the ``HDF5`` metadata files are stored may be usefull if you want to store these files in another disk like an SSD. 
+
+To do this, you simply need to assign a new path to the ``.cache_dir`` attribute field and it will automatically register it both in memory and in disk. 
+
+.. code-block:: python
+
+   >>> dbc.cache.cache_dir = 'new/path/cache/'
+
+Also, you can check what the current path where the cache data is stored by printing this field:
+
+.. code-block:: python
+
+   >>> dbc.cache.cache_dir
+   'new/path/cache/'
+
 
 Change the default download directory path
 ------------------------------------------
 
-reset to the default value
+Like with the cache directory, you can also change the default path where source data files of datasets are stored via the ``.download_dir`` attribute field.
+
+Just assign a new path to it to change where the source files are stored in disk:
+
+.. code-block:: python
+
+   >>> dbc.cache.download_dir = 'new/save/path/download/data/'
+
+Likewise, to see check what is the default path where downloaded data files are stored just print this field:
+
+.. code-block:: python
+
+   >>> dbc.cache.download_dir
+   'new/save/path/download/data/'
+
 
 Reloading the cache
 -------------------
 
-Reload the cache
+Consider the following: you've changed something in the cache file (manually or by some other way) but you want to discard them and get back the previous cache state. 
+
+This is achieved by useing the ``reload_cache()`` method which loads the cache's contents in disk back to memory, regenerating the previous information.
+
+.. code-block:: python
+
+   >>> dbc.cache.reload_cache()
 
 
