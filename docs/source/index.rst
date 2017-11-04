@@ -48,7 +48,7 @@ Contents:
    :maxdepth: 1
    :caption: Introduction
 
-   introduction
+   about
 
 .. toctree::
    :maxdepth: 1
