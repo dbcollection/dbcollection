@@ -46,17 +46,50 @@ Contents:
 
 .. toctree::
    :maxdepth: 1
+   :caption: Introduction
 
-   introduction
+   about
+
+.. toctree::
+   :maxdepth: 1
+   :caption: User guide
+
    install
    getting_started
    managing_datasets
    fetching_data
    cache_management
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Developer guide
+
    create_new_dataset
-   reference/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Reference manual
+
+   reference/core
+   reference/datasets
+   reference/utils
    available_datasets
-   contributing/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contributing
+
+   contributing/how_to_contribute
+   contributing/submitting_bugs
+   contributing/feedback_channels
+   contributing/code_organization
+   contributing/coding_guidelines
+   contributing/testing_guidelines
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Other information
+
    license
 
 Indices and tables

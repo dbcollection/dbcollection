@@ -1,8 +1,8 @@
-.. _introduction:
+.. _about:
 
-============
-Introduction
-============
+==================
+About dbcollection
+==================
 
 What is dbcollection
 ====================
