@@ -4,11 +4,21 @@
 How to contribute
 =================
 
+If you are considering to contribute to this project, first let me take the time to thank you
+for your time! And there are plenty of ways you can help!
+
+Please take a moment to review this document in order to make the contribution
+process easy and confortable for everyone involved.
+
+Following these guidelines is a great way to effectively contribute to the project
+and help the community.
+
 This section describes a way to contribute to the project. You are welcome to provide with code or ideas
-to help improve the pool of functionality this package offers. You can also help by answering questions or
+to help improve the functionality this package offers. You can also help by answering questions or
 helping out with documentation if you prefer.
 
 .. note::
+
     The main goal behind contributing to this project is to provide tools for the community to help 
     accelerate research and share code with others in a simple and easy way.
 
