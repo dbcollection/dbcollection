@@ -2,6 +2,7 @@
 
 
 .. _core_reference_api:
+
 core
 ====
 .. automodule:: dbcollection.core
