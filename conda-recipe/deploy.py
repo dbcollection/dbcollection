@@ -89,3 +89,5 @@ if os.path.exists(build_dir):
 if os.path.exists(dist_dir):
     print('\nRemoving temp dir: {}'.format(dist_dir))
     shutil.rmtree(dist_dir, ignore_errors=True)
+
+print('Package sucessfully deployed to pypi and anaconda!')
