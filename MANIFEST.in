@@ -5,7 +5,7 @@ include LICENSE.txt
 include requirements.txt
 
 # include mnist data
-recursive-include dbcollection/datasets/mnist/data/*-ubyte
+recursive-include dbcollection/datasets/mnist/data/ *-ubyte
 
 #include README.rst
 #recursive-exclude * __pycache__
