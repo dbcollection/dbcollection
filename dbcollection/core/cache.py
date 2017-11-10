@@ -159,6 +159,7 @@ class CacheManager:
             If the file cannot be opened.
 
         """
+        assert data, 'Must input a non-empty dictionary'
         filename = fname or self.cache_filename
         with open(filename, 'w') as file_cache:
             json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
@@ -631,9 +632,10 @@ class CacheManager:
                 print('------------------------')
                 print('  Categories: all ')
                 print('------------------------\n')
-                for cat_name in self.data['category']:
-                    if name in self.data['category'][cat_name]:
-                        print('   > {}: '.format(cat_name))
+                max_size_name = max([len(category) for category in self.data['category']]) + 7
+                for category in self.data['category']:
+                    print("{:{}}".format('   > {}: '.format(category), max_size_name) +
+                          "{}".format(sorted(self.data['category'][category])))
 
     def reload_cache(self):
         """Reload the cache file contents."""
