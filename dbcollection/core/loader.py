@@ -1,5 +1,5 @@
 """
-Dataset's metadata loader class.
+Dataset's metadata loader classes.
 """
 
 
@@ -126,7 +126,7 @@ class FieldLoader(object):
                   .format(self.name, str(self.shape), str(self.type)))
 
     def _set_to_memory(self, is_in_memory):
-        """"Stores the contents of the field in a numpy array if True.
+        """Stores the contents of the field in a numpy array if True.
 
         Parameters
         ----------
@@ -206,7 +206,7 @@ class SetLoader(object):
 
     Attributes
     ----------
-    data : h5py._hl.group.Group
+    hdf5_group : h5py._hl.group.Group
         hdf5 group object handler.
     set : str
         Name of the set.
@@ -222,7 +222,7 @@ class SetLoader(object):
     def __init__(self, hdf5_group):
         """Initialize class."""
         assert hdf5_group, 'Must input a valid hdf5 group'
-        self.data = hdf5_group
+        self.hdf5_group = hdf5_group
         self.set = hdf5_group.name.split('/')[-1]
         self.fields = tuple(hdf5_group.keys())
         self._object_fields = tuple(convert_ascii_to_str(hdf5_group['object_fields'].value))
@@ -263,11 +263,11 @@ class SetLoader(object):
         assert field in self.fields, 'Field \'{}\' does not exist in the \'{}\' set.' \
                                      .format(field, self.set)
         if idx is None:
-            return self.data[field].value
+            return self.hdf5_group[field].value
         else:
             if isinstance(idx, tuple):
                 idx = list(idx)
-            return self.data[field][idx]
+            return self.hdf5_group[field][idx]
 
     def _convert(self, idx):
         """Retrieve data from the dataset's hdf5 metadata file in the original format.
@@ -304,14 +304,14 @@ class SetLoader(object):
         output = []
         for idx_ in idx:
             # fetch list of indexes for the current id
-            ids = self.data['object_ids'][idx_]
+            ids = self.hdf5_group['object_ids'][idx_]
 
             # fetch data for each element of the list
             data = []
             for i, field_name in enumerate(fields):
                 field_id = ids[i]
                 if field_id >= 0:
-                    data.append(self.data[field_name][field_id])
+                    data.append(self.hdf5_group[field_name][field_id])
                 else:
                     data.append([])
             output.append(data)
@@ -382,7 +382,7 @@ class SetLoader(object):
         """
         assert field in self.fields, 'Field \'{}\' does not exist in the \'{}\' set.' \
                                      .format(field, self.set)
-        return tuple(self.data[field].shape)
+        return tuple(self.hdf5_group[field].shape)
 
     def list(self):
         """List of all field names.
@@ -435,7 +435,7 @@ class SetLoader(object):
         fields_info = []
         lists_info = []
         for field in sorted(self.fields):
-            f = self.data[field]
+            f = self.hdf5_group[field]
 
             if field.startswith('list_'):
                 lists_info.append({

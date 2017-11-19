@@ -320,7 +320,7 @@ def add(name, task, data_dir, file_path, keywords=(), is_test=False):
     task : str
         Name of the task to load.
     data_dir : str
-        Path of the stored data on disk.
+        Path of the stored data in disk.
     file_path : bool
         Path to the metadata HDF5 file.
     keywords : list of strings, optional
@@ -355,7 +355,7 @@ def remove(name, task=None, delete_data=False, is_test=False):
     """Remove/delete a dataset and/or task from the cache.
 
     Removes the datasets cache information from the dbcollection.json file.
-    The dataset's data files remain on disk if 'delete_data' is set to False,
+    The dataset's data files remain in disk if 'delete_data' is set to False,
     otherwise it removes also the data files.
 
     Also, instead of deleting the entire dataset, removing a specific task
@@ -455,8 +455,8 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     Examples
     --------
     Delete the cache by removing the dbcollection.json cache file.
-    This will NOT remove the contents of the dbcollection/. For that,
-    just set the *delete_cache_dir* flag to True.
+    This will NOT remove the file contents in dbcollection/. For that,
+    you must set the *delete_cache_dir* argument to True.
 
     >>> import dbcollection as dbc
     >>> dbc.config_cache(delete_cache_file=True)
@@ -620,7 +620,7 @@ def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=T
     Parameters
     ----------
     name : str/list/tuple, optional
-        Name or list of names to be selected for print.
+        Name or list of names of datasets to be selected for print.
     paths_info : bool, optional
         Print the paths info to screen.
     datasets_info : bool, optional

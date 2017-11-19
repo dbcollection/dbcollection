@@ -496,7 +496,7 @@ class CacheManager:
                 else:
                     self.data['category'][keyword] = [name]
 
-    def update(self, name, data_dir, cache_tasks, cache_keywords, is_append=True):
+    def update(self, name, data_dir, cache_tasks, cache_keywords=(), is_append=True):
         """Modify/add data of a dataset in the cache file.
 
         Parameters
