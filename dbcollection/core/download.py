@@ -53,9 +53,13 @@ class DownloadAPI(object):
 
     """
 
-    def __init__(self, name, data_dir=None, extract_data=True, verbose=True, is_test=False):
+    def __init__(self, name, data_dir, extract_data, verbose, is_test):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
+        assert data_dir, 'Must input a valid dataset data dir path: {}'.format(data_dir)
+        assert extract_data is not None, 'extract_data cannot be empty'
+        assert verbose is not None, 'verbose cannot be empty'
+        assert is_test is not None, 'is_test cannot be empty'
 
         self.name = name
         self.data_dir = data_dir
