@@ -79,6 +79,7 @@ class DownloadAPI(object):
         """Set download data + cache dirs in disk."""
         if self.verbose:
             print('==> Setup directories to store the data files.')
+
         self.save_data_dir = self.set_download_data_dir()
         self.save_cache_dir = self.set_download_cache_dir()
 
@@ -104,7 +105,7 @@ class DownloadAPI(object):
         return save_data_dir
 
     def create_dir(self, path):
-        """Create directory in the disk."""
+        """Create a directory in the disk."""
         if not os.path.exists(path):
             if self.verbose:
                 print('Creating save directory in disk: {}'.format(path))
@@ -131,6 +132,7 @@ class DownloadAPI(object):
         """Update the cache manager information for this dataset."""
         if self.verbose:
             print('==> Updating the cache manager')
+
         keywords = self.available_datasets_list[self.name]['keywords']
         self.cache_manager.update(self.name,
                                   self.save_data_dir,
