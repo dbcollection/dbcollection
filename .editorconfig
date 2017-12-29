@@ -21,5 +21,4 @@ line_length = 100
 trim_trailing_whitespace = false
 
 [Makefile]
-indent_style = space
-indent_size = 4
+indent_style = tab
