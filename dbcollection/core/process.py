@@ -11,32 +11,27 @@ from .list_datasets import fetch_list_datasets
 
 
 class ProcessAPI(object):
-    """Process a dataset's metadata and stores it to file.
+    """Dataset metadata process API class.
 
-    The data is stored a a HSF5 file for each task composing the dataset's tasks.
+    This class contains methods to correctly process
+    the dataset's data files and convert their metadata
+    to disk.
 
     Parameters
     ----------
     name : str
         Name of the dataset.
-    task : str, optional
+    task : str
         Name of the task to process.
-    verbose : bool, optional
+    verbose : bool
         Displays text information (if true).
-    is_test : bool, optional
+    is_test : bool
         Flag used for tests.
 
     Raises
     ------
     KeyError
         If a task does not exist for a dataset.
-
-    Examples
-    --------
-    Download the CIFAR10 dataset to disk.
-
-    >>> import dbcollection as dbc
-    >>> dbc.process('cifar10', task='classification', verbose=False)
 
     """
 

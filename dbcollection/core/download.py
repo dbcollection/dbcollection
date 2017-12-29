@@ -21,13 +21,13 @@ class DownloadAPI(object):
     ----------
     name : str
         Name of the dataset.
-    data_dir : str, optional
+    data_dir : str
         Directory path to store the downloaded data.
-    extract_data : bool, optional
+    extract_data : bool
         Extracts/unpacks the data files (if true).
-    verbose : bool, optional
+    verbose : bool
         Displays text information (if true).
-    is_test : bool, optional
+    is_test : bool
         Flag used for tests.
 
     Attributes
@@ -56,7 +56,6 @@ class DownloadAPI(object):
     def __init__(self, name, data_dir, extract_data, verbose, is_test):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
-        assert data_dir, 'Must input a valid dataset data dir path: {}'.format(data_dir)
         assert extract_data is not None, 'extract_data cannot be empty'
         assert verbose is not None, 'verbose cannot be empty'
         assert is_test is not None, 'is_test cannot be empty'

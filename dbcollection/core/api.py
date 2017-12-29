@@ -77,13 +77,13 @@ def download(name, data_dir=None, extract_data=True, verbose=True, is_test=False
     assert name, 'Must input a valid dataset name: {}'.format(name)
     check_if_dataset_name_is_valid(name)
 
-    download = DownloadAPI(name=name,
-                           data_dir=data_dir,
-                           extract_data=extract_data,
-                           verbose=verbose,
-                           is_test=is_test)
+    downloader = DownloadAPI(name=name,
+                             data_dir=data_dir,
+                             extract_data=extract_data,
+                             verbose=verbose,
+                             is_test=is_test)
 
-    download.run()
+    downloader.run()
 
     if verbose:
         print('==> Dataset download complete.')
@@ -118,21 +118,21 @@ def process(name, task='default', verbose=True, is_test=False):
     >>> dbc.process('cifar10', task='classification', verbose=False)
 
     """
-    assert name is not None, 'Must input a valid dataset name: {}'.format(name)
+    assert name, 'Must input a valid dataset name: {}'.format(name)
     check_if_dataset_name_is_valid(name)
 
-    process = ProcessAPI(name=name,
-                         task=task,
-                         verbose=verbose,
-                         is_test=is_test)
+    processer = ProcessAPI(name=name,
+                           task=task,
+                           verbose=verbose,
+                           is_test=is_test)
 
-    process.run()
+    processer.run()
 
     if verbose:
-        print('==> Processing complete.')
+        print('==> Dataset processing complete.')
 
 
-def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
+def load(name, task='default', data_dir=None, verbose=True, is_test=False):
     """Returns a metadata loader of a dataset.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -170,40 +170,21 @@ def load(name=None, task='default', data_dir=None, verbose=True, is_test=False):
     Dataset name:  mnist
 
     """
-    assert name is not None, 'Must input a valid dataset name: {}'.format(name)
+    assert name, 'Must input a valid dataset name: {}'.format(name)
+    check_if_dataset_name_is_valid(name)
 
-    available_datasets_list = fetch_list_datasets()
+    loader = LoadAPI(name=name,
+                     task=task,
+                     data_dir=data_dir,
+                     verbose=verbose,
+                     is_test=is_test)
 
-    # check if the dataset name exists in the list of available dataset for download
-    assert name in available_datasets_list, 'Invalid dataset name: {}'.format(name)
+    data_loader = loader.run()
 
-    # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    if verbose:
+        print('==> Dataset loading complete.')
 
-    if task == '' or task == 'default':
-        task = available_datasets_list[name]['default_task']
-
-    # check if dataset exists. If not attempt to download the dataset
-    if not cache_manager.exists_dataset(name):
-        download(name, data_dir, True, verbose, is_test)
-        cache_manager.reload_cache()  # reload the cache's data
-
-    # check if the task exists inf cache
-    if not cache_manager.exists_task(name, task):
-        process(name, task, verbose, is_test)
-        cache_manager.reload_cache()  # reload the cache's
-
-    # get data + cache dir paths
-    dset_paths = cache_manager.get_dataset_storage_paths(name)
-
-    # get task cache file path
-    task_cache_path = cache_manager.get_task_cache_path(name, task)
-
-    # Create a loader
-    dataset_loader = DataLoader(name, task, dset_paths['data_dir'], task_cache_path)
-
-    # return Loader
-    return dataset_loader
+    return data_loader
 
 
 def add(name, task, data_dir, file_path, keywords=(), is_test=False):
