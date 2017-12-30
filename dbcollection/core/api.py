@@ -18,15 +18,6 @@ functions to manage and query their datasets in a simple and easy way.
 
 
 from __future__ import print_function
-import os
-import sys
-import shutil
-import pkgutil
-import json
-
-import dbcollection.datasets as datasets
-from dbcollection.core.cache import CacheManager
-from dbcollection.core.loader import DataLoader
 
 from .download import DownloadAPI
 from .process import ProcessAPI
