@@ -25,6 +25,16 @@ class QueryAPI(object):
 
     Attributes
     ----------
+    pattern : str
+        Field name used to search for a matching pattern in cache data.
+    verbose : bool
+        Displays text information (if true).
+    is_test : bool
+        Flag used for tests.
+    query_list : list
+        Stores all data found for the input pattern.
+    cache_manager : CacheManager
+        Cache manager object.
 
     """
 
