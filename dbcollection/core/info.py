@@ -84,11 +84,7 @@ class InfoCacheAPI(object):
         self.names = names
 
     def run(self):
-        """<stuff>.
-
-        ** Main method **
-
-        """
+        """Main method."""
         self.display_paths_info()
         self.display_datasets_info()
         self.display_categories_info()
@@ -224,11 +220,7 @@ class InfoDatasetAPI(object):
         self.cache_manager = CacheManager(self.is_test)
 
     def run(self):
-        """<stuff>.
-
-        ** Main method **
-
-        """
+        """Main method."""
         self.display_downloaded_datasets()
         self.display_available_datasets()
 

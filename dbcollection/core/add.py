@@ -69,11 +69,7 @@ class AddAPI(object):
         self.cache_manager = CacheManager(self.is_test)
 
     def run(self):
-        """<stuff>.
-
-        ** Main method **
-
-        """
+        """Main method."""
         if self.verbose:
             print('==> Adding a dataset registry to the cache records in disk.')
 

@@ -78,11 +78,7 @@ class LoadAPI(object):
         return self.available_datasets_list[self.name]['default_task']
 
     def run(self):
-        """<stuff>.
-
-        ** Main method **
-
-        """
+        """Main method."""
         self.set_dataset_data()
         dataset_loader = self.get_data_loader()
         return dataset_loader

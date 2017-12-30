@@ -69,11 +69,7 @@ class DownloadAPI(object):
         self.available_datasets_list = fetch_list_datasets()
 
     def run(self):
-        """Download a dataset to disk.
-
-        ** Main method **
-
-        """
+        """Main method."""
         self.set_dataset_dirs()
         self.download_dataset()
         self.update_cache()

@@ -88,11 +88,7 @@ class ConfigAPI(object):
             self.delete_cache_file = True
 
     def run(self):
-        """<stuff>.
-
-        ** Main method **
-
-        """
+        """Main method."""
         self.delete_cache_dir_files()
         self.modify_cache_configs()
 

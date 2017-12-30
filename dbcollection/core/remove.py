@@ -57,11 +57,7 @@ class RemoveAPI(object):
         self.cache_manager = CacheManager(self.is_test)
 
     def run(self):
-        """<stuff>.
-
-        ** Main method **
-
-        """
+        """Main method."""
         if self.exists_dataset():
             self.remove_registry_from_cache()
         else:

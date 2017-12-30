@@ -93,11 +93,7 @@ class ProcessAPI(object):
         return self.available_datasets_list[self.name]['default_task']
 
     def run(self):
-        """Process the metadata of the dataset into an HDF5 file.
-
-        ** Main method **
-
-        """
+        """Main method."""
         self.set_dataset_dirs()
         self.process_dataset()
         self.update_cache()

@@ -51,11 +51,7 @@ class QueryAPI(object):
         self.cache_manager = CacheManager(self.is_test)
 
     def run(self):
-        """<stuff>.
-
-        ** Main method **
-
-        """
+        """Main method."""
         self.match_pattern_root()
         self.match_pattern_info()
         self.match_pattern_datasets()
