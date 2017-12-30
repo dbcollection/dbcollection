@@ -187,7 +187,7 @@ def load(name, task='default', data_dir=None, verbose=True, is_test=False):
     return data_loader
 
 
-def add(name, task, data_dir, file_path, keywords=(), is_test=False):
+def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=False):
     """Add a dataset/task to the list of available datasets for loading.
 
     Parameters
@@ -202,6 +202,8 @@ def add(name, task, data_dir, file_path, keywords=(), is_test=False):
         Path to the metadata HDF5 file.
     keywords : list of strings, optional
         List of keywords to categorize the dataset.
+    verbose : bool, optional
+        Displays text information (if true).
     is_test : bool, optional
         Flag used for tests.
 
@@ -221,11 +223,18 @@ def add(name, task, data_dir, file_path, keywords=(), is_test=False):
     assert data_dir, "Must input a valid data_dir: {}".format(data_dir)
     assert file_path, "Must input a valid file_path: {}".format(file_path)
 
-    # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    db_adder = AddAPI(name=name,
+                      task=task,
+                      data_dir=data_dir,
+                      file_path=file_path,
+                      keywords=keywords,
+                      verbose=verbose,
+                      is_test=is_test)
 
-    # update the cache for the dataset
-    cache_manager.update(name, data_dir, {task: file_path}, keywords, True)
+    db_adder.run()
+
+    if verbose:
+        print('==> Dataset registry complete.')
 
 
 def remove(name, task=None, delete_data=False, is_test=False):
