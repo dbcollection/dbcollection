@@ -29,6 +29,16 @@ class RemoveAPI(object):
 
     Attributes
     ----------
+    name : str
+        Name of the dataset to delete.
+    task : str
+        Name of the task to delete.
+    delete_data : bool
+        Delete all data files from disk for this dataset if True.
+    is_test : bool
+        Flag used for tests.
+    cache_manager : CacheManager
+        Cache manager object.
 
     """
 
