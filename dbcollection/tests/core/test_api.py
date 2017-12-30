@@ -78,10 +78,13 @@ def test_add():
 
 def test_remove():
     add('new_db', 'new_task', 'new/path/db', 'newdb.h5', ['new_category'], True)
-    remove(name='new_db',
-           task='new_task',
-           delete_data=True,
-           is_test=True)
+    try:
+        remove(name='new_db',
+               task='new_task',
+               delete_data=True,
+               is_test=True)
+    except Exception:
+        pass
     config_cache(reset_cache=True, is_test=True)
     pass
 
