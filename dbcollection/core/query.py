@@ -9,9 +9,10 @@ from dbcollection.core.cache import CacheManager
 
 
 class QueryAPI(object):
-    """Do simple queries to the cache.
+    """Cache query API class.
 
-    list all available datasets for download/preprocess.
+    This class contains methods to query
+    the cache registry for patterns.
 
     Parameters
     ----------
