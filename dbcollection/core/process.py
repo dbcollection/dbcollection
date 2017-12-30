@@ -29,6 +29,23 @@ class ProcessAPI(object):
     is_test : bool
         Flag used for tests.
 
+    Attributes
+    ----------
+    name : str
+        Name of the dataset.
+    task : str
+        Name of the task to process.
+    verbose : bool
+        Displays text information (if true).
+    is_test : bool
+        Flag used for tests.
+    extract_data : bool
+        Flag to extract data (if True).
+    cache_manager : CacheManager
+        Cache manager object.
+    available_datasets_list : list
+        List of available datast names for download.
+
     Raises
     ------
     KeyError
@@ -62,14 +79,14 @@ class ProcessAPI(object):
     def exists_task(self):
         """Checks if a task exists for a dataset."""
         if self.task == '':
-            task_ = self.get_default_task()
+            task = self.get_default_task()
         elif self.task == 'default':
-            task_ = self.get_default_task()
+            task = self.get_default_task()
         elif self.task.endswith('_s'):
-            task_ = self.task[:-2]
+            task = self.task[:-2]
         else:
-            task_ = self.task
-        return task_ in self.available_datasets_list[self.name]['tasks']
+            task = self.task
+        return task in self.available_datasets_list[self.name]['tasks']
 
     def get_default_task(self):
         """Returns the default task for this dataset."""
