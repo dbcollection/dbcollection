@@ -339,35 +339,16 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     >>> import dbcollection as dbc
     >>> dbc.config_cache(delete_cache_file=True)
     """
+    manager = ConfigAPI(field=field,
+                        value=value,
+                        delete_cache=delete_cache,
+                        delete_cache_dir=delete_cache_dir,
+                        delete_cache_file=delete_cache_file,
+                        reset_cache=reset_cache,
+                        verbose=verbose,
+                        is_test=is_test)
 
-    # Load a cache manager object
-    cache_manager = CacheManager(is_test)
-
-    if delete_cache:
-        delete_cache_dir = True
-        delete_cache_file = True
-
-    if delete_cache_dir:
-        # delete cache dir
-        if os.path.exists(cache_manager.cache_dir):
-            shutil.rmtree(cache_manager.cache_dir)
-            if verbose:
-                print('Deleted {} directory.'.format(cache_manager.cache_dir))
-
-    if delete_cache_file:
-        # delete the entire cache
-        if os.path.exists(cache_manager.cache_filename):
-            os.remove(cache_manager.cache_filename)
-            if verbose:
-                print('Deleted {} cache file.'.format(cache_manager.cache_filename))
-    else:
-        if reset_cache:
-            # reset the cache file
-            cache_manager.reset_cache(force_reset=True)
-        else:
-            if field is not None:
-                if verbose:
-                    print(cache_manager.modify_field(field, value))
+    manager.run()
 
 
 def query(pattern='info', is_test=False):
