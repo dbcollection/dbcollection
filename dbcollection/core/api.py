@@ -237,7 +237,7 @@ def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=Fals
         print('==> Dataset registry complete.')
 
 
-def remove(name, task=None, delete_data=False, is_test=False):
+def remove(name, task=None, delete_data=False, verbose=True, is_test=False):
     """Remove/delete a dataset and/or task from the cache.
 
     Removes the datasets cache information from the dbcollection.json file.
@@ -257,6 +257,8 @@ def remove(name, task=None, delete_data=False, is_test=False):
         Name of the task to delete.
     delete_data : bool, optional
         Delete all data files from disk for this dataset if True.
+    verbose : bool, optional
+        Displays text information (if true).
     is_test : bool, optional
         Flag used for tests.
 
@@ -278,26 +280,16 @@ def remove(name, task=None, delete_data=False, is_test=False):
     """
     assert name is not None, 'Must input a valid dataset name: {}'.format(name)
 
-    # Load a cache manager object
-    cache_manager = CacheManager(is_test)
+    db_remover = RemoveAPI(name=name,
+                           task=task,
+                           delete_data=delete_data,
+                           verbose=verbose,
+                           is_test=is_test)
 
-    # check if dataset exists in the cache file
-    if cache_manager.exists_dataset(name):
-        if task is None:
-            if delete_data:
-                cache_manager.delete_dataset(name, True)
-            else:
-                cache_manager.delete_dataset(name, False)
+    db_remover.run()
 
-            print('Removed \'{}\' dataset: cache=True, disk={}'.format(name, delete_data))
-        else:
-            if cache_manager.delete_task(name, task):
-                print('Removed the task \'{}\' from the \'{}\' dataset: cache=True'
-                      .format(task, name))
-            else:
-                print('Do nothing.')
-    else:
-        print('Dataset \'{}\' does not exist.'.format(name))
+    if verbose:
+        print('==> Dataset registry removed.')
 
 
 def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=False,
