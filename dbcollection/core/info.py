@@ -32,6 +32,20 @@ class InfoCacheAPI(object):
 
     Attributes
     ----------
+    name : str/list/tuple, optional
+        Name or list of names of datasets to be selected for print.
+    paths_info : bool
+        Print the paths info to screen.
+    datasets_info : bool
+        Print the datasets info to screen.
+    categories_info : bool
+        Print the categories keywords info to screen.
+    is_test : bool
+        Flag used for tests.
+    cache_manager : CacheManager
+        Cache manager object.
+    _max_size_name : int
+        Maximum length of the biggest dataset name.
 
     """
 
@@ -168,17 +182,29 @@ class InfoDatasetAPI(object):
     ----------
     db_pattern : str
         String for matching dataset names available for downloading in the database.
-    show_downloaded : bool, optional
+    show_downloaded : bool
         Print the downloaded datasets stored in cache.
-    show_available : bool, optional
+    show_available : bool
         Print the available datasets for load/download with dbcollection.
-    verbose : bool, optional
+    verbose : bool
         Displays text information (if true).
-    is_test : bool, optional
+    is_test : bool
         Flag used for tests.
 
     Attributes
     ----------
+    db_pattern : str
+        String for matching dataset names available for downloading in the database.
+    show_downloaded : bool
+        Print the downloaded datasets stored in cache.
+    show_available : bool
+        Print the available datasets for load/download with dbcollection.
+    verbose : bool
+        Displays text information (if true).
+    is_test : bool
+        Flag used for tests.
+    cache_manager : CacheManager
+        Cache manager object.
 
     """
 
