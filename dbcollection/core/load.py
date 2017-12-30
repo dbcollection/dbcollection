@@ -32,15 +32,22 @@ class LoadAPI(object):
     is_test : bool
         Flag used for tests.
 
-    Returns
-    -------
-    DataLoader
-       Data loader class.
-
-    Raises
-    ------
-    Exception
-        If dataset is not available for loading.
+    Attributes
+    ----------
+    name : str
+        Name of the dataset.
+    task : str
+        Name of the task to load.
+    data_dir : str
+        Directory path to store the downloaded data.
+    verbose : bool
+        Displays text information (if true).
+    is_test : bool
+        Flag used for tests.
+    cache_manager : CacheManager
+        Cache manager object.
+    available_datasets_list : list
+        List of available datast names for download.
 
     """
 
