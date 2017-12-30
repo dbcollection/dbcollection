@@ -351,7 +351,7 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     manager.run()
 
 
-def query(pattern='info', is_test=False):
+def query(pattern='info', verbose=True, is_test=False):
     """Do simple queries to the cache.
 
     list all available datasets for download/preprocess.
@@ -360,72 +360,20 @@ def query(pattern='info', is_test=False):
     ----------
     pattern : str, optional
         Field name used to search for a matching pattern in cache data.
+    verbose : bool, optional
+        Displays text information (if true).
     is_test : bool, optional
         Flag used for tests.
 
     """
     assert isinstance(pattern, str), 'Must insert a string value as input. ' + \
                                      'Expected "str", got "{}"'.format(pattern)
-    # Load a cache manager object
-    cache_manager = CacheManager(is_test)
 
-    # init list
-    query_list = []
+    query = QueryAPI(pattern=pattern,
+                     verbose=verbose,
+                     is_test=is_test)
 
-    # check info / dataset lists first
-    if pattern in cache_manager.data:
-        query_list.append({pattern: cache_manager.data[pattern]})
-
-    # match default paths
-    if pattern in cache_manager.data['info']:
-        query_list.append({'info': {pattern: cache_manager.data['info'][pattern]}})
-
-    # match datasets/tasks
-    if pattern in cache_manager.data['dataset']:
-        query_list.append({'dataset': {pattern: cache_manager.data['dataset'][pattern]}})
-
-    for name in cache_manager.data['dataset']:
-        if pattern in cache_manager.data['dataset'][name]:
-            query_list.append({
-                'dataset': {
-                    name: {
-                        pattern: cache_manager.data['dataset'][name][pattern]
-                    }
-                }
-            })
-        if pattern in cache_manager.data['dataset'][name]['tasks']:
-            query_list.append({
-                'dataset': {
-                    name: {
-                        'tasks': {
-                            pattern: cache_manager.data['dataset'][name]['tasks'][pattern]
-                        }
-                    }
-                }
-            })
-        if pattern in cache_manager.data['dataset'][name]['keywords']:
-            query_list.append({
-                'dataset': {
-                    name: {
-                        'keywords': {
-                            pattern: cache_manager.data['dataset'][name]['keywords']
-                        }
-                    }
-                }
-            })
-
-    # match category
-    if pattern in cache_manager.data['category']:
-        query_list.append({
-            'category': {
-                pattern: list(cache_manager.data['category'][pattern])
-            }
-        })
-    for category in cache_manager.data['category']:
-        if pattern in cache_manager.data['category'][category]:
-            query_list.append({'category': {category: [pattern, ]}})
-
-    return query_list
+    return query.run()
 
 
 def print_paths_info(data):
