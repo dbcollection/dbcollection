@@ -306,7 +306,7 @@ def config_cache(field=None, value=None, delete_cache=False, delete_cache_dir=Fa
     ----------
     field : str, optional
         Name of the field to update/modify in the cache file.
-    value : str, list, table, optional
+    value : str, list, tuple, optional
         Value to update the field.
     delete_cache : bool, optional
         Delete/remove the dbcollection cache file + directory.
