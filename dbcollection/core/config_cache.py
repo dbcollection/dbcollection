@@ -21,7 +21,7 @@ class ConfigAPI(object):
     ----------
     field : str, optional
         Name of the field to update/modify in the cache file.
-    value : str, list, table, optional
+    value : str, list, tuple, optional
         Value to update the field.
     delete_cache : bool
         Delete/remove the dbcollection cache file + directory.
@@ -38,6 +38,24 @@ class ConfigAPI(object):
 
     Attributes
     ----------
+    field : str
+        Name of the field to update/modify in the cache file.
+    value : str, list, tuple
+        Value to update the field.
+    delete_cache : bool
+        Delete/remove the dbcollection cache file + directory.
+    delete_cache_dir : bool
+        Delete/remove the dbcollection cache directory.
+    delete_cache_file : bool
+        Delete/remove the dbcollection.json cache file.
+    reset_cache : bool
+        Reset the cache file.
+    verbose : bool
+        Displays text information (if true).
+    is_test : bool
+        Flag used for tests.
+    cache_manager : CacheManager
+        Cache manager object.
 
     """
 
