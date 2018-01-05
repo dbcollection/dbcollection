@@ -257,7 +257,11 @@ def test_FieldLoader_to_memory_to_disk():
     assert isinstance(field_loader.data, h5py._hl.dataset.Dataset)
 
 def test_FieldLoader__len__():
-    pass
+    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+    size = len(field_loader)
+
+    assert size == len(set_data['data'])
 
 def test_FieldLoader__tostring__():
     pass
