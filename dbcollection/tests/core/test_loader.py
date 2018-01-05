@@ -11,7 +11,7 @@ import pytest
 
 from dbcollection.core.loader import FieldLoader, SetLoader, DataLoader
 from dbcollection.utils.test import TestDatasetGenerator
-from dbcollection.utils.string_ascii import convert_ascii_to_str as tostr_
+from dbcollection.utils.string_ascii import convert_ascii_to_str as ascii_to_str
 
 
 # Setup dataset generator
@@ -282,7 +282,7 @@ def test_FieldLoader__str__in_memory():
         if sys.version_info[0] == 2:
             matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10L, 10L), type "int32">'
         else:
-        matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int32">'
+            matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int32">'
     else:
         matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int64">'
 
@@ -326,6 +326,83 @@ def test_FieldLoader__index__single_objs_single_value_in_memory():
 # -----------------------------------------------------------
 
 def test_SetLoader__init():
+    h5obj = db_generator.load_hdf5_file()
+
+    dataset = db_generator.dataset
+    set_name = 'test'
+    set_loader = SetLoader(h5obj[set_name])
+
+    assert set_loader.set == set_name
+    assert set_loader.object_fields == ascii_to_str(dataset[set_name]['object_fields'])
+    assert set_loader.nelems == 5
+
+def test_SetLoader_get_data_single_obj():
+    pass
+
+def test_SetLoader_get_data_single_obj_in_memory():
+    pass
+
+def test_SetLoader_get_data_two_objs():
+    pass
+
+def test_SetLoader_get_data_two_objs_in_memory():
+    pass
+
+def test_SetLoader_get_data_multiple_objs():
+    pass
+
+def test_SetLoader_get_data_multiple_objs_in_memory():
+    pass
+
+def test_SetLoader_get_data_all_obj():
+    pass
+
+def test_SetLoader_get_data_all_obj_in_memory():
+    pass
+
+def test_SetLoader_get_data_single_obj_object_ids():
+    pass
+
+def test_SetLoader_get_data_single_obj_object_ids_in_memory():
+    pass
+
+def test_SetLoader_object_single_obj():
+    pass
+
+def test_SetLoader_object_single_obj_value():
+    pass
+
+def test_SetLoader_object_two_objs():
+    pass
+
+def test_SetLoader_object_two_objs_value():
+    pass
+
+def test_SetLoader_object_all_objs():
+    pass
+
+def test_SetLoader_object_all_objs_value():
+    pass
+
+def test_SetLoader_size():
+    pass
+
+def test_SetLoader_size_object_ids():
+    pass
+
+def test_SetLoader_list():
+    pass
+
+def test_SetLoader_list_error_call_with_inputs():
+    pass
+
+def test_SetLoader_info():
+    pass
+
+def test_SetLoader__len__():
+    pass
+
+def test_SetLoader__str__():
     pass
 
 
@@ -334,4 +411,76 @@ def test_SetLoader__init():
 # -----------------------------------------------------------
 
 def test_DataLoader__init():
+    pass
+
+def test_DataLoader_get_single_obj():
+    pass
+
+def test_DataLoader_get_single_obj_named_args():
+    pass
+
+def test_DataLoader_get_single_obj_access_via_SetLoader():
+    pass
+
+def test_DataLoader_get_two_objs():
+    pass
+
+def test_DataLoader_get_all_objs():
+    pass
+
+def test_DataLoader_get_all_objs_no_index():
+    pass
+
+def test_DataLoader_object_single_obj():
+    pass
+
+def test_DataLoader_object_single_obj_values():
+    pass
+
+def test_DataLoader_object_two_objs():
+    pass
+
+def test_DataLoader_object_two_obj_values():
+    pass
+
+def test_DataLoader_object_all_objs():
+    pass
+
+def test_DataLoader_object_all_objs_no_index():
+    pass
+
+def test_DataLoader_size_single_field():
+    pass
+
+def test_DataLoader_size_default():
+    pass
+
+def test_DataLoader_size_single_field_all_sets():
+    pass
+
+def test_DataLoader_size_no_inputs():
+    pass
+
+def test_DataLoader_list_single_set():
+    pass
+
+def test_DataLoader_list_all_sets():
+    pass
+
+def test_DataLoader_object_field_id_field1():
+    pass
+
+def test_DataLoader_object_field_id_field2():
+    pass
+
+def test_DataLoader_info_single_set():
+    pass
+
+def test_DataLoader_info_all_sets():
+    pass
+
+def test_DataLoader__len__():
+    pass
+
+def test_DataLoader__str__():
     pass
