@@ -218,7 +218,7 @@ class TestDatasetGenerator:
         }
 
         fields = {
-            "data": lambda x: np.tile(np.array(range(10)), [x, 1]),
+            "data": lambda x: np.random.randint(0, 10, (x, 10)),
             "number": lambda x: np.array(range(x)),
             "field_with_a_long_name_for_printing": lambda x: np.array(range(x)),
         }
@@ -239,9 +239,8 @@ class TestDatasetGenerator:
     def populate_set(self, size, fields, lists):
         dataset = {}
 
-        size_fields = len(fields)
         for field in fields:
-            dataset[field] = fields[field](size_fields)
+            dataset[field] = fields[field](size)
 
         for field in lists:
             dataset[field] = lists[field]

@@ -65,7 +65,7 @@ class FieldLoader(object):
     def _get_hdf5_object_str(self):
         return self.hdf5_handler.name.split('/')
 
-    def get(self, idx=None):
+    def get(self, index=None):
         """Retrieves data of the field from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file. Also, it is
@@ -74,7 +74,7 @@ class FieldLoader(object):
 
         Parameters
         ----------
-        idx : int/list/tuple, optional
+        index : int/list/tuple, optional
             Index number of he field. If it is a list, returns the data
             for all the value indexes of that list.
 
@@ -83,18 +83,39 @@ class FieldLoader(object):
         np.ndarray
             Numpy array containing the field's data.
 
+        Note
+        ----
+        When using lists/tuples of indexes, this method sorts the list
+        and removes duplicate values. This is because the h5py
+        api requires the indexing elements to be in increasing order when
+        retrieving data.
+
         """
-        if idx is None:
+        if index is None:
             return self._get_all_idx()
         else:
-            return self.data[idx]
+            return self._get_range_idx(index)
 
     def _get_all_idx(self):
-        """Return the entire data array."""
+        """Return the full data array."""
         if self._in_memory:
             return self.data
         else:
             return self.data.value
+
+    def _get_range_idx(self, idx):
+        """Return a slice of the data array."""
+        assert idx is not None
+        if isinstance(idx, int):
+            return self.data[idx]
+        else:
+            size = len(idx)
+            if size > 1:
+                return self.data[sorted(set(idx))]
+            elif size == 1:
+                return self.data[idx[0]]
+            else:
+                return self._get_all_idx()
 
     def size(self):
         """Size of the field.
