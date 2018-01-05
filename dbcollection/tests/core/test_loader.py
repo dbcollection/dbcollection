@@ -216,13 +216,21 @@ def test_FieldLoader_size():
 
     size = field_loader.size()
 
-    print(size)
-    print(set_data['data'].shape)
-
     assert size == set_data['data'].shape
 
 def test_FieldLoader_object_field_id():
-    pass
+    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+    obj_id = field_loader.object_field_id()
+
+    assert obj_id is 1
+
+def test_FieldLoader_object_field_id_not_equal():
+    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+    obj_id = field_loader.object_field_id()
+
+    assert obj_id is not 2
 
 def test_FieldLoader_info():
     pass
