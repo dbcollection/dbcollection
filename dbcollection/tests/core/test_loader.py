@@ -263,11 +263,20 @@ def test_FieldLoader__len__():
 
     assert size == len(set_data['data'])
 
-def test_FieldLoader__tostring__():
-    pass
+def test_FieldLoader__str__():
+    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
 
-def test_FieldLoader__tostring__in_memory():
-    pass
+    matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i8">'
+
+    assert str(field_loader) == matching_str
+
+def test_FieldLoader__str__in_memory():
+    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+
+    field_loader.to_memory = True
+    matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int64">'
+
+    assert str(field_loader) == matching_str
 
 def test_FieldLoader__index__single_obj():
     pass
