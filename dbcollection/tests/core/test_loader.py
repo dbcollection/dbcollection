@@ -5,6 +5,7 @@ Test dbcollection/utils/loader.py.
 
 import pytest
 import numpy as np
+import h5py
 
 import dbcollection as dbc
 from dbcollection.core.loader import FieldLoader, SetLoader, DataLoader
@@ -219,14 +220,14 @@ def test_FieldLoader_size():
     assert size == set_data['data'].shape
 
 def test_FieldLoader_object_field_id():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
 
     obj_id = field_loader.object_field_id()
 
     assert obj_id is 1
 
 def test_FieldLoader_object_field_id_not_equal():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
 
     obj_id = field_loader.object_field_id()
 
@@ -241,7 +242,19 @@ def test_FieldLoader_info_no_verbose():
     field_loader.info(False)
 
 def test_FieldLoader_to_memory():
-    pass
+    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+
+    field_loader.to_memory = True
+
+    assert isinstance(field_loader.data, np.ndarray)
+
+def test_FieldLoader_to_memory_to_disk():
+    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+
+    field_loader.to_memory = True
+    field_loader.to_memory = False
+
+    assert isinstance(field_loader.data, h5py._hl.dataset.Dataset)
 
 def test_FieldLoader__len__():
     pass
