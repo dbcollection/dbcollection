@@ -4,6 +4,7 @@ Test dbcollection/utils/loader.py.
 
 
 import os
+import sys
 import numpy as np
 import h5py
 import pytest
@@ -278,6 +279,9 @@ def test_FieldLoader__str__in_memory():
 
     field_loader.to_memory = True
     if os.name == 'nt':
+        if sys.version_info[0] == 2:
+            matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10L, 10L), type "int32">'
+        else:
         matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int32">'
     else:
         matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int64">'
