@@ -230,6 +230,53 @@ class FieldLoader(object):
         return str(self)
 
 
+class ListFieldLoader:
+    """Constains a list of all data fields as FieldLoader objects.
+
+    Parameters
+    ----------
+    fields : tuple
+        List of all field names of the set.
+    object_fields : tuple
+        List of all field names of the set contained by the 'object_ids' list.
+    hdf5_group : h5py._hl.group.Group
+        hdf5 group object handler.
+
+    Attributes
+    ----------
+    <data_field1> : FieldLoader
+        Data field 1.
+    <data_field2> : FieldLoader
+        Data field 2.
+    <data_field3> : FieldLoader
+        Data field 3.
+    ...
+    <data_fieldN> : FieldLoader
+        Data field N.
+
+    """
+    def __init__(self, fields, object_fields, hdf5_group):
+        """Initialize class."""
+        assert fields, "Must input a valid 'fields' list"
+        assert object_fields, "Must input a valid 'object_fields' list"
+        assert hdf5_group, "Must input a valid 'hdf5_group' handler"
+
+        self._fields = fields
+        self._object_fields = object_fields
+        self._load_fields_as_FieldLoader_obj(hdf5_group)
+
+    def _load_fields_as_FieldLoader_obj(self, hdf5_group):
+        for field in self._fields:
+            obj_id = self._get_obj_id_field(field)
+            setattr(self, field, FieldLoader(hdf5_group[field], obj_id))
+
+    def _get_obj_id_field(self, field):
+        if field in self._object_fields:
+            return self._object_fields.index(field)
+        else:
+            return None
+
+
 class SetLoader(object):
     """Set metadata loader class.
 
@@ -250,7 +297,7 @@ class SetLoader(object):
         Name of the set.
     fields : tuple
         List of all field names of the set.
-    _object_fields : tuple
+    object_fields : tuple
         List of all field names of the set contained by the 'object_ids' list.
     nelems : int
         Number of rows in 'object_ids'.
@@ -260,21 +307,36 @@ class SetLoader(object):
     def __init__(self, hdf5_group):
         """Initialize class."""
         assert hdf5_group, 'Must input a valid hdf5 group'
+
         self.hdf5_group = hdf5_group
-        self.set = hdf5_group.name.split('/')[-1]
-        self.fields = tuple(hdf5_group.keys())
-        self._object_fields = tuple(convert_ascii_to_str(hdf5_group['object_fields'].value))
-        self.nelems = len(hdf5_group['object_ids'])
+        self.set = self._get_set_name()
+        self.object_fields = self._get_object_fields()
+        self.nelems = self._get_num_elements()
+        self._fields = self._get_field_names()
+        self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
 
-        # add fields to the class
-        for field in self.fields:
-            if field in self._object_fields:
-                obj_id = self._object_fields.index(field)
-            else:
-                obj_id = None
-            setattr(self, field, FieldLoader(hdf5_group[field], obj_id))
+    def _get_set_name(self):
+        hdf5_object_str = self.hdf5_group.name
+        str_split = hdf5_object_str.split('/')
+        return str_split[-1]
 
-    def get(self, field, idx=None):
+    def _get_object_fields(self):
+        object_fields_data = self.hdf5_group['object_fields'].value
+        output = convert_ascii_to_str(object_fields_data)
+        if type(output) == 'string':
+            output = (output,)
+        return output
+
+    def _get_field_names(self):
+        return tuple(self.hdf5_group.keys())
+
+    def _get_num_elements(self):
+        return len(self.hdf5_group['object_ids'])
+
+    def _load_hdf5_fields(self):
+        return ListFieldLoader(self._fields, self.object_fields, self.hdf5_group)
+
+    def get(self, field, index=None):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -285,7 +347,7 @@ class SetLoader(object):
         ----------
         field : str
             Field name.
-        idx : int/list/tuple, optional
+        index : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
 
@@ -293,18 +355,16 @@ class SetLoader(object):
         -------
         np.ndarray
             Numpy array containing the field's data.
-        list
-            List of numpy arrays if using a list of indexes.
 
         """
         assert field, 'Must input a valid field name: {}'.format(field)
-        assert field in self.fields, 'Field \'{}\' does not exist in the \'{}\' set.' \
-                                     .format(field, self.set)
-        if idx is None:
+        assert field in self._fields, 'Field \'{}\' does not exist in the \'{}\' set.' \
+                                      .format(field, self.set)
+        if index is None:
             return self.hdf5_group[field].value
         else:
-            if isinstance(idx, tuple):
-                idx = list(idx)
+            if isinstance(index, tuple):
+                idx = list(index)
             return self.hdf5_group[field][idx]
 
     def _convert(self, idx):
