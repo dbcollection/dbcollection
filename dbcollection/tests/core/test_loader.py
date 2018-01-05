@@ -3,9 +3,10 @@ Test dbcollection/utils/loader.py.
 """
 
 
-import pytest
+import os
 import numpy as np
 import h5py
+import pytest
 
 from dbcollection.core.loader import FieldLoader, SetLoader, DataLoader
 from dbcollection.utils.test import TestDatasetGenerator
@@ -265,7 +266,10 @@ def test_FieldLoader__len__():
 def test_FieldLoader__str__():
     field_loader, _ = db_generator.get_test_data_FieldLoader('train')
 
-    matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i8">'
+    if os.name == 'nt':
+        matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i4">'
+    else:
+        matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i8">'
 
     assert str(field_loader) == matching_str
 
@@ -273,7 +277,10 @@ def test_FieldLoader__str__in_memory():
     field_loader, _ = db_generator.get_test_data_FieldLoader('train')
 
     field_loader.to_memory = True
-    matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int64">'
+    if os.name == 'nt':
+        matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int32">'
+    else:
+        matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int64">'
 
     assert str(field_loader) == matching_str
 
