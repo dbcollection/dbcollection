@@ -233,7 +233,12 @@ def test_FieldLoader_object_field_id_not_equal():
     assert obj_id is not 2
 
 def test_FieldLoader_info():
-    pass
+    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+    field_loader.info()
+
+def test_FieldLoader_info_no_verbose():
+    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+    field_loader.info(False)
 
 def test_FieldLoader_to_memory():
     pass
