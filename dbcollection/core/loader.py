@@ -18,6 +18,8 @@ class FieldLoader(object):
     ----------
     hdf5_field : h5py._hl.dataset.Dataset
         hdf5 field object handler.
+    obj_id : int, optional
+        Position of the field in 'object_fields'.
 
     Attributes
     ----------
@@ -41,19 +43,27 @@ class FieldLoader(object):
     def __init__(self, hdf5_field, obj_id=None):
         """Initialize class."""
         assert hdf5_field, 'Must input a valid hdf5 dataset.'
+
         self.data = hdf5_field
         self.hdf5_handler = hdf5_field
         self._in_memory = False
-        s = hdf5_field.name.split('/')
-        self.set = s[1]
-        self.name = s[-1]
-        self.type = hdf5_field.dtype
-        self.shape = hdf5_field.shape
+        self.set = self._get_set_name()
+        self.name = self._get_field_name()
+        self.shape = hdf5_field.dtype
+        self.type = hdf5_field.shape
         self.fillvalue = hdf5_field.fillvalue
-        if obj_id:
-            self.obj_id = obj_id
-        else:
-            self.obj_id = None
+        self.obj_id = obj_id
+
+    def _get_set_name(self):
+        hdf5_object_str = self._get_hdf5_object_str()
+        return hdf5_object_str[1]
+
+    def _get_field_name(self):
+        hdf5_object_str = self._get_hdf5_object_str()
+        return hdf5_object_str[-1]
+
+    def _get_hdf5_object_str(self):
+        return self.hdf5_handler.name.split('/')
 
     def get(self, idx=None):
         """Retrieves data of the field from the dataset's hdf5 metadata file.
@@ -72,18 +82,19 @@ class FieldLoader(object):
         -------
         np.ndarray
             Numpy array containing the field's data.
-        list
-            List of numpy arrays if using a list of indexes.
 
         """
         if idx is None:
-            if self._in_memory:
-                data = self.data
-            else:
-                data = self.data.value
+            return self._get_all_idx()
         else:
-            data = self.data[idx]
-        return data
+            return self.data[idx]
+
+    def _get_all_idx(self):
+        """Return the entire data array."""
+        if self._in_memory:
+            return self.data
+        else:
+            return self.data.value
 
     def size(self):
         """Size of the field.
@@ -92,7 +103,7 @@ class FieldLoader(object):
 
         Returns
         -------
-        list
+        tuple
             Returns the size of the field.
 
         """
@@ -112,18 +123,24 @@ class FieldLoader(object):
         """
         return self.obj_id
 
-    def info(self):
+    def info(self, verbose=True):
         """Prints information about the field.
 
         Displays information like name, size and shape of the field.
 
+        Parameters
+        ----------
+        verbose : bool, optional
+            If true, display extra information about the field.
+
         """
-        if hasattr(self, 'obj_id'):
-            print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})'
-                  .format(self.name, str(self.shape), str(self.type), self.obj_id))
-        else:
-            print('Field: {},  shape = {},  dtype = {}'
-                  .format(self.name, str(self.shape), str(self.type)))
+        if verbose:
+            if hasattr(self, 'obj_id'):
+                print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})'
+                    .format(self.name, str(self.shape), str(self.type), self.obj_id))
+            else:
+                print('Field: {},  shape = {},  dtype = {}'
+                    .format(self.name, str(self.shape), str(self.type)))
 
     def _set_to_memory(self, is_in_memory):
         """Stores the contents of the field in a numpy array if True.
