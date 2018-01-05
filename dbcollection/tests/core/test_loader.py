@@ -212,7 +212,14 @@ def test_FieldLoader_get_all_obj_in_memory():
     assert np.array_equal(data, set_data['data'])
 
 def test_FieldLoader_size():
-    pass
+    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+    size = field_loader.size()
+
+    print(size)
+    print(set_data['data'].shape)
+
+    assert size == set_data['data'].shape
 
 def test_FieldLoader_object_field_id():
     pass

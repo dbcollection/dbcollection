@@ -49,8 +49,8 @@ class FieldLoader(object):
         self._in_memory = False
         self.set = self._get_set_name()
         self.name = self._get_field_name()
-        self.shape = hdf5_field.dtype
-        self.type = hdf5_field.shape
+        self.shape = hdf5_field.shape
+        self.type = hdf5_field.dtype
         self.fillvalue = hdf5_field.fillvalue
         self.obj_id = obj_id
 
