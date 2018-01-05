@@ -158,10 +158,10 @@ class FieldLoader(object):
         if verbose:
             if hasattr(self, 'obj_id'):
                 print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})'
-                    .format(self.name, str(self.shape), str(self.type), self.obj_id))
+                      .format(self.name, str(self.shape), str(self.type), self.obj_id))
             else:
                 print('Field: {},  shape = {},  dtype = {}'
-                    .format(self.name, str(self.shape), str(self.type)))
+                      .format(self.name, str(self.shape), str(self.type)))
 
     def _set_to_memory(self, is_in_memory):
         """Stores the contents of the field in a numpy array if True.
