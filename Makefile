@@ -12,15 +12,15 @@ test:
 
 test-api:
 	make build
-	pytest dbcollection/tests/core/test_api.py
+	pytest -v dbcollection/tests/core/test_api.py
 
 test-cache:
 	make build
-	pytest dbcollection/tests/core/test_cache.py
+	pytest -v dbcollection/tests/core/test_cache.py
 
 test-loader:
 	make build
-	pytest dbcollection/tests/core/test_loader.py
+	pytest -v dbcollection/tests/core/test_loader.py
 
 lint:
 	tox -e flake8
