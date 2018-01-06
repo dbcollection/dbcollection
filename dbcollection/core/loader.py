@@ -667,7 +667,7 @@ class DataLoader(object):
         set_name : str
             Name of the set.
         field : str
-            Field name.
+            Name of the data field.
         idx : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
@@ -676,16 +676,22 @@ class DataLoader(object):
         -------
         np.ndarray
             Numpy array containing the field's data.
-        list
-            List of numpy arrays if using a list of indexes.
+
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
 
         """
-        assert set_name, 'Must input a valid set name: {}'.format(set_name)
-        assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
-                                      .format(set_name)
-        assert field, 'Must input a valid field name: {}'.format(field)
-        set_obj = getattr(self, set_name)
-        return set_obj.get(field, idx)
+        assert set_name, 'Must input a set name.'
+        assert field, 'Must input a field name.'
+        try:
+            return self.sets[set_name].get(field, index)
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
+
+    def _raise_error_invalid_set_name(self, set_name):
+            raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self._sets))
 
     def object(self, set_name, idx=None, convert_to_value=False):
         """Retrieves a list of all fields' indexes/values of an object composition.

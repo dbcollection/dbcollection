@@ -616,25 +616,90 @@ def test_SetLoader__str__():
 # -----------------------------------------------------------
 
 def test_DataLoader__init():
-    pass
+    name = 'some_db'
+    task = 'task'
+    data_dir = './some/dir'
+    hdf5_file = db_generator.get_test_hdf5_filepath_DataLoader()
 
-def test_DataLoader_get_single_obj():
-    pass
+    data_loader = DataLoader(name, task, data_dir, hdf5_file)
+
+    assert data_loader.db_name == name
+    assert data_loader.task == task
+    assert data_loader.data_dir == data_dir
+    assert data_loader.hdf5_filepath == hdf5_file
+    assert 'train' in data_loader.sets
+
+@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+def test_DataLoader_get_single_obj(idx):
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    field = 'data'
+    data = data_loader.get(set_name, field, idx)
+
+    assert np.array_equal(data, dataset[set_name][field][idx])
 
 def test_DataLoader_get_single_obj_named_args():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    field = 'data'
+    idx = 0
+    data = data_loader.get(
+        set_name=set_name,
+        field=field,
+        index=idx
+    )
+
+    assert np.array_equal(data, dataset[set_name][field][idx])
 
 def test_DataLoader_get_single_obj_access_via_SetLoader():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    field = 'data'
+    idx = 1
+    data = data_loader.sets[set_name].get(field, idx)
+
+    assert np.array_equal(data, dataset[set_name][field][idx])
+
+def test_DataLoader_get_single_obj_raise_error_invalid_set():
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    with pytest.raises(KeyError):
+        set_name = 'val'
+        field = 'data'
+        idx = 0
+        data = data_loader.get(set_name, field, idx)
 
 def test_DataLoader_get_two_objs():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    field = 'data'
+    idx = (2, 6, )
+    data = data_loader.get(set_name, field, idx)
+
+    assert np.array_equal(data, dataset[set_name][field][list(idx)])
 
 def test_DataLoader_get_all_objs():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-def test_DataLoader_get_all_objs_no_index():
-    pass
+    set_name = 'train'
+    field = 'data'
+    data = data_loader.get(set_name, field)
+
+    assert np.array_equal(data, dataset[set_name][field])
+
+def test_DataLoader_get_all_objs_empty_index():
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    field = 'data'
+    idx = []
+    data = data_loader.get(set_name, field)
+
+    assert np.array_equal(data, dataset[set_name][field])
 
 def test_DataLoader_object_single_obj():
     pass

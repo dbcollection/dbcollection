@@ -290,13 +290,25 @@ class TestDatasetGenerator:
         set_loader = SetLoader(h5obj[set_name])
         return set_loader
 
-    def get_test_dataset_DataLoader(self, set_name):
+    def get_test_dataset_DataLoader(self):
         """Return a dataset for testing the FieldLoader class."""
-        name = 'some_db'
-        task = 'task'
-        data_dir = './some/dir'
-        hdf5_file = self.hdf5_filepath
+        test_info = self.get_test_DataLoader_info()
+        name = test_info["name"]
+        task = test_info["task"]
+        data_dir = test_info["data_dir"]
+        hdf5_file = test_info["hdf5_file"]
 
         data_loader = DataLoader(name, task, data_dir, hdf5_file)
 
         return data_loader, self.dataset, self.data_fields
+
+    def get_test_DataLoader_info(self):
+        return {
+            "name": 'some_db',
+            "task": 'task',
+            "data_dir": './some/dir',
+            "hdf5_file": self.hdf5_filepath,
+        }
+
+    def get_test_hdf5_filepath_DataLoader(self):
+        return self.hdf5_filepath
