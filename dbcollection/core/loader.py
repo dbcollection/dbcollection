@@ -420,13 +420,14 @@ class SetLoader(object):
 
         Returns
         -------
-        list
-            Returns the size of a field.
+        tuple
+            Returns the size of the field.
 
         """
-        assert field in self.fields, 'Field \'{}\' does not exist in the \'{}\' set.' \
-                                     .format(field, self.set)
-        return tuple(self.hdf5_group[field].shape)
+        try:
+            return self.fields[field].shape
+        except KeyError:
+            raise KeyError('\'{}\' does not exist in the \'{}\' set.'.format(field, self.set))
 
     def list(self):
         """List of all field names.
@@ -437,7 +438,7 @@ class SetLoader(object):
             List of all data fields of the dataset.
 
         """
-        return self.fields
+        return self._fields
 
     def object_field_id(self, field):
         """Retrieves the index position of a field in the 'object_ids' list.

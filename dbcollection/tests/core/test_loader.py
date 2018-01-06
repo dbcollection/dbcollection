@@ -556,10 +556,19 @@ def test_SetLoader_object_all_objs_value():
     assert compare_lists(data, expected)
 
 def test_SetLoader_size():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    size = set_loader.size(field)
+
+    assert size == set_data[field].shape
 
 def test_SetLoader_size_object_ids():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    size = set_loader.size()
+
+    assert size == set_data['object_ids'].shape
 
 def test_SetLoader_list():
     pass
