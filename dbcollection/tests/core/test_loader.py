@@ -869,7 +869,11 @@ def test_DataLoader_info_raise_error_invalid_set():
         data_loader.info(set_name)
 
 def test_DataLoader__len__():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    size = len(data_loader)
+
+    assert size == len(dataset)
 
 def test_DataLoader__str__():
     pass

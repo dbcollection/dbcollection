@@ -886,6 +886,9 @@ class DataLoader(object):
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
+    def __len__(self):
+        return len(self.sets)
+
     def __str__(self):
         s = 'DataLoader: "{}" ({} task)' \
             .format(self.db_name, self.task)
@@ -893,6 +896,3 @@ class DataLoader(object):
 
     def __repr__(self):
         return str(self)
-
-    def __len__(self):
-        return len(self.sets)
