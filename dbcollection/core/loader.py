@@ -331,60 +331,7 @@ class SetLoader(object):
         except KeyError:
             raise KeyError('\'{}\' does not exist in the \'{}\' set.'.format(field, self.set))
 
-    def _convert(self, idx):
-        """Retrieve data from the dataset's hdf5 metadata file in the original format.
-
-        This method fetches all indices of an object(s), and then it looks up for the
-        value for each field in 'object_ids' for a certain index(es), and then it
-        groups the fetches data into a single list.
-
-        Parameters
-        ----------
-        idx : int/list/tuple
-            Index number of the field. If it is a list, returns the data
-            for all the indexes of that list as values.
-
-        Returns
-        -------
-        str/int/list
-            Value/list of a field from the metadata cache file.
-
-        """
-        if isinstance(idx, list) or isinstance(idx, tuple):
-            assert min(idx) >= 0, 'list/tuple must have indexes >= 0: {}'.format(idx)
-        else:
-            assert idx >= 0, 'idx must be >=0: {}'.format(idx)
-
-        # convert idx into a tuple (in case it is a number)
-        if not isinstance(idx, tuple):
-            idx = (idx,)
-
-        # fetch the field names composing 'object_ids'
-        fields = self._object_fields
-
-        # iterate over all ids and build an output list
-        output = []
-        for idx_ in idx:
-            # fetch list of indexes for the current id
-            ids = self.hdf5_group['object_ids'][idx_]
-
-            # fetch data for each element of the list
-            data = []
-            for i, field_name in enumerate(fields):
-                field_id = ids[i]
-                if field_id >= 0:
-                    data.append(self.hdf5_group[field_name][field_id])
-                else:
-                    data.append([])
-            output.append(data)
-
-        # output data
-        if len(idx) == 1:
-            return output[0]
-        else:
-            return output
-
-    def object(self, idx=None, convert_to_value=False):
+    def object(self, index=None, convert_to_value=False):
         """Retrieves a list of all fields' indexes/values of an object composition.
 
         Retrieves the data's ids or contents of all fields of an object.
@@ -395,7 +342,7 @@ class SetLoader(object):
 
         Parameters
         ----------
-        idx : int/list/tuple, optional
+        index : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list. If no index is used,
             it returns the entire data field array.
@@ -410,21 +357,56 @@ class SetLoader(object):
             a list of data arrays/values.
 
         """
-        if idx is None:
-            idx = tuple(range(0, self.nelems))
-        else:
-            if isinstance(idx, list) or isinstance(idx, tuple):
-                if any(idx):
-                    assert min(idx) >= 0, 'list/tuple must have indexes >= 0: {}'.format(idx)
-                else:
-                    raise ValueError('Must input a non-empty list/tuple as index: {}'.format(idx))
-            else:
-                assert idx >= 0, 'idx must be >=0: {}'.format(idx)
-
+        indexes = self._get_object_indexes(index)
         if convert_to_value:
-            return self._convert(idx)
+            indexes = self._convert(indexes.tolist())
+        return indexes
+
+    def _get_object_indexes(self, index):
+        return self.get('object_ids', index)
+
+    def _convert(self, index):
+        """Retrieve data from the dataset's hdf5 metadata file in the original format.
+
+        This method fetches all indices of an object(s), and then it looks up for the
+        value for each field in 'object_ids' for a certain index(es), and then it
+        groups the fetches data into a single list.
+
+        Parameters
+        ----------
+        index : list
+            List of indexes of data fields.
+
+        Returns
+        -------
+        List
+            Value/list of a field from the metadata cache file.
+
+        Raises
+        ------
+        TypeError
+            If index is not a list of ints or a list of lists.
+
+        """
+        assert index, 'Must input a valid index.'
+        if isinstance(index[0], int):
+            output = self._convert_to_value_single_object(index)
+        elif isinstance(index[0], list):
+            output = []
+            for idx in index:
+                output.append(self._convert_to_value_single_object(idx))
         else:
-            return self.get('object_ids', idx)
+            raise TypeError("Invalid input index format.")
+        return output
+
+    def _convert_to_value_single_object(self, idx):
+        data = []
+        for i, field in enumerate(self.object_fields):
+            if idx[i] >= 0:
+                data.append(self.get(field, idx[i]))
+            else:
+                data.append([])  # undefined index retrieves an empty list
+        return data
 
     def size(self, field='object_ids'):
         """Size of a field.

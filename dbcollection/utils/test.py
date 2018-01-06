@@ -245,9 +245,9 @@ class TestDatasetGenerator:
         for field in lists:
             dataset[field] = lists[field]
 
-        data_fields = sorted(dataset.keys())
-        dataset['object_fields'] = str_to_ascii(data_fields)
-        dataset['object_ids'] = np.array([[i] * len(fields) for i in range(size)])
+        obj_fields = sorted(fields.keys())
+        dataset['object_fields'] = str_to_ascii(obj_fields)
+        dataset['object_ids'] = np.array([[i] * len(obj_fields) for i in range(size)])
 
         return dataset
 

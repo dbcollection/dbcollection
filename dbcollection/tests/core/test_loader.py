@@ -446,28 +446,114 @@ def test_SetLoader_get_data_all_obj_in_memory():
     assert np.array_equal(data, set_data[field])
 
 def test_SetLoader_get_data_single_obj_object_ids():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'object_ids'
+    idx = 0
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][idx])
 
 def test_SetLoader_get_data_single_obj_object_ids_in_memory():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'object_ids'
+    idx = 0
+    set_loader.fields[field].to_memory = True
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][idx])
 
 def test_SetLoader_object_single_obj():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    idx = 0
+    data = set_loader.object(idx)
+
+    assert np.array_equal(data, set_data['object_ids'][idx])
+
+###
+def get_expected_object_values(set_data, fields, idx):
+    """Get the expected values of an object index from the test dataset."""
+    assert set_data
+    assert fields
+    assert idx is not None
+
+    if isinstance(idx, int):
+        expected = get_single_object_values(set_data, fields, idx)
+    else:
+        expected = []
+        for i in idx:
+            expected.append(get_single_object_values(set_data, fields, idx[i]))
+    return expected
+
+def get_single_object_values(set_data, fields, idx):
+    data = []
+    for field in fields:
+        data.append(set_data[field][idx])
+    return data
+
+def compare_lists(listA, listB):
+    assert listA
+    assert listB
+    if isinstance(listA[0], list):
+        for i in range(len(listA)):
+            if not compare_single_lists(listA[i], listB[i]):
+                return False
+        return True
+    else:
+        return compare_single_lists(listA, listB)
+
+def compare_single_lists(listA, listB):
+    assert listA
+    assert listB
+    for i in range(len(listA)):
+        if not np.array_equal(listA[i], listB[i]):
+            return False
+    return True
+###
 
 def test_SetLoader_object_single_obj_value():
-    pass
+    set_loader, set_data, fields = db_generator.get_test_dataset_SetLoader('train')
+
+    idx = 0
+    data = set_loader.object(idx, True)
+    expected = get_expected_object_values(set_data, set_loader.object_fields, idx)
+
+    assert compare_lists(data, expected)
 
 def test_SetLoader_object_two_objs():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    idx = [0, 1]
+    data = set_loader.object(idx)
+
+    assert np.array_equal(data, set_data['object_ids'][idx])
 
 def test_SetLoader_object_two_objs_value():
-    pass
+    set_loader, set_data, fields = db_generator.get_test_dataset_SetLoader('train')
+
+    idx = [0, 1]
+    data = set_loader.object(idx, True)
+    expected = get_expected_object_values(set_data, set_loader.object_fields, idx)
+
+    assert compare_lists(data, expected)
 
 def test_SetLoader_object_all_objs():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    data = set_loader.object()
+
+    assert np.array_equal(data, set_data['object_ids'])
 
 def test_SetLoader_object_all_objs_value():
-    pass
+    set_loader, set_data, fields = db_generator.get_test_dataset_SetLoader('train')
+
+    data = set_loader.object(convert_to_value=True)
+    idx = range(len(set_data['object_ids']))
+    expected = get_expected_object_values(set_data, set_loader.object_fields, idx)
+
+    assert compare_lists(data, expected)
 
 def test_SetLoader_size():
     pass
