@@ -591,7 +591,9 @@ def test_SetLoader_object_field_id_raise_error_invalid_field():
         obj_id = set_loader.object_field_id('data_invalid_field')
 
 def test_SetLoader_info():
-    pass
+    set_loader, _, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    set_loader.info()
 
 def test_SetLoader__len__():
     pass

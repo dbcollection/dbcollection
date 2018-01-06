@@ -224,8 +224,8 @@ class TestDatasetGenerator:
         }
 
         lists = {
-            "dummy_data": np.array(range(10)),
-            "dummy_number": np.array(range(10), dtype=np.uint8),
+            "list_dummy_data": np.array(range(10)),
+            "list_dummy_number": np.array(range(10), dtype=np.uint8),
         }
 
         dataset = {}

@@ -268,6 +268,9 @@ class SetLoader(object):
         self._fields = self._get_field_names()
         self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
 
+        self._fields_info = []
+        self._lists_info = []
+
     def _get_set_name(self):
         hdf5_object_str = self.hdf5_group.name
         str_split = hdf5_object_str.split('/')
@@ -485,39 +488,48 @@ class SetLoader(object):
 
         """
         print('\n> Set: {}'.format(self.set))
+        self._set_fields_lists_info()
+        self._print_info_fields()
+        self._print_info_lists()
 
-        # prints all fields except list_*
-        fields_info = []
-        lists_info = []
+    def _set_fields_lists_info(self):
+        if any(self._fields_info):
+            return
         for field in sorted(self.fields):
-            f = self.hdf5_group[field]
-
-            if field.startswith('list_'):
-                lists_info.append({
-                    "name": str(field),
-                    "shape": 'shape = {}'.format(str(f.shape)),
-                    "type": 'dtype = {}'.format(str(f.dtype))
-                })
+            if self._is_field_a_list(field):
+                self._lists_info.append(self._get_list_info(field))
             else:
-                # check if its in 'object_ids'
-                if field in self.object_fields:
-                    s_obj = "(in 'object_ids', position = {})" \
-                            .format(self.object_field_id(field))
-                else:
-                    s_obj = ''
+                self._fields_info.append(self._get_field_info(field))
 
-                fields_info.append({
-                    "name": str(field),
-                    "shape": 'shape = {}'.format(str(f.shape)),
-                    "type": 'dtype = {}'.format(str(f.dtype)),
-                    "obj": s_obj
-                })
+    def _is_field_a_list(self, field):
+        assert field
+        return field.startswith('list_')
 
-        maxsize_name = max([len(d["name"]) for d in fields_info]) + 8
-        maxsize_shape = max([len(d["shape"]) for d in fields_info]) + 3
-        maxsize_type = max([len(d["type"]) for d in fields_info]) + 3
+    def _get_list_info(self, field):
+        assert field
+        return {
+            "name": str(field),
+            "shape": 'shape = {}'.format(str(self.fields[field].shape)),
+            "type": 'dtype = {}'.format(str(self.fields[field].type))
+        }
 
-        for i, info in enumerate(fields_info):
+    def _get_field_info(self, field):
+        assert field
+        s_obj = ''
+        if field in self.object_fields:
+            obj_id = self.object_field_id(field)
+            s_obj = "(in 'object_ids', position = {})".format(obj_id)
+
+        return {
+            "name": str(field),
+            "shape": 'shape = {}'.format(str(self.fields[field].shape)),
+            "type": 'dtype = {}'.format(str(self.fields[field].type)),
+            "obj": s_obj
+        }
+
+    def _print_info_fields(self):
+        maxsize_name, maxsize_shape, maxsize_type = self._get_max_sizes_fields()
+        for i, info in enumerate(self._fields_info):
             s_name = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
             s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
             s_obj = info["obj"]
@@ -527,17 +539,26 @@ class SetLoader(object):
                 s_type = '{:{}}'.format('{}'.format(info["type"]), maxsize_type)
             print(s_name + s_shape + s_type + s_obj)
 
-        if any(lists_info):
+    def _get_max_sizes_fields(self):
+        maxsize_name = max([len(d["name"]) for d in self._fields_info]) + 8
+        maxsize_shape = max([len(d["shape"]) for d in self._fields_info]) + 3
+        maxsize_type = max([len(d["type"]) for d in self._fields_info]) + 3
+        return maxsize_name, maxsize_shape, maxsize_type
+
+    def _print_info_lists(self):
+        if any(self._lists_info):
             print('\n   (Pre-ordered lists)')
-
-            maxsize_name = max([len(d["name"]) for d in lists_info]) + 8
-            maxsize_shape = max([len(d["shape"]) for d in lists_info]) + 3
-
-            for i, info in enumerate(lists_info):
+            maxsize_name, maxsize_shape = self._get_max_sizes_lists()
+            for i, info in enumerate(self._lists_info):
                 s_name = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
                 s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
                 s_type = info["type"]
                 print(s_name + s_shape + s_type)
+
+    def _get_max_sizes_lists(self):
+        maxsize_name = max([len(d["name"]) for d in self._lists_info]) + 8
+        maxsize_shape = max([len(d["shape"]) for d in self._lists_info]) + 3
+        return maxsize_name, maxsize_shape
 
     def __len__(self):
         """
