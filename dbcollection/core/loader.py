@@ -890,8 +890,7 @@ class DataLoader(object):
         return len(self.sets)
 
     def __str__(self):
-        s = 'DataLoader: "{}" ({} task)' \
-            .format(self.db_name, self.task)
+        s = "DataLoader: {} ('{}' task)".format(self.db_name, self.task)
         return s
 
     def __repr__(self):

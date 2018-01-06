@@ -876,4 +876,8 @@ def test_DataLoader__len__():
     assert size == len(dataset)
 
 def test_DataLoader__str__():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    matching_str = "DataLoader: some_db ('task' task)"
+
+    assert str(data_loader) == matching_str
