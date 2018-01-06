@@ -603,7 +603,12 @@ def test_SetLoader__len__():
     assert nelems == len(set_data['object_ids'])
 
 def test_SetLoader__str__():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    size = len(set_data['object_ids'])
+    matching_str = 'SetLoader: set<train>, len<{}>'.format(size)
+
+    assert str(set_loader) == matching_str
 
 
 # -----------------------------------------------------------

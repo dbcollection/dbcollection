@@ -571,8 +571,7 @@ class SetLoader(object):
         return self.nelems
 
     def __str__(self):
-        s = 'SetLoader: set<{}>, len<{}>' \
-            .format(self.set, self.nelems)
+        s = 'SetLoader: set<{}>, len<{}>'.format(self.set, self.nelems)
         return s
 
     def __repr__(self):
