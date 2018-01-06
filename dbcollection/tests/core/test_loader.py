@@ -596,7 +596,11 @@ def test_SetLoader_info():
     set_loader.info()
 
 def test_SetLoader__len__():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    nelems = len(set_loader)
+
+    assert nelems == len(set_data['object_ids'])
 
 def test_SetLoader__str__():
     pass
