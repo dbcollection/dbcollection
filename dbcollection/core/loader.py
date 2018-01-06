@@ -618,33 +618,44 @@ class DataLoader(object):
 
     def __init__(self, name, task, data_dir, hdf5_filepath):
         """Initialize class."""
-        assert name, 'Must input a valid dataset name: {}'.format(name)
-        assert task, 'Must input a valid task name: {}'.format(task)
-        assert data_dir, 'Must input a valid path for the data directory: {}'.format(data_dir)
-        assert hdf5_filepath, 'Must input a valid path for the cache file: {}'.format(hdf5_filepath)
+        assert name, 'Must input a valid dataset name.'
+        assert task, 'Must input a valid task name.'
+        assert data_dir, 'Must input a valid path for the data directory.'
+        assert hdf5_filepath, 'Must input a valid path for the cache file.'
 
-        # store information of the dataset
         self.db_name = name
         self.task = task
         self.data_dir = data_dir
         self.hdf5_filepath = hdf5_filepath
-
-        # create a handler for the cache file
-        self.hdf5_file = h5py.File(self.hdf5_filepath, 'r', libver='latest')
+        self.hdf5_file = self._load_hdf5_file()
         self.root_path = '/'
+        self._sets = self._get_sets()
+        self.object_fields = self._get_object_fields()
 
-        # make links for all groups (train/val/test/etc) for easier access
-        self.sets = tuple(self.hdf5_file['/'].keys())
-        for set_name in self.sets:
-            setattr(self, set_name, SetLoader(self.hdf5_file[set_name]))
+        self.sets = self._get_set_loaders()
 
-        # fetch list of field names that compose the object list.
-        self.object_fields = {}
-        for set_name in self.sets:
+    def _load_hdf5_file(self):
+        return h5py.File(self.hdf5_filepath, 'r', libver='latest')
+
+    def _get_sets(self):
+        return tuple(sorted(self.hdf5_file['/'].keys()))
+
+    def _get_object_fields(self):
+        """# fetch list of field names that compose the object list."""
+        object_fields = {}
+        for set_name in self._sets:
             data = self.hdf5_file['/{}/object_fields'.format(set_name)].value
-            self.object_fields[set_name] = tuple(convert_ascii_to_str(data))
+            object_fields[set_name] = tuple(convert_ascii_to_str(data))
+        return object_fields
 
-    def get(self, set_name, field, idx=None):
+    def _get_set_loaders(self):
+        """Return a dictionary with list of set loaders."""
+        sets = {}
+        for set_name in self._sets:
+            sets[set_name] = SetLoader(self.hdf5_file[set_name])
+        return sets
+
+    def get(self, set_name, field, index=None):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
