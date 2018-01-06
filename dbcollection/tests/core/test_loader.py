@@ -571,10 +571,11 @@ def test_SetLoader_size_object_ids():
     assert size == set_data['object_ids'].shape
 
 def test_SetLoader_list():
-    pass
+    set_loader, set_data, set_fields = db_generator.get_test_dataset_SetLoader('train')
 
-def test_SetLoader_list_error_call_with_inputs():
-    pass
+    fields = set_loader.list()
+
+    assert fields == tuple(set_fields)
 
 def test_SetLoader_info():
     pass
