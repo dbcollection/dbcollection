@@ -571,11 +571,24 @@ def test_SetLoader_size_object_ids():
     assert size == set_data['object_ids'].shape
 
 def test_SetLoader_list():
-    set_loader, set_data, set_fields = db_generator.get_test_dataset_SetLoader('train')
+    set_loader, _, set_fields = db_generator.get_test_dataset_SetLoader('train')
 
     fields = set_loader.list()
 
     assert fields == tuple(set_fields)
+
+def test_SetLoader_object_field_id():
+    set_loader, _, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    obj_id = set_loader.object_field_id('data')
+
+    assert obj_id == 0
+
+def test_SetLoader_object_field_id_raise_error_invalid_field():
+    set_loader, _, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    with pytest.raises(KeyError):
+        obj_id = set_loader.object_field_id('data_invalid_field')
 
 def test_SetLoader_info():
     pass

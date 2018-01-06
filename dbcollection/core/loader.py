@@ -423,6 +423,11 @@ class SetLoader(object):
         tuple
             Returns the size of the field.
 
+        Raises
+        ------
+        KeyError
+            If field is invalid or does not exist in the fields dict.
+
         """
         try:
             return self.fields[field].shape
@@ -456,12 +461,17 @@ class SetLoader(object):
         int
             Index of the field in the 'object_ids' list.
 
+        Raises
+        ------
+        KeyError
+            If field does not exists in the list of object fields.
+
         """
-        assert field, 'Must input a valid field: {}'.format(field)
-        if field in self._object_fields:
-            return self._object_fields.index(field)
-        else:
-            raise ValueError('Field \'{}\' is not contained in \'object_fields\'.'.format(field))
+        assert field, 'Must input a valid field.'
+        try:
+            return self.fields[field].object_field_id()
+        except KeyError:
+            raise KeyError('\'{}\' is not contained in \'object_fields\'.'.format(field))
 
     def info(self):
         """Prints information about the data fields of a set.
@@ -490,7 +500,7 @@ class SetLoader(object):
                 })
             else:
                 # check if its in 'object_ids'
-                if field in self._object_fields:
+                if field in self.object_fields:
                     s_obj = "(in 'object_ids', position = {})" \
                             .format(self.object_field_id(field))
                 else:
