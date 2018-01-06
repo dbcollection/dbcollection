@@ -693,7 +693,7 @@ class DataLoader(object):
     def _raise_error_invalid_set_name(self, set_name):
             raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self._sets))
 
-    def object(self, set_name, idx=None, convert_to_value=False):
+    def object(self, set_name, index=None, convert_to_value=False):
         """Retrieves a list of all fields' indexes/values of an object composition.
 
         Retrieves the data's ids or contents of all fields of an object.
@@ -706,7 +706,7 @@ class DataLoader(object):
         ----------
         set_name : str
             Name of the set.
-        idx : int/list/tuple, optional
+        index : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list. If no index is used,
             it returns the entire data field array.
@@ -717,15 +717,21 @@ class DataLoader(object):
         Returns
         -------
         list
-            Returns a list of indexes or, if convert_to_value is True,
-            a list of data arrays/values.
+            List of indexes of the data fields available in 'object_fields'.
+            If convert_to_value is set to True, it returns a list of data
+            instead of indexes.
+
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
 
         """
-        assert set_name, 'Must input a valid set name: {}'.format(set_name)
-        assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
-                                      .format(set_name)
-        set_obj = getattr(self, set_name)
-        return set_obj.object(idx, convert_to_value)
+        assert set_name, 'Must input a valid set name.'
+        try:
+            return self.sets[set_name].object(index, convert_to_value)
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
     def size(self, set_name=None, field='object_ids'):
         """Size of a field.

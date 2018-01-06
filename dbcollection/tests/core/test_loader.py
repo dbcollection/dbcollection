@@ -702,22 +702,50 @@ def test_DataLoader_get_all_objs_empty_index():
     assert np.array_equal(data, dataset[set_name][field])
 
 def test_DataLoader_object_single_obj():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    idx = 3
+    data = data_loader.object(set_name, idx)
+
+    assert np.array_equal(data, dataset[set_name]['object_ids'][idx])
 
 def test_DataLoader_object_single_obj_values():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    idx = 3
+    data = data_loader.object(set_name, idx, True)
+    expected = get_expected_object_values(dataset[set_name],
+                                          data_loader.sets[set_name].object_fields,
+                                          idx)
+
+    assert compare_lists(data, expected)
+
+def test_DataLoader_object_single_obj_raise_error_invalid_set():
+    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+
+    with pytest.raises(KeyError):
+        set_name = 'val'
+        idx = 3
+        data = data_loader.object(set_name, idx)
 
 def test_DataLoader_object_two_objs():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-def test_DataLoader_object_two_obj_values():
-    pass
+    set_name = 'train'
+    idx = [3, 4]
+    data = data_loader.object(set_name, idx)
+
+    assert np.array_equal(data, dataset[set_name]['object_ids'][idx])
 
 def test_DataLoader_object_all_objs():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-def test_DataLoader_object_all_objs_no_index():
-    pass
+    set_name = 'train'
+    data = data_loader.object(set_name)
+
+    assert np.array_equal(data, dataset[set_name]['object_ids'])
 
 def test_DataLoader_size_single_field():
     pass
