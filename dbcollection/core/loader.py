@@ -747,7 +747,7 @@ class DataLoader(object):
 
         Returns
         -------
-        list
+        list/dict
             Returns the size of a field.
 
         Raises
@@ -786,21 +786,32 @@ class DataLoader(object):
 
         Returns
         -------
-        list
+        list/dict
             List of all data fields of the dataset.
 
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
+
         """
-        if set_name:
-            assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
-                                          .format(set_name)
-            set_obj = getattr(self, set_name)
-            return set_obj.list()
+        if set_name is None:
+            return self._get_list_all_sets()
         else:
-            out = {}
-            for set_name_ in self.sets:
-                set_obj = getattr(self, set_name_)
-                out.update({set_name_: set_obj.list()})
-            return out
+            return self._get_list_single_set(set_name)
+
+    def _get_list_all_sets(self):
+        out = {}
+        for set_name in self.sets:
+            out.update({set_name: self.sets[set_name].list()})
+        return out
+
+    def _get_list_single_set(self, set_name):
+        assert set_name
+        try:
+            return self.sets[set_name].list()
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
     def object_field_id(self, set_name, field):
         """Retrieves the index position of a field in the 'object_ids' list.

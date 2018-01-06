@@ -575,7 +575,7 @@ def test_SetLoader_list():
 
     fields = set_loader.list()
 
-    assert fields == tuple(set_fields)
+    assert fields == tuple(sorted(set_fields))
 
 def test_SetLoader_object_field_id():
     set_loader, _, _ = db_generator.get_test_dataset_SetLoader('train')
@@ -800,10 +800,29 @@ def test_DataLoader_size_raise_error_invalid_sfield():
         size = data_loader.size(field=field)
 
 def test_DataLoader_list_single_set():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name= 'train'
+    fields = data_loader.list(set_name)
+
+    assert fields == tuple(sorted(dataset[set_name]))
 
 def test_DataLoader_list_all_sets():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    fields = data_loader.list()
+    expected = {}
+    for set_name in dataset:
+        expected[set_name] = tuple(sorted(dataset[set_name]))
+
+    assert fields == expected
+
+def test_DataLoader_list_raise_error_invalid_set():
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    with pytest.raises(KeyError):
+        set_name = 'val'
+        fields = data_loader.list(set_name)
 
 def test_DataLoader_object_field_id_field1():
     pass
