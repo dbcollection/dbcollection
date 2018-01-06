@@ -230,53 +230,6 @@ class FieldLoader(object):
         return str(self)
 
 
-class ListFieldLoader:
-    """Constains a list of all data fields as FieldLoader objects.
-
-    Parameters
-    ----------
-    fields : tuple
-        List of all field names of the set.
-    object_fields : tuple
-        List of all field names of the set contained by the 'object_ids' list.
-    hdf5_group : h5py._hl.group.Group
-        hdf5 group object handler.
-
-    Attributes
-    ----------
-    <data_field1> : FieldLoader
-        Data field 1.
-    <data_field2> : FieldLoader
-        Data field 2.
-    <data_field3> : FieldLoader
-        Data field 3.
-    ...
-    <data_fieldN> : FieldLoader
-        Data field N.
-
-    """
-    def __init__(self, fields, object_fields, hdf5_group):
-        """Initialize class."""
-        assert fields, "Must input a valid 'fields' list"
-        assert object_fields, "Must input a valid 'object_fields' list"
-        assert hdf5_group, "Must input a valid 'hdf5_group' handler"
-
-        self._fields = fields
-        self._object_fields = object_fields
-        self._load_fields_as_FieldLoader_obj(hdf5_group)
-
-    def _load_fields_as_FieldLoader_obj(self, hdf5_group):
-        for field in self._fields:
-            obj_id = self._get_obj_id_field(field)
-            setattr(self, field, FieldLoader(hdf5_group[field], obj_id))
-
-    def _get_obj_id_field(self, field):
-        if field in self._object_fields:
-            return self._object_fields.index(field)
-        else:
-            return None
-
-
 class SetLoader(object):
     """Set metadata loader class.
 
@@ -334,7 +287,17 @@ class SetLoader(object):
         return len(self.hdf5_group['object_ids'])
 
     def _load_hdf5_fields(self):
-        return ListFieldLoader(self._fields, self.object_fields, self.hdf5_group)
+        fields = {}
+        for field in self._fields:
+            obj_id = self._get_obj_id_field(field)
+            fields[field] = FieldLoader(self.hdf5_group[field], obj_id)
+        return fields
+
+    def _get_obj_id_field(self, field):
+        if field in self.object_fields:
+            return self.object_fields.index(field)
+        else:
+            return None
 
     def get(self, field, index=None):
         """Retrieves data from the dataset's hdf5 metadata file.
