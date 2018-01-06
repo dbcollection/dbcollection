@@ -748,16 +748,56 @@ def test_DataLoader_object_all_objs():
     assert np.array_equal(data, dataset[set_name]['object_ids'])
 
 def test_DataLoader_size_single_field():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    field = 'data'
+    size = data_loader.size(set_name, field)
+
+    assert size == dataset[set_name][field].shape
 
 def test_DataLoader_size_default():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    size = data_loader.size(set_name)
+
+    assert size == dataset[set_name]['object_ids'].shape
 
 def test_DataLoader_size_single_field_all_sets():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    field = 'data'
+    size = data_loader.size(field=field)
+    expected = {}
+    for set_name in dataset:
+        expected.update({set_name: dataset[set_name][field].shape})
+
+    assert size == expected
 
 def test_DataLoader_size_no_inputs():
-    pass
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    size = data_loader.size()
+    expected = {}
+    for set_name in dataset:
+        expected.update({set_name: dataset[set_name]['object_ids'].shape})
+
+    assert size == expected
+
+def test_DataLoader_size_raise_error_invalid_set():
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    with pytest.raises(KeyError):
+        set_name = "val"
+        size = data_loader.size(set_name)
+
+def test_DataLoader_size_raise_error_invalid_sfield():
+    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+    with pytest.raises(KeyError):
+        field = "invalid_field_name"
+        size = data_loader.size(field=field)
 
 def test_DataLoader_list_single_set():
     pass

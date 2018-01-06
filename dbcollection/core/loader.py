@@ -691,7 +691,7 @@ class DataLoader(object):
             self._raise_error_invalid_set_name(set_name)
 
     def _raise_error_invalid_set_name(self, set_name):
-            raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self._sets))
+        raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self._sets))
 
     def object(self, set_name, index=None, convert_to_value=False):
         """Retrieves a list of all fields' indexes/values of an object composition.
@@ -750,18 +750,31 @@ class DataLoader(object):
         list
             Returns the size of a field.
 
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
+
         """
         if set_name is None:
-            out = {}
-            for set_name_ in self.sets:
-                set_obj = getattr(self, set_name_)
-                out.update({set_name_: set_obj.size(field)})
-            return out
+            return self._get_size_all_sets(field)
         else:
-            assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
-                                          .format(set_name)
-            set_obj = getattr(self, set_name)
-            return set_obj.size(field)
+            return self._get_size_single_set(set_name, field)
+
+    def _get_size_all_sets(self, field):
+        assert field
+        out = {}
+        for set_name in self.sets:
+            out[set_name] = self.sets[set_name].size(field)
+        return out
+
+    def _get_size_single_set(self, set_name, field):
+        assert set_name
+        assert field
+        try:
+            return self.sets[set_name].size(field)
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
     def list(self, set_name=None):
         """List of all field names of a set.
