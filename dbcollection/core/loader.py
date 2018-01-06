@@ -864,16 +864,27 @@ class DataLoader(object):
         set_name : str, optional
             Name of the set.
 
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
+
         """
-        if set_name:
-            assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
-                                          .format(set_name)
-            set_obj = getattr(self, set_name)
-            set_obj.info()
+        if set_name is None:
+            self._print_info_all_sets()
         else:
-            for set_name in sorted(self.sets):
-                set_obj = getattr(self, set_name)
-                set_obj.info()
+            self._print_info_single_set(set_name)
+
+    def _print_info_all_sets(self):
+        for set_name in sorted(self.sets):
+            self.sets[set_name].info()
+
+    def _print_info_single_set(self, set_name):
+        assert set_name
+        try:
+            self.sets[set_name].info()
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
     def __str__(self):
         s = 'DataLoader: "{}" ({} task)' \

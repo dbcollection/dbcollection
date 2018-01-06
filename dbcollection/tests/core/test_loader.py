@@ -851,10 +851,22 @@ def test_DataLoader_object_field_id_raise_error_invalid_set():
         obj_id = data_loader.object_field_id(set_name, field)
 
 def test_DataLoader_info_single_set():
-    pass
+    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    data_loader.info(set_name)
 
 def test_DataLoader_info_all_sets():
-    pass
+    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+
+    data_loader.info()
+
+def test_DataLoader_info_raise_error_invalid_set():
+    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+
+    with pytest.raises(KeyError):
+        set_name = 'val'
+        data_loader.info(set_name)
 
 def test_DataLoader__len__():
     pass
