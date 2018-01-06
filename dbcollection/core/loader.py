@@ -319,16 +319,17 @@ class SetLoader(object):
         np.ndarray
             Numpy array containing the field's data.
 
+        Raises
+        ------
+        KeyError
+            If the field does not exist in the list.
+
         """
-        assert field, 'Must input a valid field name: {}'.format(field)
-        assert field in self._fields, 'Field \'{}\' does not exist in the \'{}\' set.' \
-                                      .format(field, self.set)
-        if index is None:
-            return self.hdf5_group[field].value
-        else:
-            if isinstance(index, tuple):
-                idx = list(index)
-            return self.hdf5_group[field][idx]
+        assert field, 'Must input a valid field name.'
+        try:
+            return self.fields[field].get(index=index)
+        except KeyError:
+            raise KeyError('\'{}\' does not exist in the \'{}\' set.'.format(field, self.set))
 
     def _convert(self, idx):
         """Retrieve data from the dataset's hdf5 metadata file in the original format.

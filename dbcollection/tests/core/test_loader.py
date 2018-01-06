@@ -336,29 +336,114 @@ def test_SetLoader__init():
     assert set_loader.object_fields == ascii_to_str(dataset[set_name]['object_fields'])
     assert set_loader.nelems == 5
 
-def test_SetLoader_get_data_single_obj():
-    pass
+def test_SetLoader_get_data_raises_keyerror_missing_field():
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
 
-def test_SetLoader_get_data_single_obj_in_memory():
-    pass
+    with pytest.raises(AssertionError):
+        field = 'data'
+        idx = 0
+        data = set_loader.get(idx)
+
+def test_SetLoader_get_data_raises_keyerror_invalid_field():
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    with pytest.raises(KeyError):
+        field = 'data_invalid'
+        idx = 0
+        data = set_loader.get(field, idx)
+
+@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+def test_SetLoader_get_data_single_obj(idx):
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][idx])
+
+@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+def test_SetLoader_get_data_single_obj_in_memory(idx):
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    set_loader.fields[field].to_memory = True
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][idx])
 
 def test_SetLoader_get_data_two_objs():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    idx = [0, 1]
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][idx])
 
 def test_SetLoader_get_data_two_objs_in_memory():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    idx = [0, 1]
+    set_loader.fields[field].to_memory = True
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][idx])
+
+def test_SetLoader_get_data_two_objs_same_index():
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    idx = [0, 0]
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][list(set(idx))])
+
+def test_SetLoader_get_data_two_objs_in_memory():
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    idx = [0, 0]
+    set_loader.fields[field].to_memory = True
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][list(set(idx))])
 
 def test_SetLoader_get_data_multiple_objs():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    idx = range(5)
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][idx])
 
 def test_SetLoader_get_data_multiple_objs_in_memory():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    idx = range(5)
+    set_loader.fields[field].to_memory = True
+    data = set_loader.get(field, idx)
+
+    assert np.array_equal(data, set_data[field][idx])
 
 def test_SetLoader_get_data_all_obj():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    data = set_loader.get(field)
+
+    assert np.array_equal(data, set_data[field])
 
 def test_SetLoader_get_data_all_obj_in_memory():
-    pass
+    set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
+
+    field = 'data'
+    set_loader.fields[field].to_memory = True
+    data = set_loader.get(field)
+
+    assert np.array_equal(data, set_data[field])
 
 def test_SetLoader_get_data_single_obj_object_ids():
     pass
