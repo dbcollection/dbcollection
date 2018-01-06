@@ -831,13 +831,18 @@ class DataLoader(object):
         int
             Index of the field in the 'object_ids' list.
 
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
+
         """
-        assert set_name, 'Must input a valid set name: {}'.format(set_name)
-        assert set_name in self.sets, 'Set {} does not exist for this dataset.' \
-                                      .format(set_name)
-        assert field, 'Must input a valid field name: {}'.format(field)
-        set_obj = getattr(self, set_name)
-        return set_obj.object_field_id(field)
+        assert set_name, 'Must input a valid set name.'
+        assert field, 'Must input a valid field name.'
+        try:
+            return self.sets[set_name].object_field_id(field)
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
     def info(self, set_name=None):
         """Prints information about all data fields of a set.

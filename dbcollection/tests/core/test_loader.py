@@ -825,10 +825,30 @@ def test_DataLoader_list_raise_error_invalid_set():
         fields = data_loader.list(set_name)
 
 def test_DataLoader_object_field_id_field1():
-    pass
+    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    field = 'data'
+    obj_id = data_loader.object_field_id(set_name, field)
+
+    assert obj_id == 0
 
 def test_DataLoader_object_field_id_field2():
-    pass
+    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+
+    set_name = 'train'
+    field = 'number'
+    obj_id = data_loader.object_field_id(set_name, field)
+
+    assert obj_id == 2
+
+def test_DataLoader_object_field_id_raise_error_invalid_set():
+    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+
+    with pytest.raises(KeyError):
+        set_name = 'val'
+        field = 'data'
+        obj_id = data_loader.object_field_id(set_name, field)
 
 def test_DataLoader_info_single_set():
     pass
