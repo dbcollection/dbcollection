@@ -8,6 +8,7 @@ from setuptools import setup, find_packages
 # set version
 VERSION = '0.2.0'
 
+
 def get_requirements():
     """
     Load contents from requirements.txt.
