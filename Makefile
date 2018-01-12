@@ -1,10 +1,23 @@
+#########
+# Build
+#########
+
 build: mybuild
 mybuild:
 	python setup.py develop
 
+install: myinstall
+myinstall:
+	python setup.py install
+
 docs: mydocs
 mydocs:
 	make -C docs html
+
+
+#########
+# Tests
+#########
 
 test:
 	make build
@@ -24,6 +37,11 @@ test-loader:
 
 lint:
 	tox -e flake8
+
+
+##########
+# Deploy
+##########
 
 deploy:
 	python conda-recipe/deploy.py
