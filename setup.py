@@ -8,10 +8,16 @@ from setuptools import setup, find_packages
 # set version
 VERSION = '0.2.0'
 
-# Load requirements
-requirements = []
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
+def get_requirements():
+    """
+    Load contents from requirements.txt.
+    """
+    requirements = []
+    with open('requirements.txt') as f:
+        data = f.read().splitlines()
+    if any(data):
+        requirements = [item.split(" ")[0] for item in data]
+    return requirements
 
 
 setup(
@@ -80,6 +86,6 @@ setup(
                                     'ci',
                                     'conda-recipe',
                                     'dbcollection.tests']),
-    install_requires=requirements,
+    install_requires=get_requirements(),
     include_package_data=True,
 )
