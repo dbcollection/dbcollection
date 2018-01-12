@@ -1,4 +1,0 @@
-twine
-patool
-xmltodict
-progressbar2

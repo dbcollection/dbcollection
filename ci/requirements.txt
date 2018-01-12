@@ -1,7 +1,0 @@
-pytest
-pytest-cov
-h5py
-numpy
-scipy
-requests
-Pillow
