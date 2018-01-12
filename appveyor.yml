@@ -36,14 +36,6 @@ environment:
       PY_TAG: "cp35"
 
     - CONDA_ROOT: "C:\\Miniconda3_64"
-      PYTHON_VERSION: "3.4"
-      PYTHON_ARCH: "64"
-      CONDA_PY: "34"
-      CONDA_NPY: "112"
-      PLAT_NAME: "win-amd64"
-      PY_TAG: "cp34"
-
-    - CONDA_ROOT: "C:\\Miniconda3_64"
       PYTHON_VERSION: "2.7"
       PYTHON_ARCH: "64"
       CONDA_PY: "27"
