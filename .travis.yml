@@ -14,6 +14,7 @@ install:
     - echo "install start"
     - pip install pipenv --upgrade
     - pipenv install --dev
+    - pipenv run python setup.py install
     - echo "install complete."
 
 # command to run tests
