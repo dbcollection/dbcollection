@@ -11,6 +11,7 @@ tox = "*"
 pytest = "*"
 pytest-sugar = "*"
 pytest-cov = "*"
+tox-pyenv = "*"
 
 
 [packages]
