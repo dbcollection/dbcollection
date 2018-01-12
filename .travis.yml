@@ -19,8 +19,10 @@ install:
 
 # command to run tests
 script:
+    - echo "Run tests"
     - pipenv run pytest --cov=dbcollection dbcollection/tests/
-    - pipenv run pytest --cov=dbcollection/tests/datasets/__test_check_urls.py
+    - pipenv run pytest dbcollection/tests/datasets/__test_check_urls.py
+    - echo "Test complete."
 
 after_success:
     - echo "Upload code coverage to codecov"
