@@ -1,3 +1,7 @@
+shell-python:
+	python -i -c "import rlcompleter, readline; readline.parse_and_bind('tab: complete');"
+
+
 #########
 # Build
 #########
@@ -17,6 +21,7 @@ mydocs:
 requirements:
 	pipenv lock --requirements > requirements.txt
 	pipenv lock --requirements --dev > requirements_dev.txt
+
 
 #########
 # Tests
