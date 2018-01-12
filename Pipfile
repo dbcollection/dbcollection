@@ -10,6 +10,7 @@ name = "pypi"
 tox = "*"
 pytest = "*"
 pytest-sugar = "*"
+pytest-cov = "*"
 
 
 [packages]
