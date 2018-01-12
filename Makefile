@@ -1,5 +1,5 @@
 shell-python:
-	python -i -c "import rlcompleter, readline; readline.parse_and_bind('tab: complete');"
+	pipenv run python -i -c "import rlcompleter, readline; readline.parse_and_bind('tab: complete');"
 
 
 #########
@@ -8,11 +8,11 @@ shell-python:
 
 build: mybuild
 mybuild:
-	python setup.py develop
+	pipenv run python setup.py develop
 
 install: myinstall
 myinstall:
-	python setup.py install
+	pipenv run  python setup.py install
 
 docs: mydocs
 mydocs:
@@ -29,22 +29,22 @@ requirements:
 
 test:
 	make build
-	tox
+	pipenv run tox
 
 test-api:
 	make build
-	pytest -v dbcollection/tests/core/test_api.py
+	pipenv run pytest -v dbcollection/tests/core/test_api.py
 
 test-cache:
 	make build
-	pytest -v dbcollection/tests/core/test_cache.py
+	pipenv run pytest -v dbcollection/tests/core/test_cache.py
 
 test-loader:
 	make build
-	pytest -v dbcollection/tests/core/test_loader.py
+	pipenv run pytest -v dbcollection/tests/core/test_loader.py
 
 lint:
-	tox -e flake8
+	pipenv run tox -e flake8
 
 
 ##########
