@@ -10,26 +10,19 @@ python:
 matrix:
     fast_finish: true
 
-before_install:
-    - echo "before_install"
-    - export PATH="$HOME/miniconda3/bin:$PATH"
-    - df -h
-    - pwd
-    - uname -a
-    - git --version
-    - git tag
-
 install:
     - echo "install start"
-    - chmod +x ci/travis_install.sh
-    - ci/travis_install.sh
-    - echo "install done"
+    - pip install pipenv --upgrade
+    - pipenv install --dev
+    - pipenv run python setup.py install
+    - echo "install complete."
 
 # command to run tests
 script:
-    - source activate dbcollection
-    - pytest --cov=dbcollection dbcollection/tests/
-    - pytest --cov=dbcollection dbcollection/tests/datasets/__test_check_urls.py
+    - echo "Run tests"
+    - pipenv run pytest --cov=dbcollection dbcollection/tests/
+    - pipenv run pytest --cov=dbcollection dbcollection/tests/datasets/__test_check_urls.py
+    - echo "Test complete."
 
 after_success:
     - echo "Upload code coverage to codecov"
@@ -43,4 +36,5 @@ matrix:
         python: "3.6"
         addons: true
         install: pip install flake8
-        script: flake8
+        script: flake8 dbcollection
+

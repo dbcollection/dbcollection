@@ -1,0 +1,27 @@
+[[source]]
+
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+
+[dev-packages]
+
+tox = "*"
+pytest = "*"
+pytest-sugar = "*"
+pytest-cov = "*"
+tox-pyenv = "*"
+funcsigs = "*"
+
+
+[packages]
+
+"h5py" = "*"
+numpy = "*"
+patool = "*"
+"progressbar2" = "*"
+scipy = "*"
+xmltodict = "*"
+requests = "*"
+pillow = "*"
