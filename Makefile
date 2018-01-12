@@ -14,6 +14,9 @@ docs: mydocs
 mydocs:
 	make -C docs html
 
+requirements:
+	pipenv lock --requirements > requirements.txt
+	pipenv lock --requirements --dev > requirements_dev.txt
 
 #########
 # Tests
