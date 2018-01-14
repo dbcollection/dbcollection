@@ -19,9 +19,9 @@ is distributed under the MIT license. With this package,
 you'll have access (in a quick and simple way) to a
 collection of datasets for a variety of tasks such as
 object classification, detection, human pose estimation,
-captioning or NLP.
+captioning, etc.
 
-This package is available for Windows, Linux and MacOs.
+This package is available for Linux, MacOs and Windows.
 
 ## Supported languages
 
