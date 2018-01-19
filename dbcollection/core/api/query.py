@@ -8,6 +8,31 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
+def query(pattern='info', verbose=True, is_test=False):
+    """Do simple queries to the cache.
+
+    list all available datasets for download/preprocess.
+
+    Parameters
+    ----------
+    pattern : str, optional
+        Field name used to search for a matching pattern in cache data.
+    verbose : bool, optional
+        Displays text information (if true).
+    is_test : bool, optional
+        Flag used for tests.
+
+    """
+    assert isinstance(pattern, str), 'Must insert a string value as input. ' + \
+                                     'Expected "str", got "{}"'.format(pattern)
+
+    query = QueryAPI(pattern=pattern,
+                     verbose=verbose,
+                     is_test=is_test)
+
+    return query.run()
+
+
 class QueryAPI(object):
     """Cache query API class.
 

@@ -8,6 +8,61 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
+def remove(name, task=None, delete_data=False, verbose=True, is_test=False):
+    """Remove/delete a dataset and/or task from the cache.
+
+    Removes the datasets cache information from the dbcollection.json file.
+    The dataset's data files remain in disk if 'delete_data' is set to False,
+    otherwise it removes also the data files.
+
+    Also, instead of deleting the entire dataset, removing a specific task
+    from disk is also possible by specifying which task to delete. This removes
+    the task entry for the dataset and removes the corresponding hdf5 file from
+    disk.
+
+    Parameters
+    ----------
+    name : str
+        Name of the dataset to delete.
+    task : str, optional
+        Name of the task to delete.
+    delete_data : bool, optional
+        Delete all data files from disk for this dataset if True.
+    verbose : bool, optional
+        Displays text information (if true).
+    is_test : bool, optional
+        Flag used for tests.
+
+    Examples
+    --------
+    Remove a dataset from the list.
+
+    >>> import dbcollection as dbc
+    >>> # add a dataset
+    >>> dbc.add('new_db', 'new_task', 'new/path/db', 'newdb.h5', ['new_category'])
+    >>> dbc.query('new_db')
+    {'new_db': {'tasks': {'new_task': 'newdb.h5'}, 'data_dir': 'new/path/db',
+    'keywords': ['new_category']}}
+    >>> dbc.remove('new_db')  # remove the dataset
+    Removed 'new_db' dataset: cache=True, disk=False
+    >>> dbc.query('new_db')  # check if the dataset info was removed (retrieves an empty dict)
+    {}
+
+    """
+    assert name is not None, 'Must input a valid dataset name: {}'.format(name)
+
+    db_remover = RemoveAPI(name=name,
+                           task=task,
+                           delete_data=delete_data,
+                           verbose=verbose,
+                           is_test=is_test)
+
+    db_remover.run()
+
+    if verbose:
+        print('==> Dataset registry removed.')
+
+
 class RemoveAPI(object):
     """Dataset remove API class.
 

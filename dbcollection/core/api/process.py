@@ -8,7 +8,50 @@ import os
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import fetch_list_datasets
+from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
+
+
+def process(name, task='default', verbose=True, is_test=False):
+    """Process a dataset's metadata and stores it to file.
+
+    The data is stored a a HSF5 file for each task composing the dataset's tasks.
+
+    Parameters
+    ----------
+    name : str
+        Name of the dataset.
+    task : str, optional
+        Name of the task to process.
+    verbose : bool, optional
+        Displays text information (if true).
+    is_test : bool, optional
+        Flag used for tests.
+
+    Raises
+    ------
+    KeyError
+        If a task does not exist for a dataset.
+
+    Examples
+    --------
+    Download the CIFAR10 dataset to disk.
+
+    >>> import dbcollection as dbc
+    >>> dbc.process('cifar10', task='classification', verbose=False)
+
+    """
+    assert name, 'Must input a valid dataset name: {}'.format(name)
+    check_if_dataset_name_is_valid(name)
+
+    processer = ProcessAPI(name=name,
+                           task=task,
+                           verbose=verbose,
+                           is_test=is_test)
+
+    processer.run()
+
+    if verbose:
+        print('==> Dataset processing complete.')
 
 
 class ProcessAPI(object):

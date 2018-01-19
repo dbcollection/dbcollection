@@ -8,7 +8,50 @@ import os
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import fetch_list_datasets
+from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
+
+
+def download(name, data_dir=None, extract_data=True, verbose=True, is_test=False):
+    """Download a dataset data to disk.
+
+    This method will download a dataset's data files to disk. After download,
+    it updates the cache file with the  dataset's name and path where the data
+    is stored.
+
+    Parameters
+    ----------
+    name : str
+        Name of the dataset.
+    data_dir : str, optional
+        Directory path to store the downloaded data.
+    extract_data : bool, optional
+        Extracts/unpacks the data files (if true).
+    verbose : bool, optional
+        Displays text information (if true).
+    is_test : bool, optional
+        Flag used for tests.
+
+    Examples
+    --------
+    Download the CIFAR10 dataset to disk.
+
+    >>> import dbcollection as dbc
+    >>> dbc.download('cifar10')
+
+    """
+    assert name, 'Must input a valid dataset name: {}'.format(name)
+    check_if_dataset_name_is_valid(name)
+
+    downloader = DownloadAPI(name=name,
+                             data_dir=data_dir,
+                             extract_data=extract_data,
+                             verbose=verbose,
+                             is_test=is_test)
+
+    downloader.run()
+
+    if verbose:
+        print('==> Dataset download complete.')
 
 
 class DownloadAPI(object):

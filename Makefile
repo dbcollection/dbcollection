@@ -47,7 +47,7 @@ lint:
 	pipenv run tox -e flake8
 
 urls_check:
-	pipenv run tox -e urls_check
+	pipenv run tox -e urls_check_health
 
 ##########
 # Deploy
