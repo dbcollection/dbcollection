@@ -29,16 +29,15 @@ and it is licensed under the :ref:`MIT license <license>`.
 Main features
 =============
 
-- Simple API to load/download/setup/manage datasets
-- Simple API to fetch data of a dataset
-- All data is stored in disk, resulting in reduced RAM usage (useful for large datasets)
-- Datasets only need to be setup once
+- Simple API to load/download/setup/manage datasets.
+- Simple API to fetch data from a dataset.
+- Store and pull data from disk or from memory, you choose!
+- Datasets only need to be set/processed once, so next time you use it it will load instantly!
 - Cross-platform (**Windows**, **Linux**, **MacOs**).
 - Cross-language (**Python**, **Lua/Torch7**, **Matlab**).
-- Easily extensible to other languages that have support for ``HDF5`` files
-- Concurrent/parallel data access is possible thanks to the ``HDF5`` file format
-- Diverse list of popular datasets are available for use
-- All datasets were manually parsed by someone, meaning that some of the quirks were already solved for you
+- Easily extensible to other languages that support `HDF5` files format.
+- Concurrent/parallel data access thanks to `HDF5`.
+- Contains a diverse (and growing!) list of popular datasets for machine-, deep-learning tasks (*object detection*, *action recognition*, *human pose estimation*, etc.)
 
 
 Contents:
