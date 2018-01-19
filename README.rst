@@ -21,7 +21,7 @@ previously set dataset as many times as needed without having to set it each tim
 are used.
 
 **dbcollection** allows users to focus on more important tasks like prototyping new models
-or testing them in different datasets without having to incur the loss of time spent managing
+or testing them in different datasets without having to incur the loss of spending time managing
 datasets or creating/modyfing scripts to load/fetch data by taking advantage
 of the work of the community that shared these resources.
 
