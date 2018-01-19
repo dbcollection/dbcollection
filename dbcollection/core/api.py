@@ -21,7 +21,7 @@ from __future__ import print_function
 
 from .download import download
 from .process import process
-from .load import LoadAPI
+from .load import load
 from .add import AddAPI
 from .remove import RemoveAPI
 from .config_cache import ConfigAPI
@@ -35,61 +35,6 @@ def check_if_dataset_name_is_valid(name):
     """Check if the dataset name exists (is valid) in the list of available dataset for download"""
     available_datasets_list = fetch_list_datasets()
     assert name in available_datasets_list, 'Invalid dataset name: {}'.format(name)
-
-
-def load(name, task='default', data_dir=None, verbose=True, is_test=False):
-    """Returns a metadata loader of a dataset.
-
-    Returns a loader with the necessary functions to manage the selected dataset.
-
-    Parameters
-    ----------
-    name : str
-        Name of the dataset.
-    task : str, optional
-        Name of the task to load.
-    data_dir : str, optional
-        Directory path to store the downloaded data.
-    verbose : bool, optional
-        Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
-
-    Returns
-    -------
-    DataLoader
-       Data loader class.
-
-    Raises
-    ------
-    Exception
-        If dataset is not available for loading.
-
-    Examples
-    --------
-    Load the MNIST dataset.
-
-    >>> import dbcollection as dbc
-    >>> mnist = dbc.load('mnist')
-    >>> print('Dataset name: ', mnist.db_name)
-    Dataset name:  mnist
-
-    """
-    assert name, 'Must input a valid dataset name: {}'.format(name)
-    check_if_dataset_name_is_valid(name)
-
-    loader = LoadAPI(name=name,
-                     task=task,
-                     data_dir=data_dir,
-                     verbose=verbose,
-                     is_test=is_test)
-
-    data_loader = loader.run()
-
-    if verbose:
-        print('==> Dataset loading complete.')
-
-    return data_loader
 
 
 def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=False):
