@@ -7,13 +7,13 @@ dbcollection
 |Documentation Status| |PyPI version| |Anaconda-Server Badge|
 
 **dbcollection** is a library for downloading/parsing/managing datasets via simple methods.
-It was built from the ground up to be cross-platform (Windows, Linux, MacOS) and
-cross-language (Python, Lua, Matlab, etc.). This is achieved by using the popular HDF5
+It was built from the ground up to be cross-platform (**Windows**, **Linux**, **MacOS**) and
+cross-language (**Python**, **Lua**, **Matlab**, etc.). This is achieved by using the popular ``HDF5``
 file format to store (meta)data of manually parsed datasets and the power of Python for
 scripting. By doing so, this library can target any platform that supports Python and
-any language that has bindings for HDF5.
+any language that has bindings for ``HDF5``.
 
-This package allows to easily manage and load datasets by using HDF5 files to store
+This package allows to easily manage and load datasets by using ``HDF5`` files to store
 metadata. By storing all the necessary metadata to disk, managing either big or small
 datasets equally impacts the system's resources usage in the same way.
 Also, once a dataset is setup, it is setup forever! This means users can reuse any
@@ -31,12 +31,12 @@ Here are some of key features dbcollection provides:
 - Simple API to fetch data from a dataset.
 - Store and pull data from disk or from memory, you choose!
 - Datasets only need to be set/processed once, so next time you use it it will load instantly!
-- Cross-platform (Windows, Linux, MacOs).
-- Cross-language (Python, Lua/Torch7, Matlab).
-- Easily extensible to other languages that support HDF5 files format.
-- Concurrent/parallel data access thanks to HDF5.
+- Cross-platform (**Windows**, **Linux**, **MacOs**).
+- Cross-language (**Python**, **Lua/Torch7**, **Matlab**).
+- Easily extensible to other languages that support ``HDF5`` files format.
+- Concurrent/parallel data access thanks to ``HDF5``.
 - Contains a diverse (and growing!) list of popular datasets for machine-, deep-learning tasks
-  (object detection, action recognition, human pose estimation, etc.)
+  (*object detection*, *action recognition*, *human pose estimation*, etc.)
 
 Supported languages
 -------------------
@@ -181,7 +181,8 @@ code base, please see the document `How to Contribute`_.
 Feedback
 --------
 
-For now, use the `Github issues`_ for requests/bug issues.
+For now, use the `Github issues`_ for requests/bug issues or use our `Gitter room`_
+for any other questions you may have.
 
 License
 -------
@@ -212,4 +213,5 @@ License
 .. _Read The Docs: http://dbcollection.readthedocs.io/en/latest/
 .. _How to Contribute: https://github.com/dbcollection/dbcollection/blob/master/docs/source/contributing/how_to_contribute.rst
 .. _Github issues: https://github.com/dbcollection/dbcollection/issues
+.. _Gitter room: https://gitter.im/dbcollection/dbcollection
 .. _MIT License: LICENSE.txt
