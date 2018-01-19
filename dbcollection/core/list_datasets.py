@@ -48,3 +48,9 @@ def get_dataset_attributes(name):
         return db_fields
     except AttributeError:
         return None
+
+
+def check_if_dataset_name_is_valid(name):
+    """Check if the dataset name exists (is valid) in the list of available dataset for download"""
+    available_datasets_list = fetch_list_datasets()
+    assert name in available_datasets_list, 'Invalid dataset name: {}'.format(name)

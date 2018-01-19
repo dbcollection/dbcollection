@@ -19,7 +19,7 @@ functions to manage and query their datasets in a simple and easy way.
 
 from __future__ import print_function
 
-from .download import DownloadAPI
+from .download import download
 from .process import ProcessAPI
 from .load import LoadAPI
 from .add import AddAPI
@@ -35,49 +35,6 @@ def check_if_dataset_name_is_valid(name):
     """Check if the dataset name exists (is valid) in the list of available dataset for download"""
     available_datasets_list = fetch_list_datasets()
     assert name in available_datasets_list, 'Invalid dataset name: {}'.format(name)
-
-
-def download(name, data_dir=None, extract_data=True, verbose=True, is_test=False):
-    """Download a dataset data to disk.
-
-    This method will download a dataset's data files to disk. After download,
-    it updates the cache file with the  dataset's name and path where the data
-    is stored.
-
-    Parameters
-    ----------
-    name : str
-        Name of the dataset.
-    data_dir : str, optional
-        Directory path to store the downloaded data.
-    extract_data : bool, optional
-        Extracts/unpacks the data files (if true).
-    verbose : bool, optional
-        Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
-
-    Examples
-    --------
-    Download the CIFAR10 dataset to disk.
-
-    >>> import dbcollection as dbc
-    >>> dbc.download('cifar10')
-
-    """
-    assert name, 'Must input a valid dataset name: {}'.format(name)
-    check_if_dataset_name_is_valid(name)
-
-    downloader = DownloadAPI(name=name,
-                             data_dir=data_dir,
-                             extract_data=extract_data,
-                             verbose=verbose,
-                             is_test=is_test)
-
-    downloader.run()
-
-    if verbose:
-        print('==> Dataset download complete.')
 
 
 def process(name, task='default', verbose=True, is_test=False):
