@@ -15,12 +15,15 @@ any language that has bindings for ``HDF5``.
 
 This package allows to easily manage and load datasets by using ``HDF5`` files to store
 metadata. By storing all the necessary metadata to disk, managing either big or small
-datasets equally impacts the system's resources usage in the same way.
+datasets has an equal or very similar impact on the system's resource usage.
 Also, once a dataset is setup, it is setup forever! This means users can reuse any
 previously set dataset as many times as needed without having to set it each time they
-are used. This allows users to focus on more important tasks and speed up prototyping
-without having to incurr in spending time managing datasets or creating/modyfing
-scripts to load/fetch data from disk.
+are used.
+
+**dbcollection** allows users to focus on more important tasks like prototyping new models
+or testing them in different datasets without having to incur the loss of time spent managing
+datasets or creating/modyfing scripts to load/fetch data by taking advantage
+of the work of the community that shared these resources.
 
 Main features
 -------------
