@@ -613,43 +613,67 @@ class CacheManager:
         """
         # print info header
         if show_paths:
-            print('--------------')
-            print('  Paths info ')
-            print('--------------')
-            print(json.dumps(self.data['info'], sort_keys=True, indent=4))
-            print('')
+            self._info_show_paths()
 
         # print datasets
         if show_datasets:
-            if name:
-                print('---------------------')
-                print('  Dataset info: {} '.format(name))
-                print('---------------------')
-                print(json.dumps(self.data['dataset'][name], sort_keys=True, indent=4))
-            else:
-                print('---------------------')
-                print('  Dataset info: all ')
-                print('---------------------')
-                print(json.dumps(self.data['dataset'], sort_keys=True, indent=4))
-            print('')
+            self._info_show_datasets(name)
 
         if show_categories:
-            if name:
-                print('------------------------')
-                print('  Categories: {} '.format(name))
-                print('------------------------\n')
-                max_size_name = max([len(n) for n in self.data['category'][name]]) + 7
-                for name in self.data['category']:
-                    print("{:{}}".format('   > {}: '.format(name), max_size_name) +
-                          "{}".format(sorted(self.data['category'][name])))
-            else:
-                print('------------------------')
-                print('  Categories: all ')
-                print('------------------------\n')
-                max_size_name = max([len(category) for category in self.data['category']]) + 7
-                for category in self.data['category']:
-                    print("{:{}}".format('   > {}: '.format(category), max_size_name) +
-                          "{}".format(sorted(self.data['category'][category])))
+            self._info_show_categories(name)
+
+    def _info_show_paths(self):
+        """Prints the info data of the cache."""
+        self._info_display(self.data['info'], 'Paths info')
+
+    def _info_display(self, data, text):
+        """Prints data with a header"""
+        self._print_header(text)
+        print(json.dumps(data, sort_keys=True, indent=4))
+        print('')
+
+    def _print_header(self, text):
+        """Prints a simple text header.
+
+        Example:
+            >>> CacheManager()._print_header('Some text to display!')
+            >>>
+            '-----------------------------'
+            '--  Some text to display!  --'
+            '-----------------------------'
+        """
+        str_display = '--  {display_text}  --'.format(display_text=text)
+        str_separator = '-' * len(str_display)
+        print('\n{separator}\n{text}\n{separator}\n'.format(separator=str_separator,
+                                                            text=str_display))
+
+    def _info_show_datasets(self, name):
+        """Prints the datasets info in the cache."""
+        if name:
+            datasets_data = self.data['dataset'][name]
+            header_str = 'Dataset info: {}'.format(name)
+        else:
+            datasets_data = self.data['dataset']
+            header_str = 'Dataset info: all'
+        self._info_display(datasets_data, header_str)
+
+    def _info_show_categories(self, name):
+        """Prints the categories info in the cache."""
+        if name:
+            header_str = 'Categories: {}'.format(name)
+            categories_names = name
+        else:
+            header_str = 'Categories: all'
+            categories_names = list(self.data['category'].keys())
+        self._print_header(header_str)
+        self._print_categories(categories_names)
+
+    def _print_categories(self, names):
+        """Prints the selected category names in the cache."""
+        max_size_name = max([len(name) for name in names]) + 7
+        for name in names:
+            print("{:{}}".format('   > {}: '.format(name), max_size_name) +
+                  "{}".format(sorted(self.data['category'][name])))
 
     def reload_cache(self):
         """Reload the cache file contents."""
