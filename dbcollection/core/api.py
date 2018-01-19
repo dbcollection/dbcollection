@@ -25,33 +25,8 @@ from .load import load
 from .add import add
 from .remove import remove
 from .config_cache import config_cache
-from .query import QueryAPI
+from .query import query
 from .info import InfoCacheAPI, InfoDatasetAPI
-
-
-def query(pattern='info', verbose=True, is_test=False):
-    """Do simple queries to the cache.
-
-    list all available datasets for download/preprocess.
-
-    Parameters
-    ----------
-    pattern : str, optional
-        Field name used to search for a matching pattern in cache data.
-    verbose : bool, optional
-        Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
-
-    """
-    assert isinstance(pattern, str), 'Must insert a string value as input. ' + \
-                                     'Expected "str", got "{}"'.format(pattern)
-
-    query = QueryAPI(pattern=pattern,
-                     verbose=verbose,
-                     is_test=is_test)
-
-    return query.run()
 
 
 def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=True,
