@@ -35,6 +35,9 @@ docs-clean:
 .PHONY: requirements
 requirements:
 	pipenv lock --requirements > $(REQUIREMENTS_FILE)
+
+.PHONY: requirements-dev
+requirements-dev:
 	pipenv lock --requirements --dev > $(REQUIREMENTS_DEV_FILE)
 
 
