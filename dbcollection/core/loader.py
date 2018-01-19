@@ -65,7 +65,7 @@ class FieldLoader(object):
     def _get_hdf5_object_str(self):
         return self.hdf5_handler.name.split('/')
 
-    def get(self, index=None):
+    def get(self, index=None, convert_to_str=False):
         """Retrieves data of the field from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file. Also, it is
@@ -77,11 +77,16 @@ class FieldLoader(object):
         index : int/list/tuple, optional
             Index number of he field. If it is a list, returns the data
             for all the value indexes of that list.
+        convert_to_str : bool, optional
+            Convert the output data into a string.
+            Warning: output must be of type np.uint8
 
         Returns
         -------
-        np.ndarray
+        np.ndarray/list/str
             Numpy array containing the field's data.
+            If convert_to_str is set to True, it returns a string
+            or list of strings.
 
         Note
         ----
@@ -92,9 +97,12 @@ class FieldLoader(object):
 
         """
         if index is None:
-            return self._get_all_idx()
+            data = self._get_all_idx()
         else:
-            return self._get_range_idx(index)
+            data = self._get_range_idx(index)
+        if convert_to_str:
+            data = convert_ascii_to_str(data)
+        return data
 
     def _get_all_idx(self):
         """Return the full data array."""
@@ -302,7 +310,7 @@ class SetLoader(object):
         else:
             return None
 
-    def get(self, field, index=None):
+    def get(self, field, index=None, convert_to_str=False):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -316,11 +324,16 @@ class SetLoader(object):
         index : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
+        convert_to_str : bool, optional
+            Convert the output data into a string.
+            Warning: output must be of type np.uint8
 
         Returns
         -------
-        np.ndarray
+        np.ndarray/list/str
             Numpy array containing the field's data.
+            If convert_to_str is set to True, it returns a string
+            or list of strings.
 
         Raises
         ------
@@ -330,7 +343,7 @@ class SetLoader(object):
         """
         assert field, 'Must input a valid field name.'
         try:
-            return self.fields[field].get(index=index)
+            return self.fields[field].get(index=index, convert_to_str=convert_to_str)
         except KeyError:
             raise KeyError('\'{}\' does not exist in the \'{}\' set.'.format(field, self.set))
 
@@ -655,7 +668,7 @@ class DataLoader(object):
             sets[set_name] = SetLoader(self.hdf5_file[set_name])
         return sets
 
-    def get(self, set_name, field, index=None):
+    def get(self, set_name, field, index=None, convert_to_str=False):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -671,11 +684,16 @@ class DataLoader(object):
         idx : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
+        convert_to_str : bool, optional
+            Convert the output data into a string.
+            Warning: output must be of type np.uint8
 
         Returns
         -------
-        np.ndarray
+        np.ndarray/list/str
             Numpy array containing the field's data.
+            If convert_to_str is set to True, it returns a string
+            or list of strings.
 
         Raises
         ------
@@ -686,7 +704,7 @@ class DataLoader(object):
         assert set_name, 'Must input a set name.'
         assert field, 'Must input a field name.'
         try:
-            return self.sets[set_name].get(field, index)
+            return self.sets[set_name].get(field, index, convert_to_str=convert_to_str)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 

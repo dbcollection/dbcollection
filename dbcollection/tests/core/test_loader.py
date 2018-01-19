@@ -147,6 +147,48 @@ def test_FieldLoader_get_single_obj_empty_list_in_memory():
 
     assert np.array_equal(data, set_data['data'])
 
+@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+def test_FieldLoader_get_single_obj_convert_to_string(idx):
+    data_field = 'strings_list'
+    field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
+
+    data = field_loader.get(idx, convert_to_str=True)
+
+    assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
+    assert isinstance(data, str)
+
+@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+def test_FieldLoader_get_single_obj_convert_to_string_in_memory(idx):
+    data_field = 'strings_list'
+    field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
+
+    field_loader.to_memory = True
+    data = field_loader.get(idx, convert_to_str=True)
+
+    assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
+    assert isinstance(data, str)
+
+def test_FieldLoader_get_multi_obj_convert_to_string():
+    data_field = 'strings_list'
+    field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
+
+    idx = list(range(3))
+    data = field_loader.get(idx, convert_to_str=True)
+
+    assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
+    assert isinstance(data, list)
+
+def test_FieldLoader_get_multi_obj_convert_to_string_in_memory():
+    data_field = 'strings_list'
+    field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
+
+    field_loader.to_memory = True
+    idx = list(range(3))
+    data = field_loader.get(idx, convert_to_str=True)
+
+    assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
+    assert isinstance(data, list)
+
 def test_FieldLoader_get_two_obj():
     field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
