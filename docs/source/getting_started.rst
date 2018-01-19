@@ -30,23 +30,27 @@ in the cache file to store data in ``~\dbcollection\``.
 
 You can chose to store your data files or metadata files into separate dirs on a disk or on separate disks
 by modifying the paths of these two fields: ``default_cache_dir`` and ``default_download_dir``. You can either manually change the paths in the ``~\dbcollection.json``
-file under the ``info`` key or you can do it by using **dbcollection**. To use the latter, you can do the following::
+file under the ``info`` key or you can do it by using **dbcollection**. To use the latter, you can do the following:
 
-    # import the package
-    import dbcollection as dbc
+.. code-block:: python
 
-    # directly access the fields and assign new paths
-    dbc.cache.cache_dir = 'new/cache/path'
-    dbc.cache.download_dir = 'new/download_data/path'
+    >>> # import the package
+    >>> import dbcollection as dbc
+    >>>
+    >>> # directly access the fields and assign new paths
+    >>> dbc.cache.cache_dir = 'new/cache/path'
+    >>> dbc.cache.download_dir = 'new/download_data/path'
 
 This will change the paths where the metadata files (``cache_dir``) and the downloaded files (``download_dir``) are stored in disk.
-In case you want to reset the paths to the original defaults you can simply do::
+In case you want to reset the paths to the original defaults you can simply do:
 
-    # reset the metadata cache dir to the default path
-    dbc.cache.reset_cache_dir()
+.. code-block:: python
 
-    # reset the data download dir to the default path
-    dbc.cache.reset_download_dir()
+    >>> # reset the metadata cache dir to the default path
+    >>> dbc.cache.reset_cache_dir()
+    >>>
+    >>> # reset the data download dir to the default path
+    >>> dbc.cache.reset_download_dir()
 
 With this you should be able to easily locate where data/metadata files are being stored in disk
 without having to manually specify a path everytime you setup a new dataset.
@@ -79,7 +83,7 @@ To use this package you first need to import it.
 
 .. code-block:: python
 
-    import dbcollection as dbc
+    >>> import dbcollection as dbc
 
 Then, to load a dataset, all you need to do is call the ``load()`` method with
 the name of the dataset you want to load. For example, lets load the ``mnist``
