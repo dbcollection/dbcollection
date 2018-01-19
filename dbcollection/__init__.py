@@ -39,16 +39,15 @@ Here are some of key features dbcollection provides:
 import pkg_resources
 
 # API methods
-from dbcollection.core.api import (download,
-                                   process,
-                                   load,
-                                   add,
-                                   remove,
-                                   config_cache,
-                                   query,
-                                   info_cache,
-                                   info_datasets,
-                                   fetch_list_datasets)
+from dbcollection.core.api.download import download
+from dbcollection.core.api.process import process
+from dbcollection.core.api.load import load
+from dbcollection.core.api.add import add
+from dbcollection.core.api.remove import remove
+from dbcollection.core.api.config_cache import config_cache
+from dbcollection.core.api.query import query
+from dbcollection.core.api.info import info_cache, info_datasets
+from dbcollection.core.api.list_datasets import fetch_list_datasets
 
 # load the cache file
 from dbcollection.core.cache import CacheManager
