@@ -8,7 +8,7 @@ Here you can find a list of all available datasets for load/download on this pac
 are for computer vision tasks, but other tasks such as natural language processing are being added to this list.
 If you have any suggestion for a well needed dataset, please feel free to write an `issue on GitHub <https://github.com/dbcollection/dbcollection/issues>`_
 detailing the new proposal or submit a pull request with an implementation of your proposal.
-For more information about contributing to this project, please check out the :ref:`Contributing <contributing_index>` section of this docs.
+For more information about contributing to this project, please check out the Contributing section of the documentation.
 
 The following list of datasets contains detailed information about how datasets are stored,
 along with other properties that you may find useful to know about when using them.
