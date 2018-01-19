@@ -20,7 +20,7 @@ functions to manage and query their datasets in a simple and easy way.
 from __future__ import print_function
 
 from .download import download
-from .process import ProcessAPI
+from .process import process
 from .load import LoadAPI
 from .add import AddAPI
 from .remove import RemoveAPI
@@ -35,49 +35,6 @@ def check_if_dataset_name_is_valid(name):
     """Check if the dataset name exists (is valid) in the list of available dataset for download"""
     available_datasets_list = fetch_list_datasets()
     assert name in available_datasets_list, 'Invalid dataset name: {}'.format(name)
-
-
-def process(name, task='default', verbose=True, is_test=False):
-    """Process a dataset's metadata and stores it to file.
-
-    The data is stored a a HSF5 file for each task composing the dataset's tasks.
-
-    Parameters
-    ----------
-    name : str
-        Name of the dataset.
-    task : str, optional
-        Name of the task to process.
-    verbose : bool, optional
-        Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
-
-    Raises
-    ------
-    KeyError
-        If a task does not exist for a dataset.
-
-    Examples
-    --------
-    Download the CIFAR10 dataset to disk.
-
-    >>> import dbcollection as dbc
-    >>> dbc.process('cifar10', task='classification', verbose=False)
-
-    """
-    assert name, 'Must input a valid dataset name: {}'.format(name)
-    check_if_dataset_name_is_valid(name)
-
-    processer = ProcessAPI(name=name,
-                           task=task,
-                           verbose=verbose,
-                           is_test=is_test)
-
-    processer.run()
-
-    if verbose:
-        print('==> Dataset processing complete.')
 
 
 def load(name, task='default', data_dir=None, verbose=True, is_test=False):
