@@ -84,7 +84,15 @@ class CacheManager:
         self._set_cache_dir(self._default_cache_dir_path())
 
     def create_os_home_dir(self):
-        """Create the main dir to store all metadata files."""
+        """Create the main dir to store all metadata files.
+
+
+        ***
+        CHECK IF METHOD IS USED / NECESSARY OR IF IT CAN BE DELETED.
+        ***
+
+
+        """
         if not os.path.exists(self._cache_dir):
             os.makedirs(self._cache_dir)
 
