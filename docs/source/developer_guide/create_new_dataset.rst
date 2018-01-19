@@ -22,10 +22,10 @@ Setting up the dataset's directory
 ==================================
 
 To create a new dataset you need to create a
-directory with the same name of the dataset you want it be called under 
+directory with the same name of the dataset you want it be called under
 the ``datasets/`` directory.
 
-You can use multiple nested directories to store your dataset in cases 
+You can use multiple nested directories to store your dataset in cases
 where other related datasets will be grouped under a common dir. For example,
 the ``cifar10`` and ``cifar100`` datasets are stored under the ``cifar/`` directory:
 
@@ -36,10 +36,10 @@ the ``cifar10`` and ``cifar100`` datasets are stored under the ``cifar/`` direct
     ├── core/
     │      ...
     ├── datasets/
-    │   ├── cifar/  
-    │   │   ├── cifar10/    
-    │   │   └── cifar100/           
-    │   └── ...  
+    │   ├── cifar/
+    │   │   ├── cifar10/
+    │   │   └── cifar100/
+    │   └── ...
     ├── tests/
     │      ...
     │
@@ -48,11 +48,11 @@ the ``cifar10`` and ``cifar100`` datasets are stored under the ``cifar/`` direct
 
 This enables the package to group several different (or similar) versions of the same dataset under the same parent folder for organizational purposes, thus maintaing a clear structure for future additions of datasets in the root ``datasets/`` directory that may contain many related datasets.
 
-.. note:: 
+.. note::
 
    Please use **snake_case** when naming the directory by using
-   all characters in lower case and separated by an underscore. 
-   See the :ref:`Coding guidelines <code_guidelines>` section for 
+   all characters in lower case and separated by an underscore.
+   See the :ref:`Coding guidelines <code_guidelines>` section for
    more information.
 
 
@@ -113,7 +113,7 @@ To setup the new dataset's class you need to:
    the ``default_task`` field indicates which task should be loaded as the default if no name is
    set when loading/processing a dataset.
 
-.. note:: 
+.. note::
 
    The task(s) file(s) does/do not require to have the same name of the task, but it is best practice to use the same name as the task to avoid confusion.
 
@@ -124,7 +124,7 @@ Additional information about setting up URLs for different sources
 When configuring an url for download, you can either specify a string or a dict.
 
 If using a string, the url of the file to download will
-be stored with the same filename as the url. 
+be stored with the same filename as the url.
 Lets take the case of downloading data files for the ``cifar10`` dataset. To download the data file, you simply need to set the urls list as the following example:
 
 .. code-block:: python
@@ -181,7 +181,7 @@ Another use case you may want to know is how to download url files from google d
 Creating a task for parsing annotations
 =======================================
 
-To create a script to parse / process annotations for a specific task you need to create a file (or as many files as you need) in the same directory as the ``__init__.py`` file. 
+To create a script to parse / process annotations for a specific task you need to create a file (or as many files as you need) in the same directory as the ``__init__.py`` file.
 
 Here you'll load and process all your annotations and define how data will be stored in the ``HDF5`` metadata file. The following template shows a basic setup of such task file which you can use as guidance when creating your own. You should also take a look at how other datasets' tasks are setup in order to have a better grasp on how to setup yours.
 
@@ -209,7 +209,7 @@ Here you'll load and process all your annotations and define how data will be st
 
    class Classification(BaseTask):
        """Name of the dataset + task."""
- 
+
        # metadata filename of the task
        filename_h5 = 'classification'
 
@@ -250,7 +250,7 @@ One important note about storing data into ``HDF5`` files is how to do it. Due t
 
 For most cases, you will need to pad data in order to have arrays of the same shape. This has been discussed in :ref:`this section here <user_fetching_data_parsing_data>` which you should take a look if you have questions about (un)padding data. Also, you should take a look at :ref:`Padding <utils_reference_padding>` section in the Reference manual.
 
-Another relevant information to mention is how to save the data fields into the ``HDF5`` file. You can either use ``h5py`` syntax to allocate the data fields in the right position or you can use the :ref:`hdf5_write_data() <utils_reference_hdf5_write_data>` from ``dbcollection.utils.hdf5`` to simplify this process. 
+Another relevant information to mention is how to save the data fields into the ``HDF5`` file. You can either use ``h5py`` syntax to allocate the data fields in the right position or you can use the :ref:`hdf5_write_data() <utils_reference_hdf5_write_data>` from ``dbcollection.utils.hdf5`` to simplify this process.
 
 Besides these utility methods there are other useful ones in ``dbcollection.utils`` module that you should take a look when creating your own task, specially the :ref:`utils <utils_reference>` section in the Reference manual for a list of available methods.
 
@@ -301,7 +301,7 @@ The following scheme details a template format on how to write a ``README.rst`` 
                - ``which``:
                    - brief description of the annotation (e.g., labels for each image class/category.)
                      ...
-                   
+
        - :ref:`<task_name2> <link_task2>`:
           ...
        - :ref:`<task_name3> <link_task3>`:
@@ -346,8 +346,8 @@ The following scheme details a template format on how to write a ``README.rst`` 
        - ``fill value``: 0 , 1, -1, etc.
        - ``note``: an important note about this data field ( e.g., strings stored in ASCII format)
    - ``<field2>``: <description of the field>
-       - ``available in``: <sets> 
-       - ``dtype``: <numpy data type> 
+       - ``available in``: <sets>
+       - ``dtype``: <numpy data type>
        - ``is padded``: True or False
        - ``fill value``: 0 , 1, -1, etc.
        - ``note``: pre-ordered list (another example)

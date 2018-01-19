@@ -26,6 +26,18 @@ and feature requests. How to submit good bugs and feature requests is described 
     We don't want to use Github Issues for general 'how-to' questions about dbcollection.
     Instead, these general 'how-to' questions may/will be redirected to Stack Overflow.
 
+`Gitter <https://gitter.im/dbcollection/dbcollection>`_
+======================================================================
+
+We have a `Gitter chat! <https://gitter.im/dbcollection/dbcollection>`_
+If you prefer interacting with other for asking questions about your issues via a chat room,
+then you are more than welcome to join us in our gitter room and ask any questions you like.
+Remember to always be polite with others and help out if you can.
+
+.. warning::
+
+    Don't post huge blobs of code on the chat. If you need to, create a gist with the code sample and share the link instead.
+
 ..
     `Stack Overflow <https://stackoverflow.com/questions/tagged/dbcollection>`_
     ===========================================================================
