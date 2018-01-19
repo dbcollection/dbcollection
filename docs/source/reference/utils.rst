@@ -78,6 +78,16 @@ TestBaseDB
 .. autoclass:: TestBaseDB
    :members:
 
+TestDatasetGenerator
+^^^^^^^^^^^^^^^^^^^^
+.. autoclass:: TestDatasetGenerator
+   :members:
+
+Timeout
+^^^^^^^
+.. autoclass:: Timeout
+   :members:
+
 
 Third party modules
 -------------------
