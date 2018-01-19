@@ -28,14 +28,6 @@ from .config_cache import ConfigAPI
 from .query import QueryAPI
 from .info import InfoCacheAPI, InfoDatasetAPI
 
-from .list_datasets import fetch_list_datasets
-
-
-def check_if_dataset_name_is_valid(name):
-    """Check if the dataset name exists (is valid) in the list of available dataset for download"""
-    available_datasets_list = fetch_list_datasets()
-    assert name in available_datasets_list, 'Invalid dataset name: {}'.format(name)
-
 
 def remove(name, task=None, delete_data=False, verbose=True, is_test=False):
     """Remove/delete a dataset and/or task from the cache.
