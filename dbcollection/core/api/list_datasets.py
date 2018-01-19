@@ -54,3 +54,25 @@ def check_if_dataset_name_is_valid(name):
     """Check if the dataset name exists (is valid) in the list of available dataset for download"""
     available_datasets_list = fetch_list_datasets()
     assert name in available_datasets_list, 'Invalid dataset name: {}'.format(name)
+
+
+def get_list_urls_dataset():
+    available_datasets = fetch_list_datasets()
+    dataset_urls = []
+    for name in available_datasets:
+        url_list = []
+        urls = available_datasets[name]['urls']
+        for url in urls:
+            if isinstance(url, str):
+                url_list.append(url)
+            elif isinstance(url, dict):
+                try:
+                    url_ = url['url']
+                    url_list.append(url_)
+                except KeyError:
+                    pass  # do nothing
+            else:
+                raise Exception('Unknown format when downloading urls: {}'.format(type(url)))
+        # add list to the out dictionary
+        dataset_urls.append((name, url_list))
+    return dataset_urls

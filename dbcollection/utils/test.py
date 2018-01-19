@@ -5,6 +5,8 @@ Test utility functions/classes.
 
 from __future__ import print_function
 import os
+import signal
+import requests
 import numpy as np
 import h5py
 
@@ -319,3 +321,31 @@ class TestDatasetGenerator:
 
     def get_test_hdf5_filepath_DataLoader(self):
         return self.hdf5_filepath
+
+
+class Timeout():
+    """Timeout class using ALARM signal."""
+    class Timeout(Exception):
+        pass
+
+    def __init__(self, sec):
+        self.sec = sec
+
+    def __enter__(self):
+        signal.signal(signal.SIGALRM, self.raise_timeout)
+        signal.alarm(self.sec)
+
+    def __exit__(self, *args):
+        signal.alarm(0)    # disable alarm
+
+    def raise_timeout(self, *args):
+        raise Timeout.Timeout()
+
+
+def check_url_redirect(url, timeout_seconds=3):
+    try:
+        with Timeout(timeout_seconds):
+            response = requests.get(url)
+            return response.status_code == 200
+    except Timeout.Timeout:
+        return True
