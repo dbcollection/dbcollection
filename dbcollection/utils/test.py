@@ -218,6 +218,7 @@ class TestDatasetGenerator:
         }
 
         fields = {
+            "strings_list": lambda x: str_to_ascii(self.generate_string_list(x)),
             "data": lambda x: np.random.randint(0, 10, (x, 10)),
             "number": lambda x: np.array(range(x)),
             "field_with_a_long_name_for_printing": lambda x: np.array(range(x)),
@@ -235,6 +236,12 @@ class TestDatasetGenerator:
             data_fields[set_name] = sorted(dataset[set_name].keys())
 
         return dataset, data_fields
+
+    def generate_string_list(self, n):
+        """Generate a list of strings."""
+        template_str = 'string_'
+        string_list = [template_str + str(i) for i in range(n)]
+        return string_list
 
     def populate_set(self, size, fields, lists):
         dataset = {}
@@ -261,9 +268,9 @@ class TestDatasetGenerator:
     def load_hdf5_file(self):
         return h5py.File(self.hdf5_filepath, 'r')
 
-    def get_test_data_FieldLoader(self, set_name='train'):
+    def get_test_data_FieldLoader(self, set_name='train', field='data'):
         """Load data for testing the FieldLoader class."""
-        path = "/{}/data".format(set_name)
+        path = "/{set_name}/{field}".format(set_name=set_name, field=field)
         field_loader = self.load_hdf5_file_FieldLoader(path)
         set_data = self.dataset[set_name]
         return field_loader, set_data
