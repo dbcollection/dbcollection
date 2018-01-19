@@ -47,23 +47,23 @@ Contents:
    :maxdepth: 1
    :caption: Introduction
 
-   about
+   introduction/about
 
 .. toctree::
    :maxdepth: 1
    :caption: User guide
 
-   install
-   getting_started
-   managing_datasets
-   fetching_data
-   cache_management
+   user_guide/install
+   user_guide/getting_started
+   user_guide/managing_datasets
+   user_guide/fetching_data
+   user_guide/cache_management
 
 .. toctree::
    :maxdepth: 1
    :caption: Developer guide
 
-   create_new_dataset
+   developer_guide/create_new_dataset
 
 .. toctree::
    :maxdepth: 1

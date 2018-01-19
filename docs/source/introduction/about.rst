@@ -7,16 +7,15 @@ About dbcollection
 What is dbcollection
 ====================
 
-It is a package written in **Python** that contains methods for downloading and setup datasets and to fetch data via simple API function calls,
-with ease of use in mind and seamless reuse of data between projects. This provides researchers
-a quick and easy way to deal with the headache of setting up data for processing when working on a new project.
+``dbcollection`` is a package written in **Python** that contains methods for downloading / managing datasets and to fetch data from them
+via simple API function calls. This package was developed with ease of use in mind and seamless reuse of data between projects.
+It provides to researchers a quick and easy way to deal with the headache of setting up data for training / processing algorithms when working on a new project.
 
-Also, it provides a cross-platform, cross-language framework to manage datasets,
-quickly load/fetch data with minimal resources wasted and a list of diverse
-datasets to work with.
+Also, it provides a cross-platform, cross-language framework to share datasets between users
+such that anyone can quickly load/fetch data with minimal effort spent, thus taking advantage
+of the community effort to build and share solutions for common problems.
 
-The main goal of this project is to help save time for users when developing/deploying/sharing code.
-
+In summary, the main goal of this project is to help users save time and effort when developing/deploying/sharing code.
 
 
 Why does this project exist
@@ -38,26 +37,27 @@ Afterwards, I've discovered how neat ``HDF5`` files were and all the features th
 building a cross-language, cross-platform metadata storing/fetching framework for general purpose data management.
 
 
-What problems does it solve
-===========================
+What problems does it try to solve
+==================================
 
 This project tries to solve some of the problems I've identified
 during my research when trying out new datasets. These are some of the
 problems ``dbcollection`` tries to solve:
 
-- downloading, extracting and parsing different datasets without prior knowledge of their inner workings and possible pitfalls
-- constantly writting the same boilerplate code or adapting existing one for new projects
-- moving to a new language meant a complete re-writte the same code for loading/parsing datasets
-- disk space littered with cached data everywhere
-- multiple versions of parsers for specific use cases depending on the project (which meant you'll have to figure out which version fits best your new problem if you are reusing code)
-- wasted time and memory when loading large datasets
-- .json files are not a good solution for cross-platform, cross-language scenarios (again, because of large datasets)
-- using a new dataset means you have to spend a significant part of time learning how to use it in order to load/parse it (and good luck if they use some obscure, in house format that can only be extracted by using a specific toolbox)
-- and learning how to use other people's toolboxes is a tedious task, let alone if they are written in one or several different languages.
+- Downloading, extracting and parsing different datasets without prior knowledge of their inner workings is sometimes error prone.
+- Constantly writting the same boilerplate code or adapting existing one for new projects is a hassle.
+- Disk space gets littered with data files everywhere as you work on different projects with no centralized storage.
+- Wasted time and computer resources (mostly memory) when loading large datasets.
+- Many datasets use ``.json`` files to distribute their (meta)data, which is fine for smaller datasets, but they are not an efficient solution to store large amounts of (meta)data for large datasets.
+- Usually trying new datasets means that you will have to spend a significant portion of your time learning how to use it so you can load/parse it. And good luck if those datasets are distributed using some complicated, in house format that can only be extracted by using a specific toolbox (e.g., Caltech Pedestrian).
+- Having to learn a toolboxe (and languages maybe) to fetch data for a given dataset that you just want to try it out before doing anything serious is not viable at all or, at best, a tedious task.
+- If you start using a new language you'll probably write the same scripts to load/parse your datasets.
 
-This project aims to solve most of this problems for its users, such that they don't have to deal
-with the nightmare that using a new dataset can be when you just want to train/test your new algorithm in
-a more complex scenario or bigger set of data.
+This project aims to solve most of these problems so anyone using it won't have to deal
+with the nightmare that is trying a new dataset. By using ``dbcollection``, you can immediately
+start to use any dataset of your choice without much of the pain that involves using a
+new dataset, so you can quickly train/test your new, shiny algorithm / model in simple or complex scenarios
+without having to waste precious time.
 
 
 How does it work
@@ -68,11 +68,11 @@ The method looks for an entry of the dataset in a cache file stored in your home
 If the dataset does not exist in cache, the system proceeds to do the following steps to download and process a dataset:
 
 #.  First, the data files are located in a pre-defined path or in a path provided by the user.
-    If no data files are found or no one matches the specific files the package is looking for, it proceeds to download the 
-    data files to disk by using pre-defined urls with the source files. Then, the downloaded files are extracted into the same 
+    If no data files are found or no one matches the specific files the package is looking for, it proceeds to download the
+    data files to disk by using pre-defined urls with the source files. Then, the downloaded files are extracted into the same
     path where the files are located;
 
-#.  Next, the data files are processed and annotations are parsed and converted into numpy arrays which are stored 
+#.  Next, the data files are processed and annotations are parsed and converted into numpy arrays which are stored
     into a ``HDF5`` file;
 
 #.  Then, the dataset's information is added to cache.
