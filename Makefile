@@ -4,7 +4,7 @@
 REQUIREMENTS_FILE = requirements.txt
 REQUIREMENTS_DEV_FILE = requirements_dev.txt
 
-.PHONE: shell-python
+.PHONY: shell-python
 shell-python:
 	pipenv run python -i -c "import rlcompleter, readline; readline.parse_and_bind('tab: complete');"
 
@@ -13,7 +13,7 @@ shell-python:
 # Build
 #########
 
-.PHONE: build
+.PHONY: build
 build: mybuild
 mybuild:
 	pipenv run python setup.py develop
