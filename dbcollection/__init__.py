@@ -4,8 +4,8 @@ A collection of popular datasets for deep learning
 
 **dbcollection** is a library for downloading/parsing/managing datasets via simple methods.
 It was built from the ground up to be cross-platform (**Windows**, **Linux**, **MacOS**) and
-cross-language (**Python**, **Lua**, **Matlab**, etc.). This is achieved by using the popular ``HDF5``
-file format to store (meta)data of manually parsed datasets and the power of Python for
+cross-language (**Python**, **Lua**, **Matlab**, etc.). This is achieved by using the popular
+``HDF5`` file format to store (meta)data of manually parsed datasets and the power of Python for
 scripting. By doing so, this library can target any platform that supports Python and
 any language that has bindings for ``HDF5``.
 
