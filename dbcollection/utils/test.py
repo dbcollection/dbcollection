@@ -323,7 +323,7 @@ class TestDatasetGenerator:
         return self.hdf5_filepath
 
 
-class Timeout():
+class Timeout:
     """Timeout class using ALARM signal."""
     class Timeout(Exception):
         pass
