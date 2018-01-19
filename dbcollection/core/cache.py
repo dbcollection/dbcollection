@@ -37,24 +37,30 @@ class CacheManager:
     def __init__(self, is_test=False):
         """Initialize class."""
         self.is_test = is_test
-
-        # setup cache file path+name
-        if self.is_test:
-            self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection_test.json')
-        else:
-            self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection.json')
-        if not os.path.exists(self.cache_filename):
-            print('Generating the dbcollection\'s package cache file on disk: {}'
-                  .format(self.cache_filename))
-            self.write_data_cache(self._empty_data(), self.cache_filename)
-
-        # load cache data file
+        self.cache_filename = self._get_cache_filename()
+        self._set_cache_file()
         self.data = self.read_data_cache()
         self._cache_dir = self._get_cache_dir()
 
+    def _get_cache_filename(self):
+        """Get cache file name + path."""
+        home_dir = os.path.expanduser("~")
+        if self.is_test:
+            filename = 'dbcollection_test.json'
+        else:
+            filename = 'dbcollection.json'
+        return os.path.join(home_dir, filename)
+
+    def _set_cache_file(self):
+        """Creates the cache file in disk if it does not exist."""
+        if not os.path.exists(self.cache_filename):
+            print('Generating the dbcollection\'s package cache file to disk: {}'
+                  .format(self.cache_filename))
+            self.write_data_cache(self._empty_data(), self.cache_filename)
+
     def _set_cache_dir(self, path):
         """Set the default cache dir to store all metadata files"""
-        # assert path, 'Must input a directory path'
+        assert path, 'Must input a directory path'
         self._cache_dir = path
         self.data['info']['default_cache_dir'] = self._cache_dir
         self.write_data_cache(self.data)
