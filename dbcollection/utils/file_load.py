@@ -91,7 +91,7 @@ def load_pickle(fname):
     else:
         return pickle.load(open(fname, mode='rb'), encoding='latin1')
 
-    
+
 def load_xml(fname):
     """Loads and parses a xml file to a dictionary.
 
