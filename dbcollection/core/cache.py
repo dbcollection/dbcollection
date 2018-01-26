@@ -36,7 +36,13 @@ class CacheManager:
 
     def __init__(self):
         """Initializes the class."""
-        pass
+        self.cache_filename = self._get_cache_filename()
+
+    def _get_cache_filename(self):
+        """Return the cache file name + path."""
+        home_dir = os.path.expanduser("~")
+        filename = 'dbcollection.json'
+        return os.path.join(home_dir, filename)
 
 
 class CacheManagerDataset:

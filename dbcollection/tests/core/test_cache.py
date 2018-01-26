@@ -244,6 +244,10 @@ class TestCacheManager:
     def test_CacheManager__init(self, cache_manager):
         assert cache_manager
 
+    def test___get_cache_filename(self, cache_manager):
+        filename = cache_manager._get_cache_filename()
+        assert os.path.basename(filename) == 'dbcollection.json'
+
 
 class TestCacheManagerInfo:
     """Unit tests for the CacheManagerInfo class."""
