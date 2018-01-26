@@ -275,6 +275,15 @@ class TestCacheManager:
         cache_manager.write_data_cache(new_data)
         assert cache_manager.data == new_data
 
+    def test__set_cache_dir(self, mocker, cache_manager):
+        mocker.patch.object(CacheManager, "write_data_cache")
+        new_path = "/new/cache/path"
+        cache_manager._set_cache_dir(new_path)
+        assert cache_manager.cache_dir == new_path
+
+    def test__get_cache_dir(self, mocker, cache_manager):
+        assert cache_manager.cache_dir == test_data.data['info']['root_cache_dir']
+
 
 class TestCacheManagerInfo:
     """Unit tests for the CacheManagerInfo class."""
