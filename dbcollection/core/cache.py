@@ -38,7 +38,7 @@ class CacheManager:
         """Initializes the class."""
         self.cache_filename = self._get_cache_filename()
         self.data = self.read_data_cache()
-        #self.cache_dir = self._get_cache_dir()
+        self._cache_dir = self._get_cache_dir()
 
     def _get_cache_filename(self):
         """Return the cache file name + path."""
@@ -113,6 +113,19 @@ class CacheManager:
         with open(self.cache_filename, 'w') as file_cache:
             json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
         self.data = data  # must assign the new data or risk problems
+
+    def _set_cache_dir(self, path):
+        """Set the root cache dir to store all metadata files"""
+        assert path, 'Must input a directory path'
+        self._cache_dir = path
+        self.data['info']['root_cache_dir'] = self._cache_dir
+        self.write_data_cache(self.data)
+
+    def _get_cache_dir(self):
+        """Get the root cache dir path."""
+        return self.data['info']['root_cache_dir']
+
+    cache_dir = property(_get_cache_dir, _set_cache_dir)
 
 
 class CacheManagerDataset:
