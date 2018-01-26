@@ -4,234 +4,263 @@ Test dbcollection/utils/cache.py.
 
 
 import os
+import random
 import pytest
-from dbcollection.core.cache import CacheManager
+
+from dbcollection.core.cache import (
+    CacheManager,
+    CacheManagerInfo,
+    CacheManagerDataset,
+    CacheManagerCategory
+)
 
 
-data = {
-    "info": {
-        "default_cache_dir": os.path.join('some','path','dir')
-    },
-    "dataset": {
-        "test_dataset1": {
-            "cache_dir": os.path.join('some','path','dir','test_dataset1'),
-            "data_dir": os.path.join('some','path','dir','test_dataset1', 'data'),
-            "tasks": {
-                "default": "file1.h5",
-                "classification": "file2.h5",
-                "extra": "file3.h5"
-            },
-            "keywords": ['image_processing', 'classification']
+# -----------------------------------------------------------
+# Test data setup
+# -----------------------------------------------------------
+
+class DataGenerator:
+    """Generates sample data for testing the CacheManager class
+
+    This class generates a sample data structure thet a cache file will
+    contain wityh information about paths, datasets and categories of
+    datasets.
+
+    Example
+    =======
+    The generated data should resemble something like the following:
+
+    data = {
+        "info": {
+            "cache_dir": '/some/path/dbcollection',
+            "download_dir": '/some/path/dbcollection/downloads',
         },
-        "test_dataset2": {
-            "cache_dir": os.path.join('some','path','dir','test_dataset2'),
-            "data_dir": os.path.join('some','path','dir','test_dataset2', 'data'),
-            "tasks": {
-                "default": "file4.h5",
-                "classification": "file5.h5",
-                "extra": "file6.h5"
+        "dataset": {
+            "datasetA": {
+                "data_dir": 'some/path/dbcollection/downloads/datasetA'
+                "keywords": ["categoryA", "categoryB", "categoryC"]
+                "tasks": {
+                    "taskA_i": {
+                        "filename": 'some/path/dbcollection/datasetA/taskA_i.h5',
+                        "categories": ["categoryB"]
+                    },
+                    "taskA_ii": {
+                        "filename": 'some/path/dbcollection/datasetA/taskA_ii.h5',
+                        "categories": ["categoryA"]
+                    },
+                    "taskA_iii": {
+                        "filename": 'some/path/dbcollection/datasetA/taskA_iii.h5',
+                        "categories": ["categoryA", "categoryC"]
+                    }
+                }
             },
-            "keywords": ['image_processing', 'classification']
+            "datasetB": {
+                "data_dir": 'some/path/dbcollection/downloads/datasetB'
+                "keywords": ["categoryC", "categoryD"]
+                "tasks": {
+                    "taskB_i": {
+                        "filename": 'some/path/dbcollection/datasetB/taskB_i.h5',
+                        "categories": ["categoryD"]
+                    },
+                    "taskB_ii": {
+                        "filename": 'some/path/dbcollection/datasetB/taskB_ii.h5',
+                        "categories": ["categoryC"]
+                    }
+                }
+            },
+            "datasetC": {
+                "data_dir": 'some/path/dbcollection/downloads/datasetC'
+                "keywords": ["categoryA", "categoryB", "categoryC"]
+                "tasks": {
+                    "taskC_i": {
+                        "filename": 'some/path/dbcollection/datasetC/taskC_i.h5',
+                        "categories": ["categoryA", categoryB", "categoryC"]
+                    },
+                    "taskC_ii": {
+                        "filename": 'some/path/dbcollection/datasetC/taskC_ii.h5',
+                        "categories": ["categoryB", "categoryC"]
+                    },
+                    "taskC_iii": {
+                        "filename": 'some/path/dbcollection/datasetC/taskC_iii.h5',
+                        "categories": ["categoryA", "categoryC"]
+                    },
+                    "taskC_iv": {
+                        "filename": 'some/path/dbcollection/datasetC/taskC_iv.h5',
+                        "categories": ["categoryC"]
+                    }
+                }
+            },
+            .
+            .
+            .
         },
-    },
-    "category": {
-        'image_processing': ['test_dataset1, test_dataset2'],
-        'classification': ['test_dataset1, test_dataset2']
+        "category": {
+            "categoryA": {
+                "datasetA": ["taskA_i", "taskA_ii", "taskA_iii"],
+                "datasetC": ["taskC_i", "taskC_iv"]
+            },
+            "categoryB": {
+                "datasetC": ["taskC_i", "taskC_ii"]
+            },
+            "categoryC": {
+                "datasetA": ["taskA_i", "taskC_i", "taskC_ii", "taskC_iii", "taskC_iv"],
+                "datasetB": ["taskB_ii"]
+            },
+            .
+            .
+            .
+        }
     }
-}
+
+    """
+
+    def __init__(self):
+        self.base_path = "/some/path/"
+        self.list_datasets = ["dataset" + str(i) for i in range(10)]
+        self.list_categories = ["category" + str(i) for i in range(10)]
+        self.list_tasks = ["task" + str(i) for i in range(10)]
+
+        self.info = self.get_info_data()
+        self.datasets = self.get_datasets_data()
+        self.categories = self.get_categories_data()
+        self.data = {
+            "info": self.info,
+            "dataset": self.datasets,
+            "category": self.categories
+        }
+
+    def get_info_data(self):
+        """Returns the paths data for the info cache field."""
+        return {
+            "cache_dir": os.path.join(self.base_path, "dbcollection"),
+            "download_dir": os.path.join(self.base_path, "dbcollection", "downloads"),
+        }
+
+    def get_datasets_data(self):
+        """Returns the dataset's data for the dataset cache field."""
+        return self.generate_random_datasets()
+
+    def generate_random_datasets(self):
+        """Generates random datasets."""
+        datasets = {}
+        for dataset in self.list_datasets:
+            data = {}
+            data["data_dir"] = os.path.join(self.info["download_dir"], dataset)
+            data["tasks"] = self.generate_random_tasks(dataset)
+            data["keywords"] = self.get_keyword_list(data["tasks"])
+            datasets.update({dataset: data})
+        return datasets
 
 
-@pytest.fixture
-def cache_manager():
-    cache = CacheManager(is_test=True)
-    cache.reset_cache(force_reset=True)  # clear old contents
-    cache.write_data_cache(data)
-    cache.reload_cache()
+    def generate_random_tasks(self, dataset):
+        """Generates random dictionaries of tasks."""
+        tasks = {}
+        random_tasks = self.get_random_size_list_tasks()
+        for task in random_tasks:
+            tasks.update({
+                task: {
+                    "filename": os.path.join(self.info["cache_dir"], dataset, task + '.h5'),
+                    "category": self.get_random_size_list_categories()
+                }
+            })
+        return tasks
+
+    def get_random_size_list_tasks(self):
+        """Returns a random sized list of random tasks."""
+        num_tasks = random.randint(1, len(self.list_tasks))
+        tasks = self.list_tasks.copy()
+        random.shuffle(tasks)
+        return list(set(tasks[:num_tasks]))
+
+    def get_random_size_list_categories(self):
+        """Returns a random sized list of random categories."""
+        num_categories = random.randint(1, len(self.list_categories))
+        categories = self.list_categories.copy()
+        random.shuffle(categories)
+        return list(set(categories[:num_categories]))
+
+    def get_keyword_list(self, tasks):
+        """Returns a list of all unique task categories."""
+        keywords = []
+        for task in tasks:
+            keywords.extend(tasks[task]["category"])
+        return list(set(keywords))
+
+    def get_categories_data(self):
+        """Returns the category's data for the category cache field."""
+        return self.generate_random_categories()
+
+    def generate_random_categories(self):
+        """Generates random categories."""
+        categories = {}
+        used_categories = self.get_list_categories_used(self.datasets)
+        for category in used_categories:
+            categories.update({
+                category: self.get_datasets_tasks_by_category(category)
+            })
+        return categories
+
+
+    def get_list_categories_used(self, datasets):
+        """Returns a list of all categories available in the datasets data."""
+        categories_used = []
+        for dataset in datasets:
+            categories_used.extend(datasets[dataset]['keywords'])
+        return list(set(categories_used))
+
+
+    def get_datasets_tasks_by_category(self, category):
+        """Returns a list of all datasets and tasks that have the category name."""
+        list_datasets_tasks = {}
+        for dataset in self.datasets:
+            list_datasets_tasks.update({
+                dataset: self.get_tasks_by_category(self.datasets[dataset]["tasks"], category)
+            })
+        return list_datasets_tasks
+
+    def get_tasks_by_category(self, tasks, category):
+        """Returns a list of tasks that contains the category name"""
+        tasks_category = []
+        for task in tasks:
+            if category in tasks[task]['category']:
+                tasks_category.append(task)
+        return tasks_category
+
+
+# -----------------------------------------------------------
+# Tests
+# -----------------------------------------------------------
+
+test_data = DataGenerator()
+
+@pytest.fixture()
+def cache_manager(mocker):
+    cache = CacheManager()
     return cache
 
+class TestCacheManager:
+    """Unit tests for the CacheManager class."""
 
-@pytest.mark.parametrize("name, new_info, is_append", [
-    ('new_dataset1', {}, True),
-    ('new_dataset2', {}, False),
-    ('test_dataset1', {}, False),
-])
-def test_add_data(name, new_info, is_append, cache_manager):
-    cache_manager.add_data(name, new_info, is_append)
-    assert(name in cache_manager.data['dataset'])
-    assert(cache_manager.data['dataset'][name] == new_info)
+    def test_CacheManager__init(self, cache_manager):
+        assert cache_manager
 
 
-@pytest.mark.parametrize("name, delete_cache", [
-    ('test_dataset1', False),
-    ('test_dataset2', False),
-    ('test_dataset2', True),
-])
-def test_delete_dataset(name, delete_cache, cache_manager):
-    cache_manager.delete_dataset(name, delete_cache)
-    assert(not name in cache_manager.data['dataset'])
+class TestCacheManagerInfo:
+    """Unit tests for the CacheManagerInfo class."""
+
+    def test_CacheManagerDataset__init(self):
+        pass
 
 
-@pytest.mark.parametrize("name, delete_cache", [
-    ('test_dataset_non_exists', False),
-])
-def test_delete_dataset_raise(name, delete_cache, cache_manager):
-    with pytest.raises(Exception):
-        cache_manager.delete_dataset(name, delete_cache)
+class TestCacheManagerDataset:
+    """Unit tests for the CacheManagerDataset class."""
 
-@pytest.mark.parametrize("name, task", [
-    ('test_dataset2', 'extra'),
-])
-def test_delete_task(name, task, cache_manager):
-    cache_manager.delete_task(name, task)
+    def test_CacheManagerDataset__init(self):
+        pass
 
 
-@pytest.mark.parametrize("name, output", [
-    ('test_dataset1', True),
-    ('test_dataset2', True),
-    ('test_dataset_non_exists', False),
-    ('', False),
-])
-def test_exists_dataset(name, output, cache_manager):
-    assert(output == cache_manager.exists_dataset(name))
+class TestCacheManagerCategory:
+    """Unit tests for the CacheManagerCategory class."""
 
-
-@pytest.mark.parametrize("name, task, output", [
-    ('test_dataset1', 'default', True),
-    ('test_dataset1', 'classification', True),
-    ('test_dataset1', 'classific', False),
-    ('test_dataset2', 'extra', True),
-    ('test_dataset_non_exists', 'default', False),
-    ('', 'default', False),
-])
-def test_exists_task(name, task, output, cache_manager):
-    assert(output == cache_manager.exists_task(name, task))
-
-
-@pytest.mark.parametrize("name, output", [
-    ('test_dataset1', {
-        "data_dir": data["dataset"]["test_dataset1"]["data_dir"],
-        "cache_dir": data["dataset"]["test_dataset1"]["cache_dir"]
-    }),
-    ('test_dataset2', {
-        "data_dir": data["dataset"]["test_dataset2"]["data_dir"],
-        "cache_dir": data["dataset"]["test_dataset2"]["cache_dir"]
-    }),
-])
-def test_get_dataset_storage_paths(name, output, cache_manager):
-    assert(output == cache_manager.get_dataset_storage_paths(name))
-
-
-@pytest.mark.parametrize("name, task", [
-    ('test_dataset1', "default"),
-    ('test_dataset1', "classification"),
-    ('test_dataset1', "extra"),
-    ('test_dataset2', "default"),
-    ('test_dataset2', "classification"),
-    ('test_dataset2', "extra"),
-])
-def test_get_task_cache_path__succeed(name, task, cache_manager):
-    task_path = cache_manager.data["dataset"][name]["tasks"][task]
-    assert(task_path == cache_manager.get_task_cache_path(name, task))
-
-
-@pytest.mark.parametrize("name, task", [
-    ('test_dataset1', ""),
-    ('test_dataset1', "classific"),
-    ('test_dataset1', "extra_"),
-    ('test_dataset_non_exists', "default"),
-    ('test_dataset_non_exists', "classification"),
-    ('test_dataset_non_exists', "extra"),
-])
-def test_get_task_cache_path__fail(name, task, cache_manager):
-    with pytest.raises(Exception):
-        cache_manager.get_task_cache_path(name, task)
-
-@pytest.mark.parametrize("name, keywords", [
-    ('test_dataset1', "new_kw"),
-    ('test_dataset1', ["new_kw1", "new_kw2"]),
-])
-def test_add_keywords(name, keywords, cache_manager):
-    cache_manager.add_keywords(name, keywords)
-    if not isinstance(keywords, list):
-        keywords = [keywords]
-    l = [kw for kw in keywords if kw in cache_manager.data["dataset"][name]["keywords"]]
-    assert(any(l))
-    l = [kw for kw in keywords if kw in cache_manager.data["category"]]
-    assert(any(l))
-
-@pytest.mark.parametrize("name, keywords", [
-    ('test_dataset1', ""),
-    ('test_dataset1', ["", ""]),
-])
-def test_add_keywords_empty(name, keywords, cache_manager):
-    kw = list(cache_manager.data["dataset"][name]["keywords"])
-    cache_manager.add_keywords(name, keywords)
-    assert(set(kw) == set(cache_manager.data["dataset"][name]["keywords"]))
-    l = [kw for kw in keywords if kw in cache_manager.data["category"]]
-    assert(not any(l))
-
-
-@pytest.mark.parametrize("name, data_dir, cache_tasks, cache_keywords, is_append", [
-    ('test_dataset1', os.path.join('new', 'data', 'dir'), {"new_task": "new_file.h5"},
-     ["new_kw1", "new_kw2"], False),
-    ('test_dataset2', os.path.join('new', 'data', 'dir'), {"new_task": "new_file.h5"},
-     ["new_kw1", "new_kw2"], True),
-])
-def test_update(name, data_dir, cache_tasks, cache_keywords, is_append, cache_manager):
-    cache_manager.update(name, data_dir, cache_tasks, cache_keywords, is_append)
-    assert(name in cache_manager.data["dataset"])
-    if is_append:
-        assert(data_dir != cache_manager.data["dataset"][name]["data_dir"])
-    else:
-        assert(data_dir == cache_manager.data["dataset"][name]["data_dir"])
-    l = [task for task in cache_tasks if task in cache_manager.data["dataset"][name]["tasks"]]
-    assert(any(l))
-    l = [kw for kw in cache_keywords if kw in cache_manager.data["dataset"][name]["keywords"]]
-    assert(any(l))
-
-
-@pytest.mark.parametrize("field, value", [
-    ('test_dataset1', "string"),
-    ('test_dataset1', ['dummy_data']),
-    ('test_dataset2', 1),
-    ('test_dataset2', {'new': 'stuff'}),
-])
-def test_modify_field_dataset(field, value, cache_manager):
-    cache_manager.modify_field(field, value)
-    assert(value == cache_manager.data["dataset"][field])
-
-
-@pytest.mark.parametrize("field, value", [
-    ('image_processing', "new_val"),
-    ('image_processing', ["new_val1", "new_val2"]),
-    ('image_processing', ["new_val1", "new_val2"]),
-    ('classification', 1),
-])
-def test_modify_field_dataset_keywords(field, value, cache_manager):
-    cache_manager.modify_field(field, value)
-    assert(value == cache_manager.data["category"][field])
-
-
-@pytest.mark.parametrize("field, value", [
-    ('default_cache_dir', "new_val"),
-    ('default_cache_dir', ["new_val1", "new_val2"]),
-])
-def test_modify_field_info(field, value, cache_manager):
-    cache_manager.modify_field(field, value)
-    assert(value == cache_manager.data["info"][field])
-
-
-@pytest.mark.parametrize("field, value", [
-    ('test_dataset1', {}),
-    ('test_dataset1', []),
-    ('test_dataset1', ""),
-    ('test_dataset1_', ['dummy_data']),
-    ('test_dataset2', {}),
-    ({}, {}),
-    (['test_dataset1'], ['new_value']),
-    ('info2', "new_val"),
-    ('default_cache_dir_', "new_val"),
-])
-def test_modify_field_raise(field, value, cache_manager):
-    with pytest.raises(Exception):
-        cache_manager.modify_field(field, value)
+    def test_CacheManagerCategory__init(self):
+        pass
