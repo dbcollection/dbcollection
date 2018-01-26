@@ -210,3 +210,14 @@ class CacheManagerInfo:
         """Initialize class."""
         assert manager, "Must input a valid cache manager."
         self.manager = manager
+
+    def _set_cache_dir(self, path):
+        """Set the root cache dir to store all metadata files"""
+        assert path, 'Must input a directory path'
+        self.manager.cache_dir = path
+
+    def _get_cache_dir(self):
+        """Get the root cache dir path."""
+        return self.manager.cache_dir
+
+    cache_dir = property(_get_cache_dir, _set_cache_dir)

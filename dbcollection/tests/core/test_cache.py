@@ -367,3 +367,12 @@ class TestCacheManagerCategory:
 
     def test_CacheManagerCategory__init(self, cache_category_manager):
         pass
+
+    def test__set_cache_dir(self, mocker, cache_category_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        new_path = "/new/cache/path"
+        cache_category_manager.manager.cache_dir = new_path
+        assert cache_category_manager.cache_dir == new_path
+
+    def test__get_cache_dir(self, mocker, cache_category_manager):
+        assert cache_category_manager.cache_dir == test_data.data['info']['root_cache_dir']
