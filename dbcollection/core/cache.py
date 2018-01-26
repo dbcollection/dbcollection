@@ -140,8 +140,8 @@ class CacheDataManager:
     cache_dir = property(_get_cache_dir, _set_cache_dir)
 
     def reset_cache_dir(self):
-        """Reset the root download dir."""
-        return self._set_cache_dir(self._get_default_cache_dir())
+        """Reset the root cache dir path."""
+        self._set_cache_dir(self._get_default_cache_dir())
 
     def _set_download_dir(self, path):
         """Set the root save dir path for downloaded data."""
@@ -156,7 +156,7 @@ class CacheDataManager:
     download_dir = property(_get_download_dir, _set_download_dir)
 
     def reset_download_dir(self):
-        """Reset the root download dir."""
+        """Reset the root download dir path."""
         return self._set_download_dir(self._get_default_downloads_dir())
 
     def reset_cache(self, force_reset=False):
@@ -221,3 +221,7 @@ class CacheManagerInfo:
         return self.manager.cache_dir
 
     cache_dir = property(_get_cache_dir, _set_cache_dir)
+
+    def reset_cache_dir(self):
+        """Reset the root cache dir path."""
+        self.manager.reset_cache_dir()
