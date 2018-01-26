@@ -127,6 +127,18 @@ class CacheManager:
 
     cache_dir = property(_get_cache_dir, _set_cache_dir)
 
+    def _set_download_dir(self, path):
+        """Set the root save dir path for downloaded data."""
+        assert path, 'Must input a non-empty path.'
+        self.data['info']['root_downloads_dir'] = path
+        self.write_data_cache(self.data)
+
+    def _get_download_dir(self):
+        """Get the root save dir path."""
+        return self.data['info']['root_downloads_dir']
+
+    download_dir = property(_get_download_dir, _set_download_dir)
+
 
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""
