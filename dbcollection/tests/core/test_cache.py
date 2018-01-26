@@ -151,7 +151,6 @@ class DataGenerator:
             datasets.update({dataset: data})
         return datasets
 
-
     def generate_random_tasks(self, dataset):
         """Generates random dictionaries of tasks."""
         tasks = {}
@@ -200,14 +199,12 @@ class DataGenerator:
             })
         return categories
 
-
     def get_list_categories_used(self, datasets):
         """Returns a list of all categories available in the datasets data."""
         categories_used = []
         for dataset in datasets:
             categories_used.extend(datasets[dataset]['keywords'])
         return list(set(categories_used))
-
 
     def get_datasets_tasks_by_category(self, category):
         """Returns a list of all datasets and tasks that have the category name."""
@@ -284,6 +281,14 @@ class TestCacheManager:
     def test__get_cache_dir(self, mocker, cache_manager):
         assert cache_manager.cache_dir == test_data.data['info']['root_cache_dir']
 
+    def test__set_download_dir(self, mocker, cache_manager):
+        mocker.patch.object(CacheManager, "write_data_cache")
+        new_path = "/new/cache/downloads/path"
+        cache_manager._set_download_dir(new_path)
+        assert cache_manager.download_dir == new_path
+
+    def test__get_download_dir(self, mocker, cache_manager):
+        assert cache_manager.download_dir == test_data.data['info']['root_downloads_dir']
 
 class TestCacheManagerInfo:
     """Unit tests for the CacheManagerInfo class."""
