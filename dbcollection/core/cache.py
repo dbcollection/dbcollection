@@ -37,12 +37,63 @@ class CacheManager:
     def __init__(self):
         """Initializes the class."""
         self.cache_filename = self._get_cache_filename()
+        self.data = self.read_data_cache()
+        #self.cache_dir = self._get_cache_dir()
 
     def _get_cache_filename(self):
         """Return the cache file name + path."""
         home_dir = os.path.expanduser("~")
         filename = 'dbcollection.json'
         return os.path.join(home_dir, filename)
+
+    def read_data_cache(self):
+        """Loads data from the cache file.
+
+        Returns
+        -------
+        dict
+            Data containing information of all datasets and categories.
+
+        """
+        if os.path.exists(self.cache_filename):
+            return self.read_data_cache_file()
+        else:
+            data = self._empty_data()
+            #self._write_cache_file(data)
+            return data
+
+    def read_data_cache_file(self):
+        """Read the cache file data to memory.
+
+        Returns
+        -------
+        dict
+            Data structure of the cache (file).
+
+        """
+        with open(self.cache_filename, 'r') as json_data:
+            return json.load(json_data)
+
+    def _empty_data(self):
+        """Returns an empty (dummy) template of the cache data structure."""
+        return {
+            "info": {
+                "root_cache_dir": self._get_default_cache_dir(),
+                "root_downloads_dir": self._get_default_downloads_dir(),
+            },
+            "dataset": {},
+            "category": {}
+        }
+
+    def _get_default_cache_dir(self):
+        """Returns the pre-defined path of the cache's root directory."""
+        default_cache_dir = os.path.join(os.path.expanduser("~"), 'dbcollection')
+        return default_cache_dir
+
+    def _get_default_downloads_dir(self):
+        """Returns the pre-defined path of the cache's downloads directory."""
+        default_downloads_dir = os.path.join(self._get_default_cache_dir(), 'downloads')
+        return default_downloads_dir
 
 
 class CacheManagerDataset:

@@ -32,8 +32,8 @@ class DataGenerator:
 
     data = {
         "info": {
-            "cache_dir": '/some/path/dbcollection',
-            "download_dir": '/some/path/dbcollection/downloads',
+            "root_cache_dir": '/some/path/dbcollection',
+            "root_download_dir": '/some/path/dbcollection/downloads',
         },
         "dataset": {
             "datasetA": {
@@ -132,8 +132,8 @@ class DataGenerator:
     def get_info_data(self):
         """Returns the paths data for the info cache field."""
         return {
-            "cache_dir": os.path.join(self.base_path, "dbcollection"),
-            "download_dir": os.path.join(self.base_path, "dbcollection", "downloads"),
+            "root_cache_dir": os.path.join(self.base_path, "dbcollection"),
+            "root_download_dir": os.path.join(self.base_path, "dbcollection", "downloads"),
         }
 
     def get_datasets_data(self):
@@ -145,7 +145,7 @@ class DataGenerator:
         datasets = {}
         for dataset in self.list_datasets:
             data = {}
-            data["data_dir"] = os.path.join(self.info["download_dir"], dataset)
+            data["data_dir"] = os.path.join(self.info["root_download_dir"], dataset)
             data["tasks"] = self.generate_random_tasks(dataset)
             data["keywords"] = self.get_keyword_list(data["tasks"])
             datasets.update({dataset: data})
@@ -159,7 +159,7 @@ class DataGenerator:
         for task in random_tasks:
             tasks.update({
                 task: {
-                    "filename": os.path.join(self.info["cache_dir"], dataset, task + '.h5'),
+                    "filename": os.path.join(self.info["root_cache_dir"], dataset, task + '.h5'),
                     "category": self.get_random_size_list_categories()
                 }
             })
@@ -233,20 +233,39 @@ class DataGenerator:
 
 test_data = DataGenerator()
 
+
 @pytest.fixture()
 def cache_manager(mocker):
+    mocker.patch.object(CacheManager, "read_data_cache", return_value=test_data.data)
     cache = CacheManager()
     return cache
+
 
 class TestCacheManager:
     """Unit tests for the CacheManager class."""
 
-    def test_CacheManager__init(self, cache_manager):
-        assert cache_manager
+    def test_CacheManager__init(self, mocker):
+        mocker.patch.object(CacheManager, "read_data_cache", return_value=test_data.data)
+        cache = CacheManager()
+        assert os.path.basename(cache.cache_filename) == 'dbcollection.json'
 
     def test___get_cache_filename(self, cache_manager):
         filename = cache_manager._get_cache_filename()
         assert os.path.basename(filename) == 'dbcollection.json'
+
+    def test_read_data_cache__file_exists(self, mocker):
+        mocked_exists = mocker.patch("os.path.exists")
+        mocked_exists.return_value = True
+        mocker.patch.object(CacheManager, "read_data_cache_file", return_value=test_data.data)
+        cache = CacheManager()
+        assert cache.read_data_cache() == test_data.data
+
+    def test_read_data_cache__file_missing(self, mocker):
+        mocked_exists = mocker.patch("os.path.exists")
+        mocked_exists.return_value = False
+        mocker.patch.object(CacheManager, "_empty_data", return_value=test_data.data)
+        cache = CacheManager()
+        assert cache.read_data_cache() == test_data.data
 
 
 class TestCacheManagerInfo:
