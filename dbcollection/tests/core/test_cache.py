@@ -308,6 +308,15 @@ class TestCacheManager:
         assert cache_manager.download_dir == cache_manager._get_default_downloads_dir()
         assert cache_manager.download_dir is not new_path
 
+    def test_reset_cache(self, mocker, cache_manager):
+        mocker.patch.object(CacheManager, "write_data_cache")
+        cache_manager.reset_cache(True)
+
+    def test_reset_cache__raise_warning(self, mocker, cache_manager):
+        with pytest.warns(UserWarning):
+            cache_manager.reset_cache()
+
+
 class TestCacheManagerInfo:
     """Unit tests for the CacheManagerInfo class."""
 

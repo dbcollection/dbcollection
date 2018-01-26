@@ -147,6 +147,31 @@ class CacheManager:
         """Reset the root download dir."""
         return self._set_download_dir(self._get_default_downloads_dir())
 
+    def reset_cache(self, force_reset=False):
+        """Resets the cache file contents.
+
+        Resets the cache file by removing all info about
+        the datasets/categories/info from the cache file.
+        Basically, it empties the cache contents.
+
+        Parameters
+        ----------
+        force_reset : bool, optional
+            Forces the cache to be reset (emptied) if True.
+
+        Warning
+        -------
+        UserWarning
+            If force_reset is False, display a warning to the user.
+
+        """
+        if force_reset:
+            self.write_data_cache(self._empty_data())
+        else:
+            msg = 'All information about stored datasets will be lost if you proceed! ' + \
+                  'Set \'force_reset=True\' to proceed with the reset of dbcollection.json.'
+            warnings.warn(msg, UserWarning, stacklevel=2)
+
 
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""
