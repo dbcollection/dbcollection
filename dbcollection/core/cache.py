@@ -36,9 +36,21 @@ class CacheManager:
 
     def __init__(self):
         """Initializes the class."""
+        self.manager = CacheDataManager()
+        self.info = CacheManagerInfo(self.manager)
+        self.dataset = CacheManagerDataset(self.manager)
+        self.category = CacheManagerCategory(self.manager)
+
+
+class CacheDataManager:
+    """Cache's data write/read methods."""
+
+    def __init__(self):
+        """Initialize class."""
         self.cache_filename = self._get_cache_filename()
         self.data = self.read_data_cache()
         self._cache_dir = self._get_cache_dir()
+        self.info = CacheManagerInfo(self.data["info"])
 
     def _get_cache_filename(self):
         """Return the cache file name + path."""
@@ -176,21 +188,25 @@ class CacheManager:
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""
 
-    def __init__(self):
-        """Initializes the class."""
-        pass
+    def __init__(self, manager):
+        """Initialize class."""
+        assert manager, "Must input a valid cache manager."
+        self.manager = manager
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
 
-    def __init__(self):
-        """Initializes the class."""
-        pass
+    def __init__(self, manager):
+        """Initialize class."""
+        assert manager, "Must input a valid cache manager."
+        self.manager = manager
 
 
 class CacheManagerInfo:
     """Manage the cache's information configurations."""
 
-    def __init__(self):
-        """Initializes the class."""
-        pass
+    def __init__(self, manager):
+        """Initialize class."""
+        assert manager, "Must input a valid cache manager."
+        self.manager = manager

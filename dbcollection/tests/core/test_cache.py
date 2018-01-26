@@ -9,6 +9,7 @@ import pytest
 
 from dbcollection.core.cache import (
     CacheManager,
+    CacheDataManager,
     CacheManagerInfo,
     CacheManagerDataset,
     CacheManagerCategory
@@ -232,107 +233,137 @@ test_data = DataGenerator()
 
 
 @pytest.fixture()
-def cache_manager(mocker):
-    mocker.patch.object(CacheManager, "read_data_cache", return_value=test_data.data)
-    cache = CacheManager()
-    return cache
+def cache_data_manager(mocker):
+    mocker.patch.object(CacheDataManager, "read_data_cache", return_value=test_data.data)
+    cache_data = CacheDataManager()
+    return cache_data
 
 
-class TestCacheManager:
-    """Unit tests for the CacheManager class."""
+class TestCacheDataManager:
+    """Unit tests for the CacheDataManager class."""
 
-    def test_CacheManager__init(self, mocker):
-        mocker.patch.object(CacheManager, "read_data_cache", return_value=test_data.data)
-        cache = CacheManager()
+    def test_CacheDataManager__init(self, mocker):
+        mocker.patch.object(CacheDataManager, "read_data_cache", return_value=test_data.data)
+        cache = CacheDataManager()
         assert os.path.basename(cache.cache_filename) == 'dbcollection.json'
 
-    def test___get_cache_filename(self, cache_manager):
-        filename = cache_manager._get_cache_filename()
+    def test___get_cache_filename(self, cache_data_manager):
+        filename = cache_data_manager._get_cache_filename()
         assert os.path.basename(filename) == 'dbcollection.json'
 
     def test_read_data_cache__file_exists(self, mocker):
         mocked_exists = mocker.patch("os.path.exists")
         mocked_exists.return_value = True
-        mocker.patch.object(CacheManager, "read_data_cache_file", return_value=test_data.data)
-        cache = CacheManager()
+        mocker.patch.object(CacheDataManager, "read_data_cache_file", return_value=test_data.data)
+        cache = CacheDataManager()
         assert cache.read_data_cache() == test_data.data
 
     def test_read_data_cache__file_missing(self, mocker):
         mocked_exists = mocker.patch("os.path.exists")
         mocked_exists.return_value = False
-        mocker.patch.object(CacheManager, "_empty_data", return_value=test_data.data)
-        mocker.patch.object(CacheManager, "write_data_cache")
-        cache = CacheManager()
+        mocker.patch.object(CacheDataManager, "_empty_data", return_value=test_data.data)
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        cache = CacheDataManager()
         assert cache.read_data_cache() == test_data.data
 
-    def test_write_data_cache(self, mocker, cache_manager):
+    def test_write_data_cache(self, mocker, cache_data_manager):
         new_data = {"some": "data"}
         mocker.patch("builtins.open")
         mocker.patch('json.dump')
-        cache_manager.write_data_cache(new_data)
-        assert cache_manager.data == new_data
+        cache_data_manager.write_data_cache(new_data)
+        assert cache_data_manager.data == new_data
 
-    def test__set_cache_dir(self, mocker, cache_manager):
-        mocker.patch.object(CacheManager, "write_data_cache")
+    def test__set_cache_dir(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
         new_path = "/new/cache/path"
-        cache_manager._set_cache_dir(new_path)
-        assert cache_manager.cache_dir == new_path
+        cache_data_manager._set_cache_dir(new_path)
+        assert cache_data_manager.cache_dir == new_path
 
-    def test__get_cache_dir(self, mocker, cache_manager):
-        assert cache_manager.cache_dir == test_data.data['info']['root_cache_dir']
+    def test__get_cache_dir(self, mocker, cache_data_manager):
+        assert cache_data_manager.cache_dir == test_data.data['info']['root_cache_dir']
 
-    def test_reset_cache_dir(self, mocker, cache_manager):
-        mocker.patch.object(CacheManager, "write_data_cache")
+    def test_reset_cache_dir(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
         new_path = "/new/cache/path"
-        cache_manager._set_cache_dir(new_path)
-        assert cache_manager.cache_dir == new_path
-        cache_manager.reset_cache_dir()
-        assert cache_manager.cache_dir == cache_manager._get_default_cache_dir()
-        assert cache_manager.cache_dir is not new_path
+        cache_data_manager._set_cache_dir(new_path)
+        assert cache_data_manager.cache_dir == new_path
+        cache_data_manager.reset_cache_dir()
+        assert cache_data_manager.cache_dir == cache_data_manager._get_default_cache_dir()
+        assert cache_data_manager.cache_dir is not new_path
 
-    def test__set_download_dir(self, mocker, cache_manager):
-        mocker.patch.object(CacheManager, "write_data_cache")
+    def test__set_download_dir(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
         new_path = "/new/cache/downloads/path"
-        cache_manager._set_download_dir(new_path)
-        assert cache_manager.download_dir == new_path
+        cache_data_manager._set_download_dir(new_path)
+        assert cache_data_manager.download_dir == new_path
 
-    def test__get_download_dir(self, mocker, cache_manager):
-        assert cache_manager.download_dir == test_data.data['info']['root_downloads_dir']
+    def test__get_download_dir(self, mocker, cache_data_manager):
+        assert cache_data_manager.download_dir == test_data.data['info']['root_downloads_dir']
 
-    def test_reset_download_dir(self, mocker, cache_manager):
-        mocker.patch.object(CacheManager, "write_data_cache")
+    def test_reset_download_dir(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
         new_path = "/new/cache/downloads/path"
-        cache_manager._set_download_dir(new_path)
-        assert cache_manager.download_dir == new_path
-        cache_manager.reset_download_dir()
-        assert cache_manager.download_dir == cache_manager._get_default_downloads_dir()
-        assert cache_manager.download_dir is not new_path
+        cache_data_manager._set_download_dir(new_path)
+        assert cache_data_manager.download_dir == new_path
+        cache_data_manager.reset_download_dir()
+        assert cache_data_manager.download_dir == cache_data_manager._get_default_downloads_dir()
+        assert cache_data_manager.download_dir is not new_path
 
-    def test_reset_cache(self, mocker, cache_manager):
-        mocker.patch.object(CacheManager, "write_data_cache")
-        cache_manager.reset_cache(True)
+    def test_reset_cache(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        cache_data_manager.reset_cache(True)
 
-    def test_reset_cache__raise_warning(self, mocker, cache_manager):
+    def test_reset_cache__raise_warning(self, mocker, cache_data_manager):
         with pytest.warns(UserWarning):
-            cache_manager.reset_cache()
+            cache_data_manager.reset_cache()
+
+
+@pytest.fixture()
+def cache_manager(mocker):
+    cache_info = CacheManagerInfo(cache_manager)
+    return cache_info
+
+class TestCacheManager:
+    """Unit tests for the CacheManager class."""
+
+    def test_CacheManager__init(self, cache_manager):
+        pass
+
+
+@pytest.fixture()
+def cache_info_manager(mocker, cache_data_manager):
+    cache_info = CacheManagerInfo(cache_data_manager)
+    return cache_info
 
 
 class TestCacheManagerInfo:
     """Unit tests for the CacheManagerInfo class."""
 
-    def test_CacheManagerDataset__init(self):
+    def test_CacheManagerDataset__init(self, cache_info_manager):
         pass
+
+
+@pytest.fixture()
+def cache_dataset_manager(mocker, cache_data_manager):
+    cache_info = CacheManagerInfo(cache_data_manager)
+    return cache_info
 
 
 class TestCacheManagerDataset:
     """Unit tests for the CacheManagerDataset class."""
 
-    def test_CacheManagerDataset__init(self):
+    def test_CacheManagerDataset__init(self, cache_dataset_manager):
         pass
+
+
+@pytest.fixture()
+def cache_category_manager(mocker, cache_data_manager):
+    cache_info = CacheManagerInfo(cache_data_manager)
+    return cache_info
 
 
 class TestCacheManagerCategory:
     """Unit tests for the CacheManagerCategory class."""
 
-    def test_CacheManagerCategory__init(self):
+    def test_CacheManagerCategory__init(self, cache_category_manager):
         pass
