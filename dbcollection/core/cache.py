@@ -59,7 +59,7 @@ class CacheManager:
             return self.read_data_cache_file()
         else:
             data = self._empty_data()
-            #self._write_cache_file(data)
+            self.write_data_cache(data)
             return data
 
     def read_data_cache_file(self):
@@ -94,6 +94,25 @@ class CacheManager:
         """Returns the pre-defined path of the cache's downloads directory."""
         default_downloads_dir = os.path.join(self._get_default_cache_dir(), 'downloads')
         return default_downloads_dir
+
+    def write_data_cache(self, data):
+        """Writes data to the cache file.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Raises
+        ------
+        IOError
+            If the file cannot be opened.
+
+        """
+        assert data, 'Must input a non-empty dictionary.'
+        with open(self.cache_filename, 'w') as file_cache:
+            json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
+        self.data = data  # must assign the new data or risk problems
 
 
 class CacheManagerDataset:

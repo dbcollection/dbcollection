@@ -264,8 +264,16 @@ class TestCacheManager:
         mocked_exists = mocker.patch("os.path.exists")
         mocked_exists.return_value = False
         mocker.patch.object(CacheManager, "_empty_data", return_value=test_data.data)
+        mocker.patch.object(CacheManager, "write_data_cache")
         cache = CacheManager()
         assert cache.read_data_cache() == test_data.data
+
+    def test_write_data_cache(self, mocker, cache_manager):
+        new_data = {"some": "data"}
+        mocker.patch("builtins.open")
+        mocker.patch('json.dump')
+        cache_manager.write_data_cache(new_data)
+        assert cache_manager.data == new_data
 
 
 class TestCacheManagerInfo:
