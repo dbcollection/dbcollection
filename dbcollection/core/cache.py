@@ -225,3 +225,14 @@ class CacheManagerInfo:
     def reset_cache_dir(self):
         """Reset the root cache dir path."""
         self.manager.reset_cache_dir()
+
+    def _set_download_dir(self, path):
+        """Set the root save dir path for downloaded data."""
+        assert path, 'Must input a non-empty path.'
+        self.manager.download_dir = path
+
+    def _get_download_dir(self):
+        """Get the root save dir path."""
+        return self.manager.download_dir
+
+    download_dir = property(_get_download_dir, _set_download_dir)
