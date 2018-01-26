@@ -281,6 +281,15 @@ class TestCacheManager:
     def test__get_cache_dir(self, mocker, cache_manager):
         assert cache_manager.cache_dir == test_data.data['info']['root_cache_dir']
 
+    def test_reset_cache_dir(self, mocker, cache_manager):
+        mocker.patch.object(CacheManager, "write_data_cache")
+        new_path = "/new/cache/path"
+        cache_manager._set_cache_dir(new_path)
+        assert cache_manager.cache_dir == new_path
+        cache_manager.reset_cache_dir()
+        assert cache_manager.cache_dir == cache_manager._get_default_cache_dir()
+        assert cache_manager.cache_dir is not new_path
+
     def test__set_download_dir(self, mocker, cache_manager):
         mocker.patch.object(CacheManager, "write_data_cache")
         new_path = "/new/cache/downloads/path"
