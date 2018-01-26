@@ -139,6 +139,10 @@ class CacheManager:
 
     download_dir = property(_get_download_dir, _set_download_dir)
 
+    def reset_download_dir(self):
+        """Reset the root download dir."""
+        return self._set_download_dir(self._get_default_downloads_dir())
+
 
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""

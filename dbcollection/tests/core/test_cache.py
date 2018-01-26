@@ -290,6 +290,15 @@ class TestCacheManager:
     def test__get_download_dir(self, mocker, cache_manager):
         assert cache_manager.download_dir == test_data.data['info']['root_downloads_dir']
 
+    def test_reset_download_dir(self, mocker, cache_manager):
+        mocker.patch.object(CacheManager, "write_data_cache")
+        new_path = "/new/cache/downloads/path"
+        cache_manager._set_download_dir(new_path)
+        assert cache_manager.download_dir == new_path
+        cache_manager.reset_download_dir()
+        assert cache_manager.download_dir == cache_manager._get_default_downloads_dir()
+        assert cache_manager.download_dir is not new_path
+
 class TestCacheManagerInfo:
     """Unit tests for the CacheManagerInfo class."""
 
