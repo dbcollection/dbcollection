@@ -279,7 +279,7 @@ class CacheDataManager:
         keywords = []
         for task in tasks:
             keywords.extend(tasks[task]["categories"])
-        return tuple(set(keywords))
+        return tuple(sorted(set(keywords)))
 
     def update_data(self, name, cache_dir=None, data_dir=None, tasks=None):
         """Updates the data of a dataset in the cache.
