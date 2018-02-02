@@ -396,6 +396,16 @@ class TestCacheManagerInfo:
         assert cache_info_manager.download_dir == cache_info_manager.manager.download_dir
         assert cache_info_manager.download_dir is not new_path
 
+    def test_reset(self, mocker, cache_info_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        cache_info_manager.cache_dir = "/new/cache/path"
+        cache_info_manager.download_dir = "/new/cache/downloads/path"
+
+        cache_info_manager.reset()
+
+        assert cache_info_manager.cache_dir == cache_info_manager.manager._get_default_cache_dir()
+        assert cache_info_manager.download_dir == cache_info_manager.manager._get_default_downloads_dir()
+
 
 @pytest.fixture()
 def cache_dataset_manager(mocker, cache_data_manager):

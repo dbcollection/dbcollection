@@ -240,3 +240,8 @@ class CacheManagerInfo:
     def reset_download_dir(self):
         """Reset the root download dir path."""
         self.manager.reset_download_dir()
+
+    def reset(self):
+        """Resets the cache and download dirs to default."""
+        self.reset_cache_dir()
+        self.reset_download_dir()
