@@ -586,9 +586,13 @@ def cache_dataset_manager(mocker, cache_data_manager):
 class TestCacheManagerDataset:
     """Unit tests for the CacheManagerDataset class."""
 
-    def test_CacheManagerDataset__init(self, cache_dataset_manager):
-        pass
+    def test_init_class(self, mocker):
+        manager = mocker.Mock()
+        cache_info = CacheManagerDataset(manager)
 
+    def test_init_class__raises_error_missing_manager(self, mocker):
+        with pytest.raises(TypeError):
+            cache_info = CacheManagerInfo()
 
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
