@@ -246,7 +246,7 @@ class CacheDataManager:
             shutil.rmtree(dir_path)
 
     def add_data(self, name, cache_dir, data_dir, tasks):
-        """Adds/appends a new category/dataset to the cache file.
+        """Adds a new dataset to the cache.
 
         Parameters
         ----------
@@ -262,7 +262,7 @@ class CacheDataManager:
         """
         assert name, "Must input a valid dataset name."
         assert cache_dir, "Must input a valid directory (cache_dir)."
-        assert data_dir, "Must input a valid directory (data_dir)."
+        assert cache_dir, "Must input a valid directory (data_dir)."
         assert tasks, "Must input a valid tasks."
 
         new_data = {
