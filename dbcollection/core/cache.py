@@ -245,6 +245,38 @@ class CacheDataManager:
         for dir_path in dirs:
             shutil.rmtree(dir_path)
 
+    def add_data(self, name, cache_dir, data_dir, tasks):
+        """Adds/appends a new category/dataset to the cache file.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        cache_dir : str
+            Path of the dataset's metadata directory.
+        data_dir : str
+            Path of the dataset's data files.
+        tasks : dict
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert cache_dir, "Must input a valid directory (cache_dir)."
+        assert cache_dir, "Must input a valid directory (data_dir)."
+        assert tasks, "Must input a valid tasks."
+
+        new_data = {
+            "cache_dir": cache_dir,
+            "data_dir": data_dir,
+            "keywords": self._get_keywords_from_tasks(tasks),
+            "tasks": tasks
+        }
+        self.data["dataset"][name] = new_data
+
+    def _get_keywords_from_tasks(self, tasks):
+        """Fetch a list of categories from a tasks' dictionary."""
+        keywords = []
+        return tuple(keywords)
 
 
 class CacheManagerDataset:

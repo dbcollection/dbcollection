@@ -351,6 +351,27 @@ class TestCacheDataManager:
 
         assert mock_shutil.called
 
+    def test_add_data_to_cache(self, mocker, cache_data_manager):
+        name = 'new_dataset'
+        cache_dir = '/some/path/to/cache/dir'
+        data_dir = '/some/path/to/data'
+        tasks = {
+            "new_taskA": {
+                "filename": '/some/path/dbcollection/{}/new_taskA.h5'.format(name),
+                "categories": ["new_categoryA"]
+            },
+            "new_taskB": {
+                "filename": '/some/path/dbcollection/{}/new_taskB.h5'.format(name),
+                "categories": ["new_categoryB", 'new_categoryC']
+            },
+        }
+
+        cache_data_manager.add_data(name, cache_dir, data_dir, tasks)
+
+        assert name in cache_data_manager.data["dataset"]
+        assert cache_dir in cache_data_manager.data["dataset"][name]["cache_dir"]
+        assert data_dir in cache_data_manager.data["dataset"][name]["data_dir"]
+        assert tasks == cache_data_manager.data["dataset"][name]["tasks"]
 
 @pytest.fixture()
 def cache_manager(mocker):
