@@ -521,7 +521,10 @@ class CacheManagerCategory:
 
         """
         assert category, "Must input a valid category name."
-        return self.manager.data["category"][category]
+        try:
+            return self.manager.data["category"][category]
+        except KeyError:
+            raise KeyError("The category \'{}\' does not exist in cache.".format(category))
 
 
 class CacheManagerInfo:

@@ -733,3 +733,13 @@ class TestCacheManagerCategory:
         result = cache_category_manager.get(category)
 
         assert result == cache_category_manager.manager.data["category"][category]
+
+    def test_get_categoryt__raises_error_missing_input(self, mocker, cache_category_manager):
+        with pytest.raises(TypeError):
+            cache_category_manager.get()
+
+    def test_get_categoryt__raises_error_invalid_category(self, mocker, cache_category_manager):
+       category = 'categoryZ'
+
+       with pytest.raises(KeyError):
+            cache_category_manager.get(category)
