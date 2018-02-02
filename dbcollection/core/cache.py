@@ -382,6 +382,7 @@ class CacheDataManager:
         except KeyError:
             raise KeyError("The dataset \'{}\' does not exist in the cache.".format(name))
 
+
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""
 
@@ -442,3 +443,7 @@ class CacheManagerInfo:
         """Resets the cache and download dirs to default."""
         self.reset_cache_dir()
         self.reset_download_dir()
+
+    def info(self):
+        """Prints the cache and download data dir paths of the cache."""
+        pass

@@ -573,6 +573,9 @@ class TestCacheManagerInfo:
         assert cache_info_manager.cache_dir == cache_info_manager.manager._get_default_cache_dir()
         assert cache_info_manager.download_dir == cache_info_manager.manager._get_default_downloads_dir()
 
+    def test_info(self, mocker, cache_info_manager):
+        cache_info_manager.info()
+
 
 @pytest.fixture()
 def cache_dataset_manager(mocker, cache_data_manager):
