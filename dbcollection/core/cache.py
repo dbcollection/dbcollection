@@ -184,7 +184,7 @@ class CacheDataManager:
                   'Set \'force_reset=True\' to proceed with the reset of dbcollection.json.'
             warnings.warn(msg, UserWarning, stacklevel=2)
 
-    def delete_cache(self, force_delete_file=False):
+    def delete_cache(self, force_delete_file=False, force_delete_metadata=False):
         """Deletes the cache file and/or metadata dir from disk.
 
         Deletes the dbcollection.json file from disk if enabled.
@@ -192,10 +192,17 @@ class CacheDataManager:
         instead. Only by selecting the 'force_delete_file' option will
         the cache file be deleted.
 
+        Also, there is an option to delete the cache's metadata files
+        by selecting the 'force_delete_metadata'. This will remove the
+        every dataset's metadata dir and its contents, but it will not
+        delete the downloads directory.
+
         Parameters
         ----------
         force_delete_file : bool, optional
             Forces the cache file to be deleted if True.
+        force_delete_metadata : bool, optional
+            Forces the cache metadata to be deleted if True.
 
         Warning
         -------
@@ -210,6 +217,16 @@ class CacheDataManager:
             msg = 'All information about stored datasets will be lost if you proceed! ' + \
                   'Set \'force_delete_file=True\' to proceed with the deletion of dbcollection.json.'
             warnings.warn(msg, UserWarning, stacklevel=2)
+
+        if force_delete_metadata:
+            if force_delete_file:
+                pass
+            else:
+                msg = 'All metadata files of all datasets will be lost if you proceed! ' + \
+                    'Set both \'force_delete_file=True\' and \'force_delete_metadata=True\' ' + \
+                    'to proceed with the deletion of dbcollection.json and all metadata files.'
+                warnings.warn(msg, UserWarning, stacklevel=2)
+
 
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""

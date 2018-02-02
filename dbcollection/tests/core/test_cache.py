@@ -340,6 +340,10 @@ class TestCacheDataManager:
 
         os.remove.assert_called_once_with(cache_data_manager.cache_filename)
 
+    def test_delete_cache__raise_warning_cache_metadata(self, mocker, cache_data_manager):
+        with pytest.warns(UserWarning):
+            cache_data_manager.delete_cache(force_delete_metadata=True)
+
 
 @pytest.fixture()
 def cache_manager(mocker):
