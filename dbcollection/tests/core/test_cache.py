@@ -668,6 +668,26 @@ class TestCacheManagerDataset:
         with pytest.raises(AssertionError):
             cache_dataset_manager.update(name)
 
+    def test_delete_dataset(self, mocker, cache_dataset_manager):
+        name = 'dataset6'
+        categories = cache_dataset_manager.manager.data["category"].copy()
+
+        cache_dataset_manager.delete(name)
+
+        assert name not in cache_dataset_manager.manager.data["dataset"]
+        assert categories != cache_dataset_manager.manager.data["category"]
+
+    def test_delete_dataset__raises_error_missing_input(self, mocker, cache_dataset_manager):
+        with pytest.raises(TypeError):
+            cache_dataset_manager.delete()
+
+    def test_delete_dataset__raises_error_unknown_dataset(self, mocker, cache_dataset_manager):
+        name = "yet_another_unknown_dataset"
+
+        with pytest.raises(KeyError):
+            cache_dataset_manager.delete(name)
+
+
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
     cache_info = CacheManagerInfo(cache_data_manager)

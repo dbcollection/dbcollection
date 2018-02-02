@@ -446,6 +446,18 @@ class CacheManagerDataset:
         assert name, "Must input a valid dataset name."
         self.manager.update_data(name, cache_dir, data_dir, tasks)
 
+    def delete(self, name):
+        """Deletes a dataset from the cache data.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        self.manager.delete_data(name)
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
