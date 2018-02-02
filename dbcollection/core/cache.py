@@ -486,6 +486,10 @@ class CacheManagerDataset:
         assert name, "Must input a valid dataset name."
         return name in self.manager.data["dataset"]
 
+    def list(self):
+        """Returns a list of all dataset names."""
+        return list(sorted(self.manager.data["dataset"].keys()))
+
     def info(self):
         """Prints the dataset information contained in the cache."""
         pp = pprint.PrettyPrinter(indent=4)

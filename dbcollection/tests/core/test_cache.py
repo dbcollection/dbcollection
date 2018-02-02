@@ -704,6 +704,11 @@ class TestCacheManagerDataset:
         with pytest.raises(TypeError):
             cache_dataset_manager.exists()
 
+    def test_list_dataset_names(self, mocker, cache_dataset_manager):
+        datasets = list(sorted(cache_dataset_manager.manager.data["dataset"].keys()))
+
+        assert datasets == cache_dataset_manager.list()
+
 
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
