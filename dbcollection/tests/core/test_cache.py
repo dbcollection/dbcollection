@@ -726,3 +726,10 @@ class TestCacheManagerCategory:
     def test_init_class__raises_error_missing_manager(self, mocker):
         with pytest.raises(TypeError):
             cache_info = CacheManagerCategory()
+
+    def test_get_category(self, mocker, cache_category_manager):
+        category = 'category0'
+
+        result = cache_category_manager.get(category)
+
+        assert result == cache_category_manager.manager.data["category"][category]

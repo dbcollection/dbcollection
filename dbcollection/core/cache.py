@@ -506,6 +506,24 @@ class CacheManagerCategory:
         assert manager, "Must input a valid cache manager."
         self.manager = manager
 
+    def get(self, category):
+        """Retrieves the data of a category from the cache.
+
+        Parameters
+        ----------
+        category : str
+            Name of the category.
+
+        Returns
+        -------
+        dict
+            Information about the dataset.
+
+        """
+        assert category, "Must input a valid category name."
+        return self.manager.data["category"][category]
+
+
 class CacheManagerInfo:
     """Manage the cache's information configurations."""
 
