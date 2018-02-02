@@ -372,6 +372,19 @@ class TestCacheDataManager:
         assert tasks == cache_data_manager.data["dataset"][name]["tasks"]
         assert any(cache_data_manager.data["dataset"][name]["keywords"])
 
+    def test_get_data(self, mocker, cache_data_manager):
+        name = 'dataset0'
+
+        data = cache_data_manager.get_data(name)
+
+        assert data == cache_data_manager.data["dataset"][name]
+
+    def test_get_data__raises_error_unknown_dataset_name(self, mocker, cache_data_manager):
+        name = 'unknown_dataset_name'
+
+        with pytest.raises(KeyError):
+            cache_data_manager.get_data(name)
+
     def test_update_data_new_dirs(self, mocker, cache_data_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
         name = 'dataset0'

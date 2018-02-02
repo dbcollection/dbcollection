@@ -281,6 +281,21 @@ class CacheDataManager:
             keywords.extend(tasks[task]["categories"])
         return tuple(sorted(set(keywords)))
 
+    def get_data(self, name):
+        """Retrieves the data of a dataset from the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        try:
+            return self.data["dataset"][name]
+        except KeyError:
+            raise KeyError("The dataset \'{}\' does not exist in the cache.".format(name))
+
     def update_data(self, name, cache_dir=None, data_dir=None, tasks=None):
         """Updates the data of a dataset in the cache.
 
