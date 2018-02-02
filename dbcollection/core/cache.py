@@ -6,9 +6,9 @@ Class to manage the dbcollection.json cache file.
 from __future__ import print_function
 import os
 import shutil
-import errno
 import json
 import warnings
+from glob import glob
 
 
 class CacheManager:
@@ -220,7 +220,13 @@ class CacheDataManager:
 
         if force_delete_metadata:
             if force_delete_file:
-                pass
+                dirs = glob("{}/*/".format(self.cache_dir))
+                try:
+                    dirs.remove(self.download_dir)
+                except ValueError:
+                    pass
+                for dir_path in dirs:
+                    shutil.rmtree(dir_path)
             else:
                 msg = 'All metadata files of all datasets will be lost if you proceed! ' + \
                     'Set both \'force_delete_file=True\' and \'force_delete_metadata=True\' ' + \

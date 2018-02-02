@@ -344,6 +344,13 @@ class TestCacheDataManager:
         with pytest.warns(UserWarning):
             cache_data_manager.delete_cache(force_delete_metadata=True)
 
+    def test_delete_cache__delete_cache_metadata(self, mocker, cache_data_manager):
+        mock_shutil = mocker.patch('shutil.rmtree')
+
+        cache_data_manager.delete_cache(force_delete_file=True, force_delete_metadata=True)
+
+        assert mock_shutil.called
+
 
 @pytest.fixture()
 def cache_manager(mocker):
