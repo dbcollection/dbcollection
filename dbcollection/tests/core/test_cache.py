@@ -690,6 +690,20 @@ class TestCacheManagerDataset:
     def test_info(self, mocker, cache_dataset_manager):
         cache_dataset_manager.info()
 
+    def test_exists_dataset__valid_dataset(self, mocker, cache_dataset_manager):
+        name = 'dataset0'
+
+        assert cache_dataset_manager.exists(name)
+
+    def test_exists_dataset__invalid_dataset(self, mocker, cache_dataset_manager):
+        name = 'dataset0__invalid'
+
+        assert not cache_dataset_manager.exists(name)
+
+    def test_exists_dataset__raises_error_missing_input(self, mocker, cache_dataset_manager):
+        with pytest.raises(TypeError):
+            cache_dataset_manager.exists()
+
 
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):

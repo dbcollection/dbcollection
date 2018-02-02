@@ -332,6 +332,11 @@ class CacheDataManager:
         name : str
             Name of the dataset.
 
+        Returns
+        -------
+        dict
+            Information about the dataset.
+
         """
         assert name, "Must input a valid dataset name."
         try:
@@ -424,6 +429,11 @@ class CacheManagerDataset:
         name : str
             Name of the dataset.
 
+        Returns
+        -------
+        dict
+            Information about the dataset.
+
         """
         assert name, "Must input a valid dataset name."
         return self.manager.get_data(name)
@@ -457,6 +467,24 @@ class CacheManagerDataset:
         """
         assert name, "Must input a valid dataset name."
         self.manager.delete_data(name)
+
+    def exists(self, name):
+        """Checks if a dataset name exists in the cache..
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        bool
+            Returns True if the name exists in the dataset names.
+            Otherwise, returns False.
+
+        """
+        assert name, "Must input a valid dataset name."
+        return name in self.manager.data["dataset"]
 
     def info(self):
         """Prints the dataset information contained in the cache."""
