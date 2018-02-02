@@ -412,6 +412,14 @@ class TestCacheDataManager:
         with pytest.raises(AssertionError):
             cache_data_manager.update_data(name)
 
+    def test_update_data_skip_writting_data_to_cache(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        name = 'dataset0'
+
+        cache_data_manager.update_data(name)
+
+        assert True  # check how to assert mocked function calls
+
 
 @pytest.fixture()
 def cache_manager(mocker):
