@@ -636,6 +636,38 @@ class TestCacheManagerDataset:
         with pytest.raises(KeyError):
             cache_dataset_manager.get(name)
 
+    def test_update_dataset(self, mocker, cache_dataset_manager):
+        name = 'dataset0'
+        tasks = {
+            "new_taskA": {
+                "filename": '/some/path/dbcollection/{}/new_taskA.h5'.format(name),
+                "categories": ["new_categoryA"]
+            },
+            "new_taskB": {
+                "filename": '/some/path/dbcollection/{}/new_taskB.h5'.format(name),
+                "categories": ["new_categoryB", 'new_categoryXYZ']
+            },
+        }
+        keywords = ("new_categoryA", "new_categoryB", "new_categoryXYZ")
+        categories = cache_dataset_manager.manager.data["category"]
+
+        cache_dataset_manager.update(name, tasks=tasks)
+
+        assert name in cache_dataset_manager.manager.data["dataset"]
+        assert tasks == cache_dataset_manager.manager.data["dataset"][name]["tasks"]
+        assert keywords == cache_dataset_manager.manager.data["dataset"][name]["keywords"]
+        assert categories != cache_dataset_manager.manager.data["category"]
+
+    def test_update_dataset__raises_error_missing_input(self, mocker, cache_dataset_manager):
+        with pytest.raises(TypeError):
+            cache_dataset_manager.update()
+
+    def test_update_dataset__raises_error_unknown_dataset(self, mocker, cache_dataset_manager):
+        name = "another_unknown_dataset"
+
+        with pytest.raises(AssertionError):
+            cache_dataset_manager.update(name)
+
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
     cache_info = CacheManagerInfo(cache_data_manager)

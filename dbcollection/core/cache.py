@@ -428,6 +428,25 @@ class CacheManagerDataset:
         assert name, "Must input a valid dataset name."
         return self.manager.get_data(name)
 
+    def update(self, name, cache_dir=None, data_dir=None, tasks=None):
+        """Updates the data of a dataset in the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        cache_dir : str, optional
+            Path of the dataset's metadata directory.
+        data_dir : str, optional
+            Path of the dataset's data files.
+        tasks : dict, optional
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        self.manager.update_data(name, cache_dir, data_dir, tasks)
+
+
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
 
