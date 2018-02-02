@@ -281,6 +281,33 @@ class CacheDataManager:
             keywords.extend(tasks[task]["categories"])
         return tuple(set(keywords))
 
+    def update_data(self, name, cache_dir=None, data_dir=None, tasks=None):
+        """Updates the data of a dataset in the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        cache_dir : str, optional
+            Path of the dataset's metadata directory.
+        data_dir : str, optional
+            Path of the dataset's data files.
+        tasks : dict, optional
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert name in self.data["dataset"], "The dataset \'{}\' does not exist in the cache." \
+                                             .format(name)
+        if cache_dir:
+            self.data["dataset"][name]["cache_dir"] = cache_dir
+        if data_dir:
+            self.data["dataset"][name]["data_dir"] = data_dir
+        if tasks:
+            self.data["dataset"][name]["tasks"] = tasks
+            self.data["dataset"][name]["keywords"] = self._get_keywords_from_tasks(tasks)
+        if cache_dir or data_dir or tasks:
+            self.write_data_cache(self.data)
 
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""

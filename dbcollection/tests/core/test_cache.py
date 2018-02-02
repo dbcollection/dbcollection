@@ -160,7 +160,7 @@ class DataGenerator:
             tasks.update({
                 task: {
                     "filename": os.path.join(self.info["root_cache_dir"], dataset, task + '.h5'),
-                    "category": self.get_random_size_list_categories()
+                    "categories": self.get_random_size_list_categories()
                 }
             })
         return tasks
@@ -183,7 +183,7 @@ class DataGenerator:
         """Returns a list of all unique task categories."""
         keywords = []
         for task in tasks:
-            keywords.extend(tasks[task]["category"])
+            keywords.extend(tasks[task]["categories"])
         return list(set(keywords))
 
     def get_categories_data(self):
@@ -218,11 +218,8 @@ class DataGenerator:
 
     def get_tasks_by_category(self, tasks, category):
         """Returns a list of tasks that contains the category name"""
-        tasks_category = []
-        for task in tasks:
-            if category in tasks[task]['category']:
-                tasks_category.append(task)
-        return tasks_category
+        categories = self.get_keyword_list(tasks)
+        return [c for c in categories if category in c]
 
 
 # -----------------------------------------------------------
@@ -351,6 +348,41 @@ class TestCacheDataManager:
 
         assert mock_shutil.called
 
+    def test_add_data_to_cache(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        name = 'new_dataset'
+        cache_dir = '/some/path/to/cache/dir'
+        data_dir = '/some/path/to/data'
+        tasks = {
+            "new_taskA": {
+                "filename": '/some/path/dbcollection/{}/new_taskA.h5'.format(name),
+                "categories": ["new_categoryA"]
+            },
+            "new_taskB": {
+                "filename": '/some/path/dbcollection/{}/new_taskB.h5'.format(name),
+                "categories": ["new_categoryB", 'new_categoryC']
+            },
+        }
+
+        cache_data_manager.add_data(name, cache_dir, data_dir, tasks)
+
+        assert name in cache_data_manager.data["dataset"]
+        assert cache_dir == cache_data_manager.data["dataset"][name]["cache_dir"]
+        assert data_dir == cache_data_manager.data["dataset"][name]["data_dir"]
+        assert tasks == cache_data_manager.data["dataset"][name]["tasks"]
+        assert any(cache_data_manager.data["dataset"][name]["keywords"])
+
+    def test_update_data_new_dirs(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        name = 'dataset0'
+        cache_dir = '/new/some/path/to/cache/dir'
+        data_dir = '/new/some/path/to/data'
+
+        cache_data_manager.update_data(name, cache_dir=cache_dir, data_dir=data_dir)
+
+        assert name in cache_data_manager.data["dataset"]
+        assert cache_dir == cache_data_manager.data["dataset"][name]["cache_dir"]
+        assert data_dir == cache_data_manager.data["dataset"][name]["data_dir"]
 
 @pytest.fixture()
 def cache_manager(mocker):
@@ -366,8 +398,8 @@ class TestCacheManager:
 
 @pytest.fixture()
 def cache_info_manager(mocker, cache_data_manager):
-        assert cache_dir == cache_data_manager.data["dataset"][name]["cache_dir"]
-        assert data_dir == cache_data_manager.data["dataset"][name]["data_dir"]
+    cache_info = CacheManagerInfo(cache_data_manager)
+    return cache_info
 
 
 class TestCacheManagerInfo:
