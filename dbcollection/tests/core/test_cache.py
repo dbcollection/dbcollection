@@ -513,8 +513,13 @@ def cache_info_manager(mocker, cache_data_manager):
 class TestCacheManagerInfo:
     """Unit tests for the CacheManagerInfo class."""
 
-    def test_CacheManagerDataset__init(self, cache_info_manager):
-        pass
+    def test_init_class(self, mocker):
+        manager = mocker.Mock()
+        cache_info = CacheManagerInfo(manager)
+
+    def test_init_class__raises_error_missing_manager(self, mocker):
+        with pytest.raises(TypeError):
+            cache_info = CacheManagerInfo()
 
     def test__set_cache_dir(self, mocker, cache_info_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
