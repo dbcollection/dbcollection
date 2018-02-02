@@ -428,6 +428,12 @@ class TestCacheDataManager:
 
         assert name not in cache_data_manager.data["dataset"]
 
+    def test_delete_data__raises_error_name_not_found(self, mocker, cache_data_manager):
+        name = 'unknown_dataset_name'
+
+        with pytest.raises(KeyError):
+            cache_data_manager.delete_data(name)
+
 
 @pytest.fixture()
 def cache_manager(mocker):
