@@ -575,13 +575,18 @@ class CacheManagerCategory:
         matching_categories = {}
         categories = self.manager.data["category"]
         for category in categories:
-            matching_category = {category: {}}
-            for name in categories[category]:
-                if task in categories[category][name]:
-                    matching_category[category].update({name: [task]})
-            if any(matching_category[category]):
-                matching_categories.update(matching_category)
+            matching_category = self._get_matching_categories_by_task(category, task)
+            if any(matching_category):
+                matching_categories.update({category: matching_category})
         return matching_categories
+
+    def _get_matching_categories_by_task(self, category, task):
+        categories = self.manager.data["category"]
+        matching_category = {}
+        for name in categories[category]:
+            if task in categories[category][name]:
+                matching_category.update({name: [task]})
+        return matching_category
 
 
 class CacheManagerInfo:
