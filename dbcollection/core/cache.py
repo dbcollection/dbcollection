@@ -272,6 +272,7 @@ class CacheDataManager:
             "tasks": tasks
         }
         self.data["dataset"][name] = new_data
+        self.update_categories()
         self.write_data_cache(self.data)
 
     def _get_keywords_from_tasks(self, tasks):
@@ -280,6 +281,45 @@ class CacheDataManager:
         for task in tasks:
             keywords.extend(tasks[task]["categories"])
         return tuple(sorted(set(keywords)))
+
+    def update_categories(self):
+        """Updates the category list of all categories."""
+        categories = {}
+        datasets = self.data['dataset']
+        used_categories = self._get_list_categories_used(datasets)
+        for category in used_categories:
+            categories.update({
+                category: self._get_datasets_tasks_by_category(datasets, category)
+            })
+        self.data["category"] = categories
+
+    def _get_list_categories_used(self, datasets):
+        """Returns a list of all categories available in the datasets data."""
+        categories_used = []
+        for dataset in datasets:
+            categories_used.extend(datasets[dataset]['keywords'])
+        return list(sorted(set(categories_used)))
+
+    def _get_datasets_tasks_by_category(self, datasets, category):
+        """Returns a list of all datasets and tasks that have the category name."""
+        list_datasets_tasks = {}
+        for dataset in datasets:
+            list_datasets_tasks.update({
+                dataset: self._get_tasks_by_category(datasets[dataset]["tasks"], category)
+            })
+        return list_datasets_tasks
+
+    def _get_tasks_by_category(self, tasks, category):
+        """Returns a list of tasks that contains the category name"""
+        categories = self._get_keyword_list(tasks)
+        return [c for c in categories if category in c]
+
+    def _get_keyword_list(self, tasks):
+        """Returns a list of unique task categories."""
+        keywords = []
+        for task in tasks:
+            keywords.extend(tasks[task]["categories"])
+        return list(set(keywords))
 
     def get_data(self, name):
         """Retrieves the data of a dataset from the cache.

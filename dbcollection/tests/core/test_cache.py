@@ -184,7 +184,7 @@ class DataGenerator:
         keywords = []
         for task in tasks:
             keywords.extend(tasks[task]["categories"])
-        return list(set(keywords))
+        return list(sorted(set(keywords)))
 
     def get_categories_data(self):
         """Returns the category's data for the category cache field."""
@@ -370,7 +370,53 @@ class TestCacheDataManager:
         assert cache_dir == cache_data_manager.data["dataset"][name]["cache_dir"]
         assert data_dir == cache_data_manager.data["dataset"][name]["data_dir"]
         assert tasks == cache_data_manager.data["dataset"][name]["tasks"]
+        assert "new_categoryA" in cache_data_manager.data["category"]
         assert any(cache_data_manager.data["dataset"][name]["keywords"])
+
+    def test_add_data_to_cache_twice(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        name_dbA = 'new_datasetA'
+        cache_dir_dbA = '/some/path/to/cache/dir'
+        data_dir_dbA = '/some/path/to/data'
+        tasks_dbA = {
+            "new_taskA": {
+                "filename": '/some/path/dbcollection/{}/new_taskA.h5'.format(name_dbA),
+                "categories": ["new_categoryA"]
+            },
+            "new_taskB": {
+                "filename": '/some/path/dbcollection/{}/new_taskB.h5'.format(name_dbA),
+                "categories": ["new_categoryB", 'new_categoryC']
+            },
+        }
+
+        name_dbB = 'new_datasetB'
+        cache_dir_dbB = '/some/path/to/cache/dir'
+        data_dir_dbB = '/some/path/to/data'
+        tasks_dbB = {
+            "new_taskC": {
+                "filename": '/some/path/dbcollection/{}/new_taskA.h5'.format(name_dbB),
+                "categories": ["new_categoryZ"]
+            }
+        }
+
+        cache_data_manager.add_data(name_dbA, cache_dir_dbA, data_dir_dbA, tasks_dbA)
+        category_after_dbA = cache_data_manager.data["category"].copy()
+        cache_data_manager.add_data(name_dbB, cache_dir_dbB, data_dir_dbB, tasks_dbB)
+        category_after_dbB = cache_data_manager.data["category"].copy()
+
+        assert name_dbA in cache_data_manager.data["dataset"]
+        assert cache_dir_dbA == cache_data_manager.data["dataset"][name_dbA]["cache_dir"]
+        assert data_dir_dbA == cache_data_manager.data["dataset"][name_dbA]["data_dir"]
+        assert tasks_dbA == cache_data_manager.data["dataset"][name_dbA]["tasks"]
+        assert any(cache_data_manager.data["dataset"][name_dbA]["keywords"])
+
+        assert name_dbB in cache_data_manager.data["dataset"]
+        assert cache_dir_dbB == cache_data_manager.data["dataset"][name_dbB]["cache_dir"]
+        assert data_dir_dbB == cache_data_manager.data["dataset"][name_dbB]["data_dir"]
+        assert tasks_dbB == cache_data_manager.data["dataset"][name_dbB]["tasks"]
+        assert any(cache_data_manager.data["dataset"][name_dbB]["keywords"])
+
+        assert category_after_dbA != category_after_dbB
 
     def test_get_data(self, mocker, cache_data_manager):
         name = 'dataset0'
