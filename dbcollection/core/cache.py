@@ -362,6 +362,7 @@ class CacheDataManager:
             self.data["dataset"][name]["tasks"] = tasks
             self.data["dataset"][name]["keywords"] = self._get_keywords_from_tasks(tasks)
         if cache_dir or data_dir or tasks:
+            self.update_categories()
             self.write_data_cache(self.data)
 
     def delete_data(self, name):

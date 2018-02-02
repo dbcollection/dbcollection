@@ -450,13 +450,14 @@ class TestCacheDataManager:
             },
         }
         keywords = ("new_categoryA", "new_categoryB", "new_categoryC")
-        old_keywords = cache_data_manager.data["dataset"][name]["keywords"]
+        categories = cache_data_manager.data["category"]
 
         cache_data_manager.update_data(name, tasks=tasks)
 
         assert name in cache_data_manager.data["dataset"]
         assert tasks == cache_data_manager.data["dataset"][name]["tasks"]
         assert keywords == cache_data_manager.data["dataset"][name]["keywords"]
+        assert categories != cache_data_manager.data["category"]
 
     def test_update_data__raise_unknown_dataset_name(self, mocker, cache_data_manager):
         name = "some_unknown_dataset_name"
@@ -467,9 +468,11 @@ class TestCacheDataManager:
     def test_update_data_skip_writting_data_to_cache(self, mocker, cache_data_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
         name = 'dataset0'
+        categories = cache_data_manager.data["category"]
 
         cache_data_manager.update_data(name)
 
+        assert categories == cache_data_manager.data["category"]
         assert True  # check how to assert mocked function calls
 
     def test_delete_data(self, mocker, cache_data_manager):
