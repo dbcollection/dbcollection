@@ -8,10 +8,7 @@ import os
 import shutil
 import json
 import warnings
-import pprint
 from glob import glob
-
-from dbcollection.utils import print_text_box
 
 
 class CacheManager:
@@ -265,7 +262,7 @@ class CacheDataManager:
         """
         assert name, "Must input a valid dataset name."
         assert cache_dir, "Must input a valid directory (cache_dir)."
-        assert cache_dir, "Must input a valid directory (data_dir)."
+        assert data_dir, "Must input a valid directory (data_dir)."
         assert tasks, "Must input a valid tasks."
 
         new_data = {
@@ -449,7 +446,4 @@ class CacheManagerInfo:
 
     def info(self):
         """Prints the cache and download data dir paths of the cache."""
-        pp = pprint.PrettyPrinter(indent=4)
-        print_text_box('Info')
-        pp.pprint(self.manager.data["info"])
-        print('')
+        pass
