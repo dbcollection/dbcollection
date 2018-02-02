@@ -406,6 +406,13 @@ class TestCacheDataManager:
         assert tasks == cache_data_manager.data["dataset"][name]["tasks"]
         assert keywords == cache_data_manager.data["dataset"][name]["keywords"]
 
+    def test_update_data__raise_unknown_dataset_name(self, mocker, cache_data_manager):
+        name = "some_unknown_dataset_name"
+
+        with pytest.raises(AssertionError):
+            cache_data_manager.update_data(name)
+
+
 @pytest.fixture()
 def cache_manager(mocker):
     cache_info = CacheManagerInfo(cache_manager)
