@@ -483,7 +483,14 @@ class CacheManagerDataset:
         return name in self.manager.data["dataset"]
 
     def list(self):
-        """Returns a list of all dataset names."""
+        """Returns a list of all dataset names.
+
+        Returns
+        -------
+        list
+            Names of datasets.
+
+        """
         return list(sorted(self.manager.data["dataset"].keys()))
 
     def info(self):
@@ -587,6 +594,17 @@ class CacheManagerCategory:
             if task in categories[category][name]:
                 matching_category.update({name: [task]})
         return matching_category
+
+    def list(self):
+        """Returns a list of all category names.
+
+        Returns
+        -------
+        list
+            Names of categories.
+
+        """
+        return list(sorted(self.manager.data["category"].keys()))
 
     def info(self):
         """Prints the cache and download data dir paths of the cache."""
