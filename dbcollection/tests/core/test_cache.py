@@ -778,3 +778,6 @@ class TestCacheManagerCategory:
     def test_get_by_task__raises_error_missing_input(self, mocker, cache_category_manager):
         with pytest.raises(TypeError):
             cache_category_manager.get_by_task()
+
+    def test_info(self, mocker, cache_category_manager):
+        cache_category_manager.info()

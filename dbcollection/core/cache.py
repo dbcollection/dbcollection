@@ -588,6 +588,13 @@ class CacheManagerCategory:
                 matching_category.update({name: [task]})
         return matching_category
 
+    def info(self):
+        """Prints the cache and download data dir paths of the cache."""
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box('Category')
+        pp.pprint(self.manager.data["category"])
+        print('')
+
 
 class CacheManagerInfo:
     """Manage the cache's information configurations."""
