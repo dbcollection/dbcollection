@@ -276,7 +276,9 @@ class CacheDataManager:
     def _get_keywords_from_tasks(self, tasks):
         """Fetch a list of categories from a tasks' dictionary."""
         keywords = []
-        return tuple(keywords)
+        for task in tasks:
+            keywords.extend(tasks[task]["categories"])
+        return tuple(set(keywords))
 
 
 class CacheManagerDataset:
