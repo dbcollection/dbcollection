@@ -366,12 +366,15 @@ class TestCacheDataManager:
 
         cache_data_manager.add_data(name, cache_dir, data_dir, tasks)
 
-        assert name in cache_data_manager.data["dataset"]
-        assert cache_dir == cache_data_manager.data["dataset"][name]["cache_dir"]
-        assert data_dir == cache_data_manager.data["dataset"][name]["data_dir"]
-        assert tasks == cache_data_manager.data["dataset"][name]["tasks"]
+        self._assert_add_data_to_cache(name, cache_dir, data_dir, tasks, cache_data_manager)
         assert "new_categoryA" in cache_data_manager.data["category"]
-        assert any(cache_data_manager.data["dataset"][name]["keywords"])
+
+    def _assert_add_data_to_cache(self, name, cache_dir, data_dir, tasks, cache_data_m):
+        assert name in cache_data_m.data["dataset"]
+        assert cache_dir == cache_data_m.data["dataset"][name]["cache_dir"]
+        assert data_dir == cache_data_m.data["dataset"][name]["data_dir"]
+        assert tasks == cache_data_m.data["dataset"][name]["tasks"]
+        assert any(cache_data_m.data["dataset"][name]["keywords"])
 
     def test_add_data_to_cache_twice(self, mocker, cache_data_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
@@ -404,18 +407,8 @@ class TestCacheDataManager:
         cache_data_manager.add_data(name_dbB, cache_dir_dbB, data_dir_dbB, tasks_dbB)
         category_after_dbB = cache_data_manager.data["category"].copy()
 
-        assert name_dbA in cache_data_manager.data["dataset"]
-        assert cache_dir_dbA == cache_data_manager.data["dataset"][name_dbA]["cache_dir"]
-        assert data_dir_dbA == cache_data_manager.data["dataset"][name_dbA]["data_dir"]
-        assert tasks_dbA == cache_data_manager.data["dataset"][name_dbA]["tasks"]
-        assert any(cache_data_manager.data["dataset"][name_dbA]["keywords"])
-
-        assert name_dbB in cache_data_manager.data["dataset"]
-        assert cache_dir_dbB == cache_data_manager.data["dataset"][name_dbB]["cache_dir"]
-        assert data_dir_dbB == cache_data_manager.data["dataset"][name_dbB]["data_dir"]
-        assert tasks_dbB == cache_data_manager.data["dataset"][name_dbB]["tasks"]
-        assert any(cache_data_manager.data["dataset"][name_dbB]["keywords"])
-
+        self._assert_add_data_to_cache(name_dbA, cache_dir_dbA, data_dir_dbA, tasks_dbA, cache_data_manager)
+        self._assert_add_data_to_cache(name_dbB, cache_dir_dbB, data_dir_dbB, tasks_dbB, cache_data_manager)
         assert category_after_dbA != category_after_dbB
 
     def test_get_data(self, mocker, cache_data_manager):
