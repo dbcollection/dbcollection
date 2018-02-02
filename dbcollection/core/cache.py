@@ -8,7 +8,10 @@ import os
 import shutil
 import json
 import warnings
+import pprint
 from glob import glob
+
+from dbcollection.utils import print_text_box
 
 
 class CacheManager:
@@ -446,4 +449,7 @@ class CacheManagerInfo:
 
     def info(self):
         """Prints the cache and download data dir paths of the cache."""
-        pass
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box('Info')
+        pp.pprint(self.manager.data["info"])
+        print('')
