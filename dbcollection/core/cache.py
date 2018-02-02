@@ -8,7 +8,10 @@ import os
 import shutil
 import json
 import warnings
+import pprint
 from glob import glob
+
+from dbcollection.utils import print_text_box
 
 
 class CacheManager:
@@ -262,7 +265,7 @@ class CacheDataManager:
         """
         assert name, "Must input a valid dataset name."
         assert cache_dir, "Must input a valid directory (cache_dir)."
-        assert cache_dir, "Must input a valid directory (data_dir)."
+        assert data_dir, "Must input a valid directory (data_dir)."
         assert tasks, "Must input a valid tasks."
 
         new_data = {
@@ -391,6 +394,28 @@ class CacheManagerDataset:
         assert manager, "Must input a valid cache manager."
         self.manager = manager
 
+    def add(self, name, cache_dir, data_dir, tasks):
+        """Adds a new dataset to the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        cache_dir : str
+            Path of the dataset's metadata directory.
+        data_dir : str
+            Path of the dataset's data files.
+        tasks : dict
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert cache_dir, "Must input a valid directory (cache_dir)."
+        assert data_dir, "Must input a valid directory (data_dir)."
+        assert tasks, "Must input a valid tasks."
+
+        self.manager.add_data(name, cache_dir, data_dir, tasks)
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
@@ -399,7 +424,6 @@ class CacheManagerCategory:
         """Initialize class."""
         assert manager, "Must input a valid cache manager."
         self.manager = manager
-
 
 class CacheManagerInfo:
     """Manage the cache's information configurations."""
@@ -446,4 +470,7 @@ class CacheManagerInfo:
 
     def info(self):
         """Prints the cache and download data dir paths of the cache."""
-        pass
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box('Info')
+        pp.pprint(self.manager.data["info"])
+        print('')

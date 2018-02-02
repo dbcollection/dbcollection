@@ -579,7 +579,8 @@ class TestCacheManagerInfo:
 
 @pytest.fixture()
 def cache_dataset_manager(mocker, cache_data_manager):
-    cache_info = CacheManagerInfo(cache_data_manager)
+    mocker.patch.object(CacheDataManager, "write_data_cache")
+    cache_info = CacheManagerDataset(cache_data_manager)
     return cache_info
 
 
@@ -592,7 +593,32 @@ class TestCacheManagerDataset:
 
     def test_init_class__raises_error_missing_manager(self, mocker):
         with pytest.raises(TypeError):
-            cache_info = CacheManagerInfo()
+            cache_info = CacheManagerDataset()
+
+    def test_add_dataset(self, mocker, cache_dataset_manager):
+        name = 'new_dataset_name'
+        cache_dir = '/some/path/to/cache/dir'
+        data_dir = '/some/path/to/data'
+        tasks = {
+            "new_task": {
+                "filename": '/some/path/dbcollection/{}/new_task.h5'.format(name),
+                "categories": ["new_category_A", "new_category_B", "new_category_C"]
+            },
+        }
+
+        cache_dataset_manager.add(name, cache_dir, data_dir, tasks)
+
+        assert name in cache_dataset_manager.manager.data["dataset"]
+        assert cache_dir == cache_dataset_manager.manager.data["dataset"][name]["cache_dir"]
+        assert data_dir == cache_dataset_manager.manager.data["dataset"][name]["data_dir"]
+        assert tasks == cache_dataset_manager.manager.data["dataset"][name]["tasks"]
+        assert any(cache_dataset_manager.manager.data["dataset"][name]["keywords"])
+        assert "new_category_A" in cache_dataset_manager.manager.data["category"]
+
+    def test_add_dataset__raises_error_missing_inputs(self, mocker, cache_dataset_manager):
+        with pytest.raises(TypeError):
+            cache_dataset_manager.add()
+
 
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
