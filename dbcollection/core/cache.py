@@ -376,6 +376,7 @@ class CacheDataManager:
         assert name, "Must input a valid dataset name."
         try:
             self.data["dataset"].pop(name)
+            self.update_categories()
             self.write_data_cache(self.data)
         except KeyError:
             raise KeyError("The dataset \'{}\' does not exist in the cache.".format(name))

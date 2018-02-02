@@ -475,10 +475,12 @@ class TestCacheDataManager:
     def test_delete_data(self, mocker, cache_data_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
         name = 'dataset5'
+        categories = cache_data_manager.data["category"].copy()
 
         cache_data_manager.delete_data(name)
 
         assert name not in cache_data_manager.data["dataset"]
+        assert categories != cache_data_manager.data["category"]
 
     def test_delete_data__raises_error_name_not_found(self, mocker, cache_data_manager):
         name = 'unknown_dataset_name'
