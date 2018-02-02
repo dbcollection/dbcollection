@@ -416,6 +416,17 @@ class CacheManagerDataset:
 
         self.manager.add_data(name, cache_dir, data_dir, tasks)
 
+    def get(self, name):
+        """Retrieves the data of a dataset from the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        return self.manager.get_data(name)
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""

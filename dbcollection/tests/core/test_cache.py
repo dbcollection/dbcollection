@@ -619,6 +619,22 @@ class TestCacheManagerDataset:
         with pytest.raises(TypeError):
             cache_dataset_manager.add()
 
+    def test_get_dataset(self, mocker, cache_dataset_manager):
+        name = 'dataset0'
+
+        dataset = cache_dataset_manager.get(name)
+
+        assert dataset == cache_dataset_manager.manager.data['dataset'][name]
+
+    def test_get_dataset__raises_error_missing_input(self, mocker, cache_dataset_manager):
+        with pytest.raises(TypeError):
+            cache_dataset_manager.get()
+
+    def test_get_dataset__raises_error_unknown_dataset(self, mocker, cache_dataset_manager):
+        name = "unknown_dataset"
+
+        with pytest.raises(KeyError):
+            cache_dataset_manager.get(name)
 
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
