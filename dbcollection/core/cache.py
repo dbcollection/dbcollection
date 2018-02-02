@@ -211,21 +211,8 @@ class CacheDataManager:
 
         """
         self._delete_cache_file(force_delete_file)
-
         if force_delete_metadata:
-            if force_delete_file:
-                dirs = glob("{}/*/".format(self.cache_dir))
-                try:
-                    dirs.remove(self.download_dir)
-                except ValueError:
-                    pass
-                for dir_path in dirs:
-                    shutil.rmtree(dir_path)
-            else:
-                msg = 'All metadata files of all datasets will be lost if you proceed! ' + \
-                    'Set both \'force_delete_file=True\' and \'force_delete_metadata=True\' ' + \
-                    'to proceed with the deletion of dbcollection.json and all metadata files.'
-                warnings.warn(msg, UserWarning, stacklevel=2)
+            self._delete_cache_metadata(force_delete_file)
 
     def _delete_cache_file(self, force_delete_file):
         """Deletes the cache file from disk."""
@@ -237,6 +224,27 @@ class CacheDataManager:
                   'Set \'force_delete_file=True\' to proceed with the deletion of ' + \
                   'dbcollection.json.'
             warnings.warn(msg, UserWarning, stacklevel=2)
+
+    def _delete_cache_metadata(self, force_delete_file):
+        """Deletes the cache metadata files from disk."""
+        if force_delete_file:
+            self._delete_dirs_datasets_in_cache_dir_except_downloads()
+        else:
+            msg = 'All metadata files of all datasets will be lost if you proceed! ' + \
+                'Set both \'force_delete_file=True\' and \'force_delete_metadata=True\' ' + \
+                'to proceed with the deletion of dbcollection.json and all metadata files.'
+            warnings.warn(msg, UserWarning, stacklevel=2)
+
+    def _delete_dirs_datasets_in_cache_dir_except_downloads(self):
+        """Deletes all directories from the root cache dir except the downloads dir."""
+        dirs = glob("{}/*/".format(self.cache_dir))
+        try:
+            dirs.remove(self.download_dir)
+        except ValueError:
+            pass
+        for dir_path in dirs:
+            shutil.rmtree(dir_path)
+
 
 
 class CacheManagerDataset:
