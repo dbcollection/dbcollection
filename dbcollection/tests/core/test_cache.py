@@ -168,58 +168,57 @@ class DataGenerator:
     def get_random_size_list_tasks(self):
         """Returns a random sized list of random tasks."""
         num_tasks = random.randint(1, len(self.list_tasks))
-        tasks = self.list_tasks.copy()
+        tasks = self.list_tasks
         random.shuffle(tasks)
-        return list(set(tasks[:num_tasks]))
+        return sorted(tasks[:num_tasks])
 
     def get_random_size_list_categories(self):
         """Returns a random sized list of random categories."""
         num_categories = random.randint(1, len(self.list_categories))
-        categories = self.list_categories.copy()
+        categories = self.list_categories
         random.shuffle(categories)
-        return list(set(categories[:num_categories]))
+        return sorted(list(set(categories[:num_categories])))
 
     def get_keyword_list(self, tasks):
         """Returns a list of all unique task categories."""
         keywords = []
         for task in tasks:
             keywords.extend(tasks[task]["categories"])
-        return list(sorted(set(keywords)))
+        return sorted(list(set(keywords)))
 
     def get_categories_data(self):
         """Returns the category's data for the category cache field."""
-        return self.generate_random_categories()
-
-    def generate_random_categories(self):
-        """Generates random categories."""
         categories = {}
-        used_categories = self.get_list_categories_used(self.datasets)
+        used_categories = self._get_list_categories_used(self.datasets)
         for category in used_categories:
             categories.update({
-                category: self.get_datasets_tasks_by_category(category)
+                category: self._get_datasets_tasks_by_category(self.datasets, category)
             })
         return categories
 
-    def get_list_categories_used(self, datasets):
+    def _get_list_categories_used(self, datasets):
         """Returns a list of all categories available in the datasets data."""
         categories_used = []
         for dataset in datasets:
             categories_used.extend(datasets[dataset]['keywords'])
-        return list(set(categories_used))
+        return list(sorted(set(categories_used)))
 
-    def get_datasets_tasks_by_category(self, category):
+    def _get_datasets_tasks_by_category(self, datasets, category):
         """Returns a list of all datasets and tasks that have the category name."""
         list_datasets_tasks = {}
-        for dataset in self.datasets:
+        for dataset in datasets:
             list_datasets_tasks.update({
-                dataset: self.get_tasks_by_category(self.datasets[dataset]["tasks"], category)
+                dataset: self._get_tasks_by_category(datasets[dataset]["tasks"], category)
             })
         return list_datasets_tasks
 
-    def get_tasks_by_category(self, tasks, category):
-        """Returns a list of tasks that contains the category name"""
-        categories = self.get_keyword_list(tasks)
-        return [c for c in categories if category in c]
+    def _get_tasks_by_category(self, tasks, category):
+        """Returns a list of tasks that contains the category name."""
+        matching_tasks = []
+        for task in tasks:
+            if category in tasks[task]["categories"]:
+                matching_tasks.append(task)
+        return sorted(matching_tasks)
 
 
 # -----------------------------------------------------------
@@ -761,3 +760,21 @@ class TestCacheManagerCategory:
     def test_get_by_dataset__raises_error_missing_input(self, mocker, cache_category_manager):
         with pytest.raises(TypeError):
             cache_category_manager.get_by_dataset()
+
+    def test_get_by_task(self, mocker, cache_category_manager):
+        task = 'task0'
+
+        result = cache_category_manager.get_by_task(task)
+
+        assert any(result)
+
+    def test_get_by_task__invalid_task(self, mocker, cache_category_manager):
+        task = 'taskXYZ'
+
+        result = cache_category_manager.get_by_task(task)
+
+        assert not any(result)
+
+    def test_get_by_task__raises_error_missing_input(self, mocker, cache_category_manager):
+        with pytest.raises(TypeError):
+            cache_category_manager.get_by_task()

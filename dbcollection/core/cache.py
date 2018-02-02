@@ -313,16 +313,12 @@ class CacheDataManager:
         return list_datasets_tasks
 
     def _get_tasks_by_category(self, tasks, category):
-        """Returns a list of tasks that contains the category name"""
-        categories = self._get_keyword_list(tasks)
-        return [c for c in categories if category in c]
-
-    def _get_keyword_list(self, tasks):
-        """Returns a list of unique task categories."""
-        keywords = []
+        """Returns a list of tasks that contains the category name."""
+        matching_tasks = []
         for task in tasks:
-            keywords.extend(tasks[task]["categories"])
-        return list(set(keywords))
+            if category in tasks[task]["categories"]:
+                matching_tasks.append(task)
+        return sorted(matching_tasks)
 
     def get_data(self, name):
         """Retrieves the data of a dataset from the cache.
@@ -517,7 +513,7 @@ class CacheManagerCategory:
         Returns
         -------
         dict
-            Information about the dataset.
+            Information about the category.
 
         """
         assert category, "Must input a valid category name."
@@ -537,7 +533,8 @@ class CacheManagerCategory:
         Returns
         -------
         dict
-            Information about the dataset.
+            Information about the categories containing
+            the dataset name.
 
         """
         assert name, "Must input a valid dataset name."
@@ -558,6 +555,33 @@ class CacheManagerCategory:
                 }
             })
         return matching_category
+
+    def get_by_task(self, task):
+        """Retrieves all categories and task that contain the task name.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        dict
+            Information about the categories containing
+            the task name.
+
+        """
+        assert task, "Must input a valid task name."
+        matching_categories = {}
+        categories = self.manager.data["category"]
+        for category in categories:
+            matching_category = {category: {}}
+            for name in categories[category]:
+                if task in categories[category][name]:
+                    matching_category[category].update({name: [task]})
+            if any(matching_category[category]):
+                matching_categories.update(matching_category)
+        return matching_categories
 
 
 class CacheManagerInfo:
