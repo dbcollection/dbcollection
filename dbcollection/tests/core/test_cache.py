@@ -687,6 +687,9 @@ class TestCacheManagerDataset:
         with pytest.raises(KeyError):
             cache_dataset_manager.delete(name)
 
+    def test_info(self, mocker, cache_dataset_manager):
+        cache_dataset_manager.info()
+
 
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):

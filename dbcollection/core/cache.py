@@ -458,6 +458,13 @@ class CacheManagerDataset:
         assert name, "Must input a valid dataset name."
         self.manager.delete_data(name)
 
+    def info(self):
+        """Prints the dataset information contained in the cache."""
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box('Dataset')
+        pp.pprint(self.manager.data["dataset"])
+        print('')
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
