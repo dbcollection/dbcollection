@@ -526,6 +526,39 @@ class CacheManagerCategory:
         except KeyError:
             raise KeyError("The category \'{}\' does not exist in cache.".format(category))
 
+    def get_by_dataset(self, name):
+        """Retrieves all categories and tasks that contain the dataset name.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        dict
+            Information about the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        matching_categories = {}
+        categories = self.manager.data["category"]
+        for category in categories:
+            matching_category = self._get_category_with_matching_dataset_name(name, category)
+            matching_categories.update(matching_category)
+        return matching_categories
+
+    def _get_category_with_matching_dataset_name(self, name, category):
+        matching_category = {}
+        categories = self.manager.data["category"]
+        if name in categories[category]:
+            matching_category.update({
+                category: {
+                    name: categories[category][name]
+                }
+            })
+        return matching_category
+
 
 class CacheManagerInfo:
     """Manage the cache's information configurations."""

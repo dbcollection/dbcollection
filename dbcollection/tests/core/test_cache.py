@@ -738,8 +738,26 @@ class TestCacheManagerCategory:
         with pytest.raises(TypeError):
             cache_category_manager.get()
 
-    def test_get_categoryt__raises_error_invalid_category(self, mocker, cache_category_manager):
-       category = 'categoryZ'
+    def test_get_category__raises_error_invalid_category(self, mocker, cache_category_manager):
+        category = 'categoryZ'
 
-       with pytest.raises(KeyError):
+        with pytest.raises(KeyError):
             cache_category_manager.get(category)
+
+    def test_get_by_dataset(self, mocker, cache_category_manager):
+        dataset = 'dataset0'
+
+        result = cache_category_manager.get_by_dataset(dataset)
+
+        assert any(result)
+
+    def test_get_by_dataset__invalid_dataset(self, mocker, cache_category_manager):
+        dataset = 'datasetZ'
+
+        result = cache_category_manager.get_by_dataset(dataset)
+
+        assert not any(result)
+
+    def test_get_by_dataset__raises_error_missing_input(self, mocker, cache_category_manager):
+        with pytest.raises(TypeError):
+            cache_category_manager.get_by_dataset()
