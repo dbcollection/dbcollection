@@ -272,6 +272,7 @@ class CacheDataManager:
             "tasks": tasks
         }
         self.data["dataset"][name] = new_data
+        self.write_data_cache(self.data)
 
     def _get_keywords_from_tasks(self, tasks):
         """Fetch a list of categories from a tasks' dictionary."""
