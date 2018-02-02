@@ -329,6 +329,17 @@ class TestCacheDataManager:
         with pytest.warns(UserWarning):
             cache_data_manager.reset_cache()
 
+    def test_delete_cache__raise_warning_cache_file(self, mocker, cache_data_manager):
+        with pytest.warns(UserWarning):
+            cache_data_manager.delete_cache()
+
+    def test_delete_cache__delete_cache_file(self, mocker, cache_data_manager):
+        mocker.patch('os.remove')
+
+        cache_data_manager.delete_cache(force_delete_file=True)
+
+        os.remove.assert_called_once_with(cache_data_manager.cache_filename)
+
 
 @pytest.fixture()
 def cache_manager(mocker):

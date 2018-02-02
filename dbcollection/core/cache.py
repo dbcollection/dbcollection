@@ -184,6 +184,32 @@ class CacheDataManager:
                   'Set \'force_reset=True\' to proceed with the reset of dbcollection.json.'
             warnings.warn(msg, UserWarning, stacklevel=2)
 
+    def delete_cache(self, force_delete_file=False):
+        """Deletes the cache file and/or metadata dir from disk.
+
+        Deletes the dbcollection.json file from disk if enabled.
+        By default this option is disabled and a warning is displayed
+        instead. Only by selecting the 'force_delete_file' option will
+        the cache file be deleted.
+
+        Parameters
+        ----------
+        force_delete_file : bool, optional
+            Forces the cache file to be deleted if True.
+
+        Warning
+        -------
+        UserWarning
+            If force_delete_file is False, display a warning to the user.
+
+        """
+        if force_delete_file:
+            if os.path.exists(self.cache_filename):
+                os.remove(self.cache_filename)
+        else:
+            msg = 'All information about stored datasets will be lost if you proceed! ' + \
+                  'Set \'force_delete_file=True\' to proceed with the deletion of dbcollection.json.'
+            warnings.warn(msg, UserWarning, stacklevel=2)
 
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""
