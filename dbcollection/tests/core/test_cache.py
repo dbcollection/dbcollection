@@ -420,6 +420,14 @@ class TestCacheDataManager:
 
         assert True  # check how to assert mocked function calls
 
+    def test_delete_data(self, mocker, cache_data_manager):
+        mocker.patch.object(CacheDataManager, "write_data_cache")
+        name = 'dataset5'
+
+        cache_data_manager.delete_data(name)
+
+        assert name not in cache_data_manager.data["dataset"]
+
 
 @pytest.fixture()
 def cache_manager(mocker):

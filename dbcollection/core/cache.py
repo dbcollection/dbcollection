@@ -309,6 +309,22 @@ class CacheDataManager:
         if cache_dir or data_dir or tasks:
             self.write_data_cache(self.data)
 
+    def delete_data(self, name):
+        """Deletes a dataset from the cache data.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        try:
+            self.data["dataset"].pop(name)
+            self.write_data_cache(self.data)
+        except KeyError:
+            raise KeyError("The dataset \'{}\' does not exist in the cache.".format(name))
+
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""
 
