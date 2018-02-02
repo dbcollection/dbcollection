@@ -210,13 +210,7 @@ class CacheDataManager:
             If force_delete_file is False, display a warning to the user.
 
         """
-        if force_delete_file:
-            if os.path.exists(self.cache_filename):
-                os.remove(self.cache_filename)
-        else:
-            msg = 'All information about stored datasets will be lost if you proceed! ' + \
-                  'Set \'force_delete_file=True\' to proceed with the deletion of dbcollection.json.'
-            warnings.warn(msg, UserWarning, stacklevel=2)
+        self._delete_cache_file(force_delete_file)
 
         if force_delete_metadata:
             if force_delete_file:
@@ -232,6 +226,17 @@ class CacheDataManager:
                     'Set both \'force_delete_file=True\' and \'force_delete_metadata=True\' ' + \
                     'to proceed with the deletion of dbcollection.json and all metadata files.'
                 warnings.warn(msg, UserWarning, stacklevel=2)
+
+    def _delete_cache_file(self, force_delete_file):
+        """Deletes the cache file from disk."""
+        if force_delete_file:
+            if os.path.exists(self.cache_filename):
+                os.remove(self.cache_filename)
+        else:
+            msg = 'All information about stored datasets will be lost if you proceed! ' + \
+                  'Set \'force_delete_file=True\' to proceed with the deletion of ' + \
+                  'dbcollection.json.'
+            warnings.warn(msg, UserWarning, stacklevel=2)
 
 
 class CacheManagerDataset:
