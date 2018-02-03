@@ -806,6 +806,71 @@ class TestCacheManagerTask:
         with pytest.raises(KeyError):
             cache_task_manager.get(dataset, task)
 
+    def test_update_task__do_nothing(self, mocker, cache_task_manager):
+        dataset = 'dataset4'
+        existing_tasks = list(cache_task_manager.manager.data["dataset"][dataset]["tasks"].keys())
+        task = existing_tasks[0]
+        filename = cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["filename"]
+        categories = cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["categories"]
+
+        cache_task_manager.update(dataset, task)
+
+        assert dataset in cache_task_manager.manager.data["dataset"]
+        assert task in cache_task_manager.manager.data["dataset"][dataset]["tasks"]
+        assert filename == cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["filename"]
+        assert categories == cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["categories"]
+
+    def test_update_task_filename(self, mocker, cache_task_manager):
+        dataset = 'dataset4'
+        existing_tasks = list(cache_task_manager.manager.data["dataset"][dataset]["tasks"].keys())
+        task = existing_tasks[0]
+        filename = "/new/file/name.h5"
+
+        cache_task_manager.update(dataset, task, filename)
+
+        assert dataset in cache_task_manager.manager.data["dataset"]
+        assert task in cache_task_manager.manager.data["dataset"][dataset]["tasks"]
+        assert filename == cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["filename"]
+
+    def test_update_task_add_categories(self, mocker, cache_task_manager):
+        dataset = 'dataset4'
+        existing_tasks = list(cache_task_manager.manager.data["dataset"][dataset]["tasks"].keys())
+        task = existing_tasks[0]
+        new_categories = ["add", "more", "categories"]
+        update_categories = list(cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["categories"]) + new_categories
+
+        cache_task_manager.update(dataset, task, None, update_categories)
+
+        assert dataset in cache_task_manager.manager.data["dataset"]
+        assert task in cache_task_manager.manager.data["dataset"][dataset]["tasks"]
+        assert sorted(update_categories) == cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["categories"]
+
+    def test_update_task_filename_categories(self, mocker, cache_task_manager):
+        dataset = 'dataset4'
+        existing_tasks = list(cache_task_manager.manager.data["dataset"][dataset]["tasks"].keys())
+        task = existing_tasks[0]
+        filename = "/new/file/name.h5"
+        categories = []
+
+        cache_task_manager.update(dataset, task, filename, categories)
+
+        assert dataset in cache_task_manager.manager.data["dataset"]
+        assert task in cache_task_manager.manager.data["dataset"][dataset]["tasks"]
+        assert filename == cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["filename"]
+        assert not any(cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]["categories"])
+
+    def test_update_task__raises_error_missing_inputs(self, mocker, cache_task_manager):
+        with pytest.raises(TypeError):
+            cache_task_manager.update()
+
+    def test_update_task__raises_error_invalid_dataset(self, mocker, cache_task_manager):
+        dataset = 'unknown_dataset'
+        task = 'some_task'
+        filename = "/new/file/name.h5"
+
+        with pytest.raises(KeyError):
+            cache_task_manager.update(dataset, task, filename)
+
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
     cache_info = CacheManagerCategory(cache_data_manager)

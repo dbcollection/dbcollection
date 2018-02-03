@@ -576,6 +576,32 @@ class CacheManagerTask:
             raise KeyError("Invalid task name. The task \'{}\' does not exist for the dataset" \
                            " \'{}\'.".format(task, name))
 
+    def update(self, name, task, filename=None, categories=None):
+        """Updates the metadata of a task for a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the task.
+        filename : str, optional
+            Path of the task's metadata HDF5 file.
+        categories : list/tuple, optional
+            List of category keywords.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert task, "Must input a valid task name."
+        self._assert_dataset_exists_in_cache(name)
+        self._assert_task_exists_in_dataset_in_cache(name, task)
+        if filename is not None:
+            self.manager.data["dataset"][name]["tasks"][task]["filename"] = filename
+        if categories is not None:
+            self.manager.data["dataset"][name]["tasks"][task]["categories"] = sorted(list(categories))
+        self.manager.update_categories()
+        self.manager.write_data_cache(self.manager.data)
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
