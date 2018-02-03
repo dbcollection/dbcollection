@@ -595,13 +595,20 @@ class CacheManagerTask:
         assert task, "Must input a valid task name."
         self._assert_dataset_exists_in_cache(name)
         self._assert_task_exists_in_dataset_in_cache(name, task)
-        if filename is not None:
-            self.manager.data["dataset"][name]["tasks"][task]["filename"] = filename
-        if categories is not None:
-            self.manager.data["dataset"][name]["tasks"][task]["categories"] = sorted(list(categories))
+
+        self._update_task_filename(name, task, filename)
+        self._update_task_categories(name, task, categories)
+
         self.manager.update_categories()
         self.manager.write_data_cache(self.manager.data)
 
+    def _update_task_filename(self, name, task, filename):
+        if filename is not None:
+            self.manager.data["dataset"][name]["tasks"][task]["filename"] = filename
+
+    def _update_task_categories(self, name, task, categories):
+        if categories is not None:
+            self.manager.data["dataset"][name]["tasks"][task]["categories"] = sorted(list(categories))
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
