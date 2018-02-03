@@ -789,6 +789,10 @@ class TestCacheManagerCategory:
 
         assert not cache_category_manager.exists(category)
 
+    def test_exists__raises_error_missing_input(self, mocker, cache_category_manager):
+        with pytest.raises(TypeError):
+            cache_category_manager.exists()
+
     def test_exists_task(self, mocker, cache_category_manager):
         task = "task0"
 
@@ -799,6 +803,10 @@ class TestCacheManagerCategory:
 
         assert not cache_category_manager.exists_task(task)
 
+    def test_exists_task__raises_error_missing_input(self, mocker, cache_category_manager):
+        with pytest.raises(TypeError):
+            cache_category_manager.exists_task()
+
     def test_exists_dataset(self, mocker, cache_category_manager):
         dataset = "dataset1"
 
@@ -808,6 +816,10 @@ class TestCacheManagerCategory:
         dataset = "datasetIOU"
 
         assert not cache_category_manager.exists_dataset(dataset)
+
+    def test_exists_dataset__raises_error_missing_input(self, mocker, cache_category_manager):
+        with pytest.raises(TypeError):
+            cache_category_manager.exists_dataset()
 
     def test_list_dataset_names(self, mocker, cache_category_manager):
         datasets = list(sorted(cache_category_manager.manager.data["category"].keys()))
