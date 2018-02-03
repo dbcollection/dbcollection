@@ -613,6 +613,24 @@ class CacheManagerCategory:
         assert category, "Must input a valid category name."
         return category in self.manager.data["category"]
 
+    def exists_task(self, task):
+        """Checks if a task exists in any category in cache.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        bool
+            True if the task exists for at least one category.
+            Otherwise, returns False.
+
+        """
+        assert task, "Must input a valid task name."
+        return any(self.get_by_task(task))
+
     def list(self):
         """Returns a list of all category names.
 
