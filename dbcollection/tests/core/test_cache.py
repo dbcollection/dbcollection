@@ -12,6 +12,7 @@ from dbcollection.core.cache import (
     CacheDataManager,
     CacheManagerInfo,
     CacheManagerDataset,
+    CacheManagerTask,
     CacheManagerCategory
 )
 
@@ -707,6 +708,24 @@ class TestCacheManagerDataset:
         datasets = list(sorted(cache_dataset_manager.manager.data["dataset"].keys()))
 
         assert datasets == cache_dataset_manager.list()
+
+
+@pytest.fixture()
+def cache_task_manager(mocker, cache_data_manager):
+    cache_task = CacheManagerTask(cache_data_manager)
+    return cache_task
+
+
+class TestCacheManagerTask:
+    """Unit tests for the CacheManagerTask class."""
+
+    def test_init_class(self, mocker):
+        manager = mocker.Mock()
+        cache_task = CacheManagerTask(manager)
+
+    def test_init_class__raises_error_missing_manager(self, mocker):
+        with pytest.raises(TypeError):
+            cache_info = CacheManagerTask()
 
 
 @pytest.fixture()

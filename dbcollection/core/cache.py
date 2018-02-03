@@ -501,6 +501,15 @@ class CacheManagerDataset:
         print('')
 
 
+class CacheManagerTask:
+    """Manage the cache's dataset task configurations."""
+
+    def __init__(self, manager):
+        """Initialize class."""
+        assert manager, "Must input a valid cache manager."
+        self.manager = manager
+
+
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
 
