@@ -673,6 +673,36 @@ class CacheManagerTask:
         tasks = sorted(list(set(tasks)))
         return tasks
 
+    def exists(self, task, name=None):
+        """Checks if a task name exists in the cache.
+
+        Also, if a dataset name is specified, it checks
+        if the task name exists for that particular
+        dataset only.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+        name : str, optional
+            Name of the dataset.
+
+        Returns
+        -------
+        bool
+            Returns True if the task exists in the cache
+            or in a dataset. Otherwise, returns False.
+
+        """
+        assert task, "Must input a valid task name."
+        if name is not None:
+            self._assert_dataset_exists_in_cache(name)
+            tasks = self.list(name)
+            return task in tasks
+        else:
+            tasks = self.list()
+            return task in tasks
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""

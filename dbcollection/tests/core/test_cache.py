@@ -921,6 +921,39 @@ class TestCacheManagerTask:
         with pytest.raises(KeyError):
             cache_task_manager.list(dataset)
 
+    def test_exists_task_in_cache(self, mocker, cache_task_manager):
+        task = 'task0'
+
+        assert cache_task_manager.exists(task)
+
+    def test_exists_task_in_cache_invalid_task(self, mocker, cache_task_manager):
+        task = 'taskXYZ'
+
+        assert not cache_task_manager.exists(task)
+
+    def test_exists_task_in_dataset(self, mocker, cache_task_manager):
+        dataset = 'dataset0'
+        existing_tasks = list(cache_task_manager.manager.data["dataset"][dataset]["tasks"].keys())
+        task = existing_tasks[0]
+
+        assert cache_task_manager.exists(task, dataset)
+
+    def test_exists_task_in_dataset_invalid_task(self, mocker, cache_task_manager):
+        dataset = 'dataset1'
+        task = "invalid_task"
+
+        assert not cache_task_manager.exists(task, dataset)
+
+    def test_exists_task__raises_error_missing_inputs(self, mocker, cache_task_manager):
+        with pytest.raises(TypeError):
+            cache_task_manager.exists()
+
+    def test_exists_task_in_dataset__raise_error_invalid_dataset(self, mocker, cache_task_manager):
+        dataset = 'datasetIOU'
+        task = "task0"
+
+        with pytest.raises(KeyError):
+            cache_task_manager.exists(task, dataset)
 
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
