@@ -595,6 +595,24 @@ class CacheManagerCategory:
                 matching_category.update({name: [task]})
         return matching_category
 
+    def exists(self, category):
+        """Checks if a category exists in cache.
+
+        Parameters
+        ----------
+        category : str
+            Name of the category.
+
+        Returns
+        -------
+        bool
+            True if the category name exists.
+            Otherwise, returns False.
+
+        """
+        assert category, "Must input a valid category name."
+        return category in self.manager.data["category"]
+
     def list(self):
         """Returns a list of all category names.
 

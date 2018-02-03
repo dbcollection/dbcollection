@@ -779,6 +779,16 @@ class TestCacheManagerCategory:
         with pytest.raises(TypeError):
             cache_category_manager.get_by_task()
 
+    def test_exists_category(self, mocker, cache_category_manager):
+        category = "category0"
+
+        assert cache_category_manager.exists(category)
+
+    def test_exists_category__invalid_category(self, mocker, cache_category_manager):
+        category = "categoryXYZ"
+
+        assert not cache_category_manager.exists(category)
+
     def test_list_dataset_names(self, mocker, cache_category_manager):
         datasets = list(sorted(cache_category_manager.manager.data["category"].keys()))
 
