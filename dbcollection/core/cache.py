@@ -542,6 +542,37 @@ class CacheManagerTask:
         self.manager.update_categories()
         self.manager.write_data_cache(self.manager.data)
 
+    def get(self, name, task):
+        """Retrieves the metadata of the task of a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        dict
+            Information about the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert task, "Must input a valid task name."
+
+        try:
+            tasks = self.manager.data["dataset"][name]["tasks"]
+        except KeyError:
+            raise KeyError("Invalid dataset name. The dataset \'{}\' does not exist in cache." \
+                           .format(name))
+
+        try:
+            return tasks[task]
+        except KeyError:
+            raise KeyError("Invalid task name. The task \'{}\' does not exist for the dataset" \
+                           " \'{}\'.".format(task, name))
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""

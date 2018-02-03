@@ -778,6 +778,34 @@ class TestCacheManagerTask:
         with pytest.raises(AssertionError):
             cache_task_manager.add(dataset, task, filename, categories)
 
+    def test_get_task(self, mocker, cache_task_manager):
+        dataset = 'dataset0'
+        existing_tasks = list(cache_task_manager.manager.data["dataset"][dataset]["tasks"].keys())
+        task = existing_tasks[0]
+        metadata = cache_task_manager.manager.data["dataset"][dataset]["tasks"][task]
+
+        result = cache_task_manager.get(dataset, task)
+
+        assert metadata == result
+
+    def test_get_task__raises_error_missing_inputs(self, mocker, cache_task_manager):
+        with pytest.raises(TypeError):
+            cache_task_manager.get()
+
+    def test_get_task__raises_error_invalid_dataset(self, mocker, cache_task_manager):
+        dataset = 'unknown_dataset'
+        task = 'some_task'
+
+        with pytest.raises(KeyError):
+            cache_task_manager.get(dataset, task)
+
+    def test_get_task__raises_error_invalid_task(self, mocker, cache_task_manager):
+        dataset = 'dataset1'
+        task = 'invalid_task'
+
+        with pytest.raises(KeyError):
+            cache_task_manager.get(dataset, task)
+
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
     cache_info = CacheManagerCategory(cache_data_manager)
