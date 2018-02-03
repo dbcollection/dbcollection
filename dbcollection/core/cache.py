@@ -696,12 +696,18 @@ class CacheManagerTask:
         """
         assert task, "Must input a valid task name."
         if name is not None:
-            self._assert_dataset_exists_in_cache(name)
-            tasks = self.list(name)
-            return task in tasks
+            return self._is_task_in_dataset(name, task)
         else:
-            tasks = self.list()
-            return task in tasks
+            return self._is_task_in_any_dataset(task)
+
+    def _is_task_in_dataset(self, name, task):
+        self._assert_dataset_exists_in_cache(name)
+        tasks = self.list(name)
+        return task in tasks
+
+    def _is_task_in_any_dataset(self, task):
+        tasks = self.list()
+        return task in tasks
 
 
 class CacheManagerCategory:
