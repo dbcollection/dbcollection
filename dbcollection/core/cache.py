@@ -709,6 +709,38 @@ class CacheManagerTask:
         tasks = self.list()
         return task in tasks
 
+    def info(self, name=None):
+        """Prints the dataset information contained in the cache.
+
+        Parameters
+        ----------
+        name : str, optional
+            Name of the dataset.
+
+        """
+        if name is not None:
+            self._assert_dataset_exists_in_cache(name)
+            tasks = self.list(name)
+            pp = pprint.PrettyPrinter(indent=4)
+            print_text_box('Tasks ({})'.format(name))
+            pp.pprint(tasks)
+            print('')
+        else:
+            tasks = {}
+            datasets = self.manager.data["dataset"]
+            for dataset in datasets:
+                for task in datasets[dataset]["tasks"]:
+                    if task in tasks:
+                        tasks[task].append(dataset)
+                    else:
+                        tasks[task] = [dataset]
+            for task in tasks:
+                tasks[task] = sorted(list(set(tasks[task])))
+            pp = pprint.PrettyPrinter(indent=4)
+            print_text_box('Tasks (all datasets)')
+            pp.pprint(tasks)
+            print('')
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""

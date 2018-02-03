@@ -955,6 +955,20 @@ class TestCacheManagerTask:
         with pytest.raises(KeyError):
             cache_task_manager.exists(task, dataset)
 
+    def test_info(self, mocker, cache_task_manager):
+        dataset = 'dataset0'
+
+        cache_task_manager.info(dataset)
+
+    def test_info_dataset(self, mocker, cache_task_manager):
+        cache_task_manager.info()
+
+    def test_info_dataset__raises_error_invalid_dataset(self, mocker, cache_task_manager):
+        dataset = 'non_existing_dataset'
+
+        with pytest.raises(KeyError):
+            cache_task_manager.info(dataset)
+
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
     cache_info = CacheManagerCategory(cache_data_manager)
