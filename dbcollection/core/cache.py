@@ -656,13 +656,21 @@ class CacheManagerTask:
 
         """
         if name is not None:
-            self._assert_dataset_exists_in_cache(name)
-            tasks = self.manager.data["dataset"][name]["tasks"].keys()
-            tasks = sorted(list(tasks))
+            tasks = self._list_all_tasks_from_single_dataset(name)
         else:
-            datasets = self.manager.data["dataset"]
-            tasks = [task for dataset in datasets for task in datasets[dataset]["tasks"]]
-            tasks = sorted(list(set(tasks)))
+            tasks = self._list_all_tasks_from_all_datasets()
+        return tasks
+
+    def _list_all_tasks_from_single_dataset(self, name):
+        self._assert_dataset_exists_in_cache(name)
+        tasks = self.manager.data["dataset"][name]["tasks"].keys()
+        tasks = sorted(list(tasks))
+        return tasks
+
+    def _list_all_tasks_from_all_datasets(self):
+        datasets = self.manager.data["dataset"]
+        tasks = [task for dataset in datasets for task in datasets[dataset]["tasks"]]
+        tasks = sorted(list(set(tasks)))
         return tasks
 
 
