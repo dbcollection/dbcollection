@@ -533,8 +533,7 @@ class CacheManagerTask:
         self.manager.data["dataset"][name]["tasks"].update({
             task: {"filename": filename, "categories": sorted(list(categories))}
         })
-        self.manager.update_categories()
-        self.manager.write_data_cache(self.manager.data)
+        self._update_cache_data()
 
     def _assert_dataset_exists_in_cache(self, name):
         try:
@@ -546,6 +545,10 @@ class CacheManagerTask:
     def _assert_task_not_exists_in_dataset_in_cache(self, name, task):
         assert task not in self.manager.data["dataset"][name]["tasks"], \
             "The task \'{}\' already exist for the dataset \'{}\'.".format(task, name)
+
+    def _update_cache_data(self):
+        self.manager.update_categories()
+        self.manager.write_data_cache(self.manager.data)
 
     def get(self, name, task):
         """Retrieves the metadata of the task of a dataset.
@@ -599,8 +602,7 @@ class CacheManagerTask:
         self._update_task_filename(name, task, filename)
         self._update_task_categories(name, task, categories)
 
-        self.manager.update_categories()
-        self.manager.write_data_cache(self.manager.data)
+        self._update_cache_data()
 
     def _update_task_filename(self, name, task, filename):
         if filename is not None:
