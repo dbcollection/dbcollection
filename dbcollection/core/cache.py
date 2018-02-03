@@ -509,6 +509,39 @@ class CacheManagerTask:
         assert manager, "Must input a valid cache manager."
         self.manager = manager
 
+    def add(self, name, task, filename, categories=()):
+        """Adds a new task to a dataset in cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the new dataset.
+        filename : str
+            Path of the task's metadata HDF5 file.
+        categories : list/tuple, optional
+            List of category keywords.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert task, "Must input a valid task name."
+        assert filename, "Must input a valid file path."
+
+        try:
+            tasks = self.manager.data["dataset"][name]["tasks"]
+        except KeyError:
+            raise KeyError("The dataset \'{}\' does not exist in cache.".format(name))
+
+        assert task not in tasks, "The task \'{}\' already exists for \'{}\'" \
+                                 .format(task, name)
+
+        self.manager.data["dataset"][name]["tasks"].update({
+            task: {"filename": filename, "categories": sorted(list(categories))}
+        })
+        self.manager.update_categories()
+        self.manager.write_data_cache(self.manager.data)
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
