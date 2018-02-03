@@ -631,6 +631,24 @@ class CacheManagerCategory:
         assert task, "Must input a valid task name."
         return any(self.get_by_task(task))
 
+    def exists_dataset(self, dataset):
+        """Checks if a dataset exists in any category in cache.
+
+        Parameters
+        ----------
+        dataset : str
+            Name of the dataset.
+
+        Returns
+        -------
+        bool
+            True if the dataset exists for at least one category.
+            Otherwise, returns False.
+
+        """
+        assert dataset, "Must input a valid dataset name."
+        return any(self.get_by_dataset(dataset))
+
     def list(self):
         """Returns a list of all category names.
 

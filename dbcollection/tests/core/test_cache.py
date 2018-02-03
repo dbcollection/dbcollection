@@ -799,6 +799,16 @@ class TestCacheManagerCategory:
 
         assert not cache_category_manager.exists_task(task)
 
+    def test_exists_dataset(self, mocker, cache_category_manager):
+        dataset = "dataset1"
+
+        assert cache_category_manager.exists_dataset(dataset)
+
+    def test_exists_dataset__invalid_dataset(self, mocker, cache_category_manager):
+        dataset = "datasetIOU"
+
+        assert not cache_category_manager.exists_dataset(dataset)
+
     def test_list_dataset_names(self, mocker, cache_category_manager):
         datasets = list(sorted(cache_category_manager.manager.data["category"].keys()))
 
