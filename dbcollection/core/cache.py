@@ -719,27 +719,46 @@ class CacheManagerTask:
 
         """
         if name is not None:
-            self._assert_dataset_exists_in_cache(name)
-            tasks = self.list(name)
-            pp = pprint.PrettyPrinter(indent=4)
-            print_text_box('Tasks ({})'.format(name))
-            pp.pprint(tasks)
-            print('')
+            self._print_info_of_all_tasks_of_single_dataset(name)
         else:
-            tasks = {}
-            datasets = self.manager.data["dataset"]
-            for dataset in datasets:
-                for task in datasets[dataset]["tasks"]:
-                    if task in tasks:
-                        tasks[task].append(dataset)
-                    else:
-                        tasks[task] = [dataset]
-            for task in tasks:
-                tasks[task] = sorted(list(set(tasks[task])))
-            pp = pprint.PrettyPrinter(indent=4)
-            print_text_box('Tasks (all datasets)')
-            pp.pprint(tasks)
-            print('')
+            self._print_info_of_all_tasks_of_all_datasets()
+
+    def _print_info_of_all_tasks_of_single_dataset(self, name):
+        self._assert_dataset_exists_in_cache(name)
+        tasks = self.list(name)
+        text_box_msg = 'Tasks ({})'.format(name)
+        self._print_text_box_data_to_screen(text_box_msg, tasks)
+
+    def _print_text_box_data_to_screen(self, msg, data):
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box(msg)
+        pp.pprint(data)
+        print('')
+
+    def _print_info_of_all_tasks_of_all_datasets(self):
+        tasks = self._get_all_tasks_with_datasets_per_task()
+        text_box_msg = 'Tasks (all datasets)'
+        self._print_text_box_data_to_screen(text_box_msg, tasks)
+
+    def _get_all_tasks_with_datasets_per_task(self):
+        tasks = self._get_all_tasks_plus_datasets()
+        return self._parse_sorted_list_of_unique_datasets(tasks)
+
+    def _get_all_tasks_plus_datasets(self):
+        tasks = {}
+        datasets = self.manager.data["dataset"]
+        for dataset in datasets:
+            for task in datasets[dataset]["tasks"]:
+                if task in tasks:
+                    tasks[task].append(dataset)
+                else:
+                    tasks[task] = [dataset]
+        return tasks
+
+    def _parse_sorted_list_of_unique_datasets(self, tasks):
+        for task in tasks:
+            tasks[task] = sorted(list(set(tasks[task])))
+        return tasks
 
 
 class CacheManagerCategory:
