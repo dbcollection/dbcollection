@@ -619,6 +619,27 @@ class CacheManagerTask:
         if categories is not None:
             self.manager.data["dataset"][name]["tasks"][task]["categories"] = sorted(list(categories))
 
+    def delete(self, name, task):
+        """Deletes a task of a dataset.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the task.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert task, "Must input a valid task name."
+        self._assert_dataset_exists_in_cache(name)
+        self._assert_task_exists_in_dataset_in_cache(name, task)
+
+        self.manager.data["dataset"][name]["tasks"].pop(task)
+
+        self._update_cache_data()
+
+
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
 

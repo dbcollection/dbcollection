@@ -871,6 +871,34 @@ class TestCacheManagerTask:
         with pytest.raises(KeyError):
             cache_task_manager.update(dataset, task, filename)
 
+    def test_delete_task(self, mocker, cache_task_manager):
+        dataset = "dataset7"
+        existing_tasks = list(cache_task_manager.manager.data["dataset"][dataset]["tasks"].keys())
+        task = existing_tasks[0]
+
+        cache_task_manager.delete(dataset, task)
+
+        assert task not in cache_task_manager.manager.data["dataset"][dataset]["tasks"]
+
+    def test_delete_task__raises_error_missing_inputs(self, mocker, cache_task_manager):
+        with pytest.raises(TypeError):
+            cache_task_manager.delete()
+
+    def test_delete_task__raises_error_invalid_dataset(self, mocker, cache_task_manager):
+        dataset = "invalid_dataset"
+        task = "some_task"
+
+        with pytest.raises(KeyError):
+            cache_task_manager.delete(dataset, task)
+
+    def test_delete_task__raises_error_invalid_dataset(self, mocker, cache_task_manager):
+        dataset = "dataset0"
+        task = "invalid_task"
+
+        with pytest.raises(KeyError):
+            cache_task_manager.delete(dataset, task)
+
+
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):
     cache_info = CacheManagerCategory(cache_data_manager)
