@@ -530,9 +530,8 @@ class CacheManagerTask:
         self._assert_dataset_exists_in_cache(name)
         self._assert_task_not_exists_in_dataset_in_cache(name, task)
 
-        self.manager.data["dataset"][name]["tasks"].update({
-            task: {"filename": filename, "categories": sorted(list(categories))}
-        })
+        self._add_new_task(name, task, filename, categories)
+
         self._update_cache_data()
 
     def _assert_dataset_exists_in_cache(self, name):
@@ -545,6 +544,14 @@ class CacheManagerTask:
     def _assert_task_not_exists_in_dataset_in_cache(self, name, task):
         assert task not in self.manager.data["dataset"][name]["tasks"], \
             "The task \'{}\' already exist for the dataset \'{}\'.".format(task, name)
+
+    def _add_new_task(self, name, task, filename, categories):
+        self.manager.data["dataset"][name]["tasks"].update({
+            task: {
+                "filename": filename,
+                "categories": sorted(list(categories))
+            }
+        })
 
     def _update_cache_data(self):
         self.manager.update_categories()
