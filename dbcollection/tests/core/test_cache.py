@@ -898,6 +898,29 @@ class TestCacheManagerTask:
         with pytest.raises(KeyError):
             cache_task_manager.delete(dataset, task)
 
+    def test_list_all_tasks(self, mocker, cache_task_manager):
+        datasets = cache_task_manager.manager.data["dataset"]
+        list_tasks = [task for dataset in datasets for task in datasets[dataset]["tasks"]]
+        list_tasks = sorted(list(set(list_tasks)))
+
+        result = cache_task_manager.list()
+
+        assert list_tasks == result
+
+    def test_list_tasks_given_dataset(self, mocker, cache_task_manager):
+        dataset = "dataset0"
+        tasks = sorted(list(cache_task_manager.manager.data["dataset"][dataset]["tasks"].keys()))
+
+        result = cache_task_manager.list(dataset)
+
+        assert tasks == result
+
+    def test_list_tasks__raise_error_invalid_dataset(self, mocker, cache_task_manager):
+        dataset = "invalid_dataset"
+
+        with pytest.raises(KeyError):
+            cache_task_manager.list(dataset)
+
 
 @pytest.fixture()
 def cache_category_manager(mocker, cache_data_manager):

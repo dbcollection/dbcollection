@@ -639,6 +639,32 @@ class CacheManagerTask:
 
         self._update_cache_data()
 
+    def list(self, name=None):
+        """Returns a list of all dataset names.
+
+        Parameters
+        ----------
+        name : str, optional
+            Name of the dataset.
+
+        Returns
+        -------
+        list
+            Names of tasks. If a dataset name is used,
+            it lists only the task names for that specific
+            dataset.
+
+        """
+        if name is not None:
+            self._assert_dataset_exists_in_cache(name)
+            tasks = self.manager.data["dataset"][name]["tasks"].keys()
+            tasks = sorted(list(tasks))
+        else:
+            datasets = self.manager.data["dataset"]
+            tasks = [task for dataset in datasets for task in datasets[dataset]["tasks"]]
+            tasks = sorted(list(set(tasks)))
+        return tasks
+
 
 class CacheManagerCategory:
     """Manage the cache's category configurations."""
