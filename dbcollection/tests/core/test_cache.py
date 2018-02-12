@@ -289,15 +289,20 @@ class TestCacheDataManager:
 
 
 @pytest.fixture()
-def cache_manager(mocker):
-    cache_info = CacheManagerInfo(cache_manager)
-    return cache_info
+def cache_manager(mocker, test_data):
+    mocker.patch.object(CacheDataManager, "read_data_cache", return_value=test_data.data)
+    cache = CacheManager()
+    return cache
 
 class TestCacheManager:
     """Unit tests for the CacheManager class."""
 
-    def test_CacheManager__init(self, cache_manager):
-        pass
+    def test_CacheManager__init(self, cache_manager, test_data):
+        assert isinstance(cache_manager.manager, CacheDataManager)
+        assert isinstance(cache_manager.info, CacheManagerInfo)
+        assert isinstance(cache_manager.dataset, CacheManagerDataset)
+        assert isinstance(cache_manager.task, CacheManagerTask)
+        assert isinstance(cache_manager.category, CacheManagerCategory)
 
 
 @pytest.fixture()
