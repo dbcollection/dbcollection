@@ -45,6 +45,28 @@ class CacheManager:
         self.task = CacheManagerTask(self.manager)
         self.category = CacheManagerCategory(self.manager)
 
+    def add(self, name, cache_dir, data_dir, tasks):
+        """Adds a new dataset to the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        cache_dir : str
+            Path of the dataset's metadata directory.
+        data_dir : str
+            Path of the dataset's data files.
+        tasks : dict
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert cache_dir, "Must input a valid directory (cache_dir)."
+        assert data_dir, "Must input a valid directory (data_dir)."
+        assert tasks, "Must input a valid tasks."
+
+        self.dataset.add(name, cache_dir, data_dir, tasks)
+
 
 class CacheDataManager:
     """Cache's data write/read methods."""
