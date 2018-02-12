@@ -891,7 +891,7 @@ class TestCacheManagerTask:
         with pytest.raises(KeyError):
             cache_task_manager.delete(dataset, task)
 
-    def test_delete_task__raises_error_invalid_dataset(self, mocker, cache_task_manager):
+    def test_delete_task__raises_error_invalid_task(self, mocker, cache_task_manager):
         dataset = "dataset0"
         task = "invalid_task"
 
