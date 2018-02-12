@@ -26,7 +26,7 @@ class DataGenerator:
     data = {
         "info": {
             "root_cache_dir": '/some/path/dbcollection',
-            "root_download_dir": '/some/path/dbcollection/downloads',
+            "root_downloads_dir": '/some/path/dbcollection/downloads',
         },
         "dataset": {
             "datasetA": {
@@ -126,7 +126,7 @@ class DataGenerator:
         """Returns the paths data for the info cache field."""
         return {
             "root_cache_dir": os.path.join(self.base_path, "dbcollection"),
-            "root_download_dir": os.path.join(self.base_path, "dbcollection", "downloads"),
+            "root_downloads_dir": os.path.join(self.base_path, "dbcollection", "downloads"),
         }
 
     def get_datasets_data(self):
@@ -138,7 +138,7 @@ class DataGenerator:
         datasets = {}
         for dataset in self.list_datasets:
             data = {}
-            data["data_dir"] = os.path.join(self.info["root_download_dir"], dataset)
+            data["data_dir"] = os.path.join(self.info["root_downloads_dir"], dataset)
             data["tasks"] = self.generate_random_tasks(dataset)
             data["keywords"] = self.get_keyword_list(data["tasks"])
             datasets.update({dataset: data})
