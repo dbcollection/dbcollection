@@ -45,15 +45,13 @@ class CacheManager:
         self.task = CacheManagerTask(self.manager)
         self.category = CacheManagerCategory(self.manager)
 
-    def add(self, name, cache_dir, data_dir, tasks):
+    def add(self, name, data_dir, tasks):
         """Adds a new dataset to the cache.
 
         Parameters
         ----------
         name : str
             Name of the dataset.
-        cache_dir : str
-            Path of the dataset's metadata directory.
         data_dir : str
             Path of the dataset's data files.
         tasks : dict
@@ -61,11 +59,10 @@ class CacheManager:
 
         """
         assert name, "Must input a valid dataset name."
-        assert cache_dir, "Must input a valid directory (cache_dir)."
-        assert data_dir, "Must input a valid directory (data_dir)."
+        assert data_dir, "Must input a valid data directory."
         assert tasks, "Must input a valid tasks."
 
-        self.dataset.add(name, cache_dir, data_dir, tasks)
+        self.dataset.add(name, data_dir, tasks)
 
 
 class CacheDataManager:
@@ -271,15 +268,13 @@ class CacheDataManager:
         for dir_path in dirs:
             shutil.rmtree(dir_path)
 
-    def add_data(self, name, cache_dir, data_dir, tasks):
+    def add_data(self, name, data_dir, tasks):
         """Adds a new dataset to the cache.
 
         Parameters
         ----------
         name : str
             Name of the dataset.
-        cache_dir : str
-            Path of the dataset's metadata directory.
         data_dir : str
             Path of the dataset's data files.
         tasks : dict
@@ -287,12 +282,10 @@ class CacheDataManager:
 
         """
         assert name, "Must input a valid dataset name."
-        assert cache_dir, "Must input a valid directory (cache_dir)."
-        assert data_dir, "Must input a valid directory (data_dir)."
+        assert data_dir, "Must input a valid data directory."
         assert tasks, "Must input a valid tasks."
 
         new_data = {
-            "cache_dir": cache_dir,
             "data_dir": data_dir,
             "keywords": self._get_keywords_from_tasks(tasks),
             "tasks": tasks
@@ -418,15 +411,13 @@ class CacheManagerDataset:
         assert manager, "Must input a valid cache manager."
         self.manager = manager
 
-    def add(self, name, cache_dir, data_dir, tasks):
+    def add(self, name, data_dir, tasks):
         """Adds a new dataset to the cache.
 
         Parameters
         ----------
         name : str
             Name of the dataset.
-        cache_dir : str
-            Path of the dataset's metadata directory.
         data_dir : str
             Path of the dataset's data files.
         tasks : dict
@@ -434,11 +425,10 @@ class CacheManagerDataset:
 
         """
         assert name, "Must input a valid dataset name."
-        assert cache_dir, "Must input a valid directory (cache_dir)."
         assert data_dir, "Must input a valid directory (data_dir)."
         assert tasks, "Must input a valid tasks."
 
-        self.manager.add_data(name, cache_dir, data_dir, tasks)
+        self.manager.add_data(name, data_dir, tasks)
 
     def get(self, name):
         """Retrieves the data of a dataset from the cache.

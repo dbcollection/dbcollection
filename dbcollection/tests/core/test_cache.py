@@ -147,7 +147,6 @@ class TestCacheDataManager:
     def test_add_data_to_cache(self, mocker, cache_data_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
         name = 'new_dataset'
-        cache_dir = '/some/path/to/cache/dir'
         data_dir = '/some/path/to/data'
         tasks = {
             "new_taskA": {
@@ -160,14 +159,13 @@ class TestCacheDataManager:
             },
         }
 
-        cache_data_manager.add_data(name, cache_dir, data_dir, tasks)
+        cache_data_manager.add_data(name, data_dir, tasks)
 
-        self._assert_add_data_to_cache(name, cache_dir, data_dir, tasks, cache_data_manager)
+        self._assert_add_data_to_cache(name, data_dir, tasks, cache_data_manager)
         assert "new_categoryA" in cache_data_manager.data["category"]
 
-    def _assert_add_data_to_cache(self, name, cache_dir, data_dir, tasks, cache_data_m):
+    def _assert_add_data_to_cache(self, name, data_dir, tasks, cache_data_m):
         assert name in cache_data_m.data["dataset"]
-        assert cache_dir == cache_data_m.data["dataset"][name]["cache_dir"]
         assert data_dir == cache_data_m.data["dataset"][name]["data_dir"]
         assert tasks == cache_data_m.data["dataset"][name]["tasks"]
         assert any(cache_data_m.data["dataset"][name]["keywords"])
@@ -175,7 +173,6 @@ class TestCacheDataManager:
     def test_add_data_to_cache_twice(self, mocker, cache_data_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
         name_dbA = 'new_datasetA'
-        cache_dir_dbA = '/some/path/to/cache/dir'
         data_dir_dbA = '/some/path/to/data'
         tasks_dbA = {
             "new_taskA": {
@@ -189,7 +186,6 @@ class TestCacheDataManager:
         }
 
         name_dbB = 'new_datasetB'
-        cache_dir_dbB = '/some/path/to/cache/dir'
         data_dir_dbB = '/some/path/to/data'
         tasks_dbB = {
             "new_taskC": {
@@ -198,13 +194,13 @@ class TestCacheDataManager:
             }
         }
 
-        cache_data_manager.add_data(name_dbA, cache_dir_dbA, data_dir_dbA, tasks_dbA)
+        cache_data_manager.add_data(name_dbA, data_dir_dbA, tasks_dbA)
         category_after_dbA = cache_data_manager.data["category"].copy()
-        cache_data_manager.add_data(name_dbB, cache_dir_dbB, data_dir_dbB, tasks_dbB)
+        cache_data_manager.add_data(name_dbB, data_dir_dbB, tasks_dbB)
         category_after_dbB = cache_data_manager.data["category"].copy()
 
-        self._assert_add_data_to_cache(name_dbA, cache_dir_dbA, data_dir_dbA, tasks_dbA, cache_data_manager)
-        self._assert_add_data_to_cache(name_dbB, cache_dir_dbB, data_dir_dbB, tasks_dbB, cache_data_manager)
+        self._assert_add_data_to_cache(name_dbA, data_dir_dbA, tasks_dbA, cache_data_manager)
+        self._assert_add_data_to_cache(name_dbB, data_dir_dbB, tasks_dbB, cache_data_manager)
         assert category_after_dbA != category_after_dbB
 
     def test_get_data(self, mocker, cache_data_manager):
@@ -306,7 +302,6 @@ class TestCacheManager:
 
     def test_add_data_to_cache(self, mocker, cache_manager):
         name = 'new_dataset_name'
-        cache_dir = '/some/path/to/cache/dir'
         data_dir = '/some/path/to/data'
         tasks = {
             "new_task": {
@@ -315,10 +310,9 @@ class TestCacheManager:
             },
         }
 
-        cache_manager.add(name=name, cache_dir=cache_dir, data_dir=data_dir, tasks=tasks)
+        cache_manager.add(name=name, data_dir=data_dir, tasks=tasks)
 
         assert name in cache_manager.manager.data["dataset"]
-        assert cache_dir == cache_manager.manager.data["dataset"][name]["cache_dir"]
         assert data_dir == cache_manager.manager.data["dataset"][name]["data_dir"]
         assert tasks == cache_manager.manager.data["dataset"][name]["tasks"]
         assert any(cache_manager.manager.data["dataset"][name]["keywords"])
@@ -422,7 +416,6 @@ class TestCacheManagerDataset:
 
     def test_add_dataset(self, mocker, cache_dataset_manager):
         name = 'new_dataset_name'
-        cache_dir = '/some/path/to/cache/dir'
         data_dir = '/some/path/to/data'
         tasks = {
             "new_task": {
@@ -431,10 +424,9 @@ class TestCacheManagerDataset:
             },
         }
 
-        cache_dataset_manager.add(name, cache_dir, data_dir, tasks)
+        cache_dataset_manager.add(name, data_dir, tasks)
 
         assert name in cache_dataset_manager.manager.data["dataset"]
-        assert cache_dir == cache_dataset_manager.manager.data["dataset"][name]["cache_dir"]
         assert data_dir == cache_dataset_manager.manager.data["dataset"][name]["data_dir"]
         assert tasks == cache_dataset_manager.manager.data["dataset"][name]["tasks"]
         assert any(cache_dataset_manager.manager.data["dataset"][name]["keywords"])
