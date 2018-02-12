@@ -45,6 +45,12 @@ class CacheManager:
         self.task = CacheManagerTask(self.manager)
         self.category = CacheManagerCategory(self.manager)
 
+    def info_cache(self):
+        """Prints the information of the cache."""
+        self.info.info()
+        self.dataset.info()
+        self.category.info()
+
 
 class CacheDataManager:
     """Cache's data write/read methods."""

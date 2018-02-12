@@ -300,6 +300,9 @@ class TestCacheManager:
         assert isinstance(cache_manager.task, CacheManagerTask)
         assert isinstance(cache_manager.category, CacheManagerCategory)
 
+    def test_info(self, cache_manager):
+        cache_manager.info_cache()
+
 
 @pytest.fixture()
 def cache_info_manager(mocker, cache_data_manager):
