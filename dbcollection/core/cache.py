@@ -42,8 +42,8 @@ class CacheManager:
         self.manager = CacheDataManager()
         self.info = CacheManagerInfo(self.manager)
         self.dataset = CacheManagerDataset(self.manager)
-        self.category = CacheManagerCategory(self.manager)
         self.task = CacheManagerTask(self.manager)
+        self.category = CacheManagerCategory(self.manager)
 
 
 class CacheDataManager:
