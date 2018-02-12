@@ -300,28 +300,6 @@ class TestCacheManager:
         assert isinstance(cache_manager.task, CacheManagerTask)
         assert isinstance(cache_manager.category, CacheManagerCategory)
 
-    def test_add_data_to_cache(self, mocker, cache_manager):
-        name = 'new_dataset_name'
-        data_dir = '/some/path/to/data'
-        tasks = {
-            "new_task": {
-                "filename": '/some/path/dbcollection/{}/new_task.h5'.format(name),
-                "categories": ["new_category_A", "new_category_B", "new_category_C"]
-            },
-        }
-
-        cache_manager.add(name=name, data_dir=data_dir, tasks=tasks)
-
-        assert name in cache_manager.manager.data["dataset"]
-        assert data_dir == cache_manager.manager.data["dataset"][name]["data_dir"]
-        assert tasks == cache_manager.manager.data["dataset"][name]["tasks"]
-        assert any(cache_manager.manager.data["dataset"][name]["keywords"])
-        assert "new_category_A" in cache_manager.manager.data["category"]
-
-    def test_add__raises_error_missing_inputs(self, mocker, cache_manager):
-        with pytest.raises(TypeError):
-            cache_manager.add()
-
 
 @pytest.fixture()
 def cache_info_manager(mocker, cache_data_manager):
