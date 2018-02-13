@@ -538,7 +538,7 @@ class CacheManagerTask:
         try:
             self.manager.data["dataset"][name]
         except KeyError:
-            raise KeyError("Invalid dataset name. The dataset \'{}\' does not exist in cache." \
+            raise KeyError("Invalid dataset name. The dataset \'{}\' does not exist in cache."
                            .format(name))
 
     def _assert_task_not_exists_in_dataset_in_cache(self, name, task):
@@ -583,7 +583,7 @@ class CacheManagerTask:
         try:
             self.manager.data["dataset"][name]["tasks"][task]
         except KeyError:
-            raise KeyError("Invalid task name. The task \'{}\' does not exist for the dataset" \
+            raise KeyError("Invalid task name. The task \'{}\' does not exist for the dataset"
                            " \'{}\'.".format(task, name))
 
     def update(self, name, task, filename=None, categories=None):
@@ -617,7 +617,8 @@ class CacheManagerTask:
 
     def _update_task_categories(self, name, task, categories):
         if categories is not None:
-            self.manager.data["dataset"][name]["tasks"][task]["categories"] = sorted(list(categories))
+            ordered_categories = sorted(list(categories))
+            self.manager.data["dataset"][name]["tasks"][task]["categories"] = ordered_categories
 
     def delete(self, name, task):
         """Deletes a task of a dataset.
