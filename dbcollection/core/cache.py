@@ -6,13 +6,16 @@ Class to manage the dbcollection.json cache file.
 from __future__ import print_function
 import os
 import shutil
-import errno
 import json
 import warnings
+import pprint
+from glob import glob
+
+from dbcollection.utils import print_text_box
 
 
 class CacheManager:
-    """Class to manage the dbcollection cache data
+    """Manage dbcollection configurations and stores them inside a cache file stored in disk.
 
     Parameters
     ----------
@@ -34,79 +37,52 @@ class CacheManager:
 
     """
 
-    def __init__(self, is_test=False):
+    def __init__(self):
+        """Initializes the class."""
+        self.manager = CacheDataManager()
+        self.info = CacheManagerInfo(self.manager)
+        self.dataset = CacheManagerDataset(self.manager)
+        self.task = CacheManagerTask(self.manager)
+        self.category = CacheManagerCategory(self.manager)
+
+    def info_cache(self):
+        """Prints the information of the cache."""
+        self.info.info()
+        self.dataset.info()
+        self.category.info()
+
+
+class CacheDataManager:
+    """Cache's data write/read methods."""
+
+    def __init__(self):
         """Initialize class."""
-        self.is_test = is_test
-
-        # setup cache file path+name
-        if self.is_test:
-            self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection_test.json')
-        else:
-            self.cache_filename = os.path.join(os.path.expanduser("~"), 'dbcollection.json')
-        if not os.path.exists(self.cache_filename):
-            print('Generating the dbcollection\'s package cache file on disk: {}'
-                  .format(self.cache_filename))
-            self.write_data_cache(self._empty_data(), self.cache_filename)
-
-        # load cache data file
+        self.cache_filename = self._get_cache_filename()
         self.data = self.read_data_cache()
         self._cache_dir = self._get_cache_dir()
+        self.info = CacheManagerInfo(self.data["info"])
 
-    def _set_cache_dir(self, path):
-        """Set the default cache dir to store all metadata files"""
-        # assert path, 'Must input a directory path'
-        self._cache_dir = path
-        self.data['info']['default_cache_dir'] = self._cache_dir
-        self.write_data_cache(self.data)
+    def _get_cache_filename(self):
+        """Return the cache file name + path."""
+        home_dir = os.path.expanduser("~")
+        filename = 'dbcollection.json'
+        return os.path.join(home_dir, filename)
 
-    def _get_cache_dir(self):
-        """Get the default cache dir path."""
-        return self.data['info']['default_cache_dir']
+    def read_data_cache(self):
+        """Loads data from the cache file.
 
-    cache_dir = property(_get_cache_dir, _set_cache_dir)
+        Returns
+        -------
+        dict
+            Data containing information of all datasets and categories.
 
-    def _default_cache_dir_path(self):
-        """Returns the pre-defined path of the cache_dir."""
-        if self.is_test:
-            default_cache_dir = os.path.join(os.path.expanduser("~"), 'tmp', 'dbcollection')
-        else:
-            default_cache_dir = os.path.join(os.path.expanduser("~"), 'dbcollection')
-        return default_cache_dir
-
-    def reset_cache_dir(self):
-        """Reset the default cache directory path."""
-        self._set_cache_dir(self._default_cache_dir_path())
-
-    def create_os_home_dir(self):
-        """Create the main dir to store all metadata files."""
-        if not os.path.exists(self._cache_dir):
-            os.makedirs(self._cache_dir)
-
-    def _set_download_dir(self, path):
-        """Set the default save dir path for downloaded data."""
-        assert path, 'Must input a non-empty path.'
-        self.data['info']['default_download_dir'] = path
-        self.write_data_cache(self.data)
-
-    def _get_download_dir(self):
-        """Get the default save dir path."""
-        return self.data['info']['default_download_dir']
-
-    def reset_download_dir(self):
-        """Reset the default download dir."""
-        return self._set_download_dir('')
-
-    download_dir = property(_get_download_dir, _set_download_dir)
-
-    def clear(self):
-        """Delete the cache file + directory from disk."""
-        # cache file
+        """
         if os.path.exists(self.cache_filename):
-            self._os_remove(self.cache_filename)
-
-        # cache dir
-        if os.path.exists(self._cache_dir):
-            self._os_remove(self._cache_dir)
+            return self.read_data_cache_file()
+        else:
+            data = self._empty_data()
+            self.write_data_cache(data)
+            return data
 
     def read_data_cache_file(self):
         """Read the cache file data to memory.
@@ -116,188 +92,89 @@ class CacheManager:
         dict
             Data structure of the cache (file).
 
-        Raises
-        ------
-        IOError
-            If the file cannot be opened.
-
         """
-        try:
-            with open(self.cache_filename, 'r') as json_data:
-                return json.load(json_data)
-        except IOError:
-            raise IOError('Unable to open file: ' + self.cache_filename)
-
-    def read_data_cache(self):
-        """Load data from the dbcollection cache file.
-
-        Returns
-        -------
-        dict
-            Data structure of the cache (file).
-
-        """
-        # check if file exists
-        if os.path.exists(self.cache_filename):
-            return self.read_data_cache_file()
-        else:
-            return self._empty_data()
-
-    def write_data_cache(self, data, fname=None):
-        """Write data to the cache file (dbcollection.json).
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        fname : str, optional
-            File path+name to store the cache data.
-
-        Raises
-        ------
-        IOError
-            If the file cannot be opened.
-
-        """
-        assert data, 'Must input a non-empty dictionary'
-        filename = fname or self.cache_filename
-        with open(filename, 'w') as file_cache:
-            json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
-        self.reload_cache()  # reload the data
+        with open(self.cache_filename, 'r') as json_data:
+            return json.load(json_data)
 
     def _empty_data(self):
         """Returns an empty (dummy) template of the cache data structure."""
-        default_cache_path = self._default_cache_dir_path()
-        default_download_path = os.path.join(default_cache_path, 'downloaded_data')
         return {
             "info": {
-                "default_cache_dir": default_cache_path,
-                "default_download_dir": default_download_path,
+                "root_cache_dir": self._get_default_cache_dir(),
+                "root_downloads_dir": self._get_default_downloads_dir(),
             },
             "dataset": {},
             "category": {}
         }
 
-    def _os_remove(self, fname):
-        """Remove a file/directory from disk.
+    def _get_default_cache_dir(self):
+        """Returns the pre-defined path of the cache's root directory."""
+        default_cache_dir = os.path.join(os.path.expanduser("~"), 'dbcollection')
+        return default_cache_dir
+
+    def _get_default_downloads_dir(self):
+        """Returns the pre-defined path of the cache's downloads directory."""
+        default_downloads_dir = os.path.join(self._get_default_cache_dir(), 'downloads')
+        return default_downloads_dir
+
+    def write_data_cache(self, data):
+        """Writes data to the cache file.
 
         Parameters
         ----------
-        fname : str
-            File name+path on disk.
+        name : str
+            Name of the dataset.
 
         Raises
         ------
-        OSError
-            If an error occurred when deleting a file.
+        IOError
+            If the file cannot be opened.
 
         """
-        try:
-            if os.path.exists(fname):
-                if os.path.isdir(fname):
-                    shutil.rmtree(fname)
-                else:
-                    os.remove(fname)
-        except OSError as err:
-            if err.errno != errno.ENOENT:  # errno.ENOENT = no such file or directory
-                raise OSError('Unable to remove: {}'.format(fname))
+        assert data, 'Must input a non-empty dictionary.'
+        with open(self.cache_filename, 'w') as file_cache:
+            json.dump(data, file_cache, sort_keys=True, indent=4, ensure_ascii=False)
+        self.data = data  # must assign the new data or risk problems
 
-    def delete_entry(self, name):
-        """Delete a dataset entry from a category dictionary.
-
-        Parameters
-        ----------
-        name : str
-            Dataset name.
-
-        """
-        try:
-            self.data['dataset'].pop(name)
-
-            # remove the dataset name from the category list
-            self.delete_category_entry(name)
-
-            # update cache file on disk
-            self.write_data_cache(self.data)
-        except KeyError:
-            print('Dataset \'{}\' not found in cache.'.format(name))
-
-    def delete_category_entry(self, name):
-        """Delete all entries in the category keywords list where 'name' exists.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-
-        """
-        keywords = []
-        for keyword in self.data['category']:
-            if name in self.data['category'][keyword]:
-                self.data['category'][keyword].remove(name)
-                if not any(self.data['category'][keyword]):
-                    keywords.append(keyword)  # add keyword name to the list
-
-        # remove empty keyword
-        if any(keywords):
-            for keyword in keywords:
-                self.data['category'].pop(keyword)
-
-        # update cache file on disk
+    def _set_cache_dir(self, path):
+        """Set the root cache dir to store all metadata files"""
+        assert path, 'Must input a directory path'
+        self._cache_dir = path
+        self.data['info']['root_cache_dir'] = self._cache_dir
         self.write_data_cache(self.data)
 
-    def delete_task(self, name, task):
-        """Delete a task of a dataset in cache.
+    def _get_cache_dir(self):
+        """Get the root cache dir path."""
+        return self.data['info']['root_cache_dir']
 
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        task : str
-            Name of the task
+    cache_dir = property(_get_cache_dir, _set_cache_dir)
 
-        """
-        try:
-            task_filename = self.data['dataset'][name]['tasks'][task]
-            self.data['dataset'][name]['tasks'].pop(task)
+    def reset_cache_dir(self):
+        """Reset the root cache dir path."""
+        self._set_cache_dir(self._get_default_cache_dir())
 
-            # update cache file on disk
-            self.write_data_cache(self.data)
-
-            # remove file from disk
-            self._os_remove(task_filename)
-
-            return True
-        except KeyError:
-            print('Task \'{}\' not found in cache for {}.'.format(task, name))
-            return False
-
-    def delete_dataset_cache(self, name):
-        """Delete the cache data from disk of a dataset.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-
-        """
-        # get cache dir path
-        cache_dir_path = os.path.join(self._cache_dir, name)
-
-        # remove cache dir
-        self._os_remove(cache_dir_path)
-
-        # remove entry from the data
-        self.delete_entry(name)
-
-        # remove dataset from the category keywords
-        self.delete_category_entry(name)
-
-        # write updated data to file
+    def _set_download_dir(self, path):
+        """Set the root save dir path for downloaded data."""
+        assert path, 'Must input a non-empty path.'
+        self.data['info']['root_downloads_dir'] = path
         self.write_data_cache(self.data)
+
+    def _get_download_dir(self):
+        """Get the root save dir path."""
+        return self.data['info']['root_downloads_dir']
+
+    download_dir = property(_get_download_dir, _set_download_dir)
+
+    def reset_download_dir(self):
+        """Reset the root download dir path."""
+        self._set_download_dir(self._get_default_downloads_dir())
 
     def reset_cache(self, force_reset=False):
-        """Resets all datasets/categories from cache.
+        """Resets the cache file contents.
+
+        Resets the cache file by removing all info about
+        the datasets/categories/info from the cache file.
+        Basically, it empties the cache contents.
 
         Parameters
         ----------
@@ -311,112 +188,143 @@ class CacheManager:
 
         """
         if force_reset:
-            self.write_data_cache(self._empty_data(), self.cache_filename)
+            self.write_data_cache(self._empty_data())
         else:
             msg = 'All information about stored datasets will be lost if you proceed! ' + \
                   'Set \'force_reset=True\' to proceed with the reset of dbcollection.json.'
             warnings.warn(msg, UserWarning, stacklevel=2)
 
-    def check_dataset_name(self, name):
-        """Check if the dataset name exists in the available dictionary keys.
+    def delete_cache(self, force_delete_file=False, force_delete_metadata=False):
+        """Deletes the cache file and/or metadata dir from disk.
+
+        Deletes the dbcollection.json file from disk if enabled.
+        By default this option is disabled and a warning is displayed
+        instead. Only by selecting the 'force_delete_file' option will
+        the cache file be deleted.
+
+        Also, there is an option to delete the cache's metadata files
+        by selecting the 'force_delete_metadata'. This will remove the
+        every dataset's metadata dir and its contents, but it will not
+        delete the downloads directory.
 
         Parameters
         ----------
-        name : str
-            Name of the dataset.
+        force_delete_file : bool, optional
+            Forces the cache file to be deleted if True.
+        force_delete_metadata : bool, optional
+            Forces the cache metadata to be deleted if True.
 
-        Returns
+        Warning
         -------
-        bool
-            The dataset exists (True) or not (False).
+        UserWarning
+            If force_delete_file is False, display a warning to the user.
 
         """
-        return name in self.data['dataset'].keys()
+        self._delete_cache_file(force_delete_file)
+        if force_delete_metadata:
+            self._delete_cache_metadata(force_delete_file)
 
-    def add_data(self, name, new_info, is_append=False):
-        """Adds/appends a new category/dataset to the cache file.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        new_info : dict
-            New data.
-        is_append : bool, optional
-            Appends the task cache data to existing ones.
-
-        """
-        if is_append:
-            if name in self.data['dataset']:
-                self.data['dataset'][name]['tasks'].update(new_info['tasks'])
-            else:
-                self.data['dataset'][name] = new_info
+    def _delete_cache_file(self, force_delete_file):
+        """Deletes the cache file from disk."""
+        if force_delete_file:
+            if os.path.exists(self.cache_filename):
+                os.remove(self.cache_filename)
         else:
-            self.data['dataset'][name] = new_info
+            msg = 'All information about stored datasets will be lost if you proceed! ' + \
+                  'Set \'force_delete_file=True\' to proceed with the deletion of ' + \
+                  'dbcollection.json.'
+            warnings.warn(msg, UserWarning, stacklevel=2)
 
-    def delete_dataset(self, name, delete_data=False):
-        """Delete a dataset from disk/cache.
+    def _delete_cache_metadata(self, force_delete_file):
+        """Deletes the cache metadata files from disk."""
+        if force_delete_file:
+            self._delete_dirs_datasets_in_cache_dir_except_downloads()
+        else:
+            msg = 'All metadata files of all datasets will be lost if you proceed! ' + \
+                'Set both \'force_delete_file=True\' and \'force_delete_metadata=True\' ' + \
+                'to proceed with the deletion of dbcollection.json and all metadata files.'
+            warnings.warn(msg, UserWarning, stacklevel=2)
 
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        delete_data : bool, optional
-            Flag indicating if the data's directory has to be deleted (or skip it).
-
-        """
-        dset_paths = self.get_dataset_storage_paths(name)
-
-        # remove cache directory
-        self.delete_dataset_cache(name)
-
-        # delete data from disk
-        if delete_data:
-            self._os_remove(dset_paths['data_dir'])
-
-    def is_empty(self):
-        """Checks if the cache data has any dataset."""
-        return any(self.data['dataset'])
-
-    def exists_dataset(self, name):
-        """Check if a dataset exists in cache for loading.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-
-        Returns
-        -------
-        bool
-            Return true if the category exists, else return False.
-
-        """
-        return name in self.data['dataset']
-
-    def exists_task(self, name, task):
-        """Check if a task of a dataset exists in cache.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        task : str
-            Name of the task.
-
-        Returns
-        -------
-        bool
-            Return true if the task exists, else return False.
-
-        """
+    def _delete_dirs_datasets_in_cache_dir_except_downloads(self):
+        """Deletes all directories from the root cache dir except the downloads dir."""
+        dirs = glob("{}/*/".format(self.cache_dir))
         try:
-            return task in self.data['dataset'][name]['tasks']
-        except KeyError:
-            return False
+            dirs.remove(self.download_dir)
+        except ValueError:
+            pass
+        for dir_path in dirs:
+            shutil.rmtree(dir_path)
 
-    def get_dataset_storage_paths(self, name):
-        """Get dataset save/load path.
+    def add_data(self, name, data_dir, tasks):
+        """Adds a new dataset to the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        data_dir : str
+            Path of the dataset's data files.
+        tasks : dict
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert data_dir, "Must input a valid data directory."
+        assert tasks, "Must input a valid tasks."
+
+        new_data = {
+            "data_dir": data_dir,
+            "keywords": self._get_keywords_from_tasks(tasks),
+            "tasks": tasks
+        }
+        self.data["dataset"][name] = new_data
+        self.update_categories()
+        self.write_data_cache(self.data)
+
+    def _get_keywords_from_tasks(self, tasks):
+        """Fetch a list of categories from a tasks' dictionary."""
+        keywords = []
+        for task in tasks:
+            keywords.extend(tasks[task]["categories"])
+        return tuple(sorted(set(keywords)))
+
+    def update_categories(self):
+        """Updates the category list of all categories."""
+        categories = {}
+        datasets = self.data['dataset']
+        used_categories = self._get_list_categories_used(datasets)
+        for category in used_categories:
+            categories.update({
+                category: self._get_datasets_tasks_by_category(datasets, category)
+            })
+        self.data["category"] = categories
+
+    def _get_list_categories_used(self, datasets):
+        """Returns a list of all categories available in the datasets data."""
+        categories_used = []
+        for dataset in datasets:
+            categories_used.extend(datasets[dataset]['keywords'])
+        return list(sorted(set(categories_used)))
+
+    def _get_datasets_tasks_by_category(self, datasets, category):
+        """Returns a list of all datasets and tasks that have the category name."""
+        list_datasets_tasks = {}
+        for dataset in datasets:
+            list_datasets_tasks.update({
+                dataset: self._get_tasks_by_category(datasets[dataset]["tasks"], category)
+            })
+        return list_datasets_tasks
+
+    def _get_tasks_by_category(self, tasks, category):
+        """Returns a list of tasks that contains the category name."""
+        matching_tasks = []
+        for task in tasks:
+            if category in tasks[task]["categories"]:
+                matching_tasks.append(task)
+        return sorted(matching_tasks)
+
+    def get_data(self, name):
+        """Retrieves the data of a dataset from the cache.
 
         Parameters
         ----------
@@ -426,24 +334,231 @@ class CacheManager:
         Returns
         -------
         dict
-            Dataset's data+cache paths.
-
-        Raises
-        ------
-        KeyError
-            If the dataset name does not exist in cache.
+            Information about the dataset.
 
         """
+        assert name, "Must input a valid dataset name."
         try:
-            return {
-                "data_dir": self.data['dataset'][name]["data_dir"],
-                "cache_dir": os.path.join(self._cache_dir, name)
-            }
+            return self.data["dataset"][name]
         except KeyError:
-            raise KeyError('Dataset name does not exist in cache: {}'.format(name))
+            raise KeyError("The dataset \'{}\' does not exist in the cache.".format(name))
 
-    def get_task_cache_path(self, name, task):
-        """Return the cache path of the metadata file of a specific task.
+    def update_data(self, name, cache_dir=None, data_dir=None, tasks=None):
+        """Updates the data of a dataset in the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        cache_dir : str, optional
+            Path of the dataset's metadata directory.
+        data_dir : str, optional
+            Path of the dataset's data files.
+        tasks : dict, optional
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert name in self.data["dataset"], "The dataset \'{}\' does not exist in the cache." \
+                                             .format(name)
+        if cache_dir:
+            self.data["dataset"][name]["cache_dir"] = cache_dir
+        if data_dir:
+            self.data["dataset"][name]["data_dir"] = data_dir
+        if tasks:
+            self.data["dataset"][name]["tasks"] = tasks
+            self.data["dataset"][name]["keywords"] = self._get_keywords_from_tasks(tasks)
+        if cache_dir or data_dir or tasks:
+            self.update_categories()
+            self.write_data_cache(self.data)
+
+    def delete_data(self, name):
+        """Deletes a dataset from the cache data.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        try:
+            self.data["dataset"].pop(name)
+            self.update_categories()
+            self.write_data_cache(self.data)
+        except KeyError:
+            raise KeyError("The dataset \'{}\' does not exist in the cache.".format(name))
+
+
+class CacheManagerDataset:
+    """Manage the cache's dataset configurations."""
+
+    def __init__(self, manager):
+        """Initialize class."""
+        assert manager, "Must input a valid cache manager."
+        self.manager = manager
+
+    def add(self, name, data_dir, tasks):
+        """Adds a new dataset to the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        data_dir : str
+            Path of the dataset's data files.
+        tasks : dict
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert data_dir, "Must input a valid directory (data_dir)."
+        assert tasks, "Must input a valid tasks."
+
+        self.manager.add_data(name, data_dir, tasks)
+
+    def get(self, name):
+        """Retrieves the data of a dataset from the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        dict
+            Information about the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        return self.manager.get_data(name)
+
+    def update(self, name, cache_dir=None, data_dir=None, tasks=None):
+        """Updates the data of a dataset in the cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        cache_dir : str, optional
+            Path of the dataset's metadata directory.
+        data_dir : str, optional
+            Path of the dataset's data files.
+        tasks : dict, optional
+            List of tasks.
+
+        """
+        assert name, "Must input a valid dataset name."
+        self.manager.update_data(name, cache_dir, data_dir, tasks)
+
+    def delete(self, name):
+        """Deletes a dataset from the cache data.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        """
+        assert name, "Must input a valid dataset name."
+        self.manager.delete_data(name)
+
+    def exists(self, name):
+        """Checks if a dataset name exists in the cache..
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+
+        Returns
+        -------
+        bool
+            Returns True if the name exists in the dataset names.
+            Otherwise, returns False.
+
+        """
+        assert name, "Must input a valid dataset name."
+        return name in self.manager.data["dataset"]
+
+    def list(self):
+        """Returns a list of all dataset names.
+
+        Returns
+        -------
+        list
+            Names of datasets.
+
+        """
+        return list(sorted(self.manager.data["dataset"].keys()))
+
+    def info(self):
+        """Prints the dataset information contained in the cache."""
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box('Dataset')
+        pp.pprint(self.manager.data["dataset"])
+        print('')
+
+
+class CacheManagerTask:
+    """Manage the cache's dataset task configurations."""
+
+    def __init__(self, manager):
+        """Initialize class."""
+        assert manager, "Must input a valid cache manager."
+        self.manager = manager
+
+    def add(self, name, task, filename, categories=()):
+        """Adds a new task to a dataset in cache.
+
+        Parameters
+        ----------
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the new dataset.
+        filename : str
+            Path of the task's metadata HDF5 file.
+        categories : list/tuple, optional
+            List of category keywords.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert task, "Must input a valid task name."
+        assert filename, "Must input a valid file path."
+        self._assert_dataset_exists_in_cache(name)
+        self._assert_task_not_exists_in_dataset_in_cache(name, task)
+
+        self._add_new_task(name, task, filename, categories)
+
+        self._update_cache_data()
+
+    def _assert_dataset_exists_in_cache(self, name):
+        try:
+            self.manager.data["dataset"][name]
+        except KeyError:
+            raise KeyError("Invalid dataset name. The dataset \'{}\' does not exist in cache."
+                           .format(name))
+
+    def _assert_task_not_exists_in_dataset_in_cache(self, name, task):
+        assert task not in self.manager.data["dataset"][name]["tasks"], \
+            "The task \'{}\' already exist for the dataset \'{}\'.".format(task, name)
+
+    def _add_new_task(self, name, task, filename, categories):
+        self.manager.data["dataset"][name]["tasks"].update({
+            task: {
+                "filename": filename,
+                "categories": sorted(list(categories))
+            }
+        })
+
+    def _update_cache_data(self):
+        self.manager.update_categories()
+        self.manager.write_data_cache(self.manager.data)
+
+    def get(self, name, task):
+        """Retrieves the metadata of the task of a dataset.
 
         Parameters
         ----------
@@ -454,190 +569,412 @@ class CacheManager:
 
         Returns
         -------
-        str
-            Cache name+path of a specific task.
-
-        Raises
-        ------
-        KeyError
-            In case the dataset name.
+        dict
+            Information about the dataset.
 
         """
+        assert name, "Must input a valid dataset name."
+        assert task, "Must input a valid task name."
+        self._assert_dataset_exists_in_cache(name)
+        self._assert_task_exists_in_dataset_in_cache(name, task)
+        return self.manager.data["dataset"][name]["tasks"][task]
+
+    def _assert_task_exists_in_dataset_in_cache(self, name, task):
         try:
-            return self.data['dataset'][name]['tasks'][task]
+            self.manager.data["dataset"][name]["tasks"][task]
         except KeyError:
-            raise KeyError('Dataset name/task cache data is empty or does not exist: {}/{}'
-                           .format(name, task))
+            raise KeyError("Invalid task name. The task \'{}\' does not exist for the dataset"
+                           " \'{}\'.".format(task, name))
 
-    def add_keywords(self, name, keywords):
-        """Add keywords to the category dictionary for the dataset.
-
-        Parameters
-        ----------
-        name : str
-            Name of the dataset.
-        keywords : list
-            Keyword categories of the dataset.
-
-        """
-        if isinstance(keywords, list):
-            keywords = tuple(keywords)
-        elif not isinstance(keywords, tuple):
-            keywords = (keywords,)
-
-        for keyword in keywords:
-            if any(keyword):
-                if keyword not in self.data["dataset"][name]["keywords"]:
-                    self.data["dataset"][name]["keywords"].append(keyword)
-
-                if keyword in self.data['category']:
-                    if name not in self.data['category'][keyword]:
-                        self.data['category'][keyword].append(name)
-                else:
-                    self.data['category'][keyword] = [name]
-
-    def update(self, name, data_dir, cache_tasks, cache_keywords=(), is_append=True):
-        """Modify/add data of a dataset in the cache file.
+    def update(self, name, task, filename=None, categories=None):
+        """Updates the metadata of a task for a dataset.
 
         Parameters
         ----------
         name : str
             Name of the dataset.
-        data_dir : str
-            Dataset directory on disk where all data is stored.
-        cache_tasks : dict
-            A table of tasks.
-        cache_keywords : str
-            A list of keywords caracterizing the dataset.
-        is_append : bool
-            Overrides existing cache info data with new data.
+        task : str
+            Name of the task.
+        filename : str, optional
+            Path of the task's metadata HDF5 file.
+        categories : list/tuple, optional
+            List of category keywords.
 
         """
-        new_info_dict = {
-            "data_dir": data_dir,
-            "tasks": cache_tasks,
-            "keywords": cache_keywords
-        }
+        assert name, "Must input a valid dataset name."
+        assert task, "Must input a valid task name."
+        self._assert_dataset_exists_in_cache(name)
+        self._assert_task_exists_in_dataset_in_cache(name, task)
 
-        # add/update data with the new info to the dataset dictionary
-        self.add_data(name, new_info_dict, is_append)
+        self._update_task_filename(name, task, filename)
+        self._update_task_categories(name, task, categories)
 
-        # add/update the keyword list of the category dictionary
-        if any(cache_keywords):
-            self.add_keywords(name, cache_keywords)
+        self._update_cache_data()
 
-        # write to file
-        self.write_data_cache(self.data)
+    def _update_task_filename(self, name, task, filename):
+        if filename is not None:
+            self.manager.data["dataset"][name]["tasks"][task]["filename"] = filename
 
-    def modify_field(self, field=None, value=None):
-        """Assign/Modify a field value to the cache data.
+    def _update_task_categories(self, name, task, categories):
+        if categories is not None:
+            ordered_categories = sorted(list(categories))
+            self.manager.data["dataset"][name]["tasks"][task]["categories"] = ordered_categories
 
-        This method allows to change/assign a value to any field
-        by referencing only the name of the field.
+    def delete(self, name, task):
+        """Deletes a task of a dataset.
 
         Parameters
         ----------
-        field : str
-            Name of the field of the cache file.
-        value : str/list/dict
-            New content to modify the field with.
+        name : str
+            Name of the dataset.
+        task : str
+            Name of the task.
+
+        """
+        assert name, "Must input a valid dataset name."
+        assert task, "Must input a valid task name."
+        self._assert_dataset_exists_in_cache(name)
+        self._assert_task_exists_in_dataset_in_cache(name, task)
+
+        self.manager.data["dataset"][name]["tasks"].pop(task)
+
+        self._update_cache_data()
+
+    def list(self, name=None):
+        """Returns a list of all dataset names.
+
+        Parameters
+        ----------
+        name : str, optional
+            Name of the dataset.
+
+        Returns
+        -------
+        list
+            Names of tasks. If a dataset name is used,
+            it lists only the task names for that specific
+            dataset.
+
+        """
+        if name is not None:
+            tasks = self._list_all_tasks_from_single_dataset(name)
+        else:
+            tasks = self._list_all_tasks_from_all_datasets()
+        return tasks
+
+    def _list_all_tasks_from_single_dataset(self, name):
+        self._assert_dataset_exists_in_cache(name)
+        tasks = self.manager.data["dataset"][name]["tasks"].keys()
+        tasks = sorted(list(tasks))
+        return tasks
+
+    def _list_all_tasks_from_all_datasets(self):
+        datasets = self.manager.data["dataset"]
+        tasks = [task for dataset in datasets for task in datasets[dataset]["tasks"]]
+        tasks = sorted(list(set(tasks)))
+        return tasks
+
+    def exists(self, task, name=None):
+        """Checks if a task name exists in the cache.
+
+        Also, if a dataset name is specified, it checks
+        if the task name exists for that particular
+        dataset only.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+        name : str, optional
+            Name of the dataset.
 
         Returns
         -------
         bool
-            Return True if a valid field was inserted.
-
-        Raises
-        ------
-        Exception
-            If the input field is not valid.
+            Returns True if the task exists in the cache
+            or in a dataset. Otherwise, returns False.
 
         """
-        assert field, 'Invalid field: {}'.format(field)
-        assert value, 'Invalid value: {}'.format(value)
+        assert task, "Must input a valid task name."
+        if name is not None:
+            return self._is_task_in_dataset(name, task)
+        else:
+            return self._is_task_in_any_dataset(task)
 
-        # check info / dataset lists first
-        if field in self.data:
-            self.data[field] = value
-            self.write_data_cache(self.data)
-            return True
+    def _is_task_in_dataset(self, name, task):
+        self._assert_dataset_exists_in_cache(name)
+        tasks = self.list(name)
+        return task in tasks
 
-        # match default paths
-        if field in self.data['info']:
-            self.data['info'][field] = value
-            self.write_data_cache(self.data)
-            return True
+    def _is_task_in_any_dataset(self, task):
+        tasks = self.list()
+        return task in tasks
 
-        # match datasets/tasks
-        if field in self.data['dataset']:
-            self.data['dataset'][field] = value
-            self.write_data_cache(self.data)
-            return True
+    def info(self, name=None):
+        """Prints the dataset information contained in the cache.
 
-        # match datasets/tasks
-        if field in self.data['category']:
-            self.data['category'][field] = value
-            self.write_data_cache(self.data)
-            return True
+        Parameters
+        ----------
+        name : str, optional
+            Name of the dataset.
 
-        raise Exception('Field name not existing: {}'.format(field))
+        """
+        if name is not None:
+            self._print_info_of_all_tasks_of_single_dataset(name)
+        else:
+            self._print_info_of_all_tasks_of_all_datasets()
 
-    def info(self, name=None, show_paths=True, show_datasets=True, show_categories=True):
-        """Display the cache contents in a digestible format.
+    def _print_info_of_all_tasks_of_single_dataset(self, name):
+        self._assert_dataset_exists_in_cache(name)
+        tasks = self.list(name)
+        text_box_msg = 'Tasks ({})'.format(name)
+        self._print_text_box_data_to_screen(text_box_msg, tasks)
+
+    def _print_text_box_data_to_screen(self, msg, data):
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box(msg)
+        pp.pprint(data)
+        print('')
+
+    def _print_info_of_all_tasks_of_all_datasets(self):
+        tasks = self._get_all_tasks_with_datasets_per_task()
+        text_box_msg = 'Tasks (all datasets)'
+        self._print_text_box_data_to_screen(text_box_msg, tasks)
+
+    def _get_all_tasks_with_datasets_per_task(self):
+        tasks = self._get_all_tasks_plus_datasets()
+        return self._parse_sorted_list_of_unique_datasets(tasks)
+
+    def _get_all_tasks_plus_datasets(self):
+        tasks = {}
+        datasets = self.manager.data["dataset"]
+        for dataset in datasets:
+            for task in datasets[dataset]["tasks"]:
+                if task in tasks:
+                    tasks[task].append(dataset)
+                else:
+                    tasks[task] = [dataset]
+        return tasks
+
+    def _parse_sorted_list_of_unique_datasets(self, tasks):
+        for task in tasks:
+            tasks[task] = sorted(list(set(tasks[task])))
+        return tasks
+
+
+class CacheManagerCategory:
+    """Manage the cache's category configurations."""
+
+    def __init__(self, manager):
+        """Initialize class."""
+        assert manager, "Must input a valid cache manager."
+        self.manager = manager
+
+    def get(self, category):
+        """Retrieves the data of a category from the cache.
+
+        Parameters
+        ----------
+        category : str
+            Name of the category.
+
+        Returns
+        -------
+        dict
+            Information about the category.
+
+        """
+        assert category, "Must input a valid category name."
+        try:
+            return self.manager.data["category"][category]
+        except KeyError:
+            raise KeyError("The category \'{}\' does not exist in cache.".format(category))
+
+    def get_by_dataset(self, name):
+        """Retrieves all categories and tasks that contain the dataset name.
 
         Parameters
         ----------
         name : str
             Name of the dataset.
-        show_paths : bool, optional
-            Displays the paths information.
-        show_datasets : bool, optional
-            Displays the dataset contents.
-        show_categories : bool, optional
-            Displays the categories information.
+
+        Returns
+        -------
+        dict
+            Information about the categories containing
+            the dataset name.
 
         """
-        # print info header
-        if show_paths:
-            print('--------------')
-            print('  Paths info ')
-            print('--------------')
-            print(json.dumps(self.data['info'], sort_keys=True, indent=4))
-            print('')
+        assert name, "Must input a valid dataset name."
+        matching_categories = {}
+        categories = self.manager.data["category"]
+        for category in categories:
+            matching_category = self._get_category_with_matching_dataset_name(name, category)
+            matching_categories.update(matching_category)
+        return matching_categories
 
-        # print datasets
-        if show_datasets:
-            if name:
-                print('---------------------')
-                print('  Dataset info: {} '.format(name))
-                print('---------------------')
-                print(json.dumps(self.data['dataset'][name], sort_keys=True, indent=4))
-            else:
-                print('---------------------')
-                print('  Dataset info: all ')
-                print('---------------------')
-                print(json.dumps(self.data['dataset'], sort_keys=True, indent=4))
-            print('')
+    def _get_category_with_matching_dataset_name(self, name, category):
+        matching_category = {}
+        categories = self.manager.data["category"]
+        if name in categories[category]:
+            matching_category.update({
+                category: {
+                    name: categories[category][name]
+                }
+            })
+        return matching_category
 
-        if show_categories:
-            if name:
-                print('------------------------')
-                print('  Categories: {} '.format(name))
-                print('------------------------\n')
-                max_size_name = max([len(n) for n in self.data['category'][name]]) + 7
-                for name in self.data['category']:
-                    print("{:{}}".format('   > {}: '.format(name), max_size_name) +
-                          "{}".format(sorted(self.data['category'][name])))
-            else:
-                print('------------------------')
-                print('  Categories: all ')
-                print('------------------------\n')
-                max_size_name = max([len(category) for category in self.data['category']]) + 7
-                for category in self.data['category']:
-                    print("{:{}}".format('   > {}: '.format(category), max_size_name) +
-                          "{}".format(sorted(self.data['category'][category])))
+    def get_by_task(self, task):
+        """Retrieves all categories and task that contain the task name.
 
-    def reload_cache(self):
-        """Reload the cache file contents."""
-        self.data = self.read_data_cache()
-        self._cache_dir = self._get_cache_dir()
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        dict
+            Information about the categories containing
+            the task name.
+
+        """
+        assert task, "Must input a valid task name."
+        matching_categories = {}
+        categories = self.manager.data["category"]
+        for category in categories:
+            matching_category = self._get_matching_categories_by_task(category, task)
+            if any(matching_category):
+                matching_categories.update({category: matching_category})
+        return matching_categories
+
+    def _get_matching_categories_by_task(self, category, task):
+        categories = self.manager.data["category"]
+        matching_category = {}
+        for name in categories[category]:
+            if task in categories[category][name]:
+                matching_category.update({name: [task]})
+        return matching_category
+
+    def exists(self, category):
+        """Checks if a category exists in cache.
+
+        Parameters
+        ----------
+        category : str
+            Name of the category.
+
+        Returns
+        -------
+        bool
+            True if the category name exists.
+            Otherwise, returns False.
+
+        """
+        assert category, "Must input a valid category name."
+        return category in self.manager.data["category"]
+
+    def exists_task(self, task):
+        """Checks if a task exists in any category in cache.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        bool
+            True if the task exists for at least one category.
+            Otherwise, returns False.
+
+        """
+        assert task, "Must input a valid task name."
+        return any(self.get_by_task(task))
+
+    def exists_dataset(self, dataset):
+        """Checks if a dataset exists in any category in cache.
+
+        Parameters
+        ----------
+        dataset : str
+            Name of the dataset.
+
+        Returns
+        -------
+        bool
+            True if the dataset exists for at least one category.
+            Otherwise, returns False.
+
+        """
+        assert dataset, "Must input a valid dataset name."
+        return any(self.get_by_dataset(dataset))
+
+    def list(self):
+        """Returns a list of all category names.
+
+        Returns
+        -------
+        list
+            Names of categories.
+
+        """
+        return list(sorted(self.manager.data["category"].keys()))
+
+    def info(self):
+        """Prints the cache and download data dir paths of the cache."""
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box('Category')
+        pp.pprint(self.manager.data["category"])
+        print('')
+
+
+class CacheManagerInfo:
+    """Manage the cache's information configurations."""
+
+    def __init__(self, manager):
+        """Initialize class."""
+        assert manager, "Must input a valid cache manager."
+        self.manager = manager
+
+    def _set_cache_dir(self, path):
+        """Set the root cache dir to store all metadata files"""
+        assert path, 'Must input a directory path'
+        self.manager.cache_dir = path
+
+    def _get_cache_dir(self):
+        """Get the root cache dir path."""
+        return self.manager.cache_dir
+
+    cache_dir = property(_get_cache_dir, _set_cache_dir)
+
+    def reset_cache_dir(self):
+        """Reset the root cache dir path."""
+        self.manager.reset_cache_dir()
+
+    def _set_download_dir(self, path):
+        """Set the root save dir path for downloaded data."""
+        assert path, 'Must input a non-empty path.'
+        self.manager.download_dir = path
+
+    def _get_download_dir(self):
+        """Get the root save dir path."""
+        return self.manager.download_dir
+
+    download_dir = property(_get_download_dir, _set_download_dir)
+
+    def reset_download_dir(self):
+        """Reset the root download dir path."""
+        self.manager.reset_download_dir()
+
+    def reset(self):
+        """Resets the cache and download dirs to default."""
+        self.reset_cache_dir()
+        self.reset_download_dir()
+
+    def info(self):
+        """Prints the cache and download data dir paths of the cache."""
+        pp = pprint.PrettyPrinter(indent=4)
+        print_text_box('Info')
+        pp.pprint(self.manager.data["info"])
+        print('')

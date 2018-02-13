@@ -5,6 +5,7 @@ Test utility functions/classes.
 
 from __future__ import print_function
 import os
+import random
 import signal
 import requests
 import numpy as np

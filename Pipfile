@@ -13,6 +13,7 @@ pytest-sugar = "*"
 pytest-cov = "*"
 tox-pyenv = "*"
 funcsigs = "*"
+pytest-mock = "*"
 
 
 [packages]

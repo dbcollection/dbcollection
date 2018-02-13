@@ -1,19 +1,19 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "15ef707bbd35cecc65cbf7573d321f462b08291bc0a1516bc1ce0ff79489759d"
+            "sha256": "9e77f4509c47d941576e41defdf8832423a0befc8ff3b05c1766bdb83b1b9694"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
-            "implementation_version": "3.6.1",
+            "implementation_version": "3.5.2",
             "os_name": "posix",
             "platform_machine": "x86_64",
             "platform_python_implementation": "CPython",
             "platform_release": "3.19.0-66-generic",
             "platform_system": "Linux",
             "platform_version": "#74~14.04.1-Ubuntu SMP Tue Jul 19 19:56:11 UTC 2016",
-            "python_full_version": "3.6.1",
-            "python_version": "3.6",
+            "python_full_version": "3.5.2",
+            "python_version": "3.5",
             "sys_platform": "linux"
         },
         "pipfile-spec": 6,
@@ -314,6 +314,13 @@
                 "sha256:03aa752cf11db41d281ea1d807d954c4eda35cfa1b21d6971966cc041bbf6e2d"
             ],
             "version": "==2.5.1"
+        },
+        "pytest-mock": {
+            "hashes": [
+                "sha256:7ed6e7e8c636fd320927c5d73aedb77ac2eeb37196c3410e6176b7c92fdf2f69",
+                "sha256:920d1167af5c2c2ad3fa0717d0c6c52e97e97810160c15721ac895cac53abb1c"
+            ],
+            "version": "==1.6.3"
         },
         "pytest-sugar": {
             "hashes": [
