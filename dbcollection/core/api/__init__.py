@@ -1,5 +1,5 @@
 """
-API methods/classes for managing datasets.
+API methods for managing datasets.
 
 This module contains several methods for easy management of datasets. These include methods for:
 
