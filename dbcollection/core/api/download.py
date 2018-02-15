@@ -142,12 +142,15 @@ class DownloadAPI(object):
         if self.verbose:
             print('==> Download {} data to disk...'.format(self.name))
 
-        constructor = self.available_datasets_list[self.name]['constructor']
+        constructor = self.get_dataset_constructor()
         db = constructor(data_path=self.save_data_dir,
                          cache_path=self.save_cache_dir,
                          extract_data=self.extract_data,
                          verbose=self.verbose)
         db.download()
+
+    def get_dataset_constructor(self):
+        return self.available_datasets_list[self.name]['constructor']
 
     def update_cache(self):
         """Update the cache manager information for this dataset."""

@@ -115,3 +115,27 @@ class TestClassDownloadAPI:
         result = download_cls.get_download_data_dir()
 
         assert result == '/some/path/'
+
+    def test_download_dataset__raise_error_invalid_dataset(self, mocker):
+        mock_DownloadAPI_init_methods(mocker)
+        dataset = 'some_dataset'
+        data_dir = '/some/dir/path'
+        extract_data = True
+        verbose = False
+
+        download_cls = DownloadAPI(dataset, data_dir, extract_data, verbose)
+        with pytest.raises(KeyError):
+            download_cls.download_dataset()
+
+    def test_download_dataset_run_constructor(self, mocker):
+        mock_DownloadAPI_init_methods(mocker)
+        mock_constructor = mocker.patch.object(DownloadAPI, "get_dataset_constructor", return_value=mocker.MagicMock())
+        dataset = 'mnist'
+        data_dir = '/some/dir/path'
+        extract_data = True
+        verbose = False
+
+        download_cls = DownloadAPI(dataset, data_dir, extract_data, verbose)
+        download_cls.download_dataset()
+
+        assert mock_constructor.called
