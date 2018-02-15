@@ -88,3 +88,30 @@ class TestClassDownloadAPI:
 
         with pytest.raises(TypeError):
             download_cls = DownloadAPI(dataset, data_dir, extract_data)
+
+    def test_get_download_data_dir_return_data_dir(self, mocker):
+        mocker.patch.object(DownloadAPI, "get_cache_manager", return_value=True)
+        mocker.patch.object(DownloadAPI, "get_download_cache_dir", return_value='/path/to/cache/')
+        dataset = 'some_dataset'
+        data_dir = '/some/dir/path'
+        extract_data = True
+        verbose = False
+
+        download_cls = DownloadAPI(dataset, data_dir, extract_data, verbose)
+        result = download_cls.get_download_data_dir()
+
+        assert result == data_dir
+
+    @pytest.mark.parametrize("data_dir", ['', None])
+    def test_get_download_data_dir_generate_data_dir(self, mocker, data_dir):
+        mocker.patch.object(DownloadAPI, "get_cache_manager", return_value=True)
+        mocker.patch.object(DownloadAPI, "get_download_cache_dir", return_value='/path/to/cache/')
+        mocker.patch.object(DownloadAPI, "get_download_data_dir_from_cache", return_value='/some/path/')
+        dataset = 'some_dataset'
+        extract_data = True
+        verbose = False
+
+        download_cls = DownloadAPI(dataset, data_dir, extract_data, verbose)
+        result = download_cls.get_download_data_dir()
+
+        assert result == '/some/path/'
