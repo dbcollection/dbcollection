@@ -53,7 +53,7 @@ test:
 .PHONY: test-api
 test-api:
 	make build
-	pipenv run pytest -v dbcollection/tests/core/test_api.py
+	pipenv run pytest -v dbcollection/tests/core/api/
 
 .PHONY: test-cache
 test-cache:
