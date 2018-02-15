@@ -80,3 +80,11 @@ class TestClassDownloadAPI:
     def test_init__raises_error_missing_inputs(self, mocker):
         with pytest.raises(TypeError):
             download_cls = DownloadAPI()
+
+    def test_init__raises_error_missing_one_input(self, mocker):
+        dataset = 'some_dataset'
+        data_dir = '/some/dir/path'
+        extract_data = True
+
+        with pytest.raises(TypeError):
+            download_cls = DownloadAPI(dataset, data_dir, extract_data)
