@@ -103,6 +103,9 @@ class ProcessAPI(object):
         self.task = self.parse_task_name(task)
         self.check_if_task_exists_in_database()
 
+        self.save_data_dir = self.get_dataset_data_dir_path()
+        self.save_cache_dir = self.get_dataset_cache_dir_path()
+
     def get_cache_manager(self):
         return CacheManager()
 
@@ -130,21 +133,27 @@ class ProcessAPI(object):
         """Checks if a task exists for a dataset."""
         return self.task in self.available_datasets_list[self.name]['tasks']
 
+    def get_dataset_data_dir_path(self):
+        dataset_data_cache = self.get_dataset_metadata_from_cache()
+        return dataset_data_cache['data_dir']
+
+    def get_dataset_metadata_from_cache(self):
+        return self.cache_manager.dataset.get(self.name)
+
+    def get_dataset_cache_dir_path(self):
+        cache_dir = self.get_cache_dir_path_from_cache()
+        return os.path.join(cache_dir, self.name)
+
+    def get_cache_dir_path_from_cache(self):
+        return self.cache_manager.info.cache_dir
+
     def run(self):
         """Main method."""
-        self.set_dataset_dirs()
-        self.process_dataset()
-        self.update_cache()
-
-    def set_dataset_dirs(self):
-        """Set the dataset's data + cache dirs in disk."""
         if self.verbose:
             print('==> Setup directories to store the data files.')
-
-        dset_paths = self.cache_manager.get_dataset_storage_paths(self.name)
-        self.save_data_dir = dset_paths['data_dir']
-        self.save_cache_dir = dset_paths['cache_dir']
         self.create_dir(self.save_cache_dir)
+        self.process_dataset()
+        self.update_cache()
 
     def create_dir(self, path):
         """Create a directory in the disk."""

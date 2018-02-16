@@ -13,6 +13,8 @@ class TestCallProcess:
 
     def test_call_with_dataset_name(self, mocker):
         mock_cache = mocker.patch.object(ProcessAPI, "get_cache_manager", return_value=True)
+        mock_data_dir = mocker.patch.object(ProcessAPI, "get_dataset_data_dir_path", return_value='/some/path/cache/db')
+        mock_cache_dir = mocker.patch.object(ProcessAPI, "get_dataset_cache_dir_path", return_value='/some/path/cache')
         mock_task_exists = mocker.patch.object(ProcessAPI, "check_if_task_exists_in_database")
         mock_run = mocker.patch.object(ProcessAPI, "run")
         dataset = 'mnist'
@@ -20,11 +22,15 @@ class TestCallProcess:
         process(dataset)
 
         assert mock_cache.called
+        assert mock_data_dir.called
+        assert mock_cache_dir.called
         assert mock_task_exists.called
         assert mock_run.called
 
     def test_call_with_all_inputs(self, mocker):
         mock_cache = mocker.patch.object(ProcessAPI, "get_cache_manager", return_value=True)
+        mock_data_dir = mocker.patch.object(ProcessAPI, "get_dataset_data_dir_path", return_value='/some/path/cache/db')
+        mock_cache_dir = mocker.patch.object(ProcessAPI, "get_dataset_cache_dir_path", return_value='/some/path/cache')
         mock_task_exists = mocker.patch.object(ProcessAPI, "check_if_task_exists_in_database")
         mock_run = mocker.patch.object(ProcessAPI, "run")
         dataset = 'mnist'
@@ -34,6 +40,8 @@ class TestCallProcess:
         process(dataset, task=task, verbose=verbose)
 
         assert mock_cache.called
+        assert mock_data_dir.called
+        assert mock_cache_dir.called
         assert mock_task_exists.called
         assert mock_run.called
 
