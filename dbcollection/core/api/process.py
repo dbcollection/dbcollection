@@ -11,7 +11,7 @@ from dbcollection.core.cache import CacheManager
 from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
 
 
-def process(name, task='default', verbose=True, is_test=False):
+def process(name, task='default', verbose=True):
     """Process a dataset's metadata and stores it to file.
 
     The data is stored a a HSF5 file for each task composing the dataset's tasks.
@@ -24,8 +24,6 @@ def process(name, task='default', verbose=True, is_test=False):
         Name of the task to process.
     verbose : bool, optional
         Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
 
     Raises
     ------
@@ -45,8 +43,7 @@ def process(name, task='default', verbose=True, is_test=False):
 
     processer = ProcessAPI(name=name,
                            task=task,
-                           verbose=verbose,
-                           is_test=is_test)
+                           verbose=verbose)
 
     processer.run()
 
@@ -69,8 +66,6 @@ class ProcessAPI(object):
         Name of the task to process.
     verbose : bool
         Displays text information (if true).
-    is_test : bool
-        Flag used for tests.
 
     Attributes
     ----------
@@ -80,8 +75,6 @@ class ProcessAPI(object):
         Name of the task to process.
     verbose : bool
         Displays text information (if true).
-    is_test : bool
-        Flag used for tests.
     extract_data : bool
         Flag to extract data (if True).
     cache_manager : CacheManager
@@ -96,19 +89,17 @@ class ProcessAPI(object):
 
     """
 
-    def __init__(self, name, task, verbose, is_test):
+    def __init__(self, name, task, verbose):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
         assert name, 'Must input a valid task name: {}'.format(task)
         assert verbose is not None, 'verbose cannot be empty'
-        assert is_test is not None, 'is_test cannot be empty'
 
         self.name = name
         self.task = task
         self.verbose = verbose
-        self.is_test = is_test
         self.extract_data = False
-        self.cache_manager = CacheManager(self.is_test)
+        self.cache_manager = CacheManager()
         self.available_datasets_list = fetch_list_datasets()
 
         self.check_if_task_exists()
