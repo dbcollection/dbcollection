@@ -11,7 +11,7 @@ from dbcollection.core.cache import CacheManager
 from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
 
 
-def download(name, data_dir=None, extract_data=True, verbose=True, is_test=False):
+def download(name, data_dir=None, extract_data=True, verbose=True):
     """Download a dataset data to disk.
 
     This method will download a dataset's data files to disk. After download,
@@ -28,8 +28,6 @@ def download(name, data_dir=None, extract_data=True, verbose=True, is_test=False
         Extracts/unpacks the data files (if true).
     verbose : bool, optional
         Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
 
     Examples
     --------
@@ -45,13 +43,9 @@ def download(name, data_dir=None, extract_data=True, verbose=True, is_test=False
     downloader = DownloadAPI(name=name,
                              data_dir=data_dir,
                              extract_data=extract_data,
-                             verbose=verbose,
-                             is_test=is_test)
+                             verbose=verbose)
 
     downloader.run()
-
-    if verbose:
-        print('==> Dataset download complete.')
 
 
 class DownloadAPI(object):
@@ -70,8 +64,6 @@ class DownloadAPI(object):
         Extracts/unpacks the data files (if true).
     verbose : bool
         Displays text information (if true).
-    is_test : bool
-        Flag used for tests.
 
     Attributes
     ----------
@@ -87,8 +79,6 @@ class DownloadAPI(object):
         Flag to extract data (if True).
     verbose : bool
         Flag to display text information (if true).
-    is_test : bool
-        Test flag.
     available_datasets_list : dict
         Dictionary of available datasets.
     cache_manager : CacheManager
@@ -96,54 +86,35 @@ class DownloadAPI(object):
 
     """
 
-    def __init__(self, name, data_dir, extract_data, verbose, is_test):
+    def __init__(self, name, data_dir, extract_data, verbose):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
         assert extract_data is not None, 'extract_data cannot be empty'
         assert verbose is not None, 'verbose cannot be empty'
-        assert is_test is not None, 'is_test cannot be empty'
 
         self.name = name
         self.data_dir = data_dir
         self.extract_data = extract_data
         self.verbose = verbose
-        self.is_test = is_test
-        self.cache_manager = CacheManager(self.is_test)
+        self.cache_manager = self.get_cache_manager()
         self.available_datasets_list = fetch_list_datasets()
 
-    def run(self):
-        """Main method."""
-        self.set_dataset_dirs()
-        self.download_dataset()
-        self.update_cache()
+        self.save_data_dir = self.get_download_data_dir()
+        self.save_cache_dir = self.get_download_cache_dir()
 
-    def set_dataset_dirs(self):
-        """Set download data + cache dirs in disk."""
-        if self.verbose:
-            print('==> Setup directories to store the data files.')
+    def get_cache_manager(self):
+        return CacheManager()
 
-        self.save_data_dir = self.set_download_data_dir()
-        self.save_cache_dir = self.set_download_cache_dir()
-
-    def set_download_data_dir(self):
-        if self.data_dir is None or self.data_dir is '':
-            save_data_dir = self.set_dir_path_from_cache()
+    def get_download_data_dir(self):
+        if self.data_dir:
+            return self.data_dir
         else:
-            save_data_dir = self.set_dir_path_from_input()
+            return self.get_download_data_dir_from_cache()
 
-        self.create_dir(save_data_dir)
-
-        return save_data_dir
-
-    def set_dir_path_from_cache(self):
+    def get_download_data_dir_from_cache(self):
         """Create a dir path from the cache information for this dataset."""
-        save_data_dir = os.path.join(self.cache_manager.download_dir, self.name)
-        return save_data_dir
-
-    def set_dir_path_from_input(self):
-        save_data_dir = self.data_dir
-        if not os.path.exists(self.data_dir):
-            save_data_dir = os.path.join(self.data_dir, self.name)
+        save_data_dir = os.path.join(self.cache_manager.manager.download_dir, self.name)
+        self.create_dir(save_data_dir)
         return save_data_dir
 
     def create_dir(self, path):
@@ -153,30 +124,50 @@ class DownloadAPI(object):
                 print('Creating save directory in disk: {}'.format(path))
             os.makedirs(path)
 
-    def set_download_cache_dir(self):
-        cache_save_path = os.path.join(self.cache_manager.cache_dir, self.name)
+    def get_download_cache_dir(self):
+        cache_save_path = os.path.join(self.cache_manager.manager.cache_dir, self.name)
         self.create_dir(cache_save_path)
         return cache_save_path
 
+    def run(self):
+        """Main method."""
+        if not self.exists_dataset_in_cache():
+            if self.verbose:
+                print('==> Download {} data to disk...'.format(self.name))
+
+            self.download_dataset()
+            if self.verbose:
+                print('==> Dataset download complete.')
+
+            self.update_cache()
+            if self.verbose:
+                print('==> Updating the cache manager')
+
+
+    def exists_dataset_in_cache(self):
+        return self.cache_manager.dataset.exists(self.name)
+
     def download_dataset(self):
         """Download the dataset to disk."""
-        if self.verbose:
-            print('==> Download {} data to disk...'.format(self.name))
-
-        constructor = self.available_datasets_list[self.name]['constructor']
+        constructor = self.get_dataset_constructor()
         db = constructor(data_path=self.save_data_dir,
                          cache_path=self.save_cache_dir,
                          extract_data=self.extract_data,
                          verbose=self.verbose)
         db.download()
 
+    def get_dataset_constructor(self):
+        return self.available_datasets_list[self.name]['constructor']
+
     def update_cache(self):
         """Update the cache manager information for this dataset."""
-        if self.verbose:
-            print('==> Updating the cache manager')
+        if self.exists_dataset_in_cache():
+            self.update_dataset_info_in_cache()
+        else:
+            self.add_dataset_info_to_cache()
 
-        keywords = self.available_datasets_list[self.name]['keywords']
-        self.cache_manager.update(self.name,
-                                  self.save_data_dir,
-                                  {},
-                                  keywords)
+    def update_dataset_info_in_cache(self):
+        self.cache_manager.dataset.update(self.name, data_dir=self.save_data_dir)
+
+    def add_dataset_info_to_cache(self):
+        self.cache_manager.dataset.add(self.name, data_dir=self.save_data_dir, tasks={})
