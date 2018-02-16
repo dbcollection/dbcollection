@@ -99,10 +99,13 @@ class ProcessAPI(object):
         self.task = task
         self.verbose = verbose
         self.extract_data = False
-        self.cache_manager = CacheManager()
+        self.cache_manager =self.get_cache_manager()
         self.available_datasets_list = fetch_list_datasets()
 
         self.check_if_task_exists()
+
+    def get_cache_manager(self):
+        return CacheManager()
 
     def check_if_task_exists(self):
         """Check if task exists in the list of available tasks for processing."""
