@@ -47,9 +47,6 @@ def process(name, task='default', verbose=True):
 
     processer.run()
 
-    if verbose:
-        print('==> Dataset processing complete.')
-
 
 class ProcessAPI(object):
     """Dataset metadata process API class.
@@ -152,8 +149,17 @@ class ProcessAPI(object):
         if self.verbose:
             print('==> Setup directories to store the data files.')
         self.create_dir(self.save_cache_dir)
+
+        if self.verbose:
+            print('==> Process \'{}\' metadata to disk...'.format(self.name))
         self.process_dataset()
+
+        if self.verbose:
+            print('==> Updating the cache manager')
         self.update_cache()
+
+        if self.verbose:
+            print('==> Dataset processing complete.')
 
     def create_dir(self, path):
         """Create a directory in the disk."""
@@ -162,22 +168,15 @@ class ProcessAPI(object):
 
     def process_dataset(self):
         """Process the dataset's metadata."""
-        if self.verbose:
-            print('==> Process \'{}\' metadata to disk...'.format(self.name))
-
         constructor = self.available_datasets_list[self.name]['constructor']
         db = constructor(data_path=self.save_data_dir,
                          cache_path=self.save_cache_dir,
                          extract_data=self.extract_data,
                          verbose=self.verbose)
-
         self.task_info = db.process(self.task)
 
     def update_cache(self):
         """Update the cache manager information for this dataset."""
-        if self.verbose:
-            print('==> Updating the cache manager')
-
         keywords = self.available_datasets_list[self.name]['keywords']
         self.cache_manager.update(self.name,
                                   self.save_data_dir,
