@@ -13,7 +13,7 @@ class TestCallProcess:
 
     def test_call_with_dataset_name(self, mocker):
         mock_cache = mocker.patch.object(ProcessAPI, "get_cache_manager", return_value=True)
-        mock_task_exists = mocker.patch.object(ProcessAPI, "check_if_task_exists")
+        mock_task_exists = mocker.patch.object(ProcessAPI, "check_if_task_exists_in_database")
         mock_run = mocker.patch.object(ProcessAPI, "run")
         dataset = 'mnist'
 
@@ -25,7 +25,7 @@ class TestCallProcess:
 
     def test_call_with_all_inputs(self, mocker):
         mock_cache = mocker.patch.object(ProcessAPI, "get_cache_manager", return_value=True)
-        mock_task_exists = mocker.patch.object(ProcessAPI, "check_if_task_exists")
+        mock_task_exists = mocker.patch.object(ProcessAPI, "check_if_task_exists_in_database")
         mock_run = mocker.patch.object(ProcessAPI, "run")
         dataset = 'mnist'
         task = ''

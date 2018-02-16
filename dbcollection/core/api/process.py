@@ -96,18 +96,31 @@ class ProcessAPI(object):
         assert verbose is not None, 'verbose cannot be empty'
 
         self.name = name
-        self.task = task
         self.verbose = verbose
         self.extract_data = False
-        self.cache_manager =self.get_cache_manager()
+        self.cache_manager = self.get_cache_manager()
         self.available_datasets_list = fetch_list_datasets()
-
-        self.check_if_task_exists()
+        self.task = self.parse_task_name(task)
+        self.check_if_task_exists_in_database()
 
     def get_cache_manager(self):
         return CacheManager()
 
-    def check_if_task_exists(self):
+    def parse_task_name(self, task):
+        """Parse the input task string."""
+        if task == '':
+            task_parsed = self.get_default_task()
+        elif task == 'default':
+            task_parsed = self.get_default_task()
+        else:
+            task_parsed = task
+        return task_parsed
+
+    def get_default_task(self):
+        """Returns the default task for this dataset."""
+        return self.available_datasets_list[self.name]['default_task']
+
+    def check_if_task_exists_in_database(self):
         """Check if task exists in the list of available tasks for processing."""
         if not self.exists_task():
             raise KeyError('The task \'{}\' does not exists for loading/processing.'
@@ -115,19 +128,7 @@ class ProcessAPI(object):
 
     def exists_task(self):
         """Checks if a task exists for a dataset."""
-        if self.task == '':
-            task = self.get_default_task()
-        elif self.task == 'default':
-            task = self.get_default_task()
-        elif self.task.endswith('_s'):
-            task = self.task[:-2]
-        else:
-            task = self.task
-        return task in self.available_datasets_list[self.name]['tasks']
-
-    def get_default_task(self):
-        """Returns the default task for this dataset."""
-        return self.available_datasets_list[self.name]['default_task']
+        return self.task in self.available_datasets_list[self.name]['tasks']
 
     def run(self):
         """Main method."""
