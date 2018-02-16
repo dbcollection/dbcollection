@@ -92,7 +92,7 @@ class ProcessAPI(object):
     def __init__(self, name, task, verbose):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
-        assert task, 'Must input a valid task name: {}'.format(task)
+        assert task is not None, 'Must input a valid task name: {}'.format(task)
         assert verbose is not None, 'verbose cannot be empty'
 
         self.name = name
