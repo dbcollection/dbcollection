@@ -6,7 +6,6 @@ Test dbcollection core API: download.
 import pytest
 
 from dbcollection.core.api.download import download, DownloadAPI
-from dbcollection.core.cache import CacheManager
 
 from ..dummy_data.example_cache import DataGenerator
 
