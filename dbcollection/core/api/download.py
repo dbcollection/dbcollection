@@ -134,14 +134,17 @@ class DownloadAPI(object):
 
     def run(self):
         """Main method."""
-        self.download_dataset()
-        self.update_cache()
+        if not self.exists_dataset_in_cache():
+            self.download_dataset()
+            self.update_cache()
+
+    def exists_dataset_in_cache(self):
+        return self.cache_manager.dataset.exists(self.name)
 
     def download_dataset(self):
         """Download the dataset to disk."""
         if self.verbose:
             print('==> Download {} data to disk...'.format(self.name))
-
         constructor = self.get_dataset_constructor()
         db = constructor(data_path=self.save_data_dir,
                          cache_path=self.save_cache_dir,
@@ -156,9 +159,13 @@ class DownloadAPI(object):
         """Update the cache manager information for this dataset."""
         if self.verbose:
             print('==> Updating the cache manager')
+        if self.exists_dataset_in_cache():
+            self.update_dataset_info_in_cache()
+        else:
+            self.add_dataset_info_to_cache()
 
-        keywords = self.available_datasets_list[self.name]['keywords']
-        self.cache_manager.update(self.name,
-                                  self.save_data_dir,
-                                  {},
-                                  keywords)
+    def update_dataset_info_in_cache(self):
+        self.cache_manager.dataset.update(self.name, data_dir=self.save_data_dir)
+
+    def add_dataset_info_to_cache(self):
+        self.cache_manager.dataset.add(self.name, data_dir=self.save_data_dir, tasks={})
