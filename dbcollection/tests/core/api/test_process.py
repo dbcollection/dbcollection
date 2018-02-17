@@ -113,3 +113,16 @@ class TestClassDownloadAPI:
         assert mock_create.called
         assert mock_process.return_value == "some_info"
         assert mock_update.called
+
+    def test_process_dataset(self, mocker, mocks_init_class):
+        mock_constructor = mocker.patch.object(ProcessAPI, "get_dataset_constructor", return_value=mocker.MagicMock())
+        dataset = 'mnist'
+        task = 'some_task'
+        verbose = True
+
+        process_api = ProcessAPI(dataset, task, verbose)
+        task_info = process_api.process_dataset()
+
+        assert_mock_init_class(mocks_init_class)
+        assert mock_constructor.called
+        assert task_info is not None

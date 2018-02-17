@@ -154,11 +154,11 @@ class ProcessAPI(object):
 
         if self.verbose:
             print('==> Process \'{}\' metadata to disk...'.format(self.name))
-        self.process_dataset()
+        task_info = self.process_dataset()
 
         if self.verbose:
             print('==> Updating the cache manager')
-        self.update_cache()
+        self.update_cache(task_info)
 
         if self.verbose:
             print('==> Dataset processing complete.')
@@ -175,12 +175,13 @@ class ProcessAPI(object):
                          cache_path=self.save_cache_dir,
                          extract_data=self.extract_data,
                          verbose=self.verbose)
-        self.task_info = db.process(self.task)
+        task_info = db.process(self.task)
+        return task_info
 
     def get_dataset_constructor(self):
         return self.db_metadata.get_constructor()
 
-    def update_cache(self):
+    def update_cache(self, task_info):
         """Update the cache manager information for this dataset."""
         self.cache_manager.update(self.name,
                                   self.save_data_dir,
