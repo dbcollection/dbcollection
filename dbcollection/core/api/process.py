@@ -8,10 +8,10 @@ import os
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
+from .list_datasets import DatasetConstructor
 
 
-def process(name, task='default', verbose=True, is_test=False):
+def process(name, task='default', verbose=True):
     """Process a dataset's metadata and stores it to file.
 
     The data is stored a a HSF5 file for each task composing the dataset's tasks.
@@ -24,8 +24,6 @@ def process(name, task='default', verbose=True, is_test=False):
         Name of the task to process.
     verbose : bool, optional
         Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
 
     Raises
     ------
@@ -41,17 +39,12 @@ def process(name, task='default', verbose=True, is_test=False):
 
     """
     assert name, 'Must input a valid dataset name: {}'.format(name)
-    check_if_dataset_name_is_valid(name)
 
     processer = ProcessAPI(name=name,
                            task=task,
-                           verbose=verbose,
-                           is_test=is_test)
+                           verbose=verbose)
 
     processer.run()
-
-    if verbose:
-        print('==> Dataset processing complete.')
 
 
 class ProcessAPI(object):
@@ -69,8 +62,6 @@ class ProcessAPI(object):
         Name of the task to process.
     verbose : bool
         Displays text information (if true).
-    is_test : bool
-        Flag used for tests.
 
     Attributes
     ----------
@@ -80,14 +71,12 @@ class ProcessAPI(object):
         Name of the task to process.
     verbose : bool
         Displays text information (if true).
-    is_test : bool
-        Flag used for tests.
     extract_data : bool
         Flag to extract data (if True).
     cache_manager : CacheManager
         Cache manager object.
-    available_datasets_list : list
-        List of available datast names for download.
+    db_metadata : DatasetConstructor
+        Dataset metadata/constructor manager.
 
     Raises
     ------
@@ -96,24 +85,44 @@ class ProcessAPI(object):
 
     """
 
-    def __init__(self, name, task, verbose, is_test):
+    def __init__(self, name, task, verbose):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
-        assert name, 'Must input a valid task name: {}'.format(task)
+        assert task is not None, 'Must input a valid task name: {}'.format(task)
         assert verbose is not None, 'verbose cannot be empty'
-        assert is_test is not None, 'is_test cannot be empty'
 
         self.name = name
-        self.task = task
         self.verbose = verbose
-        self.is_test = is_test
         self.extract_data = False
-        self.cache_manager = CacheManager(self.is_test)
-        self.available_datasets_list = fetch_list_datasets()
+        self.cache_manager = self.get_cache_manager()
+        self.db_metadata = self.get_dataset_metadata_obj(name)
+        self.task = self.parse_task_name(task)
+        self.check_if_task_exists_in_database()
 
-        self.check_if_task_exists()
+        self.save_data_dir = self.get_dataset_data_dir_path()
+        self.save_cache_dir = self.get_dataset_cache_dir_path()
 
-    def check_if_task_exists(self):
+    def get_cache_manager(self):
+        return CacheManager()
+
+    def get_dataset_metadata_obj(self, name):
+        return DatasetConstructor(name)
+
+    def parse_task_name(self, task):
+        """Parse the input task string."""
+        if task == '':
+            task_parsed = self.get_default_task()
+        elif task == 'default':
+            task_parsed = self.get_default_task()
+        else:
+            task_parsed = task
+        return task_parsed
+
+    def get_default_task(self):
+        """Returns the default task for this dataset."""
+        return self.db_metadata.get_default_task()
+
+    def check_if_task_exists_in_database(self):
         """Check if task exists in the list of available tasks for processing."""
         if not self.exists_task():
             raise KeyError('The task \'{}\' does not exists for loading/processing.'
@@ -121,35 +130,38 @@ class ProcessAPI(object):
 
     def exists_task(self):
         """Checks if a task exists for a dataset."""
-        if self.task == '':
-            task = self.get_default_task()
-        elif self.task == 'default':
-            task = self.get_default_task()
-        elif self.task.endswith('_s'):
-            task = self.task[:-2]
-        else:
-            task = self.task
-        return task in self.available_datasets_list[self.name]['tasks']
+        return self.task in self.db_metadata.get_tasks()
 
-    def get_default_task(self):
-        """Returns the default task for this dataset."""
-        return self.available_datasets_list[self.name]['default_task']
+    def get_dataset_data_dir_path(self):
+        dataset_data_cache = self.get_dataset_metadata_from_cache()
+        return dataset_data_cache['data_dir']
+
+    def get_dataset_metadata_from_cache(self):
+        return self.cache_manager.dataset.get(self.name)
+
+    def get_dataset_cache_dir_path(self):
+        cache_dir = self.get_cache_dir_path_from_cache()
+        return os.path.join(cache_dir, self.name)
+
+    def get_cache_dir_path_from_cache(self):
+        return self.cache_manager.info.cache_dir
 
     def run(self):
         """Main method."""
-        self.set_dataset_dirs()
-        self.process_dataset()
-        self.update_cache()
-
-    def set_dataset_dirs(self):
-        """Set the dataset's data + cache dirs in disk."""
         if self.verbose:
             print('==> Setup directories to store the data files.')
-
-        dset_paths = self.cache_manager.get_dataset_storage_paths(self.name)
-        self.save_data_dir = dset_paths['data_dir']
-        self.save_cache_dir = dset_paths['cache_dir']
         self.create_dir(self.save_cache_dir)
+
+        if self.verbose:
+            print('==> Process \'{}\' metadata to disk...'.format(self.name))
+        task_info = self.process_dataset()
+
+        if self.verbose:
+            print('==> Updating the cache manager')
+        self.update_cache(task_info)
+
+        if self.verbose:
+            print('==> Dataset processing complete.')
 
     def create_dir(self, path):
         """Create a directory in the disk."""
@@ -158,24 +170,19 @@ class ProcessAPI(object):
 
     def process_dataset(self):
         """Process the dataset's metadata."""
-        if self.verbose:
-            print('==> Process \'{}\' metadata to disk...'.format(self.name))
-
-        constructor = self.available_datasets_list[self.name]['constructor']
+        constructor = self.get_dataset_constructor()
         db = constructor(data_path=self.save_data_dir,
                          cache_path=self.save_cache_dir,
                          extract_data=self.extract_data,
                          verbose=self.verbose)
+        task_info = db.process(self.task)
+        return task_info
 
-        self.task_info = db.process(self.task)
+    def get_dataset_constructor(self):
+        return self.db_metadata.get_constructor()
 
-    def update_cache(self):
+    def update_cache(self, task_info):
         """Update the cache manager information for this dataset."""
-        if self.verbose:
-            print('==> Updating the cache manager')
-
-        keywords = self.available_datasets_list[self.name]['keywords']
-        self.cache_manager.update(self.name,
-                                  self.save_data_dir,
-                                  self.task_info,
-                                  keywords)
+        self.cache_manager.dataset.update(name=self.name,
+                                          cache_dir=self.save_cache_dir,
+                                          tasks=task_info)
