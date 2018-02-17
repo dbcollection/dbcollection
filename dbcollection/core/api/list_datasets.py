@@ -112,7 +112,7 @@ class DatasetConstructor(object):
         try:
             return available_datasets[name]
         except KeyError:
-            raise KeyError("Dataset '{}' does not exists in the database.".format(name))
+            raise KeyError("Dataset '{}' does not exist in the database.".format(name))
 
     def get_default_task(self):
         """Returns the default task for the dataset."""
