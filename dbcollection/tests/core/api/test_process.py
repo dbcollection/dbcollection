@@ -97,3 +97,19 @@ class TestClassDownloadAPI:
 
         assert_mock_init_class(mocks_init_class)
         assert process_api.parse_task_name(test_task) == "classification"
+
+    def test_run(self, mocker, mocks_init_class):
+        mock_create = mocker.patch.object(ProcessAPI, "create_dir")
+        mock_process = mocker.patch.object(ProcessAPI, "process_dataset", return_value="some_info")
+        mock_update = mocker.patch.object(ProcessAPI, "update_cache")
+        dataset = 'mnist'
+        task = 'some_task'
+        verbose = True
+
+        process_api = ProcessAPI(dataset, task, verbose)
+        process_api.run()
+
+        assert_mock_init_class(mocks_init_class)
+        assert mock_create.called
+        assert mock_process.return_value == "some_info"
+        assert mock_update.called
