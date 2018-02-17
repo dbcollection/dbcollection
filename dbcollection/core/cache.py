@@ -17,15 +17,8 @@ from dbcollection.utils import print_text_box
 class CacheManager:
     """Manage dbcollection configurations and stores them inside a cache file stored in disk.
 
-    Parameters
-    ----------
-    is_test : bool
-        Flag used for tests.
-
     Attributes
     ----------
-    is_test : bool
-        Flag used for tests.
     cache_filename : str
         Cache file path + name.
     cache_dir : str
