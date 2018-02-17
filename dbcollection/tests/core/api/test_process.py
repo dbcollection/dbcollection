@@ -56,3 +56,35 @@ class TestCallProcess:
 
 class TestClassDownloadAPI:
     """Unit tests for the DownloadAPI class."""
+
+    def test_init_with_all_inputs(self, mocker):
+        mock_cache = mocker.patch.object(ProcessAPI, "get_cache_manager", return_value=True)
+        mock_data_dir = mocker.patch.object(ProcessAPI, "get_dataset_data_dir_path", return_value='/some/path/cache/db')
+        mock_cache_dir = mocker.patch.object(ProcessAPI, "get_dataset_cache_dir_path", return_value='/some/path/cache')
+        dataset = 'mnist'
+        task = 'default'
+        verbose = True
+
+        process_api = ProcessAPI(dataset, task, verbose)
+
+        assert mock_cache.called
+        assert mock_data_dir.called
+        assert mock_cache_dir.called
+        assert process_api.name == dataset
+        assert process_api.task == 'classification'  # default task name for mnist
+        assert process_api.verbose == verbose
+
+    def test_init__raises_error_missing_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            ProcessAPI()
+
+    @pytest.mark.parametrize("dataset, task, verbose", [
+        ('mnist', 'classification', None),
+        ('mnist', None, True),
+        (None, '', False),
+        ('', 'default', False),
+        (None, None, None)
+    ])
+    def test_init__raises_error_missing_some_inputs(self, mocker, dataset, task, verbose):
+        with pytest.raises(AssertionError):
+            ProcessAPI(dataset, task, verbose)
