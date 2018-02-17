@@ -8,7 +8,7 @@ import os
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
+from .list_datasets import DatasetConstructor
 
 
 def download(name, data_dir=None, extract_data=True, verbose=True):
@@ -38,7 +38,6 @@ def download(name, data_dir=None, extract_data=True, verbose=True):
 
     """
     assert name, 'Must input a valid dataset name: {}'.format(name)
-    check_if_dataset_name_is_valid(name)
 
     downloader = DownloadAPI(name=name,
                              data_dir=data_dir,
@@ -79,8 +78,6 @@ class DownloadAPI(object):
         Flag to extract data (if True).
     verbose : bool
         Flag to display text information (if true).
-    available_datasets_list : dict
-        Dictionary of available datasets.
     cache_manager : CacheManager
         Cache manager object.
 
@@ -97,13 +94,16 @@ class DownloadAPI(object):
         self.extract_data = extract_data
         self.verbose = verbose
         self.cache_manager = self.get_cache_manager()
-        self.available_datasets_list = fetch_list_datasets()
+        self.db_metadata = self.get_dataset_metadata_obj(name)
 
         self.save_data_dir = self.get_download_data_dir()
         self.save_cache_dir = self.get_download_cache_dir()
 
     def get_cache_manager(self):
         return CacheManager()
+
+    def get_dataset_metadata_obj(self, name):
+        return DatasetConstructor(name)
 
     def get_download_data_dir(self):
         if self.data_dir:
@@ -157,7 +157,7 @@ class DownloadAPI(object):
         db.download()
 
     def get_dataset_constructor(self):
-        return self.available_datasets_list[self.name]['constructor']
+        return self.db_metadata.get_constructor()
 
     def update_cache(self):
         """Update the cache manager information for this dataset."""
