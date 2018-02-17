@@ -183,7 +183,6 @@ class ProcessAPI(object):
 
     def update_cache(self, task_info):
         """Update the cache manager information for this dataset."""
-        self.cache_manager.update(self.name,
-                                  self.save_data_dir,
-                                  self.task_info,
-                                  keywords)
+        self.cache_manager.dataset.update(name=self.name,
+                                          cache_dir=self.save_cache_dir,
+                                          tasks=task_info)
