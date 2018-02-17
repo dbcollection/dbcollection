@@ -50,7 +50,7 @@ class TestCallProcess:
             process()
 
     def test_call__raises_error_invalid_dataset_name(self, mocker):
-        with pytest.raises(AssertionError):
+        with pytest.raises(KeyError):
             process('invalid_dataset_name')
 
 

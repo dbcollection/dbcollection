@@ -8,7 +8,7 @@ import os
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
+from .list_datasets import DatasetConstructor
 
 
 def process(name, task='default', verbose=True):
@@ -39,7 +39,6 @@ def process(name, task='default', verbose=True):
 
     """
     assert name, 'Must input a valid dataset name: {}'.format(name)
-    check_if_dataset_name_is_valid(name)
 
     processer = ProcessAPI(name=name,
                            task=task,
@@ -76,8 +75,8 @@ class ProcessAPI(object):
         Flag to extract data (if True).
     cache_manager : CacheManager
         Cache manager object.
-    available_datasets_list : list
-        List of available datast names for download.
+    db_metadata : DatasetConstructor
+        Dataset metadata/constructor manager.
 
     Raises
     ------
@@ -96,7 +95,7 @@ class ProcessAPI(object):
         self.verbose = verbose
         self.extract_data = False
         self.cache_manager = self.get_cache_manager()
-        self.available_datasets_list = fetch_list_datasets()
+        self.db_metadata = self.get_dataset_metadata_obj(name)
         self.task = self.parse_task_name(task)
         self.check_if_task_exists_in_database()
 
@@ -105,6 +104,9 @@ class ProcessAPI(object):
 
     def get_cache_manager(self):
         return CacheManager()
+
+    def get_dataset_metadata_obj(self, name):
+        return DatasetConstructor(name)
 
     def parse_task_name(self, task):
         """Parse the input task string."""
@@ -118,7 +120,7 @@ class ProcessAPI(object):
 
     def get_default_task(self):
         """Returns the default task for this dataset."""
-        return self.available_datasets_list[self.name]['default_task']
+        return self.db_metadata.get_default_task()
 
     def check_if_task_exists_in_database(self):
         """Check if task exists in the list of available tasks for processing."""
@@ -128,7 +130,7 @@ class ProcessAPI(object):
 
     def exists_task(self):
         """Checks if a task exists for a dataset."""
-        return self.task in self.available_datasets_list[self.name]['tasks']
+        return self.task in self.db_metadata.get_tasks()
 
     def get_dataset_data_dir_path(self):
         dataset_data_cache = self.get_dataset_metadata_from_cache()
@@ -168,16 +170,18 @@ class ProcessAPI(object):
 
     def process_dataset(self):
         """Process the dataset's metadata."""
-        constructor = self.available_datasets_list[self.name]['constructor']
+        constructor = self.get_dataset_constructor()
         db = constructor(data_path=self.save_data_dir,
                          cache_path=self.save_cache_dir,
                          extract_data=self.extract_data,
                          verbose=self.verbose)
         self.task_info = db.process(self.task)
 
+    def get_dataset_constructor(self):
+        return self.db_metadata.get_constructor()
+
     def update_cache(self):
         """Update the cache manager information for this dataset."""
-        keywords = self.available_datasets_list[self.name]['keywords']
         self.cache_manager.update(self.name,
                                   self.save_data_dir,
                                   self.task_info,
