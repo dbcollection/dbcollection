@@ -88,3 +88,31 @@ class TestClassDownloadAPI:
     def test_init__raises_error_missing_some_inputs(self, mocker, dataset, task, verbose):
         with pytest.raises(AssertionError):
             ProcessAPI(dataset, task, verbose)
+
+    @pytest.mark.parametrize("test_task", ['classification', 'some_task', 'another_task'])
+    def test_parse_task_name(self, mocker, test_task):
+        mock_cache = mocker.patch.object(ProcessAPI, "get_cache_manager", return_value=True)
+        mock_data_dir = mocker.patch.object(ProcessAPI, "get_dataset_data_dir_path", return_value='/some/path/cache/db')
+        mock_cache_dir = mocker.patch.object(ProcessAPI, "get_dataset_cache_dir_path", return_value='/some/path/cache')
+        mock_exists = mocker.patch.object(ProcessAPI, 'check_if_task_exists_in_database')
+
+        process_api = ProcessAPI('mnist', test_task, True)
+
+        assert mock_cache.called
+        assert mock_data_dir.called
+        assert mock_cache_dir.called
+        assert mock_exists.called
+        assert process_api.parse_task_name(test_task) == test_task
+
+    @pytest.mark.parametrize("test_task", ['', 'default'])
+    def test_parse_task_name_to_default(self, mocker, test_task):
+        mock_cache = mocker.patch.object(ProcessAPI, "get_cache_manager", return_value=True)
+        mock_data_dir = mocker.patch.object(ProcessAPI, "get_dataset_data_dir_path", return_value='/some/path/cache/db')
+        mock_cache_dir = mocker.patch.object(ProcessAPI, "get_dataset_cache_dir_path", return_value='/some/path/cache')
+
+        process_api = ProcessAPI('mnist', '', True)
+
+        assert mock_cache.called
+        assert mock_data_dir.called
+        assert mock_cache_dir.called
+        assert process_api.parse_task_name(test_task) == "classification"
