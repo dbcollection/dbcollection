@@ -11,7 +11,7 @@ from dbcollection.core.loader import DataLoader
 from .download import DownloadAPI
 from .process import ProcessAPI
 
-from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
+from .list_datasets import DatasetConstructor
 
 
 def load(name, task='default', data_dir=None, verbose=True):
@@ -51,7 +51,6 @@ def load(name, task='default', data_dir=None, verbose=True):
 
     """
     assert name, 'Must input a valid dataset name: {}'.format(name)
-    check_if_dataset_name_is_valid(name)
 
     loader = LoadAPI(name=name,
                      task=task,
@@ -110,10 +109,15 @@ class LoadAPI(object):
         self.task = task
         self.data_dir = data_dir
         self.verbose = verbose
-        self.cache_manager = CacheManager()
-        self.available_datasets_list = fetch_list_datasets()
-
+        self.cache_manager = self.get_cache_manager()
+        self.db_metadata = self.get_dataset_metadata_obj(name)
         self.parse_task_name()
+
+    def get_cache_manager(self):
+        return CacheManager()
+
+    def get_dataset_metadata_obj(self, name):
+        return DatasetConstructor(name)
 
     def parse_task_name(self):
         """Validate the task name."""
