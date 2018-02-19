@@ -14,7 +14,7 @@ from .process import ProcessAPI
 from .list_datasets import DatasetConstructor
 
 
-def load(name, task='default', data_dir=None, verbose=True):
+def load(name, task='default', data_dir='', verbose=True):
     """Returns a metadata loader of a dataset.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -103,15 +103,15 @@ class LoadAPI(object):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
         assert task, 'Must input a valid task name: {}'.format(task)
+        assert data_dir is not None, 'Must input a valid directory path: {}'.format(data_dir)
         assert verbose is not None, 'verbose cannot be empty'
 
         self.name = name
-        self.task = task
         self.data_dir = data_dir
         self.verbose = verbose
         self.cache_manager = self.get_cache_manager()
         self.db_metadata = self.get_dataset_metadata_obj(name)
-        self.parse_task_name()
+        self.task = self.parse_task_name(task)
 
     def get_cache_manager(self):
         return CacheManager()
@@ -119,14 +119,9 @@ class LoadAPI(object):
     def get_dataset_metadata_obj(self, name):
         return DatasetConstructor(name)
 
-    def parse_task_name(self):
+    def parse_task_name(self, task):
         """Validate the task name."""
-        if self.task == '' or self.task == 'default':
-            self.task = self.get_default_task()
-
-    def get_default_task(self):
-        """Returns the default task for the dataset."""
-        return self.available_datasets_list[self.name]['default_task']
+        return self.db_metadata.parse_task_name(task)
 
     def run(self):
         """Main method."""

@@ -71,3 +71,53 @@ class TestCallLoad:
 
 class TestClassLoadAPI:
     """Unit tests for the LoadAPI class."""
+
+    def test_init_with_all_inputs(self, mocker):
+        inputs = generate_inputs_for_load()
+        mock_parse = mocker.patch.object(LoadAPI, "parse_task_name", return_value=inputs["task"])
+        mock_cache = mocker.patch.object(LoadAPI, "get_cache_manager")
+
+        load_api = LoadAPI(inputs["dataset"], inputs["task"], inputs["data_dir"], inputs["verbose"])
+
+        assert mock_parse.called
+        assert mock_cache.called
+        assert load_api.name == inputs["dataset"]
+        assert load_api.task == inputs["task"]
+        assert load_api.data_dir == inputs["data_dir"]
+        assert load_api.verbose == inputs["verbose"]
+
+    def test_init_with_all_inputs_named_args(self, mocker):
+        inputs = generate_inputs_for_load()
+        mock_parse = mocker.patch.object(LoadAPI, "parse_task_name", return_value=inputs["task"])
+        mock_cache = mocker.patch.object(LoadAPI, "get_cache_manager")
+
+        load_api = LoadAPI(name=inputs["dataset"],
+                           task=inputs["task"],
+                           data_dir=inputs["data_dir"],
+                           verbose=inputs["verbose"])
+
+        assert mock_parse.called
+        assert mock_cache.called
+        assert load_api.name == inputs["dataset"]
+        assert load_api.task == inputs["task"]
+        assert load_api.data_dir == inputs["data_dir"]
+        assert load_api.verbose == inputs["verbose"]
+
+    def test_init__raises_error_missing_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            LoadAPI()
+
+    @pytest.mark.parametrize("dataset, task, data_dir, verbose", [
+        ('mnist', 'classification', 'some_dir', None),
+        ('mnist', 'some_task', None, True),
+        ('some_dataset', None, 'some_dir', False),
+        (None, 'some_task', 'some_dir', False),
+        (None, None, None, None)
+    ])
+    def test_init__raises_error_missing_some_inputs(self, mocker, dataset, task, data_dir, verbose):
+        with pytest.raises(AssertionError):
+            LoadAPI(dataset, task, data_dir, verbose)
+
+    def test_init__raises_error_extra_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            LoadAPI("some_dataset", "some_task", "some_dir", True, "extra_field")
