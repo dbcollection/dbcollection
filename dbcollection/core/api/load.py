@@ -14,7 +14,7 @@ from .process import ProcessAPI
 from .list_datasets import fetch_list_datasets, check_if_dataset_name_is_valid
 
 
-def load(name, task='default', data_dir=None, verbose=True, is_test=False):
+def load(name, task='default', data_dir=None, verbose=True):
     """Returns a metadata loader of a dataset.
 
     Returns a loader with the necessary functions to manage the selected dataset.
@@ -29,8 +29,6 @@ def load(name, task='default', data_dir=None, verbose=True, is_test=False):
         Directory path to store the downloaded data.
     verbose : bool, optional
         Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
 
     Returns
     -------
@@ -58,8 +56,7 @@ def load(name, task='default', data_dir=None, verbose=True, is_test=False):
     loader = LoadAPI(name=name,
                      task=task,
                      data_dir=data_dir,
-                     verbose=verbose,
-                     is_test=is_test)
+                     verbose=verbose)
 
     data_loader = loader.run()
 
@@ -85,8 +82,6 @@ class LoadAPI(object):
         Directory path to store the downloaded data.
     verbose : bool
         Displays text information (if true).
-    is_test : bool
-        Flag used for tests.
 
     Attributes
     ----------
@@ -98,8 +93,6 @@ class LoadAPI(object):
         Directory path to store the downloaded data.
     verbose : bool
         Displays text information (if true).
-    is_test : bool
-        Flag used for tests.
     cache_manager : CacheManager
         Cache manager object.
     available_datasets_list : list
@@ -107,19 +100,17 @@ class LoadAPI(object):
 
     """
 
-    def __init__(self, name, task, data_dir, verbose, is_test):
+    def __init__(self, name, task, data_dir, verbose):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
         assert task, 'Must input a valid task name: {}'.format(task)
         assert verbose is not None, 'verbose cannot be empty'
-        assert is_test is not None, 'is_test cannot be empty'
 
         self.name = name
         self.task = task
         self.data_dir = data_dir
         self.verbose = verbose
-        self.is_test = is_test
-        self.cache_manager = CacheManager(self.is_test)
+        self.cache_manager = CacheManager()
         self.available_datasets_list = fetch_list_datasets()
 
         self.parse_task_name()
@@ -162,8 +153,7 @@ class LoadAPI(object):
         downloader = DownloadAPI(name=self.name,
                                  data_dir=self.data_dir,
                                  extract_data=True,
-                                 verbose=self.verbose,
-                                 is_test=self.is_test)
+                                 verbose=self.verbose)
         downloader.run()
 
     def set_dataset_metadata(self):
@@ -180,8 +170,7 @@ class LoadAPI(object):
         """Process the dataset's metadata."""
         processer = ProcessAPI(name=self.name,
                                task=self.task,
-                               verbose=self.verbose,
-                               is_test=self.is_test)
+                               verbose=self.verbose)
         processer.run()
 
     def get_data_loader(self):
