@@ -54,8 +54,8 @@ class TestCallProcess:
             process('invalid_dataset_name')
 
 
-class TestClassDownloadAPI:
-    """Unit tests for the DownloadAPI class."""
+class TestClassProcessAPI:
+    """Unit tests for the ProcessAPI class."""
 
     def test_init_with_all_inputs(self, mocker, mocks_init_class):
         dataset = 'mnist'
