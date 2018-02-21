@@ -8,8 +8,8 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 from dbcollection.core.loader import DataLoader
 
-from .download import DownloadAPI
-from .process import ProcessAPI
+from .download import download
+from .process import process
 
 from .list_datasets import DatasetConstructor
 
@@ -58,9 +58,6 @@ def load(name, task='default', data_dir='', verbose=True):
                      verbose=verbose)
 
     data_loader = loader.run()
-
-    if verbose:
-        print('==> Dataset loading complete.')
 
     return data_loader
 
@@ -125,66 +122,82 @@ class LoadAPI(object):
 
     def run(self):
         """Main method."""
-        self.set_dataset_data()
+        if not self.dataset_data_exists_in_cache():
+            if self.verbose:
+                print('==> Dataset \'{}\' not found in cache.'.format(self.name))
+                print('Proceeding to download the data files...')
+            self.download_dataset_data()
+
+        if not self.dataset_task_metadata_exists_in_cache():
+            if self.verbose:
+                print('==> Processed metadata not found for dataset \'{}\', task \'{}\'.'
+                      .format(self.name, self.task))
+                print('Proceeding to process the metadata for this task...')
+            self.process_dataset_task_metadata()
+
+        if self.verbose:
+            print('==> Load the dataset\'s metadata.')
         dataset_loader = self.get_data_loader()
+
+        if self.verbose:
+            print('==> Dataset loading complete.')
+
         return dataset_loader
 
-    def set_dataset_data(self):
-        """Setup the dataset's metadata."""
-        if self.verbose:
-            print('==> Setup the dataset\'s metadata.')
+    def dataset_data_exists_in_cache(self):
+        return self.cache_manager.dataset.exists(self.name)
 
-        self.get_dataset_files()
-        self.set_dataset_metadata()
-
-    def get_dataset_files(self):
-        """Download the dataset files if they don't exists in cache."""
-        if not self.is_dataset_files_in_cache():
-            self.download_dataset()
-            self.cache_manager.reload_cache()  # reload the cache's data
-
-    def is_dataset_files_in_cache(self):
-        """Check if the dataset is registered in the cache."""
-        return self.cache_manager.exists_dataset(self.name)
+    def download_dataset_data(self):
+        self.download_dataset()
+        self.reload_cache()
 
     def download_dataset(self):
         """Download the dataset to disk."""
-        downloader = DownloadAPI(name=self.name,
-                                 data_dir=self.data_dir,
-                                 extract_data=True,
-                                 verbose=self.verbose)
-        downloader.run()
+        download(name=self.name,
+                 data_dir=self.data_dir,
+                 extract_data=True,
+                 verbose=self.verbose)
 
-    def set_dataset_metadata(self):
-        """Process the dataset's metadata if it does not exists in cache."""
-        if not self.is_dataset_task_in_cache():
-            self.process_dataset()
-            self.cache_manager.reload_cache()  # reload the cache's
+    def reload_cache(self):
+        self.cache_manager.manager.reload_cache()
 
-    def is_dataset_task_in_cache(self):
-        """Check if the dataset task is registered in the cache."""
-        return self.cache_manager.exists_task(self.name, self.task)
+    def dataset_task_metadata_exists_in_cache(self):
+        return self.cache_manager.task.exists(self.name, self.task)
+
+    def process_dataset_task_metadata(self):
+        self.process_dataset()
+        self.reload_cache()
 
     def process_dataset(self):
         """Process the dataset's metadata."""
-        processer = ProcessAPI(name=self.name,
-                               task=self.task,
-                               verbose=self.verbose)
-        processer.run()
+        process(name=self.name,
+                task=self.task,
+                verbose=self.verbose)
 
     def get_data_loader(self):
         """Return a DataLoader object."""
-        if self.verbose:
-            print('==> Load the dataset\'s metadata.')
-
         data_dir_path, hdf5_filepath = self.get_cache_paths()
-        return DataLoader(name=self.name,
-                          task=self.task,
-                          data_dir=data_dir_path,
-                          hdf5_filepath=hdf5_filepath)
+        data_loader = self.get_loader_obj(data_dir_path, hdf5_filepath)
+        return data_loader
 
     def get_cache_paths(self):
         """Return the dataset's data dir + hdf5 metadata paths."""
-        dset_paths = self.cache_manager.get_dataset_storage_paths(self.name)
-        task_hdf5_filepath = self.cache_manager.get_task_cache_path(self.name, self.task)
-        return dset_paths['data_dir'], task_hdf5_filepath
+        data_dir_path = self.get_data_dir_path_from_cache()
+        hdf5_filepath = self.get_hdf5_file_path_from_cache()
+        return data_dir_path, hdf5_filepath
+
+    def get_data_dir_path_from_cache(self):
+        dataset_metadata = self.cache_manager.dataset.get(self.name)
+        return dataset_metadata["data_dir"]
+
+    def get_hdf5_file_path_from_cache(self):
+        task_metadata = self.cache_manager.task.get(self.name, self.task)
+        return task_metadata["filename"]
+
+    def get_loader_obj(self, data_dir, hdf5_filepath):
+        assert data_dir
+        assert hdf5_filepath
+        return DataLoader(name=self.name,
+                          task=self.task,
+                          data_dir=data_dir,
+                          hdf5_filepath=hdf5_filepath)
