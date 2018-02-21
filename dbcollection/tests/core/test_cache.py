@@ -283,6 +283,14 @@ class TestCacheDataManager:
         with pytest.raises(KeyError):
             cache_data_manager.delete_data(name)
 
+    def test_reload_cache(self, mocker, cache_data_manager, test_data):
+        cache_data_manager.data = None
+
+        cache_data_manager.reload_cache()
+
+        assert cache_data_manager.data is not None
+        assert cache_data_manager.data == test_data.data
+
 
 @pytest.fixture()
 def cache_manager(mocker, test_data):

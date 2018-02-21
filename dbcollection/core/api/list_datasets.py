@@ -118,6 +118,16 @@ class DatasetConstructor(object):
         """Returns the default task for the dataset."""
         return self.dataset_manager["default_task"]
 
+    def parse_task_name(self, task):
+        """Parse the input task string."""
+        if task == '':
+            task_parsed = self.get_default_task()
+        elif task == 'default':
+            task_parsed = self.get_default_task()
+        else:
+            task_parsed = task
+        return task_parsed
+
     def get_tasks(self):
         """Returns the available tasks of the dataset."""
         return self.dataset_manager["tasks"]

@@ -382,6 +382,10 @@ class CacheDataManager:
         except KeyError:
             raise KeyError("The dataset \'{}\' does not exist in the cache.".format(name))
 
+    def reload_cache(self):
+        """Reloads the cache data contents by reading the cache file from disk."""
+        self.data = self.read_data_cache()
+
 
 class CacheManagerDataset:
     """Manage the cache's dataset configurations."""
