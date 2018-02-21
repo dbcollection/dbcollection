@@ -81,6 +81,45 @@ def assert_mock_init_class(mocks):
         assert mock.called
 
 
+def mock_run_method(mocker, data_exists, task_exists):
+    assert data_exists is not None
+    assert task_exists is not None
+
+    mock_data_exists = mocker.patch.object(LoadAPI, "dataset_data_exists_in_cache", return_value=data_exists)
+    mock_download = mocker.patch.object(LoadAPI, "download_dataset_data")
+    mock_task_exists = mocker.patch.object(LoadAPI, "dataset_task_metadata_exists_in_cache", return_value=task_exists)
+    mock_process = mocker.patch.object(LoadAPI, "process_dataset_task_metadata")
+    mock_data_loader = mocker.patch.object(LoadAPI, "get_data_loader", return_value=["data_loader_dummy_data"])
+
+    return {
+        "data_exists": mock_data_exists,
+        "download": mock_download,
+        "task_exists": mock_task_exists,
+        "process": mock_process,
+        "data_loader": mock_data_loader
+    }
+
+
+def eval_run_method_calls(mocks, data_exists, task_exists):
+    assert mocks
+    assert data_exists is not None
+    assert task_exists is not None
+
+    assert mocks["data_exists"].called
+    assert mocks["task_exists"].called
+    assert mocks["data_loader"].called
+
+    if not data_exists:
+        assert mocks["download"].called
+    else:
+        assert not mocks["download"].called
+
+    if not task_exists:
+        assert mocks["process"].called
+    else:
+        assert not mocks["process"].called
+
+
 class TestClassLoadAPI:
     """Unit tests for the LoadAPI class."""
 
@@ -130,68 +169,40 @@ class TestClassLoadAPI:
 
     def test_run_dataset_data_files_and_task_exist_in_cache(self, mocker, mocks_init_class):
         inputs = generate_inputs_for_load()
-        mock_data_exists = mocker.patch.object(LoadAPI, "dataset_data_exists_in_cache", return_value=True)
-        mock_task_exists = mocker.patch.object(LoadAPI, "dataset_task_metadata_exists_in_cache", return_value=True)
-        mock_data_loader = mocker.patch.object(LoadAPI, "get_data_loader", return_value=["data_loader_dummy_data"])
+        mocks = mock_run_method(mocker, data_exists=True, task_exists=True)
 
         load_api = LoadAPI(inputs["dataset"], inputs["task"], inputs["data_dir"], inputs["verbose"])
         data_loader = load_api.run()
 
         assert_mock_init_class(mocks_init_class)
-        assert mock_data_exists.called
-        assert mock_task_exists.called
-        assert mock_data_loader.called
-        assert data_loader == ["data_loader_dummy_data"]
+        eval_run_method_calls(mocks, data_exists=True, task_exists=True)
 
     def test_run_dataset_data_files_exist_task_missing_in_cache(self, mocker, mocks_init_class):
         inputs = generate_inputs_for_load()
-        mock_data_exists = mocker.patch.object(LoadAPI, "dataset_data_exists_in_cache", return_value=True)
-        mock_task_exists = mocker.patch.object(LoadAPI, "dataset_task_metadata_exists_in_cache", return_value=False)
-        mock_process = mocker.patch.object(LoadAPI, "process_dataset_task_metadata")
-        mock_data_loader = mocker.patch.object(LoadAPI, "get_data_loader", return_value=["data_loader_dummy_data"])
+        mocks = mock_run_method(mocker, data_exists=True, task_exists=False)
 
         load_api = LoadAPI(inputs["dataset"], inputs["task"], inputs["data_dir"], inputs["verbose"])
         data_loader = load_api.run()
 
         assert_mock_init_class(mocks_init_class)
-        assert mock_data_exists.called
-        assert mock_task_exists.called
-        assert mock_process.called
-        assert mock_data_loader.called
-        assert data_loader == ["data_loader_dummy_data"]
+        eval_run_method_calls(mocks, data_exists=True, task_exists=False)
 
     def test_run_dataset_data_files_missing_task_exists_in_cache(self, mocker, mocks_init_class):
         inputs = generate_inputs_for_load()
-        mock_data_exists = mocker.patch.object(LoadAPI, "dataset_data_exists_in_cache", return_value=False)
-        mock_download = mocker.patch.object(LoadAPI, "download_dataset_data")
-        mock_task_exists = mocker.patch.object(LoadAPI, "dataset_task_metadata_exists_in_cache", return_value=True)
-        mock_data_loader = mocker.patch.object(LoadAPI, "get_data_loader", return_value=["data_loader_dummy_data"])
+        mocks = mock_run_method(mocker, data_exists=False, task_exists=True)
 
         load_api = LoadAPI(inputs["dataset"], inputs["task"], inputs["data_dir"], inputs["verbose"])
         data_loader = load_api.run()
 
         assert_mock_init_class(mocks_init_class)
-        assert mock_data_exists.called
-        assert mock_task_exists.called
-        assert mock_download.called
-        assert mock_data_loader.called
-        assert data_loader == ["data_loader_dummy_data"]
+        eval_run_method_calls(mocks, data_exists=False, task_exists=True)
 
     def test_run_dataset_files_and_task_missing_in_cache(self, mocker, mocks_init_class):
         inputs = generate_inputs_for_load()
-        mock_data_exists = mocker.patch.object(LoadAPI, "dataset_data_exists_in_cache", return_value=False)
-        mock_download = mocker.patch.object(LoadAPI, "download_dataset_data")
-        mock_task_exists = mocker.patch.object(LoadAPI, "dataset_task_metadata_exists_in_cache", return_value=False)
-        mock_process = mocker.patch.object(LoadAPI, "process_dataset_task_metadata")
-        mock_data_loader = mocker.patch.object(LoadAPI, "get_data_loader", return_value=["data_loader_dummy_data"])
+        mocks = mock_run_method(mocker, data_exists=False, task_exists=False)
 
         load_api = LoadAPI(inputs["dataset"], inputs["task"], inputs["data_dir"], inputs["verbose"])
         data_loader = load_api.run()
 
         assert_mock_init_class(mocks_init_class)
-        assert mock_data_exists.called
-        assert mock_task_exists.called
-        assert mock_download.called
-        assert mock_data_loader.called
-        assert mock_process.called
-        assert data_loader == ["data_loader_dummy_data"]
+        eval_run_method_calls(mocks, data_exists=False, task_exists=False)
