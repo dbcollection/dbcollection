@@ -218,3 +218,15 @@ class TestClassLoadAPI:
         assert_mock_init_class(mocks_init_class)
         assert mock_download.called
         assert mock_reload.called
+
+    def test_process_dataset_task_metadata(self, mocker, mocks_init_class):
+        inputs = generate_inputs_for_load()
+        mock_process = mocker.patch.object(LoadAPI, "process_dataset")
+        mock_reload = mocker.patch.object(LoadAPI, "reload_cache")
+
+        load_api = LoadAPI(inputs["dataset"], inputs["task"], inputs["data_dir"], inputs["verbose"])
+        load_api.process_dataset_task_metadata()
+
+        assert_mock_init_class(mocks_init_class)
+        assert mock_process.called
+        assert mock_reload.called
