@@ -206,3 +206,15 @@ class TestClassLoadAPI:
 
         assert_mock_init_class(mocks_init_class)
         eval_run_method_calls(mocks, data_exists=False, task_exists=False)
+
+    def test_download_dataset_data(self, mocker, mocks_init_class):
+        inputs = generate_inputs_for_load()
+        mock_download = mocker.patch.object(LoadAPI, "download_dataset")
+        mock_reload = mocker.patch.object(LoadAPI, "reload_cache")
+
+        load_api = LoadAPI(inputs["dataset"], inputs["task"], inputs["data_dir"], inputs["verbose"])
+        load_api.download_dataset_data()
+
+        assert_mock_init_class(mocks_init_class)
+        assert mock_download.called
+        assert mock_reload.called
