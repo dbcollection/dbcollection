@@ -176,15 +176,10 @@ class LoadAPI(object):
 
     def get_data_loader(self):
         """Return a DataLoader object."""
-        data_dir_path, hdf5_filepath = self.get_cache_paths()
-        data_loader = self.get_loader_obj(data_dir_path, hdf5_filepath)
-        return data_loader
-
-    def get_cache_paths(self):
-        """Return the dataset's data dir + hdf5 metadata paths."""
         data_dir_path = self.get_data_dir_path_from_cache()
         hdf5_filepath = self.get_hdf5_file_path_from_cache()
-        return data_dir_path, hdf5_filepath
+        data_loader = self.get_loader_obj(data_dir_path, hdf5_filepath)
+        return data_loader
 
     def get_data_dir_path_from_cache(self):
         dataset_metadata = self.cache_manager.dataset.get(self.name)

@@ -230,3 +230,21 @@ class TestClassLoadAPI:
         assert_mock_init_class(mocks_init_class)
         assert mock_process.called
         assert mock_reload.called
+
+    def test_get_data_loader(self, mocker, mocks_init_class):
+        inputs = generate_inputs_for_load()
+        mock_data_dir = mocker.patch.object(LoadAPI, "get_data_dir_path_from_cache",
+                                            return_value="/some/path/data/")
+        mock_hdf5_filepath = mocker.patch.object(LoadAPI, "get_hdf5_file_path_from_cache",
+                                            return_value="/some/path/to/file")
+        mock_loader = mocker.patch.object(LoadAPI, "get_loader_obj",
+                                            return_value=["data_loader_dummy"])
+
+        load_api = LoadAPI(inputs["dataset"], inputs["task"], inputs["data_dir"], inputs["verbose"])
+        data_loader = load_api.get_data_loader()
+
+        assert_mock_init_class(mocks_init_class)
+        assert mock_data_dir.called
+        assert mock_hdf5_filepath.called
+        assert mock_loader.called
+        assert data_loader == ["data_loader_dummy"]
