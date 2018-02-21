@@ -143,7 +143,6 @@ class DownloadAPI(object):
             if self.verbose:
                 print('==> Updating the cache manager')
 
-
     def exists_dataset_in_cache(self):
         return self.cache_manager.dataset.exists(self.name)
 
