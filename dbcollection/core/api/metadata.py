@@ -102,7 +102,7 @@ class MetadataConstructor(object):
         self.dataset_manager = self.get_dataset_metadata_from_database(name)
 
     def get_metadata_datasets(self):
-         return fetch_list_datasets()
+        return fetch_list_datasets()
 
     def get_dataset_metadata_from_database(self, name):
         """Returns the metadata and constructor class generator for a dataset."""
