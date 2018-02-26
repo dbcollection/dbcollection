@@ -11,7 +11,7 @@ from dbcollection.core.loader import DataLoader
 from .download import download
 from .process import process
 
-from .list_datasets import DatasetConstructor
+from .list_datasets import MetadataConstructor
 
 
 def load(name, task='default', data_dir='', verbose=True):
@@ -114,7 +114,7 @@ class LoadAPI(object):
         return CacheManager()
 
     def get_dataset_metadata_obj(self, name):
-        return DatasetConstructor(name)
+        return MetadataConstructor(name)
 
     def parse_task_name(self, task):
         """Validate the task name."""

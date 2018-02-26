@@ -5,11 +5,11 @@ Test dbcollection's metadata handling methods/classes.
 
 import pytest
 
-from dbcollection.core.api.list_datasets import DatasetConstructor
+from dbcollection.core.api.list_datasets import MetadataConstructor
 
 
-class TestDatasetConstructor:
-    """Unit tests for the DatasetConstructor class."""
+class TestMetadataConstructor:
+    """Unit tests for the MetadataConstructor class."""
 
     def test_init(self, mocker):
         pass

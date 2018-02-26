@@ -8,7 +8,7 @@ import os
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import DatasetConstructor
+from .list_datasets import MetadataConstructor
 
 
 def process(name, task='default', verbose=True):
@@ -75,7 +75,7 @@ class ProcessAPI(object):
         Flag to extract data (if True).
     cache_manager : CacheManager
         Cache manager object.
-    db_metadata : DatasetConstructor
+    db_metadata : MetadataConstructor
         Dataset metadata/constructor manager.
 
     Raises
@@ -106,7 +106,7 @@ class ProcessAPI(object):
         return CacheManager()
 
     def get_dataset_metadata_obj(self, name):
-        return DatasetConstructor(name)
+        return MetadataConstructor(name)
 
     def parse_task_name(self, task):
         """Parse the input task string."""

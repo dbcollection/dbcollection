@@ -83,7 +83,7 @@ def get_urls_list(urls):
     return url_list
 
 
-class DatasetConstructor(object):
+class MetadataConstructor(object):
     """Manages a dataset's metadata and constructor states.
 
     Parameters
