@@ -17,350 +17,350 @@ from dbcollection.utils.string_ascii import convert_ascii_to_str as ascii_to_str
 # Setup dataset generator
 db_generator = TestDatasetGenerator()
 
-# -----------------------------------------------------------
-# FieldLoader tests
-# -----------------------------------------------------------
 
-def test_FieldLoader__init():
-    h5obj = db_generator.load_hdf5_file()
+class TestFieldLoader:
+    """Unit tests for the TestFieldLoader class."""
 
-    obj_id = 1
-    field_loader = FieldLoader(h5obj['/train/data'], obj_id)
+    def test__init(self,):
+        h5obj = db_generator.load_hdf5_file()
 
-    assert not field_loader._in_memory
-    assert field_loader.name == 'data'
+        obj_id = 1
+        field_loader = FieldLoader(h5obj['/train/data'], obj_id)
 
-@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
-def test_FieldLoader_get_single_obj(idx):
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        assert not field_loader._in_memory
+        assert field_loader.name == 'data'
 
-    data = field_loader.get(idx)
+    @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+    def test_get_single_obj(self, idx):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, set_data['data'][idx])
-
-@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
-def test_FieldLoader_get_single_obj_in_memory(idx):
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    field_loader.to_memory = True
-    data = field_loader.get(idx)
-
-    assert np.array_equal(data, set_data['data'][idx])
-
-def test_FieldLoader_get_single_obj_by_arg_name():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    idx = 0
-    data = field_loader.get(index=idx)
-
-    assert np.array_equal(data, set_data['data'][idx])
-
-def test_FieldLoader_get_single_obj_by_arg_name_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    field_loader.to_memory = True
-    idx = 0
-    data = field_loader.get(index=idx)
-
-    assert np.array_equal(data, set_data['data'][idx])
-
-def test_FieldLoader_get_single_obj_list_of_equal_indexes():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    idx = [0, 0]
-    data = field_loader.get(idx)
-
-    assert np.array_equal(data, set_data['data'][list(set(idx))])
-
-def test_FieldLoader_get_single_obj_list_of_equal_indexes_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    field_loader.to_memory = True
-    idx = [0, 0]
-    data = field_loader.get(idx)
-
-    assert np.array_equal(data, set_data['data'][list(set(idx))])
-
-def test_FieldLoader_get_single_obj_list():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    idx = [0]
-    data = field_loader.get(idx)
-
-    assert np.array_equal(data, set_data['data'][idx[0]])
-
-def test_FieldLoader_get_single_obj_list_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    field_loader.to_memory = True
-    idx = [0]
-    data = field_loader.get(idx)
-
-    assert np.array_equal(data, set_data['data'][idx[0]])
-
-def test_FieldLoader_get_single_obj_tuple():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    idx = (0,)
-    data = field_loader.get(idx)
-
-    assert np.array_equal(data, set_data['data'][idx[0]])
-
-def test_FieldLoader_get_single_obj_tuple_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    field_loader.to_memory = True
-    idx = (0,)
-    data = field_loader.get(idx)
-
-    assert np.array_equal(data, set_data['data'][idx[0]])
-
-def test_FieldLoader_get_single_obj_raises_error_wrong_format():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-    with pytest.raises(TypeError):
-        idx = {1}
         data = field_loader.get(idx)
 
-def test_FieldLoader_get_single_obj_raises_error_wrong_format_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        assert np.array_equal(data, set_data['data'][idx])
 
-    field_loader.to_memory = True
-    with pytest.raises(TypeError):
-        idx = {1}
+    @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+    def test_get_single_obj_in_memory(self, idx):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+        field_loader.to_memory = True
         data = field_loader.get(idx)
 
-def test_FieldLoader_get_single_obj_empty_list():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        assert np.array_equal(data, set_data['data'][idx])
 
-    idx = []
-    data = field_loader.get(idx)
+    def test_get_single_obj_by_arg_name(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, set_data['data'])
+        idx = 0
+        data = field_loader.get(index=idx)
 
-def test_FieldLoader_get_single_obj_empty_list_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        assert np.array_equal(data, set_data['data'][idx])
 
-    field_loader.to_memory = True
-    idx = []
-    data = field_loader.get(idx)
+    def test_get_single_obj_by_arg_name_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, set_data['data'])
+        field_loader.to_memory = True
+        idx = 0
+        data = field_loader.get(index=idx)
 
-@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
-def test_FieldLoader_get_single_obj_convert_to_string(idx):
-    data_field = 'strings_list'
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
+        assert np.array_equal(data, set_data['data'][idx])
 
-    data = field_loader.get(idx, convert_to_str=True)
+    def test_get_single_obj_list_of_equal_indexes(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
-    assert isinstance(data, str)
+        idx = [0, 0]
+        data = field_loader.get(idx)
 
-@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
-def test_FieldLoader_get_single_obj_convert_to_string_in_memory(idx):
-    data_field = 'strings_list'
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
+        assert np.array_equal(data, set_data['data'][list(set(idx))])
 
-    field_loader.to_memory = True
-    data = field_loader.get(idx, convert_to_str=True)
+    def test_get_single_obj_list_of_equal_indexes_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
-    assert isinstance(data, str)
+        field_loader.to_memory = True
+        idx = [0, 0]
+        data = field_loader.get(idx)
 
-def test_FieldLoader_get_multi_obj_convert_to_string():
-    data_field = 'strings_list'
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
+        assert np.array_equal(data, set_data['data'][list(set(idx))])
 
-    idx = list(range(3))
-    data = field_loader.get(idx, convert_to_str=True)
+    def test_get_single_obj_list(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
-    assert isinstance(data, list)
+        idx = [0]
+        data = field_loader.get(idx)
 
-def test_FieldLoader_get_multi_obj_convert_to_string_in_memory():
-    data_field = 'strings_list'
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
+        assert np.array_equal(data, set_data['data'][idx[0]])
 
-    field_loader.to_memory = True
-    idx = list(range(3))
-    data = field_loader.get(idx, convert_to_str=True)
+    def test_get_single_obj_list_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
-    assert isinstance(data, list)
+        field_loader.to_memory = True
+        idx = [0]
+        data = field_loader.get(idx)
 
-def test_FieldLoader_get_two_obj():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        assert np.array_equal(data, set_data['data'][idx[0]])
 
-    idx = [1, 2]
-    data = field_loader.get(idx)
+    def test_get_single_obj_tuple(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, set_data['data'][idx])
+        idx = (0,)
+        data = field_loader.get(idx)
 
-def test_FieldLoader_get_two_obj_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        assert np.array_equal(data, set_data['data'][idx[0]])
 
-    field_loader.to_memory = True
-    idx = [1, 2]
-    data = field_loader.get(idx)
+    def test_get_single_obj_tuple_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, set_data['data'][idx])
+        field_loader.to_memory = True
+        idx = (0,)
+        data = field_loader.get(idx)
 
-def test_FieldLoader_get_multiple_objs():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        assert np.array_equal(data, set_data['data'][idx[0]])
 
-    idx = [1, 2, 5, 8]
-    data = field_loader.get(idx)
+    def test_get_single_obj_raises_error_wrong_format(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    assert np.array_equal(data, set_data['data'][idx])
+        with pytest.raises(TypeError):
+            idx = {1}
+            data = field_loader.get(idx)
 
-def test_FieldLoader_get_multiple_objs_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+    def test_get_single_obj_raises_error_wrong_format_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    field_loader.to_memory = True
-    idx = [1, 2, 5, 8]
-    data = field_loader.get(idx)
+        field_loader.to_memory = True
+        with pytest.raises(TypeError):
+            idx = {1}
+            data = field_loader.get(idx)
 
-    assert np.array_equal(data, set_data['data'][idx])
+    def test_get_single_obj_empty_list(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-def test_FieldLoader_get_multiple_objs_unordered():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        idx = []
+        data = field_loader.get(idx)
 
-    idx = [8, 2, 5, 1]
-    data = field_loader.get(idx)
+        assert np.array_equal(data, set_data['data'])
 
-    assert not np.array_equal(data, set_data['data'][idx])
+    def test_get_single_obj_empty_list_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-def test_FieldLoader_get_multiple_objs_unordered_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        field_loader.to_memory = True
+        idx = []
+        data = field_loader.get(idx)
 
-    field_loader.to_memory = True
-    idx = [8, 2, 5, 1]
-    data = field_loader.get(idx)
+        assert np.array_equal(data, set_data['data'])
 
-    assert not np.array_equal(data, set_data['data'][idx])
+    @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+    def test_get_single_obj_convert_to_string(self, idx):
+        data_field = 'strings_list'
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
 
-def test_FieldLoader_get_all_obj():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        data = field_loader.get(idx, convert_to_str=True)
 
-    data = field_loader.get()
+        assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
+        assert isinstance(data, str)
 
-    assert np.array_equal(data, set_data['data'])
+    @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+    def test_get_single_obj_convert_to_string_in_memory(self, idx):
+        data_field = 'strings_list'
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
 
-def test_FieldLoader_get_all_obj_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        field_loader.to_memory = True
+        data = field_loader.get(idx, convert_to_str=True)
 
-    field_loader.to_memory = True
-    data = field_loader.get()
+        assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
+        assert isinstance(data, str)
 
-    assert np.array_equal(data, set_data['data'])
+    def test_get_multi_obj_convert_to_string(self):
+        data_field = 'strings_list'
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
 
-def test_FieldLoader_size():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+        idx = list(range(3))
+        data = field_loader.get(idx, convert_to_str=True)
 
-    size = field_loader.size()
+        assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
+        assert isinstance(data, list)
 
-    assert size == set_data['data'].shape
+    def test_get_multi_obj_convert_to_string_in_memory(self):
+        data_field = 'strings_list'
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
 
-def test_FieldLoader_object_field_id():
-    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        field_loader.to_memory = True
+        idx = list(range(3))
+        data = field_loader.get(idx, convert_to_str=True)
 
-    obj_id = field_loader.object_field_id()
+        assert np.array_equal(data, ascii_to_str(set_data[data_field][idx]))
+        assert isinstance(data, list)
 
-    assert obj_id is 1
+    def test_get_two_obj(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-def test_FieldLoader_object_field_id_not_equal():
-    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        idx = [1, 2]
+        data = field_loader.get(idx)
 
-    obj_id = field_loader.object_field_id()
+        assert np.array_equal(data, set_data['data'][idx])
 
-    assert obj_id is not 2
+    def test_get_two_obj_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-def test_FieldLoader_info():
-    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-    field_loader.info()
+        field_loader.to_memory = True
+        idx = [1, 2]
+        data = field_loader.get(idx)
 
-def test_FieldLoader_info_no_verbose():
-    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-    field_loader.info(False)
+        assert np.array_equal(data, set_data['data'][idx])
 
-def test_FieldLoader_to_memory():
-    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+    def test_get_multiple_objs(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    field_loader.to_memory = True
+        idx = [1, 2, 5, 8]
+        data = field_loader.get(idx)
 
-    assert isinstance(field_loader.data, np.ndarray)
+        assert np.array_equal(data, set_data['data'][idx])
 
-def test_FieldLoader_to_memory_to_disk():
-    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+    def test_get_multiple_objs_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    field_loader.to_memory = True
-    field_loader.to_memory = False
+        field_loader.to_memory = True
+        idx = [1, 2, 5, 8]
+        data = field_loader.get(idx)
 
-    assert isinstance(field_loader.data, h5py._hl.dataset.Dataset)
+        assert np.array_equal(data, set_data['data'][idx])
 
-def test_FieldLoader__len__():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+    def test_get_multiple_objs_unordered(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    size = len(field_loader)
+        idx = [8, 2, 5, 1]
+        data = field_loader.get(idx)
 
-    assert size == len(set_data['data'])
+        assert not np.array_equal(data, set_data['data'][idx])
 
-def test_FieldLoader__str__():
-    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+    def test_get_multiple_objs_unordered_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    if os.name == 'nt':
-        matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i4">'
-    else:
-        matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i8">'
+        field_loader.to_memory = True
+        idx = [8, 2, 5, 1]
+        data = field_loader.get(idx)
 
-    assert str(field_loader) == matching_str
+        assert not np.array_equal(data, set_data['data'][idx])
 
-def test_FieldLoader__str__in_memory():
-    field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+    def test_get_all_obj(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    field_loader.to_memory = True
-    if os.name == 'nt':
-        if sys.version_info[0] == 2:
-            matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10L, 10L), type "int32">'
+        data = field_loader.get()
+
+        assert np.array_equal(data, set_data['data'])
+
+    def test_get_all_obj_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+        field_loader.to_memory = True
+        data = field_loader.get()
+
+        assert np.array_equal(data, set_data['data'])
+
+    def test_size(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+        size = field_loader.size()
+
+        assert size == set_data['data'].shape
+
+    def test_object_field_id(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+
+        obj_id = field_loader.object_field_id()
+
+        assert obj_id is 1
+
+    def test_object_field_id_not_equal(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+
+        obj_id = field_loader.object_field_id()
+
+        assert obj_id is not 2
+
+    def test_info(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        field_loader.info()
+
+    def test_info_no_verbose(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        field_loader.info(False)
+
+    def test_to_memory(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+
+        field_loader.to_memory = True
+
+        assert isinstance(field_loader.data, np.ndarray)
+
+    def test_to_memory_to_disk(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+
+        field_loader.to_memory = True
+        field_loader.to_memory = False
+
+        assert isinstance(field_loader.data, h5py._hl.dataset.Dataset)
+
+    def test__len__(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+        size = len(field_loader)
+
+        assert size == len(set_data['data'])
+
+    def test__str__(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+
+        if os.name == 'nt':
+            matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i4">'
         else:
-            matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int32">'
-    else:
-        matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int64">'
+            matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i8">'
 
-    assert str(field_loader) == matching_str
+        assert str(field_loader) == matching_str
 
-@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
-def test_FieldLoader__index__single_obj(idx):
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+    def test__str__in_memory(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
 
-    data = field_loader[idx]
+        field_loader.to_memory = True
+        if os.name == 'nt':
+            if sys.version_info[0] == 2:
+                matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10L, 10L), type "int32">'
+            else:
+                matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int32">'
+        else:
+            matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int64">'
 
-    assert np.array_equal(data, set_data['data'][idx])
+        assert str(field_loader) == matching_str
 
-@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
-def test_FieldLoader__index__single_obj_in_memory(idx):
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+    @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+    def test__index__single_obj(self, idx):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    field_loader.to_memory = True
-    data = field_loader[idx]
+        data = field_loader[idx]
 
-    assert np.array_equal(data, set_data['data'][idx])
+        assert np.array_equal(data, set_data['data'][idx])
 
-def test_FieldLoader__index__single_objs_single_value():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+    @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+    def test__index__single_obj_in_memory(self, idx):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    data = field_loader[0, 0]
+        field_loader.to_memory = True
+        data = field_loader[idx]
 
-    assert np.array_equal(data, set_data['data'][0][0])
+        assert np.array_equal(data, set_data['data'][idx])
 
-def test_FieldLoader__index__single_objs_single_value_in_memory():
-    field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+    def test__index__single_objs_single_value(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
-    field_loader.to_memory = True
-    data = field_loader[0, 0]
+        data = field_loader[0, 0]
 
-    assert np.array_equal(data, set_data['data'][0][0])
+        assert np.array_equal(data, set_data['data'][0][0])
+
+    def test__index__single_objs_single_value_in_memory(self):
+        field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
+
+        field_loader.to_memory = True
+        data = field_loader[0, 0]
+
+        assert np.array_equal(data, set_data['data'][0][0])
 
 
 # -----------------------------------------------------------
