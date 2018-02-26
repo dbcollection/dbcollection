@@ -8,7 +8,7 @@ import os
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import DatasetConstructor
+from .metadata import MetadataConstructor
 
 
 def download(name, data_dir=None, extract_data=True, verbose=True):
@@ -103,7 +103,7 @@ class DownloadAPI(object):
         return CacheManager()
 
     def get_dataset_metadata_obj(self, name):
-        return DatasetConstructor(name)
+        return MetadataConstructor(name)
 
     def get_download_data_dir(self):
         if self.data_dir:
