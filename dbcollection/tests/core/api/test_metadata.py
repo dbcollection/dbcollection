@@ -77,3 +77,24 @@ class TestMetadataConstructor:
     def test_get_default_task__raises_error_has_inputs(self, mocker, metadata_cls):
         with pytest.raises(TypeError):
             metadata_cls.get_default_task('some_input')
+
+    @pytest.mark.parametrize('task', ['', 'default'])
+    def test_parse_task_name_return_default_task_name(self, mocker, metadata_cls, task):
+        mocker.patch.object(MetadataConstructor, 'get_default_task', return_value='some_default_task_name')
+
+        assert metadata_cls.parse_task_name(task) == 'some_default_task_name'
+
+    def test_parse_task_name_return_input_task_name(self, mocker, metadata_cls):
+        assert metadata_cls.parse_task_name('some_task') == 'some_task'
+
+    def test_parse_task_name__raises_error_missing_input(self, mocker, metadata_cls):
+        with pytest.raises(TypeError):
+            metadata_cls.parse_task_name()
+
+    def test_parse_task_name__raises_error_invalid_input(self, mocker, metadata_cls):
+        with pytest.raises(AssertionError):
+            metadata_cls.parse_task_name(None)
+
+    def test_parse_task_name__raises_error_too_many_input(self, mocker, metadata_cls):
+        with pytest.raises(TypeError):
+            metadata_cls.parse_task_name('', '')

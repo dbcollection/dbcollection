@@ -123,6 +123,7 @@ class MetadataConstructor(object):
 
     def parse_task_name(self, task):
         """Parse the input task string."""
+        assert isinstance(task, str), "Must input a string as a valid task name."
         if task == '':
             task_parsed = self.get_default_task()
         elif task == 'default':
