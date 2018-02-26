@@ -68,3 +68,12 @@ class TestMetadataConstructor:
     def test_get_dataset_metadata_from_database__raises_error_too_many_input(self, mocker, metadata_cls):
         with pytest.raises(TypeError):
             metadata_cls.get_dataset_metadata_from_database('too many', 'inputs')
+
+    def test_get_default_task(self, mocker, metadata_cls):
+        dataset, dummy_metadata_dataset = test_metadata()
+
+        assert metadata_cls.get_default_task() == dummy_metadata_dataset[dataset]['default_task']
+
+    def test_get_default_task__raises_error_has_inputs(self, mocker, metadata_cls):
+        with pytest.raises(TypeError):
+            metadata_cls.get_default_task('some_input')
