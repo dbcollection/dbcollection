@@ -23,7 +23,8 @@ def test_metadata():
     dummy_metadata_dataset = {
         dataset: {
             "default_task": "some_task",
-            "tasks": ["taskA", "taskB", "taskC"]
+            "tasks": ["taskA", "taskB", "taskC"],
+            "constructor": 'dummy_constructor'
         }
     }
     return dataset, dummy_metadata_dataset
@@ -109,3 +110,14 @@ class TestMetadataConstructor:
     def test_get_tasks__raises_error_too_many_input(self, mocker, metadata_cls):
         with pytest.raises(TypeError):
             metadata_cls.get_tasks('input')
+
+    def test_get_constructor(self, mocker, metadata_cls):
+        dataset, dummy_metadata_dataset = test_metadata()
+
+        result = metadata_cls.get_constructor()
+
+        assert result == dummy_metadata_dataset[dataset]['constructor']
+
+    def test_get_constructor__raises_error_too_many_input(self, mocker, metadata_cls):
+        with pytest.raises(TypeError):
+            metadata_cls.get_constructor('input')
