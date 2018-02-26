@@ -98,3 +98,14 @@ class TestMetadataConstructor:
     def test_parse_task_name__raises_error_too_many_input(self, mocker, metadata_cls):
         with pytest.raises(TypeError):
             metadata_cls.parse_task_name('', '')
+
+    def test_get_tasks(self, mocker, metadata_cls):
+        dataset, dummy_metadata_dataset = test_metadata()
+
+        result = metadata_cls.get_tasks()
+
+        assert result == dummy_metadata_dataset[dataset]['tasks']
+
+    def test_get_tasks__raises_error_too_many_input(self, mocker, metadata_cls):
+        with pytest.raises(TypeError):
+            metadata_cls.get_tasks('input')
