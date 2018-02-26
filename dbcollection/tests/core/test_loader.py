@@ -19,7 +19,7 @@ db_generator = TestDatasetGenerator()
 
 
 class TestFieldLoader:
-    """Unit tests for the TestFieldLoader class."""
+    """Unit tests for the FieldLoader class."""
 
     def test__init(self,):
         h5obj = db_generator.load_hdf5_file()
