@@ -104,13 +104,16 @@ class MetadataConstructor(object):
         """Initialize class."""
         assert name, "Must input a valid dataset name."
         self.name = name
+        self.metadata_datasets = self.get_metadata_datasets()
         self.dataset_manager = self.get_dataset_metadata_from_database(name)
 
+    def get_metadata_datasets(self):
+         return fetch_list_datasets()
+
     def get_dataset_metadata_from_database(self, name):
-        """Returns the dataset's metadata and constructor class generator."""
-        available_datasets = fetch_list_datasets()
+        """Returns the metadata and constructor class generator for a dataset."""
         try:
-            return available_datasets[name]
+            return self.metadata_datasets[name]
         except KeyError:
             raise KeyError("Dataset '{}' does not exist in the database.".format(name))
 
