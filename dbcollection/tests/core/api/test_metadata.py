@@ -5,7 +5,7 @@ Test dbcollection's metadata handling methods/classes.
 
 import pytest
 
-from dbcollection.core.api.list_datasets import MetadataConstructor
+from dbcollection.core.api.metadata import MetadataConstructor
 
 
 class TestMetadataConstructor:
