@@ -8,7 +8,7 @@ import os
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import MetadataConstructor
+from .metadata import MetadataConstructor
 
 
 def process(name, task='default', verbose=True):

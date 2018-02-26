@@ -11,7 +11,7 @@ from dbcollection.core.loader import DataLoader
 from .download import download
 from .process import process
 
-from .list_datasets import MetadataConstructor
+from .metadata import MetadataConstructor
 
 
 def load(name, task='default', data_dir='', verbose=True):

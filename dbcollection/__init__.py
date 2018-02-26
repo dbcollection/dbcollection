@@ -51,7 +51,7 @@ from dbcollection.core.api.remove import remove
 from dbcollection.core.api.config_cache import config_cache
 from dbcollection.core.api.query import query
 from dbcollection.core.api.info import info_cache, info_datasets
-from dbcollection.core.api.list_datasets import fetch_list_datasets
+from dbcollection.core.api.metadata import fetch_list_datasets
 
 # load the cache file
 from dbcollection.core.cache import CacheManager

@@ -8,7 +8,7 @@ import json
 
 from dbcollection.core.cache import CacheManager
 
-from .list_datasets import fetch_list_datasets
+from .metadata import fetch_list_datasets
 
 
 def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=True,
