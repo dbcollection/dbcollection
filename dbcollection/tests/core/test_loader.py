@@ -651,273 +651,272 @@ class TestSetLoader:
         assert str(set_loader) == matching_str
 
 
-# -----------------------------------------------------------
-# DataLoader tests
-# -----------------------------------------------------------
+class TestDataLoader:
+    """Unit tests for the DataLoader class."""
 
-def test_DataLoader__init():
-    name = 'some_db'
-    task = 'task'
-    data_dir = './some/dir'
-    hdf5_file = db_generator.get_test_hdf5_filepath_DataLoader()
+    def test__init(self):
+        name = 'some_db'
+        task = 'task'
+        data_dir = './some/dir'
+        hdf5_file = db_generator.get_test_hdf5_filepath_DataLoader()
 
-    data_loader = DataLoader(name, task, data_dir, hdf5_file)
+        data_loader = DataLoader(name, task, data_dir, hdf5_file)
 
-    assert data_loader.db_name == name
-    assert data_loader.task == task
-    assert data_loader.data_dir == data_dir
-    assert data_loader.hdf5_filepath == hdf5_file
-    assert 'train' in data_loader.sets
+        assert data_loader.db_name == name
+        assert data_loader.task == task
+        assert data_loader.data_dir == data_dir
+        assert data_loader.hdf5_filepath == hdf5_file
+        assert 'train' in data_loader.sets
 
-@pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
-def test_DataLoader_get_single_obj(idx):
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
+    def test_get_single_obj(self, idx):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    set_name = 'train'
-    field = 'data'
-    data = data_loader.get(set_name, field, idx)
-
-    assert np.array_equal(data, dataset[set_name][field][idx])
-
-def test_DataLoader_get_single_obj_named_args():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
-
-    set_name = 'train'
-    field = 'data'
-    idx = 0
-    data = data_loader.get(
-        set_name=set_name,
-        field=field,
-        index=idx
-    )
-
-    assert np.array_equal(data, dataset[set_name][field][idx])
-
-def test_DataLoader_get_single_obj_access_via_SetLoader():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
-
-    set_name = 'train'
-    field = 'data'
-    idx = 1
-    data = data_loader.sets[set_name].get(field, idx)
-
-    assert np.array_equal(data, dataset[set_name][field][idx])
-
-def test_DataLoader_get_single_obj_raise_error_invalid_set():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
-
-    with pytest.raises(KeyError):
-        set_name = 'val'
+        set_name = 'train'
         field = 'data'
-        idx = 0
         data = data_loader.get(set_name, field, idx)
 
-def test_DataLoader_get_two_objs():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        assert np.array_equal(data, dataset[set_name][field][idx])
 
-    set_name = 'train'
-    field = 'data'
-    idx = (2, 6, )
-    data = data_loader.get(set_name, field, idx)
+    def test_get_single_obj_named_args(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert np.array_equal(data, dataset[set_name][field][list(idx)])
+        set_name = 'train'
+        field = 'data'
+        idx = 0
+        data = data_loader.get(
+            set_name=set_name,
+            field=field,
+            index=idx
+        )
 
-def test_DataLoader_get_all_objs():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        assert np.array_equal(data, dataset[set_name][field][idx])
 
-    set_name = 'train'
-    field = 'data'
-    data = data_loader.get(set_name, field)
+    def test_get_single_obj_access_via_SetLoader(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert np.array_equal(data, dataset[set_name][field])
+        set_name = 'train'
+        field = 'data'
+        idx = 1
+        data = data_loader.sets[set_name].get(field, idx)
 
-def test_DataLoader_get_all_objs_empty_index():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        assert np.array_equal(data, dataset[set_name][field][idx])
 
-    set_name = 'train'
-    field = 'data'
-    idx = []
-    data = data_loader.get(set_name, field)
+    def test_get_single_obj_raise_error_invalid_set(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert np.array_equal(data, dataset[set_name][field])
+        with pytest.raises(KeyError):
+            set_name = 'val'
+            field = 'data'
+            idx = 0
+            data = data_loader.get(set_name, field, idx)
 
-def test_DataLoader_object_single_obj():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    def test_get_two_objs(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    set_name = 'train'
-    idx = 3
-    data = data_loader.object(set_name, idx)
+        set_name = 'train'
+        field = 'data'
+        idx = (2, 6, )
+        data = data_loader.get(set_name, field, idx)
 
-    assert np.array_equal(data, dataset[set_name]['object_ids'][idx])
+        assert np.array_equal(data, dataset[set_name][field][list(idx)])
 
-def test_DataLoader_object_single_obj_values():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    def test_get_all_objs(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    set_name = 'train'
-    idx = 3
-    data = data_loader.object(set_name, idx, True)
-    expected = get_expected_object_values(dataset[set_name],
-                                          data_loader.sets[set_name].object_fields,
-                                          idx)
+        set_name = 'train'
+        field = 'data'
+        data = data_loader.get(set_name, field)
 
-    assert compare_lists(data, expected)
+        assert np.array_equal(data, dataset[set_name][field])
 
-def test_DataLoader_object_single_obj_raise_error_invalid_set():
-    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+    def test_get_all_objs_empty_index(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    with pytest.raises(KeyError):
-        set_name = 'val'
+        set_name = 'train'
+        field = 'data'
+        idx = []
+        data = data_loader.get(set_name, field)
+
+        assert np.array_equal(data, dataset[set_name][field])
+
+    def test_object_single_obj(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+        set_name = 'train'
         idx = 3
         data = data_loader.object(set_name, idx)
 
-def test_DataLoader_object_two_objs():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        assert np.array_equal(data, dataset[set_name]['object_ids'][idx])
 
-    set_name = 'train'
-    idx = [3, 4]
-    data = data_loader.object(set_name, idx)
+    def test_object_single_obj_values(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert np.array_equal(data, dataset[set_name]['object_ids'][idx])
+        set_name = 'train'
+        idx = 3
+        data = data_loader.object(set_name, idx, True)
+        expected = get_expected_object_values(dataset[set_name],
+                                            data_loader.sets[set_name].object_fields,
+                                            idx)
 
-def test_DataLoader_object_all_objs():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        assert compare_lists(data, expected)
 
-    set_name = 'train'
-    data = data_loader.object(set_name)
+    def test_object_single_obj_raise_error_invalid_set(self):
+        data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert np.array_equal(data, dataset[set_name]['object_ids'])
+        with pytest.raises(KeyError):
+            set_name = 'val'
+            idx = 3
+            data = data_loader.object(set_name, idx)
 
-def test_DataLoader_size_single_field():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    def test_object_two_objs(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    set_name = 'train'
-    field = 'data'
-    size = data_loader.size(set_name, field)
+        set_name = 'train'
+        idx = [3, 4]
+        data = data_loader.object(set_name, idx)
 
-    assert size == dataset[set_name][field].shape
+        assert np.array_equal(data, dataset[set_name]['object_ids'][idx])
 
-def test_DataLoader_size_default():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    def test_object_all_objs(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    set_name = 'train'
-    size = data_loader.size(set_name)
+        set_name = 'train'
+        data = data_loader.object(set_name)
 
-    assert size == dataset[set_name]['object_ids'].shape
+        assert np.array_equal(data, dataset[set_name]['object_ids'])
 
-def test_DataLoader_size_single_field_all_sets():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    def test_size_single_field(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    field = 'data'
-    size = data_loader.size(field=field)
-    expected = {}
-    for set_name in dataset:
-        expected.update({set_name: dataset[set_name][field].shape})
+        set_name = 'train'
+        field = 'data'
+        size = data_loader.size(set_name, field)
 
-    assert size == expected
+        assert size == dataset[set_name][field].shape
 
-def test_DataLoader_size_no_inputs():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    def test_size_default(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    size = data_loader.size()
-    expected = {}
-    for set_name in dataset:
-        expected.update({set_name: dataset[set_name]['object_ids'].shape})
-
-    assert size == expected
-
-def test_DataLoader_size_raise_error_invalid_set():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
-
-    with pytest.raises(KeyError):
-        set_name = "val"
+        set_name = 'train'
         size = data_loader.size(set_name)
 
-def test_DataLoader_size_raise_error_invalid_sfield():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        assert size == dataset[set_name]['object_ids'].shape
 
-    with pytest.raises(KeyError):
-        field = "invalid_field_name"
+    def test_size_single_field_all_sets(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+        field = 'data'
         size = data_loader.size(field=field)
+        expected = {}
+        for set_name in dataset:
+            expected.update({set_name: dataset[set_name][field].shape})
 
-def test_DataLoader_list_single_set():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        assert size == expected
 
-    set_name= 'train'
-    fields = data_loader.list(set_name)
+    def test_size_no_inputs(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert fields == tuple(sorted(dataset[set_name]))
+        size = data_loader.size()
+        expected = {}
+        for set_name in dataset:
+            expected.update({set_name: dataset[set_name]['object_ids'].shape})
 
-def test_DataLoader_list_all_sets():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        assert size == expected
 
-    fields = data_loader.list()
-    expected = {}
-    for set_name in dataset:
-        expected[set_name] = tuple(sorted(dataset[set_name]))
+    def test_size_raise_error_invalid_set(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert fields == expected
+        with pytest.raises(KeyError):
+            set_name = "val"
+            size = data_loader.size(set_name)
 
-def test_DataLoader_list_raise_error_invalid_set():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    def test_size_raise_error_invalid_sfield(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    with pytest.raises(KeyError):
-        set_name = 'val'
+        with pytest.raises(KeyError):
+            field = "invalid_field_name"
+            size = data_loader.size(field=field)
+
+    def test_list_single_set(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+        set_name= 'train'
         fields = data_loader.list(set_name)
 
-def test_DataLoader_object_field_id_field1():
-    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+        assert fields == tuple(sorted(dataset[set_name]))
 
-    set_name = 'train'
-    field = 'data'
-    obj_id = data_loader.object_field_id(set_name, field)
+    def test_list_all_sets(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert obj_id == 0
+        fields = data_loader.list()
+        expected = {}
+        for set_name in dataset:
+            expected[set_name] = tuple(sorted(dataset[set_name]))
 
-def test_DataLoader_object_field_id_field2():
-    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+        assert fields == expected
 
-    set_name = 'train'
-    field = 'number'
-    obj_id = data_loader.object_field_id(set_name, field)
+    def test_list_raise_error_invalid_set(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert obj_id == 2
+        with pytest.raises(KeyError):
+            set_name = 'val'
+            fields = data_loader.list(set_name)
 
-def test_DataLoader_object_field_id_raise_error_invalid_set():
-    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+    def test_object_field_id_field1(self):
+        data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
-    with pytest.raises(KeyError):
-        set_name = 'val'
+        set_name = 'train'
         field = 'data'
         obj_id = data_loader.object_field_id(set_name, field)
 
-def test_DataLoader_info_single_set():
-    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+        assert obj_id == 0
 
-    set_name = 'train'
-    data_loader.info(set_name)
+    def test_object_field_id_field2(self):
+        data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
-def test_DataLoader_info_all_sets():
-    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+        set_name = 'train'
+        field = 'number'
+        obj_id = data_loader.object_field_id(set_name, field)
 
-    data_loader.info()
+        assert obj_id == 2
 
-def test_DataLoader_info_raise_error_invalid_set():
-    data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+    def test_object_field_id_raise_error_invalid_set(self):
+        data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
-    with pytest.raises(KeyError):
-        set_name = 'val'
+        with pytest.raises(KeyError):
+            set_name = 'val'
+            field = 'data'
+            obj_id = data_loader.object_field_id(set_name, field)
+
+    def test_info_single_set(self):
+        data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
+
+        set_name = 'train'
         data_loader.info(set_name)
 
-def test_DataLoader__len__():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+    def test_info_all_sets(self):
+        data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
-    size = len(data_loader)
+        data_loader.info()
 
-    assert size == len(dataset)
+    def test_info_raise_error_invalid_set(self):
+        data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
-def test_DataLoader__str__():
-    data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+        with pytest.raises(KeyError):
+            set_name = 'val'
+            data_loader.info(set_name)
 
-    matching_str = "DataLoader: some_db ('task' task)"
+    def test__len__(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
 
-    assert str(data_loader) == matching_str
+        size = len(data_loader)
+
+        assert size == len(dataset)
+
+    def test__str__(self):
+        data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
+
+        matching_str = "DataLoader: some_db ('task' task)"
+
+        assert str(data_loader) == matching_str
