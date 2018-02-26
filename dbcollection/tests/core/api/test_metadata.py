@@ -11,5 +11,19 @@ from dbcollection.core.api.metadata import MetadataConstructor
 class TestMetadataConstructor:
     """Unit tests for the MetadataConstructor class."""
 
-    def test_init(self, mocker):
-        pass
+    def test_init_class(self, mocker):
+        mock_get_dataset = mocker.patch.object(MetadataConstructor, 'get_dataset_metadata_from_database', return_value=True)
+
+        metadata = MetadataConstructor('some_db')
+
+        assert mock_get_dataset.called
+        assert metadata.name == 'some_db'
+
+    def test_init_class__raise_error_missing_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            MetadataConstructor()
+
+    def test_init_class__raise_error_too_many_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            MetadataConstructor('too', 'many', 'inputs')
+
