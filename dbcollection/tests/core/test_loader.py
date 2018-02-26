@@ -10,12 +10,12 @@ import h5py
 import pytest
 
 from dbcollection.core.loader import FieldLoader, SetLoader, DataLoader
-from dbcollection.utils.test import TestDatasetGenerator
+from .dummy_data.example_hdf5_metadata import HDF5DatasetMetadataGenerator
 from dbcollection.utils.string_ascii import convert_ascii_to_str as ascii_to_str
 
 
 # Setup dataset generator
-db_generator = TestDatasetGenerator()
+db_generator = HDF5DatasetMetadataGenerator()
 
 
 class TestFieldLoader:
