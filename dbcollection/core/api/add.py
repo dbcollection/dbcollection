@@ -58,9 +58,6 @@ def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True):
 
     db_adder.run()
 
-    if verbose:
-        print('==> Dataset registry complete.')
-
 
 class AddAPI(object):
     """Add dataset API class.
