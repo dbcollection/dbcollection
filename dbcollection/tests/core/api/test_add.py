@@ -68,6 +68,18 @@ class TestCallAdd:
             add("db", "task", "data dir", "filename", [], False, 'extra field')
 
 
+@pytest.fixture()
+def add_api_cls(mocker, mocks_init_class, test_data):
+    return AddAPI(
+        name=test_data['dataset'],
+        task=test_data['task'],
+        data_dir=test_data['data_dir'],
+        hdf5_filename=test_data['hdf5_filename'],
+        categories=test_data['categories'],
+        verbose=test_data['verbose']
+    )
+
+
 class TestClassAddAPI:
     """Unit tests for the AddAPI class."""
 
@@ -98,3 +110,14 @@ class TestClassAddAPI:
     def test_init__raises_error_missing_one_input(self, mocker):
         with pytest.raises(AssertionError):
             AddAPI("db", "data dir", "filename", [], False, 'extra field')
+
+    def test_run(self, mocker, add_api_cls):
+        mock_add = mocker.patch.object(AddAPI, "add_dataset_to_cache")
+
+        add_api_cls.run()
+
+        assert mock_add.called
+
+    def test_run__raises_error_if_method_called_with_inputs(self, mocker, add_api_cls):
+        with pytest.raises(TypeError):
+            add_api_cls.run('some input')
