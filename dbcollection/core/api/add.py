@@ -75,8 +75,10 @@ class AddAPI(object):
         Path of the stored data in disk.
     hdf5_filename : str
         Path to the metadata HDF5 file.
-    keywords : list of strings
-        List of keywords to categorize the dataset.
+    categories : tuple
+        List of keyword strings to categorize the dataset.
+    verbose : bool
+        Displays text information.
 
     Attributes
     ----------
@@ -88,8 +90,10 @@ class AddAPI(object):
         Path of the stored data in disk.
     hdf5_filename : bool
         Path to the metadata HDF5 file.
-    keywords : list of strings
-        List of keywords to categorize the dataset.
+    categories : tuple
+        Tuple of keyword strings to categorize the dataset.
+    verbose : bool
+        Displays text information.
     cache_manager : CacheManager
         Cache manager object.
 
@@ -117,11 +121,61 @@ class AddAPI(object):
 
     def run(self):
         """Main method."""
-        if self.verbose:
-            print('==> Adding a dataset registry to the cache records in disk.')
+        self.add_dataset_to_cache()
 
-        self.cache_manager.update(name=self.name,
-                                  data_dir=self.data_dir,
-                                  cache_tasks={self.task: self.file_path},
-                                  cache_keywords=self.keywords,
-                                  is_append=True)
+        if self.verbose:
+            print('==> Dataset successfully registered.')
+
+    def add_dataset_to_cache(self):
+        if self.dataset_exists_in_cache(self.name):
+            self.update_dataset_cache_data()
+            self.add_task_to_cache()
+        else:
+            self.add_new_data_to_cache()
+
+    def dataset_exists_in_cache(self, name):
+        return self.cache_manager.dataset.exists(name)
+
+    def update_dataset_cache_data(self):
+        if any(self.data_dir):
+            self.cache_manager.dataset.update(
+                name=self.name,
+                data_dir=self.data_dir
+            )
+
+    def add_task_to_cache(self):
+        if self.check_if_task_exists_in_cache():
+            self.update_task_entry_in_cache()
+        else:
+            self.add_task_entry_to_cache()
+
+    def check_if_task_exists_in_cache(self):
+        return self.cache_manager.task.exists(self.name, self.task)
+
+    def update_task_entry_in_cache(self):
+        self.cache_manager.task.update(
+            name=self.name,
+            task=self.task,
+            filename=self.hdf5_filename,
+            categories=self.categories
+        )
+
+    def add_task_entry_to_cache(self):
+        self.cache_manager.task.add(
+            name=self.name,
+            task=self.task,
+            filename=self.hdf5_filename,
+            categories=self.categories
+        )
+
+    def add_new_data_to_cache(self):
+        self.cache_manager.dataset.add(
+            name=self.name,
+            data_dir=self.data_dir,
+            tasks={
+                self.task: {
+                    "filename": self.hdf5_filename,
+                    "categories": self.categories
+                }
+            }
+        )
