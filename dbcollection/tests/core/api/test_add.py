@@ -63,6 +63,10 @@ class TestCallAdd:
         assert_mock_call(mocks_init_class)
         assert mock_run.called
 
+    def test_call__raises_error_missing_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            add("db", "task", "data dir", "filename", [], False, 'extra field')
+
 
 class TestClassAddAPI:
     """Unit tests for the AddAPI class."""
