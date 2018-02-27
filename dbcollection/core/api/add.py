@@ -8,7 +8,7 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
-def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=False):
+def add(name, task, data_dir, file_path, keywords=(), verbose=True):
     """Add a dataset/task to the list of available datasets for loading.
 
     Parameters
@@ -19,14 +19,12 @@ def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=Fals
         Name of the task to load.
     data_dir : str
         Path of the stored data in disk.
-    file_path : bool
+    hdf5_filename : str
         Path to the metadata HDF5 file.
     keywords : list of strings, optional
         List of keywords to categorize the dataset.
     verbose : bool, optional
         Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
 
     Examples
     --------
@@ -49,8 +47,7 @@ def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=Fals
                       data_dir=data_dir,
                       file_path=file_path,
                       keywords=keywords,
-                      verbose=verbose,
-                      is_test=is_test)
+                      verbose=verbose)
 
     db_adder.run()
 
@@ -72,12 +69,10 @@ class AddAPI(object):
         Name of the task to load.
     data_dir : str
         Path of the stored data in disk.
-    file_path : bool
+    hdf5_filename : str
         Path to the metadata HDF5 file.
     keywords : list of strings
         List of keywords to categorize the dataset.
-    is_test : bool
-        Flag used for tests.
 
     Attributes
     ----------
@@ -87,18 +82,16 @@ class AddAPI(object):
         Name of the task to load.
     data_dir : str
         Path of the stored data in disk.
-    file_path : bool
+    hdf5_filename : bool
         Path to the metadata HDF5 file.
     keywords : list of strings
         List of keywords to categorize the dataset.
-    is_test : bool
-        Flag used for tests.
     cache_manager : CacheManager
         Cache manager object.
 
     """
 
-    def __init__(self, name, task, data_dir, file_path, keywords, verbose, is_test):
+    def __init__(self, name, task, data_dir, file_path, keywords, verbose):
         """Initialize class."""
         assert name, "Must input a valid name: {}".format(name)
         assert task, "Must input a valid task: {}".format(task)
@@ -106,7 +99,6 @@ class AddAPI(object):
         assert file_path, "Must input a valid file_path: {}".format(file_path)
         assert keywords is not None, "keywords cannot be empty"
         assert verbose is not None, "verbose cannot be empty"
-        assert is_test is not None, "is_test cannot be empty"
 
         self.name = name
         self.task = task
@@ -114,9 +106,8 @@ class AddAPI(object):
         self.file_path = file_path
         self.keywords = keywords
         self.verbose = verbose
-        self.is_test = is_test
 
-        self.cache_manager = CacheManager(self.is_test)
+        self.cache_manager = CacheManager()
 
     def run(self):
         """Main method."""
