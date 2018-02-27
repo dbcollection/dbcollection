@@ -2,9 +2,10 @@
 Test data for testing the cache api.
 
 The data generator contained in this file produces
-a mock of a potential cache file structure. The
-names used are not designed to be real names, just
-examples of possible strings.
+a mock of a potential cache file structure.
+
+Note: The names used are not designed to be real names,
+just examples of possible strings.
 """
 
 
@@ -13,7 +14,7 @@ import random
 
 
 class DataGenerator:
-    """Generates sample data for testing the CacheManager class
+    """Generates sample data for testing the CacheManager class.
 
     This class generates a sample data structure thet a cache file will
     contain wityh information about paths, datasets and categories of
