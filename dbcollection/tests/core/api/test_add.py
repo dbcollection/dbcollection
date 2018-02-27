@@ -33,7 +33,7 @@ def test_data():
 class TestCallAdd:
     """Unit tests for the core api add method."""
 
-    def test_call_add(self, mocker, mocks_init_class, test_data):
+    def test_call(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(AddAPI, "run")
 
         add(test_data['dataset'], test_data['task'], test_data['data_dir'],
@@ -42,7 +42,7 @@ class TestCallAdd:
         assert_mock_call(mocks_init_class)
         assert mock_run.called
 
-    def test_call_add_with_named_args(self, mocker, mocks_init_class, test_data):
+    def test_call_with_named_args(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(AddAPI, "run")
 
         add(name=test_data['dataset'],
@@ -55,7 +55,7 @@ class TestCallAdd:
         assert_mock_call(mocks_init_class)
         assert mock_run.called
 
-    def test_call_add_without_optional_inputs(self, mocker, mocks_init_class, test_data):
+    def test_call_without_optional_inputs(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(AddAPI, "run")
 
         add(test_data['dataset'], test_data['task'], test_data['data_dir'], test_data['hdf5_filename'])
