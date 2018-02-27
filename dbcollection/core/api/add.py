@@ -106,8 +106,10 @@ class AddAPI(object):
         self.file_path = file_path
         self.keywords = keywords
         self.verbose = verbose
+        self.cache_manager = self.get_cache_manager()
 
-        self.cache_manager = CacheManager()
+    def get_cache_manager(self):
+        return CacheManager()
 
     def run(self):
         """Main method."""
