@@ -26,5 +26,25 @@ class TestCallAdd:
         assert mock_cache.called
         assert mock_run.called
 
+    def test_call_add_with_named_args(self, mocker):
+        mock_cache = mocker.patch.object(AddAPI, "get_cache_manager", return_value=True)
+        mock_run = mocker.patch.object(AddAPI, "run")
+        dataset = 'some_db'
+        task = 'taskA'
+        data_dir = '/some/dir/data'
+        hdf5_filename = '/some/dir/db/hdf5_file.h5'
+        categories = ['categoryA', 'categoryB', 'categoryC']
+        verbose = True
+
+        add(name=dataset,
+            task=task,
+            data_dir=data_dir,
+            hdf5_filename=hdf5_filename,
+            categories=categories,
+            verbose=verbose)
+
+        assert mock_cache.called
+        assert mock_run.called
+
 class TestClassAddAPI:
     """Unit tests for the AddAPI class."""

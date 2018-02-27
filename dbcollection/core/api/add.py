@@ -8,7 +8,7 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
-def add(name, task, data_dir, file_path, keywords=(), verbose=True):
+def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True):
     """Add a dataset/task to the list of available datasets for loading.
 
     Parameters
@@ -21,8 +21,8 @@ def add(name, task, data_dir, file_path, keywords=(), verbose=True):
         Path of the stored data in disk.
     hdf5_filename : str
         Path to the metadata HDF5 file.
-    keywords : list of strings, optional
-        List of keywords to categorize the dataset.
+    categories : list, optional
+        List of keyword strings to categorize the dataset.
     verbose : bool, optional
         Displays text information (if true).
 
@@ -37,16 +37,23 @@ def add(name, task, data_dir, file_path, keywords=(), verbose=True):
     ['new_category']}}
 
     """
-    assert name, "Must input a valid name: {}".format(name)
-    assert task, "Must input a valid task: {}".format(task)
-    assert data_dir, "Must input a valid data_dir: {}".format(data_dir)
-    assert file_path, "Must input a valid file_path: {}".format(file_path)
+    assert name, "Must input a valid name."
+    assert task, "Must input a valid task."
+    assert data_dir, "Must input a valid data_dir."
+    assert hdf5_filename, "Must input a valid file_path."
+    assert isinstance(categories, (list, tuple, str)), "Must input valid categories: (list, tuple or str)."
+    assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
+
+    if isinstance(categories, str):
+        categories = (categories,)
+    else:
+        categories = tuple(categories)
 
     db_adder = AddAPI(name=name,
                       task=task,
                       data_dir=data_dir,
-                      file_path=file_path,
-                      keywords=keywords,
+                      hdf5_filename=hdf5_filename,
+                      categories=categories,
                       verbose=verbose)
 
     db_adder.run()
@@ -91,20 +98,20 @@ class AddAPI(object):
 
     """
 
-    def __init__(self, name, task, data_dir, file_path, keywords, verbose):
+    def __init__(self, name, task, data_dir, hdf5_filename, categories, verbose):
         """Initialize class."""
-        assert name, "Must input a valid name: {}".format(name)
-        assert task, "Must input a valid task: {}".format(task)
-        assert data_dir, "Must input a valid data_dir: {}".format(data_dir)
-        assert file_path, "Must input a valid file_path: {}".format(file_path)
-        assert keywords is not None, "keywords cannot be empty"
-        assert verbose is not None, "verbose cannot be empty"
+        assert name, "Must input a valid name."
+        assert task, "Must input a valid task."
+        assert data_dir, "Must input a valid data_dir."
+        assert hdf5_filename, "Must input a valid file_path."
+        assert isinstance(categories, tuple), "Must input a valid list(tuple) of categories."
+        assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
 
         self.name = name
         self.task = task
         self.data_dir = data_dir
-        self.file_path = file_path
-        self.keywords = keywords
+        self.hdf5_filename = hdf5_filename
+        self.categories = categories
         self.verbose = verbose
         self.cache_manager = self.get_cache_manager()
 
