@@ -25,7 +25,7 @@ def test_data():
         "task": "taskA",
         "data_dir": '/some/dir/data',
         "hdf5_filename": '/some/dir/db/hdf5_file.h5',
-        "categories": ['categoryA', 'categoryB', 'categoryC'],
+        "categories": ('categoryA', 'categoryB', 'categoryC'),
         "verbose": True
     }
 
@@ -70,3 +70,31 @@ class TestCallAdd:
 
 class TestClassAddAPI:
     """Unit tests for the AddAPI class."""
+
+    def test_init_with_all_inputs(self, mocker, mocks_init_class, test_data):
+        add_api = AddAPI(name=test_data['dataset'],
+                         task=test_data['task'],
+                         data_dir=test_data['data_dir'],
+                         hdf5_filename=test_data['hdf5_filename'],
+                         categories=test_data['categories'],
+                         verbose=test_data['verbose'])
+
+        assert_mock_call(mocks_init_class)
+        assert add_api.name == test_data['dataset']
+        assert add_api.task == test_data['task']
+        assert add_api.data_dir == test_data['data_dir']
+        assert add_api.hdf5_filename == test_data['hdf5_filename']
+        assert add_api.categories == test_data['categories']
+        assert add_api.verbose == test_data['verbose']
+
+    def test_init__raises_error_missing_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            AddAPI()
+
+    def test_init__raises_error_too_many_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            AddAPI("db", "task", "data dir", "filename", [], False, 'extra field')
+
+    def test_init__raises_error_missing_one_input(self, mocker):
+        with pytest.raises(AssertionError):
+            AddAPI("db", "data dir", "filename", [], False, 'extra field')
