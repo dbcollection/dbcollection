@@ -43,7 +43,7 @@ def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True, force_
     assert task, "Must input a valid task."
     assert data_dir, "Must input a valid data_dir."
     assert hdf5_filename, "Must input a valid file_path."
-    assert isinstance(categories, (list, tuple, str)), "Must input valid categories: (list, tuple or str)."
+    assert isinstance(categories, (list, tuple, str)), "Must input valid categories."
     assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
     assert isinstance(force_overwrite, bool), "Must input a valid boolean for force_overwrite."
 
