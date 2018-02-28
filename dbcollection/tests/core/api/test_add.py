@@ -121,3 +121,45 @@ class TestClassAddAPI:
     def test_run__raises_error_if_method_called_with_inputs(self, mocker, add_api_cls):
         with pytest.raises(TypeError):
             add_api_cls.run('some input')
+
+    def test_add_dataset_to_cache__dataset_exists(self, mocker, add_api_cls):
+        mock_exists = mocker.patch.object(AddAPI, "dataset_exists_in_cache", return_value=True)
+        mock_update_cache = mocker.patch.object(AddAPI, "update_dataset_cache_data")
+        mock_add_task = mocker.patch.object(AddAPI, "add_task_to_cache")
+
+        add_api_cls.add_dataset_to_cache()
+
+        assert mock_exists.called
+        assert mock_update_cache.called
+        assert mock_add_task.called
+
+    def test_add_dataset_to_cache__dataset_does_not_exist(self, mocker, add_api_cls):
+        mock_exists = mocker.patch.object(AddAPI, "dataset_exists_in_cache", return_value=False)
+        mock_add_new = mocker.patch.object(AddAPI, "add_new_data_to_cache")
+
+        add_api_cls.add_dataset_to_cache()
+
+        assert mock_exists.called
+        assert mock_add_new.called
+
+    def test_add_task_to_cache__task_exists(self, mocker, add_api_cls):
+        mock_exists = mocker.patch.object(AddAPI, "check_if_task_exists_in_cache", return_value=True)
+        mock_update_task = mocker.patch.object(AddAPI, "update_task_entry_in_cache")
+        mock_add_task = mocker.patch.object(AddAPI, "add_task_entry_to_cache")
+
+        add_api_cls.add_task_to_cache()
+
+        assert mock_exists.called
+        assert mock_update_task.called
+        assert not mock_add_task.called
+
+    def test_add_task_to_cache__task_does_not_exist(self, mocker, add_api_cls):
+        mock_exists = mocker.patch.object(AddAPI, "check_if_task_exists_in_cache", return_value=False)
+        mock_update_task = mocker.patch.object(AddAPI, "update_task_entry_in_cache")
+        mock_add_task = mocker.patch.object(AddAPI, "add_task_entry_to_cache")
+
+        add_api_cls.add_task_to_cache()
+
+        assert mock_exists.called
+        assert not mock_update_task.called
+        assert mock_add_task.called
