@@ -27,7 +27,8 @@ def test_data():
         "data_dir": '/some/dir/data',
         "hdf5_filename": '/some/dir/db/hdf5_file.h5',
         "categories": ('categoryA', 'categoryB', 'categoryC'),
-        "verbose": True
+        "verbose": True,
+        "force_overwrite": False
     }
 
 
@@ -37,8 +38,13 @@ class TestCallAdd:
     def test_call(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(AddAPI, "run")
 
-        add(test_data['dataset'], test_data['task'], test_data['data_dir'],
-            test_data['hdf5_filename'], test_data['categories'], test_data['verbose'])
+        add(test_data['dataset'],
+            test_data['task'],
+            test_data['data_dir'],
+            test_data['hdf5_filename'],
+            test_data['categories'],
+            test_data['verbose'],
+            test_data['force_overwrite'])
 
         assert_mock_call(mocks_init_class)
         assert mock_run.called
@@ -51,7 +57,8 @@ class TestCallAdd:
             data_dir=test_data['data_dir'],
             hdf5_filename=test_data['hdf5_filename'],
             categories=test_data['categories'],
-            verbose=test_data['verbose'])
+            verbose=test_data['verbose'],
+            force_overwrite=test_data['force_overwrite'])
 
         assert_mock_call(mocks_init_class)
         assert mock_run.called
@@ -66,7 +73,11 @@ class TestCallAdd:
 
     def test_call__raises_error_missing_inputs(self, mocker):
         with pytest.raises(TypeError):
-            add("db", "task", "data dir", "filename", [], False, 'extra field')
+            add("db", "task", "data dir")
+
+    def test_call__raises_error_too_many_inputs(self, mocker):
+        with pytest.raises(TypeError):
+            add("db", "task", "data dir", "filename", [], False, False, 'extra field')
 
 
 @pytest.fixture()
@@ -77,7 +88,8 @@ def add_api_cls(mocker, mocks_init_class, test_data):
         data_dir=test_data['data_dir'],
         hdf5_filename=test_data['hdf5_filename'],
         categories=test_data['categories'],
-        verbose=test_data['verbose']
+        verbose=test_data['verbose'],
+        force_overwrite=test_data['force_overwrite'],
     )
 
 
@@ -90,7 +102,8 @@ class TestClassAddAPI:
                          data_dir=test_data['data_dir'],
                          hdf5_filename=test_data['hdf5_filename'],
                          categories=test_data['categories'],
-                         verbose=test_data['verbose'])
+                         verbose=test_data['verbose'],
+                         force_overwrite=test_data['force_overwrite'])
 
         assert_mock_call(mocks_init_class)
         assert add_api.name == test_data['dataset']
@@ -99,6 +112,7 @@ class TestClassAddAPI:
         assert add_api.hdf5_filename == test_data['hdf5_filename']
         assert add_api.categories == test_data['categories']
         assert add_api.verbose == test_data['verbose']
+        assert add_api.force_overwrite == test_data['force_overwrite']
 
     def test_init__raises_error_missing_inputs(self, mocker):
         with pytest.raises(TypeError):
@@ -106,11 +120,11 @@ class TestClassAddAPI:
 
     def test_init__raises_error_too_many_inputs(self, mocker):
         with pytest.raises(TypeError):
-            AddAPI("db", "task", "data dir", "filename", [], False, 'extra field')
+            AddAPI("db", "task", "data dir", "filename", [], False, True, 'extra field')
 
     def test_init__raises_error_missing_one_input(self, mocker):
-        with pytest.raises(AssertionError):
-            AddAPI("db", "data dir", "filename", [], False, 'extra field')
+        with pytest.raises(TypeError):
+            AddAPI("db", "data dir", "filename", [], False, True)
 
     def test_run(self, mocker, add_api_cls):
         mock_add = mocker.patch.object(AddAPI, "add_dataset_to_cache")
@@ -148,10 +162,24 @@ class TestClassAddAPI:
         mock_update_task = mocker.patch.object(AddAPI, "update_task_entry_in_cache")
         mock_add_task = mocker.patch.object(AddAPI, "add_task_entry_to_cache")
 
+        add_api_cls.force_overwrite = True
         add_api_cls.add_task_to_cache()
 
         assert mock_exists.called
         assert mock_update_task.called
+        assert not mock_add_task.called
+
+    def test_add_task_to_cache__task_exists_raises_exception(self, mocker, add_api_cls):
+        mock_exists = mocker.patch.object(AddAPI, "check_if_task_exists_in_cache", return_value=True)
+        mock_update_task = mocker.patch.object(AddAPI, "update_task_entry_in_cache")
+        mock_add_task = mocker.patch.object(AddAPI, "add_task_entry_to_cache")
+
+        add_api_cls.force_overwrite = False
+        with pytest.raises(Exception):
+            add_api_cls.add_task_to_cache()
+
+        assert mock_exists.called
+        assert not mock_update_task.called
         assert not mock_add_task.called
 
     def test_add_task_to_cache__task_does_not_exist(self, mocker, add_api_cls):
