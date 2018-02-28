@@ -8,7 +8,7 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
-def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True):
+def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True, force_overwrite=False):
     """Add a dataset/task to the list of available datasets for loading.
 
     Parameters
@@ -25,6 +25,8 @@ def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True):
         List of keyword strings to categorize the dataset.
     verbose : bool, optional
         Displays text information (if true).
+    force_overwrite : bool, optional
+        Forces the overwrite of data in cache
 
     Examples
     --------
@@ -43,6 +45,7 @@ def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True):
     assert hdf5_filename, "Must input a valid file_path."
     assert isinstance(categories, (list, tuple, str)), "Must input valid categories: (list, tuple or str)."
     assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
+    assert isinstance(force_overwrite, bool), "Must input a valid boolean for force_overwrite."
 
     if isinstance(categories, str):
         categories = (categories,)
@@ -54,7 +57,8 @@ def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True):
                       data_dir=data_dir,
                       hdf5_filename=hdf5_filename,
                       categories=categories,
-                      verbose=verbose)
+                      verbose=verbose,
+                      force_overwrite=force_overwrite)
 
     db_adder.run()
 
@@ -79,6 +83,8 @@ class AddAPI(object):
         List of keyword strings to categorize the dataset.
     verbose : bool
         Displays text information.
+    force_overwrite : bool
+        Forces the overwrite of data in cache
 
     Attributes
     ----------
@@ -94,12 +100,14 @@ class AddAPI(object):
         Tuple of keyword strings to categorize the dataset.
     verbose : bool
         Displays text information.
+    force_overwrite : bool
+        Forces the overwrite of data in cache
     cache_manager : CacheManager
         Cache manager object.
 
     """
 
-    def __init__(self, name, task, data_dir, hdf5_filename, categories, verbose):
+    def __init__(self, name, task, data_dir, hdf5_filename, categories, verbose, force_overwrite):
         """Initialize class."""
         assert name, "Must input a valid name."
         assert task, "Must input a valid task."
@@ -107,6 +115,7 @@ class AddAPI(object):
         assert hdf5_filename, "Must input a valid file_path."
         assert isinstance(categories, tuple), "Must input a valid list(tuple) of categories."
         assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
+        assert isinstance(force_overwrite, bool), "Must input a valid boolean for force_overwrite."
 
         self.name = name
         self.task = task
@@ -114,6 +123,7 @@ class AddAPI(object):
         self.hdf5_filename = hdf5_filename
         self.categories = categories
         self.verbose = verbose
+        self.force_overwrite = force_overwrite
         self.cache_manager = self.get_cache_manager()
 
     def get_cache_manager(self):
@@ -145,7 +155,12 @@ class AddAPI(object):
 
     def add_task_to_cache(self):
         if self.check_if_task_exists_in_cache():
-            self.update_task_entry_in_cache()
+            if self.force_overwrite:
+                self.update_task_entry_in_cache()
+            else:
+                msg = "'{}' already exists in cache for '{}'. ".format(self.task, self.name) + \
+                      "To overwrite it, you must set 'force_overwrite=True'."
+                raise Exception(msg)
         else:
             self.add_task_entry_to_cache()
 
