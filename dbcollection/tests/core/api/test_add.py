@@ -18,6 +18,7 @@ def assert_mock_call(mocks):
     for mock in mocks:
         assert mock.called
 
+
 @pytest.fixture()
 def test_data():
     return {
