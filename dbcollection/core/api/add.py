@@ -8,7 +8,7 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
-def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=False):
+def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True, force_overwrite=False):
     """Add a dataset/task to the list of available datasets for loading.
 
     Parameters
@@ -19,14 +19,14 @@ def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=Fals
         Name of the task to load.
     data_dir : str
         Path of the stored data in disk.
-    file_path : bool
+    hdf5_filename : str
         Path to the metadata HDF5 file.
-    keywords : list of strings, optional
-        List of keywords to categorize the dataset.
+    categories : list, optional
+        List of keyword strings to categorize the dataset.
     verbose : bool, optional
         Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
+    force_overwrite : bool, optional
+        Forces the overwrite of data in cache
 
     Examples
     --------
@@ -39,23 +39,28 @@ def add(name, task, data_dir, file_path, keywords=(), verbose=True, is_test=Fals
     ['new_category']}}
 
     """
-    assert name, "Must input a valid name: {}".format(name)
-    assert task, "Must input a valid task: {}".format(task)
-    assert data_dir, "Must input a valid data_dir: {}".format(data_dir)
-    assert file_path, "Must input a valid file_path: {}".format(file_path)
+    assert name, "Must input a valid name."
+    assert task, "Must input a valid task."
+    assert data_dir, "Must input a valid data_dir."
+    assert hdf5_filename, "Must input a valid file_path."
+    assert isinstance(categories, (list, tuple, str)), "Must input valid categories."
+    assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
+    assert isinstance(force_overwrite, bool), "Must input a valid boolean for force_overwrite."
+
+    if isinstance(categories, str):
+        categories = (categories,)
+    else:
+        categories = tuple(categories)
 
     db_adder = AddAPI(name=name,
                       task=task,
                       data_dir=data_dir,
-                      file_path=file_path,
-                      keywords=keywords,
+                      hdf5_filename=hdf5_filename,
+                      categories=categories,
                       verbose=verbose,
-                      is_test=is_test)
+                      force_overwrite=force_overwrite)
 
     db_adder.run()
-
-    if verbose:
-        print('==> Dataset registry complete.')
 
 
 class AddAPI(object):
@@ -72,12 +77,14 @@ class AddAPI(object):
         Name of the task to load.
     data_dir : str
         Path of the stored data in disk.
-    file_path : bool
+    hdf5_filename : str
         Path to the metadata HDF5 file.
-    keywords : list of strings
-        List of keywords to categorize the dataset.
-    is_test : bool
-        Flag used for tests.
+    categories : tuple
+        List of keyword strings to categorize the dataset.
+    verbose : bool
+        Displays text information.
+    force_overwrite : bool
+        Forces the overwrite of data in cache
 
     Attributes
     ----------
@@ -87,44 +94,103 @@ class AddAPI(object):
         Name of the task to load.
     data_dir : str
         Path of the stored data in disk.
-    file_path : bool
+    hdf5_filename : bool
         Path to the metadata HDF5 file.
-    keywords : list of strings
-        List of keywords to categorize the dataset.
-    is_test : bool
-        Flag used for tests.
+    categories : tuple
+        Tuple of keyword strings to categorize the dataset.
+    verbose : bool
+        Displays text information.
+    force_overwrite : bool
+        Forces the overwrite of data in cache
     cache_manager : CacheManager
         Cache manager object.
 
     """
 
-    def __init__(self, name, task, data_dir, file_path, keywords, verbose, is_test):
+    def __init__(self, name, task, data_dir, hdf5_filename, categories, verbose, force_overwrite):
         """Initialize class."""
-        assert name, "Must input a valid name: {}".format(name)
-        assert task, "Must input a valid task: {}".format(task)
-        assert data_dir, "Must input a valid data_dir: {}".format(data_dir)
-        assert file_path, "Must input a valid file_path: {}".format(file_path)
-        assert keywords is not None, "keywords cannot be empty"
-        assert verbose is not None, "verbose cannot be empty"
-        assert is_test is not None, "is_test cannot be empty"
+        assert name, "Must input a valid name."
+        assert task, "Must input a valid task."
+        assert data_dir, "Must input a valid data_dir."
+        assert hdf5_filename, "Must input a valid file_path."
+        assert isinstance(categories, tuple), "Must input a valid list(tuple) of categories."
+        assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
+        assert isinstance(force_overwrite, bool), "Must input a valid boolean for force_overwrite."
 
         self.name = name
         self.task = task
         self.data_dir = data_dir
-        self.file_path = file_path
-        self.keywords = keywords
+        self.hdf5_filename = hdf5_filename
+        self.categories = categories
         self.verbose = verbose
-        self.is_test = is_test
+        self.force_overwrite = force_overwrite
+        self.cache_manager = self.get_cache_manager()
 
-        self.cache_manager = CacheManager(self.is_test)
+    def get_cache_manager(self):
+        return CacheManager()
 
     def run(self):
         """Main method."""
-        if self.verbose:
-            print('==> Adding a dataset registry to the cache records in disk.')
+        self.add_dataset_to_cache()
 
-        self.cache_manager.update(name=self.name,
-                                  data_dir=self.data_dir,
-                                  cache_tasks={self.task: self.file_path},
-                                  cache_keywords=self.keywords,
-                                  is_append=True)
+        if self.verbose:
+            print('==> Dataset successfully registered.')
+
+    def add_dataset_to_cache(self):
+        if self.dataset_exists_in_cache(self.name):
+            self.update_dataset_cache_data()
+            self.add_task_to_cache()
+        else:
+            self.add_new_data_to_cache()
+
+    def dataset_exists_in_cache(self, name):
+        return self.cache_manager.dataset.exists(name)
+
+    def update_dataset_cache_data(self):
+        if any(self.data_dir):
+            self.cache_manager.dataset.update(
+                name=self.name,
+                data_dir=self.data_dir
+            )
+
+    def add_task_to_cache(self):
+        if self.check_if_task_exists_in_cache():
+            if self.force_overwrite:
+                self.update_task_entry_in_cache()
+            else:
+                msg = "'{}' already exists in cache for '{}'. ".format(self.task, self.name) + \
+                      "To overwrite it, you must set 'force_overwrite=True'."
+                raise Exception(msg)
+        else:
+            self.add_task_entry_to_cache()
+
+    def check_if_task_exists_in_cache(self):
+        return self.cache_manager.task.exists(self.name, self.task)
+
+    def update_task_entry_in_cache(self):
+        self.cache_manager.task.update(
+            name=self.name,
+            task=self.task,
+            filename=self.hdf5_filename,
+            categories=self.categories
+        )
+
+    def add_task_entry_to_cache(self):
+        self.cache_manager.task.add(
+            name=self.name,
+            task=self.task,
+            filename=self.hdf5_filename,
+            categories=self.categories
+        )
+
+    def add_new_data_to_cache(self):
+        self.cache_manager.dataset.add(
+            name=self.name,
+            data_dir=self.data_dir,
+            tasks={
+                self.task: {
+                    "filename": self.hdf5_filename,
+                    "categories": self.categories
+                }
+            }
+        )
