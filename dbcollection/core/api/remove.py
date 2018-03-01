@@ -8,7 +8,7 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
-def remove(name, task=None, delete_data=False, verbose=True, is_test=False):
+def remove(name, task=None, delete_data=False, verbose=True):
     """Remove/delete a dataset and/or task from the cache.
 
     Removes the datasets cache information from the dbcollection.json file.
@@ -30,8 +30,6 @@ def remove(name, task=None, delete_data=False, verbose=True, is_test=False):
         Delete all data files from disk for this dataset if True.
     verbose : bool, optional
         Displays text information (if true).
-    is_test : bool, optional
-        Flag used for tests.
 
     Examples
     --------
@@ -54,8 +52,7 @@ def remove(name, task=None, delete_data=False, verbose=True, is_test=False):
     db_remover = RemoveAPI(name=name,
                            task=task,
                            delete_data=delete_data,
-                           verbose=verbose,
-                           is_test=is_test)
+                           verbose=verbose)
 
     db_remover.run()
 
@@ -79,8 +76,6 @@ class RemoveAPI(object):
         Name of the task to delete.
     delete_data : bool
         Delete all data files from disk for this dataset if True.
-    is_test : bool
-        Flag used for tests.
 
     Attributes
     ----------
@@ -90,26 +85,22 @@ class RemoveAPI(object):
         Name of the task to delete.
     delete_data : bool
         Delete all data files from disk for this dataset if True.
-    is_test : bool
-        Flag used for tests.
     cache_manager : CacheManager
         Cache manager object.
 
     """
 
-    def __init__(self, name, task, delete_data, verbose, is_test):
+    def __init__(self, name, task, delete_data, verbose):
         """Initialize class."""
         assert name, 'Must input a valid dataset name: {}'.format(name)
         assert delete_data is not None, 'delete_data cannot be empty'
         assert verbose is not None, 'verbose cannot be empty'
-        assert is_test is not None, 'is_test cannot be empty'
 
         self.name = name
         self.task = task
         self.delete_data = delete_data
         self.verbose = verbose
-        self.is_test = is_test
-        self.cache_manager = CacheManager(self.is_test)
+        self.cache_manager = CacheManager()
 
     def run(self):
         """Main method."""
