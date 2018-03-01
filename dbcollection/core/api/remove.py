@@ -47,7 +47,7 @@ def remove(name, task=None, delete_data=False, verbose=True):
     {}
 
     """
-    assert name is not None, 'Must input a valid dataset name: {}'.format(name)
+    assert name, 'Must input a valid dataset name.'
 
     db_remover = RemoveAPI(name=name,
                            task=task,
@@ -92,9 +92,10 @@ class RemoveAPI(object):
 
     def __init__(self, name, task, delete_data, verbose):
         """Initialize class."""
-        assert name, 'Must input a valid dataset name: {}'.format(name)
-        assert delete_data is not None, 'delete_data cannot be empty'
-        assert verbose is not None, 'verbose cannot be empty'
+        assert name, 'Must input a valid dataset name.'
+        assert task, 'Must input a valid task name.'
+        assert isinstance(delete_data, bool), "Must input a valid boolean for delete_data."
+        assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
 
         self.name = name
         self.task = task
