@@ -12,14 +12,15 @@ from dbcollection.core.cache import CacheManager
 def remove(name, task='', delete_data=False, verbose=True):
     """Remove/delete a dataset and/or task from the cache.
 
-    Removes the datasets cache information from the dbcollection.json file.
-    The dataset's data files remain in disk if 'delete_data' is set to False,
-    otherwise it removes also the data files.
+    Removes the dataset's information registry from the dbcollection.json cache file.
+    The dataset's data files remain in disk if 'delete_data' is not enabled.
+    If it kintended to remove the data files as well, the 'delete_data' input arg
+    must be set to 'True' in order to also remove the data files.
 
-    Also, instead of deleting the entire dataset, removing a specific task
-    from disk is also possible by specifying which task to delete. This removes
-    the task entry for the dataset and removes the corresponding hdf5 file from
-    disk.
+    Moreover, if the intended action is to remove a task of the dataset from the cache
+    registry, this can be achieved by specifying the task name to be deleted. This
+    effectively removes only that task entry for the dataset. Note that deleting a task
+    results in removing the associated HDF5 metadata file from disk.
 
     Parameters
     ----------
