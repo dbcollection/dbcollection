@@ -101,7 +101,10 @@ class RemoveAPI(object):
         self.task = task
         self.delete_data = delete_data
         self.verbose = verbose
-        self.cache_manager = CacheManager()
+        self.cache_manager = self.get_cache_manager()
+
+    def get_cache_manager(self):
+        return CacheManager()
 
     def run(self):
         """Main method."""
