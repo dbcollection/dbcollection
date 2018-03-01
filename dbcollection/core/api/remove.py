@@ -8,7 +8,7 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
-def remove(name, task=None, delete_data=False, verbose=True):
+def remove(name, task='', delete_data=False, verbose=True):
     """Remove/delete a dataset and/or task from the cache.
 
     Removes the datasets cache information from the dbcollection.json file.
@@ -93,7 +93,7 @@ class RemoveAPI(object):
     def __init__(self, name, task, delete_data, verbose):
         """Initialize class."""
         assert name, 'Must input a valid dataset name.'
-        assert task, 'Must input a valid task name.'
+        assert isinstance(task, str), 'Must input a valid task name.'
         assert isinstance(delete_data, bool), "Must input a valid boolean for delete_data."
         assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
 
