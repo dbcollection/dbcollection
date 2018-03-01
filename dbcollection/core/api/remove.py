@@ -4,6 +4,7 @@ Remove API class.
 
 
 from __future__ import print_function
+import shutil
 
 from dbcollection.core.cache import CacheManager
 
@@ -56,9 +57,6 @@ def remove(name, task='', delete_data=False, verbose=True):
 
     db_remover.run()
 
-    if verbose:
-        print('==> Dataset registry removed.')
-
 
 class RemoveAPI(object):
     """Dataset remove API class.
@@ -108,39 +106,57 @@ class RemoveAPI(object):
 
     def run(self):
         """Main method."""
+        self.remove_dataset()
+
+        if self.verbose:
+            self.print_msg_registry_removal()
+
+    def remove_dataset(self):
+        """Removes the dataset from cache (and disk if selected)."""
         if self.exists_dataset():
             self.remove_registry_from_cache()
         else:
-            raise Exception('Dataset \'{}\' does not exist.'.format(self.name))
+            raise Exception('Dataset \'{}\' does not exist in the cache.'.format(self.name))
 
     def exists_dataset(self):
         """Return True if a dataset name exists in the cache."""
-        return self.cache_manager.exists_dataset(self.name)
+        return self.cache_manager.dataset.exists(self.name)
 
     def remove_registry_from_cache(self):
         """Remove the dataset or task from cache."""
-        if self.task is None:
-            self.remove_dataset_registry()
-        else:
+        if any(self.task):
             self.remove_task_registry()
+        else:
+            self.remove_dataset_registry()
 
     def remove_dataset_registry(self):
-        """Remove the dataset registry from cache."""
+        """Removes the dataset registry from cache."""
         if self.delete_data:
-            self.cache_manager.delete_dataset(self.name, True)
-        else:
-            self.cache_manager.delete_dataset(self.name, False)
-        if self.verbose:
-            print('Removed \'{}\' dataset: cache=True, disk={}'
-                  .format(self.name, self.delete_data))
+            self.remove_dataset_data_files_from_disk()
+        self.remove_dataset_entry_from_cache()
+
+    def remove_dataset_data_files_from_disk(self):
+        """Removes the directory containing the data files from disk."""
+        data_dir = self.get_dataset_data_dir()
+        shutil.rmtree(data_dir)
+
+    def get_dataset_data_dir(self):
+        dataset_metadata = self.cache_manager.dataset.get(self.name)
+        return dataset_metadata["data_dir"]
+
+    def remove_dataset_entry_from_cache(self):
+        """Removes the dataset registry from cache."""
+        self.cache_manager.dataset.delete(self.name)
 
     def remove_task_registry(self):
         """Remove the task registry for this dataset from cache."""
-        if self.cache_manager.delete_task(self.name, self.task):
-            if self.verbose:
-                print('Removed the task \'{}\' from the \'{}\' dataset: cache=True'
-                      .format(self.task, self.name))
+        self.cache_manager.task.delete(self.name, self.task)
+
+    def print_msg_registry_removal(self):
+        """Prints to screen the success message."""
+        if any(self.task):
+            print('Removed the task \'{}\' from the \'{}\' dataset: cache=True'
+                  .format(self.task, self.name))
         else:
-            if self.verbose:
-                raise Exception('The task \'{}\' does not exists for \'{}\' dataset'
-                                .format(self.task, self.name))
+            print('Removed \'{}\' dataset: cache=True, disk={}'
+                  .format(self.name, self.delete_data))
