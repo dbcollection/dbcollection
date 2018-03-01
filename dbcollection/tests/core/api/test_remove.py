@@ -68,6 +68,16 @@ class TestCallRemove:
             remove(test_data['dataset'], test_data['task'], test_data['delete_data'], test_data['verbose'], 'extra_input')
 
 
+@pytest.fixture()
+def remove_api_cls(mocker, mocks_init_class, test_data):
+    return RemoveAPI(
+        name=test_data['dataset'],
+        task=test_data['task'],
+        delete_data=test_data['delete_data'],
+        verbose=test_data['verbose']
+    )
+
+
 class TestClassRemoveAPI:
     """Unit tests for the RemoveAPI class."""
 
@@ -94,3 +104,75 @@ class TestClassRemoveAPI:
     def test_init__raises_error_missing_one_input_arg(self, mocker, mocks_init_class, test_data):
         with pytest.raises(TypeError):
             RemoveAPI(test_data['dataset'], test_data['task'], test_data['delete_data'])
+
+    def test_run(self, mocker, remove_api_cls):
+        mock_remove_db = mocker.patch.object(RemoveAPI, 'remove_dataset')
+
+        remove_api_cls.run()
+
+        assert mock_remove_db.called
+
+    def test_remove_dataset_exists_dataset(self, mocker, remove_api_cls):
+        mock_exists_db = mocker.patch.object(RemoveAPI, 'exists_dataset', return_value=True)
+        mock_remove_registry = mocker.patch.object(RemoveAPI, 'remove_registry_from_cache')
+
+        remove_api_cls.remove_dataset()
+
+        assert mock_exists_db.called
+        assert mock_remove_registry.called
+
+    def test_remove_dataset_does_not_exist_dataset(self, mocker, remove_api_cls):
+        mock_exists_db = mocker.patch.object(RemoveAPI, 'exists_dataset', return_value=True)
+
+        with pytest.raises(Exception):
+            remove_api_cls.remove_dataset()
+
+        assert mock_exists_db.called
+
+    def test_remove_registry_from_cache_exists_task(self, mocker, remove_api_cls):
+        mock_remove_task = mocker.patch.object(RemoveAPI, 'remove_task_registry')
+        mock_remove_db = mocker.patch.object(RemoveAPI, 'remove_dataset_registry')
+
+        remove_api_cls.remove_registry_from_cache()
+
+        assert mock_remove_task.called
+        assert not mock_remove_db.called
+
+    def test_remove_registry_from_cache_task_is_empty(self, mocker, remove_api_cls):
+        mock_remove_task = mocker.patch.object(RemoveAPI, 'remove_task_registry')
+        mock_remove_db = mocker.patch.object(RemoveAPI, 'remove_dataset_registry')
+
+        remove_api_cls.task = ''
+        remove_api_cls.remove_registry_from_cache()
+
+        assert not mock_remove_task.called
+        assert mock_remove_db.called
+
+    def test_remove_dataset_registry(self, mocker, remove_api_cls):
+        mock_remove_files = mocker.patch.object(RemoveAPI, 'remove_dataset_data_files_from_disk')
+        mock_remove_cache = mocker.patch.object(RemoveAPI, 'remove_dataset_entry_from_cache')
+
+        remove_api_cls.delete_data = False
+        remove_api_cls.remove_dataset_registry()
+
+        assert not mock_remove_files.called
+        assert mock_remove_cache.called
+
+    def test_remove_dataset_registry_and_data_files(self, mocker, remove_api_cls):
+        mock_remove_files = mocker.patch.object(RemoveAPI, 'remove_dataset_data_files_from_disk')
+        mock_remove_cache = mocker.patch.object(RemoveAPI, 'remove_dataset_entry_from_cache')
+
+        remove_api_cls.delete_data = True
+        remove_api_cls.remove_dataset_registry()
+
+        assert mock_remove_files.called
+        assert mock_remove_cache.called
+
+    def test_remove_dataset_data_files_from_disk(self, mocker, remove_api_cls):
+        mock_get_dir = mocker.patch.object(RemoveAPI, 'get_dataset_data_dir', return_value='/some/dir/path')
+        mock_rmtree = mocker.patch('shutil.rmtree')
+
+        remove_api_cls.remove_dataset_data_files_from_disk()
+
+        assert mock_get_dir.called
+        assert mock_rmtree.called
