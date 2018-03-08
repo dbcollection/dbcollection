@@ -8,9 +8,9 @@ from __future__ import print_function
 from dbcollection.core.cache import CacheManager
 
 
-def cache(query='', delete_cache=False, delete_cache_dir=False, delete_cache_file=False,
+def cache(query=(), delete_cache=False, delete_cache_dir=False, delete_cache_file=False,
           reset_cache=False, reset_path_cache=False, reset_path_downloads=False,
-          set_cache_dir=None, set_downloads_dir=None, verbose=True):
+          set_cache_dir='', set_downloads_dir='', verbose=True):
     """Configures the cache file.
 
     This method allows to configure some options of the cache file. The
@@ -30,14 +30,14 @@ def cache(query='', delete_cache=False, delete_cache_dir=False, delete_cache_fil
 
     Parameters
     ----------
+    query : str/list/tuple, optional
+        Pattern or list of patterns to search for in the cache file.
     delete_cache : bool, optional
         Delete/remove the dbcollection cache file + directory.
     delete_cache_dir : bool, optional
         Delete/remove the dbcollection cache directory.
     delete_cache_file : bool, optional
         Delete/remove the dbcollection.json cache file.
-    query : str/list, optional
-        Pattern or list of patterns to search for in the cache file.
     reset_cache : bool, optional
         Reset the cache file.
     reset_cache_dir_path : bool, optional
@@ -89,14 +89,14 @@ class CacheAPI(object):
 
     Parameters
     ----------
+    query : str/list/tuple, optional
+        Pattern or list of patterns to search for in the cache file.
     delete_cache : bool, optional
         Delete/remove the dbcollection cache file + directory.
     delete_cache_dir : bool, optional
         Delete/remove the dbcollection cache directory.
     delete_cache_file : bool, optional
         Delete/remove the dbcollection.json cache file.
-    query : str/list, optional
-        Pattern or list of patterns to search for in the cache file.
     reset_cache : bool, optional
         Reset the cache file.
     reset_cache_dir_path : bool, optional
@@ -115,10 +115,35 @@ class CacheAPI(object):
 
     """
 
-    def __init__(self, delete_cache, delete_cache_dir, delete_cache_file,
+    def __init__(self, query, delete_cache, delete_cache_dir, delete_cache_file,
                  reset_cache, reset_path_cache, reset_path_downloads,
-                 set_cache_dir, set_downloads_dir, query, verbose):
-        pass
+                 set_cache_dir, set_downloads_dir, verbose):
+        """Initialize class."""
+        assert isinstance(query, (str, list, tuple)), "Must input a valid query."
+        assert isinstance(delete_cache, bool), "Must input a valid boolean for delete_cache."
+        assert isinstance(delete_cache_dir, bool), "Must input a valid boolean for delete_cache_dir."
+        assert isinstance(delete_cache_file, bool), "Must input a valid boolean for delete_cache_file."
+        assert isinstance(reset_cache, bool), "Must input a valid boolean for reset_cache."
+        assert isinstance(reset_path_cache, bool), "Must input a valid boolean for reset_path_cache."
+        assert isinstance(reset_path_downloads, bool), "Must input a valid boolean for reset_path_downloads."
+        assert isinstance(set_cache_dir, str), "Must input a valid string for set_cache_dir."
+        assert isinstance(set_downloads_dir, str), "Must input a valid string for set_downloads_dir."
+        assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
+
+        self.query = query
+        self.delete_cache = delete_cache
+        self.delete_cache_dir = delete_cache_dir
+        self.delete_cache_file = delete_cache_file
+        self.reset_cache = reset_cache
+        self.reset_path_cache = reset_path_cache
+        self.reset_path_downloads = reset_path_downloads
+        self.set_cache_dir = set_cache_dir
+        self.set_downloads_dir = set_downloads_dir
+        self.verbose = verbose
+        self.cache_manager = self.get_cache_manager()
+
+    def get_cache_manager(self):
+        return CacheManager()
 
     def run(self):
         pass
