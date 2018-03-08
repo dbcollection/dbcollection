@@ -98,17 +98,35 @@ class TestCallCache:
 class TestClassCacheAPI:
     """Unit tests for the CacheAPI class."""
 
-    def test_init_with_all_input_agrstest_init_with_all_input_agrs(self, mocker):
-        pass
+    def test_init_with_all_input_agrs(self, mocker, mocks_init_class, test_data):
+        cache_api = CacheAPI(query=test_data["query"],
+                             delete_cache=test_data["delete_cache"],
+                             delete_cache_dir=test_data["delete_cache_dir"],
+                             delete_cache_file=test_data["delete_cache_file"],
+                             reset_cache=test_data["reset_cache"],
+                             reset_path_cache=test_data["reset_path_cache"],
+                             reset_path_downloads=test_data["reset_path_downloads"],
+                             set_cache_dir=test_data["set_cache_dir"],
+                             set_downloads_dir=test_data["set_downloads_dir"],
+                             verbose=test_data["verbose"])
 
-    def test_init__raises_error_no_input_args(self, mocker):
-        pass
+        assert_mock_call(mocks_init_class)
+        assert cache_api.query == test_data["query"]
+        assert cache_api.delete_cache == test_data["delete_cache"]
+        assert cache_api.delete_cache_dir == test_data["delete_cache_dir"]
+        assert cache_api.delete_cache_file == test_data["delete_cache_file"]
+        assert cache_api.reset_cache == test_data["reset_cache"]
+        assert cache_api.reset_path_cache == test_data["reset_path_cache"]
+        assert cache_api.reset_path_downloads == test_data["reset_path_downloads"]
+        assert cache_api.set_cache_dir == test_data["set_cache_dir"]
+        assert cache_api.set_downloads_dir == test_data["set_downloads_dir"]
+        assert cache_api.verbose == test_data["verbose"]
 
     def test_init__raises_error_too_many_input_args(self, mocker):
-        pass
-
-    def test_init__raises_error_missing_one_input_arg(self, mocker):
-        pass
+        with pytest.raises(TypeError):
+            CacheAPI('some_query', False, False, False, True, True, True,
+                     '/some/dir/cache', '/some/dir/cache/downloads', False,
+                     'extra field')
 
     def test_run(self, mocker):
         pass
