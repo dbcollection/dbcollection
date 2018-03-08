@@ -66,7 +66,10 @@ def cache(query=(), delete_cache=False, delete_cache_dir=False, delete_cache_fil
     >>> dbc.cache(delete_cache_file=True)
 
     """
-    cache = CacheAPI(query=query,
+    if isinstance(query, str):
+        query = (query, )
+
+    cache = CacheAPI(query=tuple(query),
                      delete_cache=delete_cache,
                      delete_cache_dir=delete_cache_dir,
                      delete_cache_file=delete_cache_file,
@@ -89,8 +92,8 @@ class CacheAPI(object):
 
     Parameters
     ----------
-    query : str/list/tuple, optional
-        Pattern or list of patterns to search for in the cache file.
+    query : tuple, optional
+        List of patterns to search for in the cache file.
     delete_cache : bool, optional
         Delete/remove the dbcollection cache file + directory.
     delete_cache_dir : bool, optional
@@ -119,7 +122,7 @@ class CacheAPI(object):
                  reset_cache, reset_path_cache, reset_path_downloads,
                  set_cache_dir, set_downloads_dir, verbose):
         """Initialize class."""
-        assert isinstance(query, (str, list, tuple)), "Must input a valid query."
+        assert isinstance(query, tuple), "Must input a valid query."
         assert isinstance(delete_cache, bool), "Must input a valid boolean for delete_cache."
         assert isinstance(delete_cache_dir, bool), "Must input a valid boolean for delete_cache_dir."
         assert isinstance(delete_cache_file, bool), "Must input a valid boolean for delete_cache_file."

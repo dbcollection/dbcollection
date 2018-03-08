@@ -22,7 +22,7 @@ def assert_mock_call(mocks):
 @pytest.fixture()
 def test_data():
     return {
-        "query": ('some_task', 'some_dataset'),
+        "query": 'some_task',
         "delete_cache": False,
         "delete_cache_dir": True,
         "delete_cache_file": True,
@@ -99,7 +99,7 @@ class TestClassCacheAPI:
     """Unit tests for the CacheAPI class."""
 
     def test_init_with_all_input_agrs(self, mocker, mocks_init_class, test_data):
-        cache_api = CacheAPI(query=test_data["query"],
+        cache_api = CacheAPI(query=(test_data["query"],),
                              delete_cache=test_data["delete_cache"],
                              delete_cache_dir=test_data["delete_cache_dir"],
                              delete_cache_file=test_data["delete_cache_file"],
@@ -111,7 +111,7 @@ class TestClassCacheAPI:
                              verbose=test_data["verbose"])
 
         assert_mock_call(mocks_init_class)
-        assert cache_api.query == test_data["query"]
+        assert cache_api.query == (test_data["query"],)
         assert cache_api.delete_cache == test_data["delete_cache"]
         assert cache_api.delete_cache_dir == test_data["delete_cache_dir"]
         assert cache_api.delete_cache_file == test_data["delete_cache_file"]
@@ -124,7 +124,7 @@ class TestClassCacheAPI:
 
     def test_init__raises_error_too_many_input_args(self, mocker):
         with pytest.raises(TypeError):
-            CacheAPI('some_query', False, False, False, True, True, True,
+            CacheAPI(('some_query',), False, False, False, True, True, True,
                      '/some/dir/cache', '/some/dir/cache/downloads', False,
                      'extra field')
 
