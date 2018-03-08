@@ -95,6 +95,22 @@ class TestCallCache:
                   'extra_input')
 
 
+@pytest.fixture()
+def cache_api_cls(mocker, mocks_init_class, test_data):
+    return CacheAPI(
+        query=(test_data["query"],),
+        delete_cache=test_data["delete_cache"],
+        delete_cache_dir=test_data["delete_cache_dir"],
+        delete_cache_file=test_data["delete_cache_file"],
+        reset_cache=test_data["reset_cache"],
+        reset_path_cache=test_data["reset_path_cache"],
+        reset_path_downloads=test_data["reset_path_downloads"],
+        set_cache_dir=test_data["set_cache_dir"],
+        set_downloads_dir=test_data["set_downloads_dir"],
+        verbose=test_data["verbose"]
+    )
+
+
 class TestClassCacheAPI:
     """Unit tests for the CacheAPI class."""
 
@@ -128,5 +144,11 @@ class TestClassCacheAPI:
                      '/some/dir/cache', '/some/dir/cache/downloads', False,
                      'extra field')
 
-    def test_run(self, mocker):
-        pass
+    def test_run_query_only(self, mocker, cache_api_cls):
+        mock_query = mocker.patch.object(CacheAPI, 'get_matching_metadata_from_cache',
+                                         return_value=('some', 'vals'))
+
+        result = cache_api_cls.run()
+
+        assert mock_query.called
+        assert result == ('some', 'vals')
