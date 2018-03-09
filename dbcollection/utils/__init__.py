@@ -13,14 +13,23 @@ from six import iteritems
 def print_text_box(text):
     """Prints a simple text box.
 
-    Example:
-        >>> print_text_box('Some text to display!')
-        >>>
-        '-----------------------------'
-        '--  Some text to display!  --'
-        '-----------------------------'
+    Parameters
+    ----------
+    text : str
+        Header text.
+
+    Examples
+    --------
+    Display a text box with a custom header
+
+    >>> print_text_box('Some text to display!')
+    >>>
+    '-----------------------------'
+    '--  Some text to display!  --'
+    '-----------------------------'
 
     """
+    assert text, "Must input a valid text string."
     str_display = '--  {display_text}  --'.format(display_text=text)
     str_separator = '-' * len(str_display)
     print('\n{separator}\n{text}\n{separator}\n'
