@@ -154,7 +154,10 @@ class CacheAPI(object):
             result = self.get_matching_metadata_from_cache(self.query)
 
             if self.verbose:
-                print('==> Patterns found in cache: {}/{}'.format(len(result), len(self.query)))
+                print('==> Patterns found in cache:')
+                for i, pattern in enumerate(self.query):
+                    print('    - {}: {} found'.format(pattern, len(result[i])))
+
             return result
 
     def get_matching_metadata_from_cache(self, patterns):
