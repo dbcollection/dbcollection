@@ -111,6 +111,11 @@ def cache_api_cls(mocker, mocks_init_class, test_data):
     )
 
 
+@pytest.fixture()
+def mock_get_cache_dir(mocker):
+    return mocker.patch.object(CacheAPI, 'get_cache_dir', return_value='/some/dir/cache')
+
+
 class TestClassCacheAPI:
     """Unit tests for the CacheAPI class."""
 
@@ -144,14 +149,28 @@ class TestClassCacheAPI:
                      '/some/dir/cache', '/some/dir/cache/downloads', False,
                      'extra field')
 
-    def test_run_query_only(self, mocker, cache_api_cls):
+    def test_run_query_only(self, mocker, cache_api_cls, mock_get_cache_dir):
         mock_query = mocker.patch.object(CacheAPI, 'get_matching_metadata_from_cache',
                                          return_value=('some', 'vals'))
+        mock_remove_cache_dir = mocker.patch.object(CacheAPI, 'remove_cache_dir_from_disk')
 
         result = cache_api_cls.run()
 
-        assert mock_query.called
         assert result == ('some', 'vals')
+        assert mock_query.called
+        assert not mock_remove_cache_dir.called
+        assert not mock_get_cache_dir.called
+
+    def test_run_remove_cache_dir_only(self, mocker, cache_api_cls, mock_get_cache_dir):
+        mock_query = mocker.patch.object(CacheAPI, 'get_matching_metadata_from_cache')
+        mock_remove_cache_dir = mocker.patch.object(CacheAPI, 'remove_cache_dir_from_disk')
+
+        cache_api_cls.query = ()
+        cache_api_cls.run()
+
+        assert not mock_query.called
+        assert mock_remove_cache_dir.called
+        assert mock_get_cache_dir.called
 
     def test_get_matching_metadata_from_cache_and_return_some_patterns(self, mocker, cache_api_cls):
         def side_effect(pattern):
@@ -203,3 +222,23 @@ class TestClassCacheAPI:
         assert mock_find_pattern.called
         assert mock_add_key.called
         assert result == {}
+
+    def test_remove_cache_dir_from_disk_and_dir_exists(self, mocker, cache_api_cls, mock_get_cache_dir):
+        mock_exists_dir = mocker.patch.object(CacheAPI, 'exists_dir', return_value=True)
+        mock_rmtree = mocker.patch('shutil.rmtree')
+
+        cache_api_cls.remove_cache_dir_from_disk()
+
+        assert mock_get_cache_dir.called
+        assert mock_exists_dir.called
+        assert mock_rmtree.called
+
+    def test_remove_cache_dir_from_disk_and_dir_not_exists(self, mocker, cache_api_cls, mock_get_cache_dir):
+        mock_exists_dir = mocker.patch.object(CacheAPI, 'exists_dir', return_value=False)
+        mock_rmtree = mocker.patch('shutil.rmtree')
+
+        cache_api_cls.remove_cache_dir_from_disk()
+
+        assert mock_get_cache_dir.called
+        assert mock_exists_dir.called
+        assert not mock_rmtree.called

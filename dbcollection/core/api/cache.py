@@ -4,6 +4,8 @@ Cache API class.
 
 
 from __future__ import print_function
+import os
+import shutil
 
 from dbcollection.core.cache import CacheManager
 from dbcollection.utils import nested_lookup
@@ -160,6 +162,11 @@ class CacheAPI(object):
 
             return result
 
+        if self.delete_cache_dir or self.delete_cache:
+            self.remove_cache_dir_from_disk()
+            if self.verbose:
+                print('Deleted {} directory.'.format(self.get_cache_dir()))
+
     def get_matching_metadata_from_cache(self, patterns):
         """Returns a list of matching patterns from the cache."""
         found = []
@@ -186,3 +193,14 @@ class CacheAPI(object):
 
     def add_key_to_results(self, results, pattern):
         return [{pattern: result} for result in results]
+
+    def remove_cache_dir_from_disk(self):
+        cache_dir = self.get_cache_dir()
+        if self.exists_dir(cache_dir):
+            shutil.rmtree(cache_dir)
+
+    def exists_dir(self, cache_dir):
+        return os.path.exists(cache_dir)
+
+    def get_cache_dir(self):
+        return self.cache_manager.manager.cache_dir
