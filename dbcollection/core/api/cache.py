@@ -182,6 +182,11 @@ class CacheAPI(object):
             if self.verbose:
                 print('Reseted the cache dir path: {}.'.format(self.get_cache_dir()))
 
+        if self.reset_path_downloads and not self.reset_cache:
+            self.reset_download_dir_path()
+            if self.verbose:
+                print('Reseted the download dir path: {}.'.format(self.get_download_dir()))
+
     def get_matching_metadata_from_cache(self, patterns):
         """Returns a list of matching patterns from the cache."""
         found = []
@@ -230,3 +235,9 @@ class CacheAPI(object):
 
     def reset_cache_dir_path(self):
         self.cache_manager.manager.reset_cache_dir()
+
+    def reset_download_dir_path(self):
+        self.cache_manager.manager.reset_download_dir()
+
+    def get_download_dir(self):
+        return self.cache_manager.manager.download_dir
