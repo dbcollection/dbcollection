@@ -196,11 +196,8 @@ class CacheAPI(object):
 
     def remove_cache_dir_from_disk(self):
         cache_dir = self.get_cache_dir()
-        if self.exists_dir(cache_dir):
+        if os.path.exists(cache_dir):
             shutil.rmtree(cache_dir)
-
-    def exists_dir(self, cache_dir):
-        return os.path.exists(cache_dir)
 
     def get_cache_dir(self):
         return self.cache_manager.manager.cache_dir

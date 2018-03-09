@@ -224,7 +224,7 @@ class TestClassCacheAPI:
         assert result == {}
 
     def test_remove_cache_dir_from_disk_and_dir_exists(self, mocker, cache_api_cls, mock_get_cache_dir):
-        mock_exists_dir = mocker.patch.object(CacheAPI, 'exists_dir', return_value=True)
+        mock_exists_dir = mocker.patch('os.path.exists', return_value=True)
         mock_rmtree = mocker.patch('shutil.rmtree')
 
         cache_api_cls.remove_cache_dir_from_disk()
@@ -234,7 +234,7 @@ class TestClassCacheAPI:
         assert mock_rmtree.called
 
     def test_remove_cache_dir_from_disk_and_dir_not_exists(self, mocker, cache_api_cls, mock_get_cache_dir):
-        mock_exists_dir = mocker.patch.object(CacheAPI, 'exists_dir', return_value=False)
+        mock_exists_dir = mocker.patch('os.path.exists', return_value=False)
         mock_rmtree = mocker.patch('shutil.rmtree')
 
         cache_api_cls.remove_cache_dir_from_disk()
