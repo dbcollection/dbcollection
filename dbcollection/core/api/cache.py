@@ -172,6 +172,11 @@ class CacheAPI(object):
             if self.verbose:
                 print('Deleted {} cache file.'.format(self.get_cache_filename()))
 
+        if self.reset_cache:
+            self.reset_cache_file()
+            if self.verbose:
+                print('Cache reseted.')
+
     def get_matching_metadata_from_cache(self, patterns):
         """Returns a list of matching patterns from the cache."""
         found = []
@@ -214,3 +219,6 @@ class CacheAPI(object):
 
     def get_cache_filename(self):
         return self.cache_manager.manager.cache_filename
+
+    def reset_cache_file(self):
+        self.cache_manager.manager.reset_cache(force_reset=True)
