@@ -167,6 +167,11 @@ class CacheAPI(object):
             if self.verbose:
                 print('Deleted {} directory.'.format(self.get_cache_dir()))
 
+        if self.delete_cache_file or self.delete_cache:
+            self.remove_cache_file_from_disk()
+            if self.verbose:
+                print('Deleted {} cache file.'.format(self.get_cache_filename()))
+
     def get_matching_metadata_from_cache(self, patterns):
         """Returns a list of matching patterns from the cache."""
         found = []
@@ -201,3 +206,11 @@ class CacheAPI(object):
 
     def get_cache_dir(self):
         return self.cache_manager.manager.cache_dir
+
+    def remove_cache_file_from_disk(self):
+        cache_filename = self.get_cache_filename()
+        if os.path.exists(cache_filename):
+            os.remove(cache_filename)
+
+    def get_cache_filename(self):
+        return self.cache_manager.manager.cache_filename
