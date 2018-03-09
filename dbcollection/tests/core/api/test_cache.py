@@ -154,17 +154,19 @@ class TestClassCacheAPI:
                      '/some/dir/cache', '/some/dir/cache/downloads', False,
                      'extra field')
 
-    @pytest.mark.parametrize('call_query, call_rm_cache_dir, call_rm_cache_file, call_reset_cache, call_reset_cache_path, call_reset_download_path',
-                             [(True, False, False, False, False, False),
-                              (False, True, False, False, False, False),
-                              (False, False, True, False, False, False),
-                              (False, False, False, True, False, False),
-                              (False, False, False, False, True, False),
-                              (False, False, False, False, False, True),
-                              (False, True, True, False, False, False)])
+    @pytest.mark.parametrize('call_query, call_rm_cache_dir, call_rm_cache_file, call_reset_cache, call_reset_cache_path, call_reset_download_path, call_set_cache_path',
+                             [(True, False, False, False, False, False, False),
+                              (False, True, False, False, False, False, False),
+                              (False, False, True, False, False, False, False),
+                              (False, False, False, True, False, False, False),
+                              (False, False, False, False, True, False, False),
+                              (False, False, False, False, False, True, False),
+                              (False, False, False, False, False, False, True),
+                              (False, True, True, False, False, False, False)])
     def test_run(self, mocker, cache_api_cls, mock_get_cache_dir, mock_get_cache_filename,
                  call_query, call_rm_cache_dir, call_rm_cache_file, call_reset_cache,
-                 call_reset_cache_path, call_reset_download_path):
+                 call_reset_cache_path, call_reset_download_path,
+                 call_set_cache_path):
         mock_query = mocker.patch.object(CacheAPI, 'get_matching_metadata_from_cache',
                                          return_value=('some', 'vals'))
         mock_remove_cache_dir = mocker.patch.object(CacheAPI, 'remove_cache_dir_from_disk')
@@ -172,7 +174,8 @@ class TestClassCacheAPI:
         mock_reset_cache = mocker.patch.object(CacheAPI, 'reset_cache_file')
         mock_reset_cache_path = mocker.patch.object(CacheAPI, 'reset_cache_dir_path')
         mock_reset_download_path = mocker.patch.object(CacheAPI, 'reset_download_dir_path')
-        mock_get_download_dir = mocker.patch.object(CacheAPI, 'get_download_dir', return_value='/some/dir/downlaods')
+        mock_get_download_dir = mocker.patch.object(CacheAPI, 'get_download_dir', return_value='/some/dir/downloads')
+        mock_set_cache_path = mocker.patch.object(CacheAPI, 'set_cache_dir_path')
 
         if not call_query: cache_api_cls.query = ()
         cache_api_cls.delete_cache_dir = call_rm_cache_dir
@@ -180,19 +183,22 @@ class TestClassCacheAPI:
         cache_api_cls.reset_cache = call_reset_cache
         cache_api_cls.reset_path_cache = call_reset_cache_path
         cache_api_cls.reset_path_downloads = call_reset_download_path
+        if not call_set_cache_path: cache_api_cls.set_cache_dir = ''
+
         result = cache_api_cls.run()
 
         if call_query:
             assert result == ('some', 'vals')
         assert mock_query.called == call_query
         assert mock_remove_cache_dir.called == call_rm_cache_dir
-        assert mock_get_cache_dir.called == (call_rm_cache_dir or call_reset_cache_path)
+        assert mock_get_cache_dir.called == (call_rm_cache_dir or call_reset_cache_path or call_set_cache_path)
         assert mock_remove_cache_file.called == call_rm_cache_file
         assert mock_get_cache_filename.called == call_rm_cache_file
         assert mock_reset_cache.called == call_reset_cache
         assert mock_reset_cache_path.called == call_reset_cache_path
         assert mock_reset_download_path.called == call_reset_download_path
         assert mock_get_download_dir.called == call_reset_download_path
+        assert mock_set_cache_path.called == call_set_cache_path
 
     def test_get_matching_metadata_from_cache_and_return_some_patterns(self, mocker, cache_api_cls):
         def side_effect(pattern):
