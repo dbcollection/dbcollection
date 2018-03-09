@@ -65,6 +65,11 @@ test-loader:
 	make build
 	pipenv run pytest -v dbcollection/tests/core/test_loader.py
 
+.PHONY: test-utils
+test-utils:
+	make build
+	pipenv run pytest -v dbcollection/tests/utils
+
 .PHONY: lint
 lint:
 	pipenv run tox -e flake8
