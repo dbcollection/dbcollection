@@ -6,6 +6,7 @@ Cache API class.
 from __future__ import print_function
 
 from dbcollection.core.cache import CacheManager
+from dbcollection.utils import nested_lookup
 
 
 def cache(query=(), delete_cache=False, delete_cache_dir=False, delete_cache_file=False,
@@ -156,5 +157,29 @@ class CacheAPI(object):
                 print('==> Patterns found in cache: {}/{}'.format(len(result), len(self.query)))
             return result
 
-    def get_matching_metadata_from_cache(self, query):
-        pass
+    def get_matching_metadata_from_cache(self, patterns):
+        """Returns a list of matching patterns from the cache."""
+        found = []
+        for pattern in patterns:
+            if any(pattern):
+                result = self.get_matching_pattern_from_cache(pattern)
+            else:
+                result = []
+            found.append(result)
+        return found
+
+    def get_matching_pattern_from_cache(self, pattern):
+        """Returns data from cache that matches the pattern."""
+        data = self.get_cache_data()
+        results = self.find_pattern_in_dict(data, pattern)
+        out = self.add_key_to_results(results, pattern)
+        return out
+
+    def get_cache_data(self):
+        return self.cache_manager.manager.data
+
+    def find_pattern_in_dict(self, data, pattern):
+        return list(nested_lookup(key=pattern, document=data, wild=True))
+
+    def add_key_to_results(self, results, pattern):
+        return [{pattern: result} for result in results]

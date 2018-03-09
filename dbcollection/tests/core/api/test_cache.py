@@ -152,3 +152,54 @@ class TestClassCacheAPI:
 
         assert mock_query.called
         assert result == ('some', 'vals')
+
+    def test_get_matching_metadata_from_cache_and_return_some_patterns(self, mocker, cache_api_cls):
+        def side_effect(pattern):
+            return [{pattern: 'val'}]
+        mock_get_patterns = mocker.patch.object(CacheAPI, 'get_matching_pattern_from_cache', side_effect=side_effect)
+        patterns = ('dbA', 'taskB')
+
+        result = cache_api_cls.get_matching_metadata_from_cache(patterns)
+
+        assert mock_get_patterns.called
+        assert result == [[{"dbA": 'val'}], [{"taskB": 'val'}]]
+
+    def test_get_matching_metadata_from_cache_and_return_empty_list(self, mocker, cache_api_cls):
+        def side_effect(pattern):
+            if any(pattern):
+                return [{pattern: 'val'}]
+            else:
+                return []
+        mock_get_patterns = mocker.patch.object(CacheAPI, 'get_matching_pattern_from_cache', side_effect=side_effect)
+        patterns = ('',)
+
+        result = cache_api_cls.get_matching_metadata_from_cache(patterns)
+
+        assert not mock_get_patterns.called
+        assert result == [[]]
+
+    def test_get_matching_metadata_from_cache_and_return_half_empty_list(self, mocker, cache_api_cls):
+        def side_effect(pattern):
+            if any(pattern):
+                return [{pattern: 'val'}]
+            else:
+                return []
+        mock_get_patterns = mocker.patch.object(CacheAPI, 'get_matching_pattern_from_cache', side_effect=side_effect)
+        patterns = ('', 'taskB')
+
+        result = cache_api_cls.get_matching_metadata_from_cache(patterns)
+
+        assert mock_get_patterns.called
+        assert result == [[], [{"taskB": 'val'}]]
+
+    def test_get_matching_pattern_from_cache(self, mocker, cache_api_cls):
+        mock_data = mocker.patch.object(CacheAPI, 'get_cache_data')
+        mock_find_pattern = mocker.patch.object(CacheAPI, 'find_pattern_in_dict')
+        mock_add_key = mocker.patch.object(CacheAPI, 'add_key_to_results', return_value={})
+
+        result = cache_api_cls.get_matching_pattern_from_cache('some_pattern')
+
+        assert mock_data.called
+        assert mock_find_pattern.called
+        assert mock_add_key.called
+        assert result == {}
