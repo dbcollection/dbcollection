@@ -7,6 +7,7 @@ Also, all third-party submodules are located under this module.
 
 
 from __future__ import print_function
+from six import iteritems
 
 
 def print_text_box(text):
@@ -27,14 +28,41 @@ def print_text_box(text):
 
 
 def nested_lookup(key, document, wild=False):
-    """Lookup a key in a nested document recursively and yields a value."""
+    """Lookup a key in a nested document recursively and yields a value.
+
+    Parameters
+    ----------
+    key : str
+        Key string to be found.
+    document : dict/list
+        List or dictionary to be searched.
+    wild : bool, optional
+        Exact key search (True) or case insensitive search (False).
+
+    Returns
+    -------
+    List
+        List of matching values / patterns.
+
+    Examples
+    --------
+    Return all values from a dictionary that contain
+    the key 'email'.
+
+    >>> from dbcollection.utils import nested_lookup
+    >>> nested_lookup('email', {'first_email': 'myemail@gmail.com', 'second_email': 'another@gmail.com'})
+    ['myemail@gmail.com', 'another@gmail.com']
+
+    """
+    assert key, "Must input a valid key."
+    assert document, "Must input a valid dictionary."
     if isinstance(document, list):
         for d in document:
             for result in nested_lookup(key, d, wild=wild):
                 yield result
 
     if isinstance(document, dict):
-        for k, v in document:
+        for k, v in iteritems(document):
             if key == k or (wild and key.lower() in k.lower()):
                 yield v
             elif isinstance(v, dict):
