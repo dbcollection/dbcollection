@@ -74,30 +74,52 @@ class TestCallInfo:
     def test_call__raises_error_too_many_input_args(self, mocker, test_data):
         with pytest.raises(TypeError):
             info(test_data['by_dataset'],
-                test_data['by_task'],
-                test_data['by_category'],
-                test_data['show_info'],
-                test_data['show_datasets'],
-                test_data['show_categories'],
-                test_data['show_system'],
-                test_data['show_available'],
-                'extra_input')
+                 test_data['by_task'],
+                 test_data['by_category'],
+                 test_data['show_info'],
+                 test_data['show_datasets'],
+                 test_data['show_categories'],
+                 test_data['show_system'],
+                 test_data['show_available'],
+                 'extra_input')
 
 
 class TestClassInfoAPI:
     """Unit tests for the InfoAPI class."""
 
-    def test_init_with_all_input_args(self, mocker):
-        pass
+    def test_init_with_all_input_args(self, mocker, mocks_init_class, test_data):
+        info_api = InfoAPI(by_dataset=test_data['by_dataset'],
+                           by_task=test_data['by_task'],
+                           by_category=test_data['by_category'],
+                           show_info=test_data['show_info'],
+                           show_datasets=test_data['show_datasets'],
+                           show_categories=test_data['show_categories'],
+                           show_system=test_data['show_system'],
+                           show_available=test_data['show_available'])
+
+        assert_mock_call(mocks_init_class)
+        assert info_api.by_dataset == test_data['by_dataset']
+        assert info_api.by_task == test_data['by_task']
+        assert info_api.by_category == test_data['by_category']
+        assert info_api.show_info == test_data['show_info']
+        assert info_api.show_datasets == test_data['show_datasets']
+        assert info_api.show_categories == test_data['show_categories']
+        assert info_api.show_system == test_data['show_system']
+        assert info_api.show_available == test_data['show_available']
 
     def test_init__raises_error_no_input_args(self, mocker):
-        pass
+        with pytest.raises(TypeError):
+            InfoAPI()
 
     def test_init__raises_error_too_many_input_args(self, mocker):
-        pass
+        with pytest.raises(TypeError):
+            InfoAPI(('some_db',), ('some_task',), ('some_category',),
+                    False, True, False, True, False, 'extra_input')
 
     def test_init__raises_error_missing_one_input_arg(self, mocker):
-        pass
+        with pytest.raises(TypeError):
+            InfoAPI(('some_db',), ('some_task',), ('some_category',),
+                    False, True, False, True)
 
     def test_run(self, mocker):
         pass
