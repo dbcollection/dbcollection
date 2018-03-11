@@ -53,6 +53,19 @@ def info(by_dataset=(), by_task=(), by_category=(),
 
     Examples
     --------
+    Display the information contained in the cache of
+    the dbcollection package:
+
+    >>> dbc.info()
+
+    Show the available datasets for download with dbcollection:
+
+    >>> dbc.info(show_available=True)
+
+    Or show the registered datasets in the system:
+
+    >>> dbc.info(show_system=True)
+
     """
     if isinstance(by_dataset, str):
         by_dataset = (by_dataset, )
