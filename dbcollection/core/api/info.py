@@ -202,6 +202,7 @@ class InfoAPI(object):
         self.by_task = by_task
         self.by_category = by_category
         self.show_info = show_info
+        self.show_datasets = show_datasets
         self.show_categories = show_categories
         self.show_system = show_system
         self.show_available = show_available
