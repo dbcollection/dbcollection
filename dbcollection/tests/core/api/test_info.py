@@ -128,7 +128,8 @@ class TestClassInfoAPI:
         (False, False, True, False, False),
         (False, False, False, True, False),
         (False, False, False, False, True),
-        (True, True, True, True, True)  # all active
+        (True, True, True, False, False),  # all cache active
+        (False, False, False, True, True)
     ])
     def test_run(self, mocker, mocks_init_class, test_data, call_show_info, call_show_dataset,
                  call_show_category, call_show_system_dbs, call_show_available_dbs):
@@ -152,5 +153,36 @@ class TestClassInfoAPI:
         assert mock_show_info.called == call_show_info
         assert mock_show_dataset.called == call_show_dataset
         assert mock_show_category.called == call_show_category
+        assert mock_show_system.called == call_show_system_dbs
+        assert mock_show_available.called == call_show_available_dbs
+
+    @pytest.mark.parametrize('call_show_info, call_show_dataset, call_show_category, ' +
+                             'call_show_system_dbs, call_show_available_dbs', [
+        (True, True, True, True, False),
+        (True, True, True, False, True),
+        (True, True, True, True, True)
+    ])
+    def test_run_cache_prints_disabled_when_using_show_systemor_show_available(self, mocker, mocks_init_class,
+            call_show_info, call_show_dataset, call_show_category, call_show_system_dbs, call_show_available_dbs):
+        mock_show_info = mocker.patch.object(InfoAPI, 'display_info_section_from_cache')
+        mock_show_dataset = mocker.patch.object(InfoAPI, 'display_dataset_section_from_cache')
+        mock_show_category = mocker.patch.object(InfoAPI, 'display_category_section_from_cache')
+        mock_show_system = mocker.patch.object(InfoAPI, 'display_registered_datasets_in_cache')
+        mock_show_available = mocker.patch.object(InfoAPI, 'display_available_datasets_supported_by_dbcollection')
+
+        info_api = InfoAPI(by_dataset=('', ),
+                           by_task=('', ),
+                           by_category=('', ),
+                           show_info=call_show_info,
+                           show_datasets=call_show_dataset,
+                           show_categories=call_show_category,
+                           show_system=call_show_system_dbs,
+                           show_available=call_show_available_dbs)
+
+        info_api.run()
+
+        assert not mock_show_info.called
+        assert not mock_show_dataset.called
+        assert not mock_show_category.called
         assert mock_show_system.called == call_show_system_dbs
         assert mock_show_available.called == call_show_available_dbs

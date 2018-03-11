@@ -214,20 +214,21 @@ class InfoAPI(object):
 
     def run(self):
         """Main method."""
-        if self.show_info:
-            self.display_info_section_from_cache()
+        if self.show_system or self.show_available:
+            if self.show_system:
+                self.display_registered_datasets_in_cache()
 
-        if self.show_datasets:
-            self.display_dataset_section_from_cache()
+            if self.show_available:
+                self.display_available_datasets_supported_by_dbcollection()
+        else:
+            if self.show_info:
+                self.display_info_section_from_cache()
 
-        if self.show_categories:
-            self.display_category_section_from_cache()
+            if self.show_datasets:
+                self.display_dataset_section_from_cache()
 
-        if self.show_system:
-            self.display_registered_datasets_in_cache()
-
-        if self.show_available:
-            self.display_available_datasets_supported_by_dbcollection()
+            if self.show_categories:
+                self.display_category_section_from_cache()
 
     def display_info_section_from_cache(self):
         self.cache_manager.info.info()
