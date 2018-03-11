@@ -121,5 +121,19 @@ class TestClassInfoAPI:
             InfoAPI(('some_db',), ('some_task',), ('some_category',),
                     False, True, False, True)
 
-    def test_run(self, mocker):
-        pass
+    @pytest.mark.parametrize('call_show_info', [True])
+    def test_run(self, mocker, mocks_init_class, test_data, call_show_info):
+        mock_show_info = mocker.patch.object(InfoAPI, 'display_info_section_from_cache')
+
+        info_api = InfoAPI(by_dataset=test_data['by_dataset'],
+                           by_task=test_data['by_task'],
+                           by_category=test_data['by_category'],
+                           show_info=call_show_info,
+                           show_datasets=test_data['show_datasets'],
+                           show_categories=test_data['show_categories'],
+                           show_system=test_data['show_system'],
+                           show_available=test_data['show_available'])
+
+        info_api.run()
+
+        assert mock_show_info.called == call_show_info

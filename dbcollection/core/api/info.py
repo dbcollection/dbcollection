@@ -213,7 +213,11 @@ class InfoAPI(object):
 
     def run(self):
         """Main method."""
-        pass
+        if self.show_info:
+            self.display_info_section_from_cache()
+
+    def display_info_section_from_cache(self):
+        self.cache_manager.info.info()
 
 
 class InfoCacheAPI(object):
