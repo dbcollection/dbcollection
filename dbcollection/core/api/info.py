@@ -11,6 +11,67 @@ from dbcollection.core.cache import CacheManager
 from .metadata import fetch_list_datasets
 
 
+def info(by_dataset=(), by_task=(), by_category=(),
+         show_info=True, show_datasets=True, show_categories=True,
+         show_system=False, show_available=False):
+    """Prints the cache contents and other information.
+
+    This method displays to screen the contents of the 'dbcollection.json'
+    cache file. Furthermore, users can select which information is shown
+    on screen by enabling/disabling the 'show_info', 'show_datasets' and
+    'show_categories' args.
+
+    Also, information about available and downloaded datasets is
+    available via the 'show_available' and 'show_system' args,
+    recpectively.
+
+    For cases where the user wants to display a subset of the information
+    contained in the cache file or list of system datasets, there are three
+    input args that can filter the output information by dataset, task and/or
+    category names.
+
+    Parameters
+    ----------
+    by_dataset : str/list/tuple, optional
+        List of dataset names to display to the screen.
+    by_task : str/list/tuple, optional
+        List of task names to display to the screen.
+    by_category : str/list/tuple, optional
+        List of category names to display to the screen.
+    show_info : bool, optional
+        Prints the cache file's info's data to screen.
+    show_datasets : bool, optional
+        Prints the cache file's dataset's data to screen.
+    show_categories : bool, optional
+        Prints the cache file's category's data to screen.
+    show_system : bool, optional
+        Prints the downloaded datasets stored in the cache file.
+    show_available : bool, optional
+        Prints the available datasets for load/download in the
+        dbcollection package.
+
+    Examples
+    --------
+    """
+    if isinstance(by_dataset, str):
+        by_dataset = (by_dataset, )
+    if isinstance(by_task, str):
+        by_task = (by_task, )
+    if isinstance(by_category, str):
+        by_category = (by_category, )
+
+    db_info = InfoAPI(by_dataset=tuple(by_dataset),
+                      by_task=tuple(by_task),
+                      by_category=tuple(by_category),
+                      show_info=show_info,
+                      show_datasets=show_datasets,
+                      show_categories=show_categories,
+                      show_system=show_system,
+                      show_available=show_available)
+
+    db_info.run()
+
+
 def info_cache(name=None, paths_info=True, datasets_info=True, categories_info=True,
                verbose=True, is_test=False):
     """Prints the cache contents and other information.
@@ -70,6 +131,88 @@ def info_datasets(db_pattern='', show_downloaded=True, show_available=True,
                              is_test=is_test)
 
     printer.run()
+
+
+class InfoAPI(object):
+    """Info display API class.
+
+    This class contains methods to display to screen
+    the contents of the cache registry.
+
+    Also, it contains methods to display to screen
+    a list of available datasets for load/download in
+    dbcollection.
+
+    Parameters
+    ----------
+    by_dataset : tuple
+        List of dataset names to display to the screen.
+    by_task : tuple
+        List of task names to display to the screen.
+    by_category : tuple
+        List of category names to display to the screen.
+    show_info : bool
+        Prints the cache file's info's data to screen.
+    show_datasets : bool
+        Prints the cache file's dataset's data to screen.
+    show_categories : bool
+        Prints the cache file's category's data to screen.
+    show_system : bool
+        Prints the downloaded datasets stored in the cache file.
+    show_available : bool
+        Prints the available datasets for load/download in the
+        dbcollection package.
+
+    Attributes
+    ----------
+    by_dataset : tuple
+        List of dataset names to display to the screen.
+    by_task : tuple
+        List of task names to display to the screen.
+    by_category : tuple
+        List of category names to display to the screen.
+    show_info : bool
+        Prints the cache file's info's data to screen.
+    show_datasets : bool
+        Prints the cache file's dataset's data to screen.
+    show_categories : bool
+        Prints the cache file's category's data to screen.
+    show_system : bool
+        Prints the downloaded datasets stored in the cache file.
+    show_available : bool
+        Prints the available datasets for load/download in the
+        dbcollection package.
+    cache_manager : CacheManager
+        Cache manager object.
+
+    """
+
+    def __init__(self, by_dataset, by_task, by_category, show_info, show_datasets,
+                 show_categories, show_system, show_available):
+        assert isinstance(by_dataset, tuple), "Must input a valid dataset name."
+        assert isinstance(by_task, tuple), "Must input a valid task name."
+        assert isinstance(by_category, tuple), "Must input a valid category name."
+        assert isinstance(show_info, bool), "Must input a valid boolean for show_info."
+        assert isinstance(show_datasets, bool), "Must input a valid boolean for show_datasets."
+        assert isinstance(show_categories, bool), "Must input a valid boolean for show_categories."
+        assert isinstance(show_system, bool), "Must input a valid boolean for show_system."
+        assert isinstance(show_available, bool), "Must input a valid boolean for show_available."
+
+        self.by_dataset = by_dataset
+        self.by_task = by_task
+        self.by_category = by_category
+        self.show_info = show_info
+        self.show_categories = show_categories
+        self.show_system = show_system
+        self.show_available = show_available
+        self.cache_manager = self.get_cache_manager()
+
+    def get_cache_manager(self):
+        return CacheManager()
+
+    def run(self):
+        """Main method."""
+        pass
 
 
 class InfoCacheAPI(object):
