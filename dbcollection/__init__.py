@@ -49,8 +49,9 @@ from dbcollection.core.api.load import load
 from dbcollection.core.api.add import add
 from dbcollection.core.api.remove import remove
 from dbcollection.core.api.config_cache import config_cache
+from dbcollection.core.api.cache import cache
 from dbcollection.core.api.query import query
-from dbcollection.core.api.info import info_cache, info_datasets
+from dbcollection.core.api.info import info
 from dbcollection.core.api.metadata import fetch_list_datasets
 
 # load the cache file
