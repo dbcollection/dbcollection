@@ -56,7 +56,7 @@ from dbcollection.core.api.metadata import fetch_list_datasets
 
 # load the cache file
 from dbcollection.core.cache import CacheManager
-cache = CacheManager()
+cache_manager = CacheManager()
 
 # package version
 __version__ = pkg_resources.get_distribution('dbcollection').version
