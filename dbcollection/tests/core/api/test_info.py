@@ -121,16 +121,18 @@ class TestClassInfoAPI:
             InfoAPI(('some_db',), ('some_task',), ('some_category',),
                     False, True, False, True)
 
-    @pytest.mark.parametrize('call_show_info, call_show_dataset, call_show_category', [
-        (True, False, False),
-        (False, True, False),
-        (False, False, True),
-        (True, True, True)  # all active
+    @pytest.mark.parametrize('call_show_info, call_show_dataset, call_show_category, call_show_system_dbs', [
+        (True, False, False, False),
+        (False, True, False, False),
+        (False, False, True, False),
+        (False, False, False, True),
+        (True, True, True, True)  # all active
     ])
-    def test_run(self, mocker, mocks_init_class, test_data, call_show_info, call_show_dataset, call_show_category):
+    def test_run(self, mocker, mocks_init_class, test_data, call_show_info, call_show_dataset, call_show_category, call_show_system_dbs):
         mock_show_info = mocker.patch.object(InfoAPI, 'display_info_section_from_cache')
         mock_show_dataset = mocker.patch.object(InfoAPI, 'display_dataset_section_from_cache')
         mock_show_category = mocker.patch.object(InfoAPI, 'display_category_section_from_cache')
+        mock_show_system = mocker.patch.object(InfoAPI, 'display_registered_datasets_in_cache')
 
         info_api = InfoAPI(by_dataset=test_data['by_dataset'],
                            by_task=test_data['by_task'],
@@ -138,7 +140,7 @@ class TestClassInfoAPI:
                            show_info=call_show_info,
                            show_datasets=call_show_dataset,
                            show_categories=call_show_category,
-                           show_system=test_data['show_system'],
+                           show_system=call_show_system_dbs,
                            show_available=test_data['show_available'])
 
         info_api.run()
@@ -146,3 +148,4 @@ class TestClassInfoAPI:
         assert mock_show_info.called == call_show_info
         assert mock_show_dataset.called == call_show_dataset
         assert mock_show_category.called == call_show_category
+        assert mock_show_system.called == call_show_system_dbs

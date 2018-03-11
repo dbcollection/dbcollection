@@ -7,6 +7,7 @@ from __future__ import print_function
 import json
 
 from dbcollection.core.cache import CacheManager
+from dbcollection.utils import print_text_box
 
 from .metadata import fetch_list_datasets
 
@@ -222,6 +223,9 @@ class InfoAPI(object):
         if self.show_categories:
             self.display_category_section_from_cache()
 
+        if self.show_system:
+            self.display_registered_datasets_in_cache()
+
     def display_info_section_from_cache(self):
         self.cache_manager.info.info()
 
@@ -230,6 +234,18 @@ class InfoAPI(object):
 
     def display_category_section_from_cache(self):
         self.cache_manager.category.info()
+
+    def display_registered_datasets_in_cache(self):
+        print_text_box('Available datasets in cache for load')
+        datasets = self.get_datasets_from_cache()
+        for name in sorted(datasets):
+            tasks = list(sorted(datasets[name]['tasks'].keys()))
+            print('  - {}  {}'.format(name, tasks))
+        print('')
+
+    def get_datasets_from_cache(self):
+        return self.cache_manager.manager.data["dataset"]
+
 
 class InfoCacheAPI(object):
     """Cache info display API class.
