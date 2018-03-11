@@ -219,11 +219,17 @@ class InfoAPI(object):
         if self.show_datasets:
             self.display_dataset_section_from_cache()
 
+        if self.show_categories:
+            self.display_category_section_from_cache()
+
     def display_info_section_from_cache(self):
         self.cache_manager.info.info()
 
     def display_dataset_section_from_cache(self):
         self.cache_manager.dataset.info()
+
+    def display_category_section_from_cache(self):
+        self.cache_manager.category.info()
 
 class InfoCacheAPI(object):
     """Cache info display API class.
