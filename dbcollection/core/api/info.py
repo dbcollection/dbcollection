@@ -226,6 +226,9 @@ class InfoAPI(object):
         if self.show_system:
             self.display_registered_datasets_in_cache()
 
+        if self.show_available:
+            self.display_available_datasets_supported_by_dbcollection()
+
     def display_info_section_from_cache(self):
         self.cache_manager.info.info()
 
@@ -245,6 +248,14 @@ class InfoAPI(object):
 
     def get_datasets_from_cache(self):
         return self.cache_manager.manager.data["dataset"]
+
+    def display_available_datasets_supported_by_dbcollection(self):
+        print_text_box('Available datasets for download')
+        available_datasets_list = fetch_list_datasets()
+        for name in sorted(available_datasets_list):
+            tasks = list(sorted(available_datasets_list[name]['tasks'].keys()))
+            print('  - {}  {}'.format(name, tasks))
+        print('')
 
 
 class InfoCacheAPI(object):
