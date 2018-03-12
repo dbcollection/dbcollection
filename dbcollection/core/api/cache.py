@@ -95,29 +95,51 @@ class CacheAPI(object):
 
     Parameters
     ----------
-    query : tuple, optional
+    query : tuple
         List of patterns to search for in the cache file.
-    delete_cache : bool, optional
+    delete_cache : bool
         Delete/remove the dbcollection cache file + directory.
-    delete_cache_dir : bool, optional
+    delete_cache_dir : bool
         Delete/remove the dbcollection cache directory.
-    delete_cache_file : bool, optional
+    delete_cache_file : bool
         Delete/remove the dbcollection.json cache file.
-    reset_cache : bool, optional
+    reset_cache : bool
         Reset the cache file.
-    reset_cache_dir_path : bool, optional
+    reset_cache_dir_path : bool
         Reset the cache dir path to the default path.
-    reset_cache_downloads_path : bool, optional
+    reset_cache_downloads_path : bool
         Reset the downloads dir path to the default path.
-    set_cache_dir_path : str, optional
+    set_cache_dir_path : str
         New path for the cache dir.
-    set_downloads_dir : str, optional
+    set_downloads_dir : str
         New path for the downloads dir.
-    verbose : bool, optional
+    verbose : bool
         Displays text information (if true).
 
     Attributes
     ----------
+    query : tuple
+        List of patterns to search for in the cache file.
+    delete_cache : bool
+        Delete/remove the dbcollection cache file + directory.
+    delete_cache_dir : bool
+        Delete/remove the dbcollection cache directory.
+    delete_cache_file : bool
+        Delete/remove the dbcollection.json cache file.
+    reset_cache : bool
+        Reset the cache file.
+    reset_cache_dir_path : bool
+        Reset the cache dir path to the default path.
+    reset_cache_downloads_path : bool, optional
+        Reset the downloads dir path to the default path.
+    set_cache_dir_path : str
+        New path for the cache dir.
+    set_downloads_dir : str
+        New path for the downloads dir.
+    verbose : bool
+        Displays text information (if true).
+    cache_manager : CacheManager
+        Cache manager object.
 
     """
 
@@ -152,6 +174,7 @@ class CacheAPI(object):
         return CacheManager()
 
     def run(self):
+        """Main method."""
         if any(self.query):
             result = self.get_matching_metadata_from_cache(self.query)
 
