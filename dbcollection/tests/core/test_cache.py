@@ -4,6 +4,7 @@ Test dbcollection/utils/cache.py.
 
 
 import os
+import sys
 import random
 import pytest
 
@@ -63,7 +64,10 @@ class TestCacheDataManager:
 
     def test_write_data_cache(self, mocker, cache_data_manager):
         new_data = {"some": "data"}
-        mocker.patch("builtins.open")
+        if sys.version_info[0] == 3:
+            mocker.patch("builtins.open")
+        else:
+            mocker.patch("__builtin__.open")
         mocker.patch('json.dump')
 
         cache_data_manager.write_data_cache(new_data)
