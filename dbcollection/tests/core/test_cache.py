@@ -894,3 +894,26 @@ class TestCacheManagerCategory:
 
     def test_info(self, mocker, cache_category_manager):
         cache_category_manager.info()
+
+    def test_info_with_categories(self, mocker, cache_category_manager):
+        mock_filter = mocker.patch.object(CacheManagerCategory, '_get_filtered_category_data', return_value={})
+
+        cache_category_manager.info(categories='categoryA')
+
+        assert mock_filter.called
+
+    def test__get_filtered_category_data_single_category(self, mocker, cache_category_manager):
+        data = {'categoryA': ['some_data'], 'categoryb': ['more', 'data'], 'categoryC': True}
+        categories = ['categoryB']
+
+        result = cache_category_manager._get_filtered_category_data(data, categories)
+
+        assert result == {'categoryb': ['more', 'data']}
+
+    def test__get_filtered_category_data_multiple_categories(self, mocker, cache_category_manager):
+        data = {'categoryA': ['some_data'], 'categoryb': ['more', 'data'], 'categoryC': True}
+        categories = ['categoryA', 'categoryB']
+
+        result = cache_category_manager._get_filtered_category_data(data, categories)
+
+        assert result == {'categoryA': ['some_data'], 'categoryb': ['more', 'data']}

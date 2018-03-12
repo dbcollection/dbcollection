@@ -918,12 +918,28 @@ class CacheManagerCategory:
         """
         return list(sorted(self.manager.data["category"].keys()))
 
-    def info(self):
+    def info(self, categories=()):
         """Prints the cache and download data dir paths of the cache."""
         pp = pprint.PrettyPrinter(indent=4)
         print_text_box('Category')
-        pp.pprint(self.manager.data["category"])
+        data = self.manager.data["category"]
+        if any(categories):
+            data = self._get_filtered_category_data(data, categories)
+        pp.pprint(data)
         print('')
+
+    def _get_filtered_category_data(self, data, categories):
+        assert categories
+        if isinstance(categories, str):
+            categories_ = [categories.lower()]
+        else:
+            categories_ = [category.lower() for category in categories]
+        categories_cache_key = [category for category in data if category.lower() in categories_]
+        filtered_data = {}
+        if any(categories_cache_key):
+            for key in categories_cache_key:
+                filtered_data[key] = data[key]
+        return filtered_data
 
 
 class CacheManagerInfo:
