@@ -11,7 +11,7 @@ import warnings
 import pprint
 from glob import glob
 
-from dbcollection.utils import print_text_box
+from dbcollection.utils import merge_dicts, print_text_box
 
 
 class CacheManager:
@@ -490,12 +490,60 @@ class CacheManagerDataset:
         """
         return list(sorted(self.manager.data["dataset"].keys()))
 
-    def info(self):
-        """Prints the dataset information contained in the cache."""
+    def info(self, datasets=(), tasks=()):
+        """Prints the dataset information contained in the cache.
+
+        If a list of dataset or task names is specified, only the
+        information matching any strings in those lists will be
+        displayed.
+
+        Parameters
+        ----------
+        datasets : str/list/tuple, optional
+            List of dataset names.
+        tasks : str/list/tuple, optional
+            List of task names.
+
+        """
         pp = pprint.PrettyPrinter(indent=4)
         print_text_box('Dataset')
-        pp.pprint(self.manager.data["dataset"])
+        if any(datasets) or any(tasks):
+            data = self._get_select_tasks_and_datasets_data(datasets, tasks)
+        else:
+            data = self._get_dataset_data()
+        pp.pprint(data)
         print('')
+
+    def _get_select_tasks_and_datasets_data(self, datasets=(), tasks=()):
+        data = {}
+        if any(datasets):
+            data = self._get_data_selected_datasets(datasets)
+        if any(tasks):
+            filtered = self._get_data_selected_tasks(tasks)
+            data = dict(merge_dicts(data, filtered))
+        return data
+
+    def _get_data_selected_datasets(self, datasets):
+        data = {}
+        cache_dbs = self._get_dataset_data()
+        for dataset in datasets:
+            for key in cache_dbs:
+                if dataset.lower() in key.lower():
+                    data.update({key: cache_dbs[key]})
+        return data
+
+    def _get_dataset_data(self):
+        return self.manager.data['dataset']
+
+    def _get_data_selected_tasks(self, tasks):
+        data = {}
+        cache_dbs = self._get_dataset_data()
+        for task in tasks:
+            for dataset in cache_dbs:
+                for key in cache_dbs[dataset]['tasks']:
+                    if task.lower() in key.lower():
+                        data.update({dataset: {"tasks": {key: cache_dbs[dataset]['tasks'][key]}}})
+        return data
 
 
 class CacheManagerTask:
@@ -918,12 +966,28 @@ class CacheManagerCategory:
         """
         return list(sorted(self.manager.data["category"].keys()))
 
-    def info(self):
+    def info(self, categories=()):
         """Prints the cache and download data dir paths of the cache."""
         pp = pprint.PrettyPrinter(indent=4)
         print_text_box('Category')
-        pp.pprint(self.manager.data["category"])
+        data = self.manager.data["category"]
+        if any(categories):
+            data = self._get_filtered_category_data(data, categories)
+        pp.pprint(data)
         print('')
+
+    def _get_filtered_category_data(self, data, categories):
+        assert categories
+        if isinstance(categories, str):
+            categories_ = [categories.lower()]
+        else:
+            categories_ = [category.lower() for category in categories]
+        categories_cache_key = [category for category in data if category.lower() in categories_]
+        filtered_data = {}
+        if any(categories_cache_key):
+            for key in categories_cache_key:
+                filtered_data[key] = data[key]
+        return filtered_data
 
 
 class CacheManagerInfo:
