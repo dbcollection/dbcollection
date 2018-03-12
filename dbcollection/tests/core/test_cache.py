@@ -494,7 +494,95 @@ class TestCacheManagerDataset:
             cache_dataset_manager.delete(name)
 
     def test_info(self, mocker, cache_dataset_manager):
+        mock_select_data = mocker.patch.object(CacheManagerDataset, '_get_select_tasks_and_datasets_data', return_value={})
+        mock_data = mocker.patch.object(CacheManagerDataset, '_get_dataset_data', return_value={})
+
         cache_dataset_manager.info()
+
+        assert not mock_select_data.called
+        assert mock_data.called
+
+    def test_info_empty_inputs(self, mocker, cache_dataset_manager):
+        mock_select_data = mocker.patch.object(CacheManagerDataset, '_get_select_tasks_and_datasets_data', return_value={})
+        mock_data = mocker.patch.object(CacheManagerDataset, '_get_dataset_data', return_value={})
+
+        cache_dataset_manager.info('', '')
+
+        assert not mock_select_data.called
+        assert mock_data.called
+
+    @pytest.mark.parametrize('datasets, tasks', [
+        (['datasetA', 'datasetB'], None),
+        (['taskA', 'TaskC'], None),
+        (['datasetA', 'datasetB'], 'taskB'),
+    ])
+    def test_info_with_datasets_and_tasks(self, mocker, cache_dataset_manager, datasets, tasks):
+        mock_select_data = mocker.patch.object(CacheManagerDataset, '_get_select_tasks_and_datasets_data', return_value={})
+        mock_data = mocker.patch.object(CacheManagerDataset, '_get_dataset_data', return_value={})
+
+        cache_dataset_manager.info(datasets, tasks)
+
+        assert mock_select_data.called
+        assert not mock_data.called
+
+    def test_info__raises_error_too_many_inputs(self, mocker, cache_dataset_manager):
+        with pytest.raises(TypeError):
+            cache_dataset_manager.info('', '', '')
+
+    def test_get_select_tasks_and_datasets_data_with_datasets_only(self, mocker, cache_dataset_manager):
+        mock_filter_datasets = mocker.patch.object(CacheManagerDataset, '_get_data_selected_datasets', return_value={'some': 'data'})
+        mock_filter_tasks = mocker.patch.object(CacheManagerDataset, '_get_data_selected_tasks', return_value={})
+        datasets = ('datasetA', 'datasetB')
+        tasks = ()
+
+        result = cache_dataset_manager._get_select_tasks_and_datasets_data(datasets, tasks)
+
+        assert mock_filter_datasets.called
+        assert not mock_filter_tasks.called
+        assert result == {'some': 'data'}
+
+    def test_get_select_tasks_and_datasets_data_with_tasks_only(self, mocker, cache_dataset_manager):
+        mock_filter_datasets = mocker.patch.object(CacheManagerDataset, '_get_data_selected_datasets', return_value={})
+        mock_filter_tasks = mocker.patch.object(CacheManagerDataset, '_get_data_selected_tasks', return_value={'some': 'tasks'})
+        tasks = 'taskA'
+
+        result = cache_dataset_manager._get_select_tasks_and_datasets_data(tasks=tasks)
+
+        assert not mock_filter_datasets.called
+        assert mock_filter_tasks.called
+        assert result == {'some': 'tasks'}
+
+    def test_get_select_tasks_and_datasets_data_with_both(self, mocker, cache_dataset_manager):
+        mock_filter_datasets = mocker.patch.object(CacheManagerDataset, '_get_data_selected_datasets', return_value={'some': {'data': [1, 2, 3]}})
+        mock_filter_tasks = mocker.patch.object(CacheManagerDataset, '_get_data_selected_tasks', return_value={'some': {'tasks': 'taskA'}})
+        datasets = 'some_dataset'
+        tasks = 'some_task'
+
+        result = cache_dataset_manager._get_select_tasks_and_datasets_data(datasets, tasks)
+
+        assert mock_filter_datasets.called
+        assert mock_filter_tasks.called
+        assert result == {'some': {'data': [1, 2, 3], 'tasks': 'taskA'}}
+
+    def test_get_data_selected_datasets(self, mocker, cache_dataset_manager):
+        data = {'datasetA': ['some', 'data'], 'datasetB': {'data': 1}, 'datasetC': [1, 2, 3]}
+        datasets = ['datasetA', 'datasetb']
+        mock_get_data = mocker.patch.object(CacheManagerDataset, '_get_dataset_data', return_value=data)
+
+        result = cache_dataset_manager._get_data_selected_datasets(datasets)
+
+        assert mock_get_data.called
+        assert result == {'datasetA': ['some', 'data'], 'datasetB': {'data': 1}}
+
+    def test_get_data_selected_tasks(self, mocker, cache_dataset_manager):
+        data = {'datasetA': {"stuff": 'some_stuffA', "tasks": {"taskA": 'itemA'}}, 'datasetB': {"stuff": 'some_stuffB', "tasks": {"taskb": 'itemb'}}}
+        tasks = ('taskB',)
+        mock_get_data = mocker.patch.object(CacheManagerDataset, '_get_dataset_data', return_value=data)
+
+        result = cache_dataset_manager._get_data_selected_tasks(tasks)
+
+        assert mock_get_data.called
+        assert result == {'datasetB': {"tasks": {"taskb": 'itemb'}}}
 
     def test_exists_dataset__valid_dataset(self, mocker, cache_dataset_manager):
         name = 'dataset0'
@@ -514,6 +602,7 @@ class TestCacheManagerDataset:
         datasets = list(sorted(cache_dataset_manager.manager.data["dataset"].keys()))
 
         assert datasets == cache_dataset_manager.list()
+
 
 
 @pytest.fixture()
