@@ -78,6 +78,7 @@ install:
   - cmd: echo "installing dependencies"
   - cmd: pip install pipenv --upgrade
   - cmd: pipenv install --dev
+  - cmd: pipenv run pip install pytest-mock
   - cmd: echo "installing dependencies - done"
 
   # recursively clone all submodules
