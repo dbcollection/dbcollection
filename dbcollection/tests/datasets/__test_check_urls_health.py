@@ -6,7 +6,7 @@ import requests
 import pytest
 
 from dbcollection.utils.test import check_url_redirect
-from dbcollection.core.api.list_datasets import get_list_urls_dataset
+from dbcollection.core.api.metadata import get_list_urls_dataset
 
 
 TIMEOUT_SECONDS = 3

@@ -148,6 +148,10 @@ class TestClassCacheAPI:
         assert cache_api.set_downloads_dir == test_data["set_downloads_dir"]
         assert cache_api.verbose == test_data["verbose"]
 
+    def test_init__raises_error_no_input_args(self, mocker):
+        with pytest.raises(TypeError):
+            CacheAPI()
+
     def test_init__raises_error_too_many_input_args(self, mocker):
         with pytest.raises(TypeError):
             CacheAPI(('some_query',), False, False, False, True, True, True,

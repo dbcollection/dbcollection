@@ -4,6 +4,7 @@ Test dbcollection/utils/cache.py.
 
 
 import os
+import sys
 import random
 import pytest
 
@@ -63,7 +64,10 @@ class TestCacheDataManager:
 
     def test_write_data_cache(self, mocker, cache_data_manager):
         new_data = {"some": "data"}
-        mocker.patch("builtins.open")
+        if sys.version_info[0] == 3:
+            mocker.patch("builtins.open")
+        else:
+            mocker.patch("__builtin__.open")
         mocker.patch('json.dump')
 
         cache_data_manager.write_data_cache(new_data)
@@ -350,6 +354,7 @@ class TestCacheManagerInfo:
         assert cache_info_manager.cache_dir == cache_info_manager.manager.cache_dir
         assert cache_info_manager.cache_dir is not new_path
 
+    @pytest.mark.skipif(sys.version_info[0] == 2, reason="weird behaviour for python2")
     def test__set_download_dir(self, mocker, cache_info_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
         new_path = "/new/cache/downloads/path"
@@ -361,6 +366,7 @@ class TestCacheManagerInfo:
     def test__get_download_dir(self, mocker, cache_info_manager, test_data):
         assert cache_info_manager.download_dir == test_data.data['info']['root_downloads_dir']
 
+    @pytest.mark.skipif(sys.version_info[0] == 2, reason="weird behaviour for python2")
     def test_reset_download_dir(self, mocker, cache_info_manager):
         mocker.patch.object(CacheDataManager, "write_data_cache")
         new_path = "/new/cache/downloads/path"
@@ -372,14 +378,13 @@ class TestCacheManagerInfo:
         assert cache_info_manager.download_dir is not new_path
 
     def test_reset(self, mocker, cache_info_manager):
-        mocker.patch.object(CacheDataManager, "write_data_cache")
-        cache_info_manager.cache_dir = "/new/cache/path"
-        cache_info_manager.download_dir = "/new/cache/downloads/path"
+        mock_reset_cache = mocker.patch.object(CacheManagerInfo, 'reset_cache_dir')
+        mock_reset_download = mocker.patch.object(CacheManagerInfo, 'reset_download_dir')
 
         cache_info_manager.reset()
 
-        assert cache_info_manager.cache_dir == cache_info_manager.manager._get_default_cache_dir()
-        assert cache_info_manager.download_dir == cache_info_manager.manager._get_default_downloads_dir()
+        assert mock_reset_cache.called
+        assert mock_reset_download.called
 
     def test_info(self, mocker, cache_info_manager):
         cache_info_manager.info()

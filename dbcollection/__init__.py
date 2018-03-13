@@ -48,7 +48,6 @@ from dbcollection.core.api.process import process
 from dbcollection.core.api.load import load
 from dbcollection.core.api.add import add
 from dbcollection.core.api.remove import remove
-from dbcollection.core.api.config_cache import config_cache
 from dbcollection.core.api.cache import cache
 from dbcollection.core.api.query import query
 from dbcollection.core.api.info import info
