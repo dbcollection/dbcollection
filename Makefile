@@ -82,6 +82,6 @@ urls_check:
 # Deploy
 ##########
 
-.PHONY: eploy
+.PHONY: deploy
 deploy:
 	python conda-recipe/deploy.py
