@@ -81,7 +81,7 @@ def remove_api_cls(mocker, mocks_init_class, test_data):
 class TestClassRemoveAPI:
     """Unit tests for the RemoveAPI class."""
 
-    def test_init_with_all_input_agrs(self, mocker, mocks_init_class, test_data):
+    def test_init_with_all_input_args(self, mocker, mocks_init_class, test_data):
         remove_api = RemoveAPI(name=test_data['dataset'],
                                task=test_data['task'],
                                delete_data=test_data['delete_data'],
