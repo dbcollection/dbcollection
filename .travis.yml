@@ -21,7 +21,6 @@ install:
 script:
     - echo "Run tests"
     - pipenv run pytest --cov=dbcollection dbcollection/tests/
-    - pipenv run pytest --cov=dbcollection dbcollection/tests/datasets/test_check_urls_health.py
     - echo "Test complete."
 
 after_success:
