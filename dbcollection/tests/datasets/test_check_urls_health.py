@@ -13,6 +13,7 @@ TIMEOUT_SECONDS = 3
 
 
 @pytest.mark.parametrize("dataset_name, urls", get_list_urls_dataset())
+@pytest.mark.slow
 def test_check_urls_are_valid(dataset_name, urls):
     for url in urls:
         response = requests.head(url)  # try without redirect enabled
