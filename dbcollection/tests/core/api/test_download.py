@@ -7,8 +7,6 @@ import pytest
 
 from dbcollection.core.api.download import download, DownloadAPI
 
-from ..dummy_data.example_cache import DataGenerator
-
 
 @pytest.fixture()
 def mocks_init_class(mocker):
