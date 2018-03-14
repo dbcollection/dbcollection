@@ -1,43 +1,61 @@
+{% set name = "dbcollection" %}
+{% set version = "0.2.1" %}
+{% set file_ext = "tar.gz" %}
+{% set hash_type = "sha256" %}
+{% set hash_value = "2ce0ca12f554edf73614b2284dc64a8e553eb8aac5ed2d9a5d7461958523de93" %}
+
 package:
-  name: dbcollection
-  version: {{ GIT_DESCRIBE_TAG }}
+  name: '{{ name|lower }}'
+  version: '{{ version }}'
 
 source:
-  path: ../
-
-build:
-  number: {{ GIT_DESCRIBE_NUMBER|int }}
+  fn: '{{ name }}-{{ version }}.{{ file_ext }}'
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.{{ file_ext }}
+  '{{ hash_type }}': '{{ hash_value }}'
 
 requirements:
-  build:
+  host:
     - python
     - setuptools
-    - h5py
-    - numpy
-    - patool
-    - progressbar2
-    - pytest
-    - scipy
-    - xmltodict
-    - requests
-    - pillow
-
+    - patool ==1.12
+    - urllib3 ==1.22
+    - pillow ==5.0.0
+    - numpy ==1.14.0
+    - idna ==2.6
+    - six ==1.11.0
+    - certifi ==2017.11.5
+    - h5py ==2.7.1
+    - chardet ==3.0.4
+    - progressbar2 ==3.34.3
+    - python-utils ==2.2.0
+    - xmltodict ==0.11.0
+    - requests ==2.18.4
+    - scipy ==1.0.0
   run:
     - python
-    - h5py
-    - numpy
-    - patool
-    - progressbar2
-    - pytest
-    - scipy
-    - xmltodict
-    - requests
-    - pillow
-
-test:
-  imports:
-    - dbcollection
+    - patool ==1.12
+    - urllib3 ==1.22
+    - pillow ==5.0.0
+    - numpy ==1.14.0
+    - idna ==2.6
+    - six ==1.11.0
+    - certifi ==2017.11.5
+    - h5py ==2.7.1
+    - chardet ==3.0.4
+    - progressbar2 ==3.34.3
+    - python-utils ==2.2.0
+    - xmltodict ==0.11.0
+    - requests ==2.18.4
+    - scipy ==1.0.0
 
 about:
   home: https://github.com/dbcollection/dbcollection
-  license: MIT
+  license: MIT License
+  license_family: MIT
+  license_file: LICENSE.txt
+  summary: A collection of popular datasets for deep learning.
+  doc_url: https://dbcollection.readthedocs.io/en/latest/
+  dev_url: https://github.com/dbcollection/dbcollection
+
+extra:
+  recipe-maintainers: 'farrajota'
