@@ -55,10 +55,10 @@ test-api:
 	make build
 	pipenv run pytest -v dbcollection/tests/core/api/
 
-.PHONY: test-cache
-test-cache:
+.PHONY: test-manager
+test-manager:
 	make build
-	pipenv run pytest -v dbcollection/tests/core/test_cache.py
+	pipenv run pytest -v dbcollection/tests/core/test_manager.py
 
 .PHONY: test-loader
 test-loader:
