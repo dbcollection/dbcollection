@@ -49,7 +49,6 @@ from dbcollection.core.api.load import load
 from dbcollection.core.api.add import add
 from dbcollection.core.api.remove import remove
 from dbcollection.core.api.cache import cache
-from dbcollection.core.api.query import query
 from dbcollection.core.api.info import info
 from dbcollection.core.api.metadata import fetch_list_datasets
 
