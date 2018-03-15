@@ -5,7 +5,7 @@ Add API class.
 
 from __future__ import print_function
 
-from dbcollection.core.cache import CacheManager
+from dbcollection.core.manager import CacheManager
 
 
 def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True, force_overwrite=False):

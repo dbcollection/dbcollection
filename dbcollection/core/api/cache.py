@@ -7,7 +7,7 @@ from __future__ import print_function
 import os
 import shutil
 
-from dbcollection.core.cache import CacheManager
+from dbcollection.core.manager import CacheManager
 from dbcollection.utils import nested_lookup
 
 

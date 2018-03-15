@@ -6,7 +6,7 @@ Remove API class.
 from __future__ import print_function
 import shutil
 
-from dbcollection.core.cache import CacheManager
+from dbcollection.core.manager import CacheManager
 
 
 def remove(name, task='', delete_data=False, verbose=True):
