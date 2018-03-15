@@ -6,7 +6,7 @@ Info API class.
 from __future__ import print_function
 import json
 
-from dbcollection.core.cache import CacheManager
+from dbcollection.core.manager import CacheManager
 from dbcollection.utils import print_text_box
 
 from .metadata import fetch_list_datasets

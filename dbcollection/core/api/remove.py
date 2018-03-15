@@ -6,7 +6,7 @@ Remove API class.
 from __future__ import print_function
 import shutil
 
-from dbcollection.core.cache import CacheManager
+from dbcollection.core.manager import CacheManager
 
 
 def remove(name, task='', delete_data=False, verbose=True):
@@ -14,7 +14,7 @@ def remove(name, task='', delete_data=False, verbose=True):
 
     Removes the dataset's information registry from the dbcollection.json cache file.
     The dataset's data files remain in disk if 'delete_data' is not enabled.
-    If it kintended to remove the data files as well, the 'delete_data' input arg
+    If you intended to remove the data files as well, the 'delete_data' input arg
     must be set to 'True' in order to also remove the data files.
 
     Moreover, if the intended action is to remove a task of the dataset from the cache

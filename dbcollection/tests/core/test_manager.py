@@ -8,7 +8,7 @@ import sys
 import random
 import pytest
 
-from dbcollection.core.cache import (
+from dbcollection.core.manager import (
     CacheManager,
     CacheDataManager,
     CacheManagerInfo,

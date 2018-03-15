@@ -5,7 +5,7 @@ Load API class.
 
 from __future__ import print_function
 
-from dbcollection.core.cache import CacheManager
+from dbcollection.core.manager import CacheManager
 from dbcollection.core.loader import DataLoader
 
 from .download import download

@@ -49,12 +49,11 @@ from dbcollection.core.api.load import load
 from dbcollection.core.api.add import add
 from dbcollection.core.api.remove import remove
 from dbcollection.core.api.cache import cache
-from dbcollection.core.api.query import query
 from dbcollection.core.api.info import info
 from dbcollection.core.api.metadata import fetch_list_datasets
 
 # load the cache file
-from dbcollection.core.cache import CacheManager
+from dbcollection.core.manager import CacheManager
 cache_manager = CacheManager()
 
 # package version

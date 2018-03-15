@@ -6,7 +6,7 @@ Download API class.
 from __future__ import print_function
 import os
 
-from dbcollection.core.cache import CacheManager
+from dbcollection.core.manager import CacheManager
 
 from .metadata import MetadataConstructor
 
