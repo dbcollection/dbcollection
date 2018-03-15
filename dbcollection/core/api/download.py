@@ -11,7 +11,7 @@ from dbcollection.core.manager import CacheManager
 from .metadata import MetadataConstructor
 
 
-def download(name, data_dir=None, extract_data=True, verbose=True):
+def download(name, data_dir='', extract_data=True, verbose=True):
     """Download a dataset data to disk.
 
     This method will download a dataset's data files to disk. After download,
@@ -85,49 +85,19 @@ class DownloadAPI(object):
 
     def __init__(self, name, data_dir, extract_data, verbose):
         """Initialize class."""
-        assert name, 'Must input a valid dataset name: {}'.format(name)
-        assert extract_data is not None, 'extract_data cannot be empty'
-        assert verbose is not None, 'verbose cannot be empty'
+        assert name, 'Must input a valid dataset name.'
+        assert isinstance(data_dir, str), 'Must input a valid directory.'
+        assert isinstance(extract_data, bool), "Must input a valid boolean for extract_data."
+        assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
 
         self.name = name
         self.data_dir = data_dir
         self.extract_data = extract_data
         self.verbose = verbose
         self.cache_manager = self.get_cache_manager()
-        self.db_metadata = self.get_dataset_metadata_obj(name)
-
-        self.save_data_dir = self.get_download_data_dir()
-        self.save_cache_dir = self.get_download_cache_dir()
 
     def get_cache_manager(self):
         return CacheManager()
-
-    def get_dataset_metadata_obj(self, name):
-        return MetadataConstructor(name)
-
-    def get_download_data_dir(self):
-        if self.data_dir:
-            return self.data_dir
-        else:
-            return self.get_download_data_dir_from_cache()
-
-    def get_download_data_dir_from_cache(self):
-        """Create a dir path from the cache information for this dataset."""
-        save_data_dir = os.path.join(self.cache_manager.manager.download_dir, self.name)
-        self.create_dir(save_data_dir)
-        return save_data_dir
-
-    def create_dir(self, path):
-        """Create a directory in the disk."""
-        if not os.path.exists(path):
-            if self.verbose:
-                print('Creating save directory in disk: {}'.format(path))
-            os.makedirs(path)
-
-    def get_download_cache_dir(self):
-        cache_save_path = os.path.join(self.cache_manager.manager.cache_dir, self.name)
-        self.create_dir(cache_save_path)
-        return cache_save_path
 
     def run(self):
         """Main method."""
@@ -149,24 +119,63 @@ class DownloadAPI(object):
     def download_dataset(self):
         """Download the dataset to disk."""
         constructor = self.get_dataset_constructor()
-        db = constructor(data_path=self.save_data_dir,
-                         cache_path=self.save_cache_dir,
+        save_data_dir = self.get_download_data_dir()
+        save_cache_dir = self.get_download_cache_dir()
+        db = constructor(data_path=save_data_dir,
+                         cache_path=save_cache_dir,
                          extract_data=self.extract_data,
                          verbose=self.verbose)
         db.download()
 
     def get_dataset_constructor(self):
-        return self.db_metadata.get_constructor()
+        db_metadata = self.get_dataset_metadata_obj(self.name)
+        constructor = db_metadata.get_constructor()
+        return constructor
+
+    def get_dataset_metadata_obj(self, name):
+        return MetadataConstructor(name)
+
+    def get_download_data_dir(self):
+        if not any(self.data_dir):
+            self.data_dir = self.get_download_data_dir_from_cache()
+        return self.data_dir
+
+    def get_download_data_dir_from_cache(self):
+        """Create a dir path from the cache information for this dataset."""
+        download_dir = self.get_cache_download_dir_path()
+        save_data_dir = os.path.join(download_dir, self.name)
+        self.create_dir(save_data_dir)
+        return save_data_dir
+
+    def get_cache_download_dir_path(self):
+        return self.cache_manager.manager.download_dir
+
+    def create_dir(self, path):
+        """Create a directory in the disk."""
+        if not os.path.exists(path):
+            if self.verbose:
+                print('Creating save directory in disk: {}'.format(path))
+            os.makedirs(path)
+
+    def get_download_cache_dir(self):
+        cache_dir = self.get_cache_dir()
+        cache_save_path = os.path.join(cache_dir, self.name)
+        self.create_dir(cache_save_path)
+        return cache_save_path
+
+    def get_cache_dir(self):
+        return self.cache_manager.manager.cache_dir
 
     def update_cache(self):
         """Update the cache manager information for this dataset."""
+        data_dir = self.get_download_data_dir()
         if self.exists_dataset_in_cache():
-            self.update_dataset_info_in_cache()
+            self.update_dataset_info_in_cache(data_dir)
         else:
-            self.add_dataset_info_to_cache()
+            self.add_dataset_info_to_cache(data_dir)
 
-    def update_dataset_info_in_cache(self):
-        self.cache_manager.dataset.update(self.name, data_dir=self.save_data_dir)
+    def update_dataset_info_in_cache(self, data_dir):
+        self.cache_manager.dataset.update(self.name, data_dir=data_dir)
 
-    def add_dataset_info_to_cache(self):
+    def add_dataset_info_to_cache(self, data_dir):
         self.cache_manager.dataset.add(self.name, data_dir=self.save_data_dir, tasks={})
