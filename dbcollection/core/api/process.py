@@ -134,17 +134,11 @@ class ProcessAPI(object):
 
     def process_dataset(self):
         """Process the dataset's metadata."""
-        constructor = self.get_dataset_constructor()
-        save_data_dir = self.get_dataset_data_dir_path()
-        save_cache_dir = self.get_dataset_cache_dir_path()
-        db = constructor(data_path=save_data_dir,
-                         cache_path=save_cache_dir,
-                         extract_data=self.extract_data,
-                         verbose=self.verbose)
+        data_dir = self.get_dataset_data_dir_path()
+        cache_dir = self.get_dataset_cache_dir_path()
         task = self.parse_task_name(self.task)
         self.check_if_task_exists_in_database(task)
-        task_info = db.process(task)
-        return task_info
+        return self.process_dataset_metadata(data_dir, cache_dir, task)
 
     def get_dataset_constructor(self):
         db_metadata = self.get_dataset_metadata_obj(self.name)
@@ -185,6 +179,15 @@ class ProcessAPI(object):
         """Checks if a task exists for a dataset."""
         db_metadata = self.get_dataset_metadata_obj(self.name)
         return task in db_metadata.get_tasks()
+
+    def process_dataset_metadata(self, data_dir, cache_dir, task):
+        constructor = self.get_dataset_constructor()
+        db = constructor(data_path=data_dir,
+                         cache_path=cache_dir,
+                         extract_data=self.extract_data,
+                         verbose=self.verbose)
+        task_info = db.process(task)
+        return task_info
 
     def update_cache(self, task_info):
         """Update the cache manager information for this dataset."""

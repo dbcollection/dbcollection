@@ -130,19 +130,20 @@ class TestClassProcessAPI:
         assert result == os.path.join('/path/dir/cache', process_api_cls.name)
 
     def test_process_dataset(self, mocker, process_api_cls):
-        mock_constructor = mocker.patch.object(ProcessAPI, "get_dataset_constructor", return_value=mocker.MagicMock())
         mock_data_dir = mocker.patch.object(ProcessAPI, 'get_dataset_data_dir_path', return_value='/some/path/data/dir')
         mock_cache_dir = mocker.patch.object(ProcessAPI, 'get_dataset_cache_dir_path', return_value='/some/path/cache/dir')
         mock_parse_task = mocker.patch.object(ProcessAPI, "parse_task_name", return_value='correct_task')
         mock_check_exists = mocker.patch.object(ProcessAPI, "check_if_task_exists_in_database")
+        mock_process_metadata = mocker.patch.object(ProcessAPI, "process_dataset_metadata", return_value={})
 
-        process_api_cls.process_dataset()
+        result = process_api_cls.process_dataset()
 
-        assert mock_constructor.called
         assert mock_data_dir.called
         assert mock_cache_dir.called
         assert mock_parse_task.called
         assert mock_check_exists.called
+        assert mock_process_metadata.called
+        assert result == {}
 
     def test_get_dataset_data_dir_path(self, mocker, process_api_cls):
         mock_get_metadata = mocker.patch.object(ProcessAPI, "get_dataset_metadata_from_cache", return_value={'data_dir': '/some/dir/path'})
@@ -186,3 +187,10 @@ class TestClassProcessAPI:
             process_api_cls.check_if_task_exists_in_database('invalid_task')
 
         assert mock_exists.called
+
+    def test_process_dataset_metadata(self, mocker, process_api_cls):
+        mock_constructor = mocker.patch.object(ProcessAPI, "get_dataset_constructor", return_value=mocker.MagicMock())
+
+        result = process_api_cls.process_dataset_metadata('/some/path/data', '/some/path/cache', 'taskA')
+
+        assert mock_constructor.called
