@@ -35,7 +35,10 @@ class TestCallRemove:
     def test_call_with_all_input_args(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(RemoveAPI, 'run')
 
-        remove(test_data['dataset'], test_data['task'], test_data['delete_data'], test_data['verbose'])
+        remove(test_data['dataset'],
+               test_data['task'],
+               test_data['delete_data'],
+               test_data['verbose'])
 
         assert_mock_call(mocks_init_class)
         assert mock_run.called
@@ -51,10 +54,10 @@ class TestCallRemove:
         assert_mock_call(mocks_init_class)
         assert mock_run.called
 
-    def test_call_without_optional_input_args(self, mocker, mocks_init_class, test_data):
+    def test_call_without_optional_input_args(self, mocker, mocks_init_class):
         mock_run = mocker.patch.object(RemoveAPI, 'run')
 
-        remove(test_data['dataset'])
+        remove('datasetX')
 
         assert_mock_call(mocks_init_class)
         assert mock_run.called
