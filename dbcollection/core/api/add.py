@@ -43,9 +43,6 @@ def add(name, task, data_dir, hdf5_filename, categories=(), verbose=True, force_
     assert task, "Must input a valid task."
     assert data_dir, "Must input a valid data_dir."
     assert hdf5_filename, "Must input a valid file_path."
-    assert isinstance(categories, (list, tuple, str)), "Must input valid categories."
-    assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
-    assert isinstance(force_overwrite, bool), "Must input a valid boolean for force_overwrite."
 
     if isinstance(categories, str):
         categories = (categories,)
@@ -109,10 +106,10 @@ class AddAPI(object):
 
     def __init__(self, name, task, data_dir, hdf5_filename, categories, verbose, force_overwrite):
         """Initialize class."""
-        assert name, "Must input a valid name."
-        assert task, "Must input a valid task."
-        assert data_dir, "Must input a valid data_dir."
-        assert hdf5_filename, "Must input a valid file_path."
+        assert isinstance(name, str), "Must input a valid name."
+        assert isinstance(task, str), "Must input a valid task."
+        assert isinstance(data_dir, str), "Must input a valid data_dir."
+        assert isinstance(hdf5_filename, str), "Must input a valid file_path."
         assert isinstance(categories, tuple), "Must input a valid list(tuple) of categories."
         assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
         assert isinstance(force_overwrite, bool), "Must input a valid boolean for force_overwrite."
