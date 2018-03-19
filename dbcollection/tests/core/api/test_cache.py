@@ -124,7 +124,7 @@ def mock_get_cache_filename(mocker):
 class TestClassCacheAPI:
     """Unit tests for the CacheAPI class."""
 
-    def test_init_with_all_input_agrs(self, mocker, mocks_init_class, test_data):
+    def test_init_with_all_input_args(self, mocker, mocks_init_class, test_data):
         cache_api = CacheAPI(query=(test_data["query"],),
                              delete_cache=test_data["delete_cache"],
                              delete_cache_dir=test_data["delete_cache_dir"],
