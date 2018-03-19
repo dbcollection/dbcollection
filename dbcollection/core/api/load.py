@@ -98,27 +98,27 @@ class LoadAPI(object):
 
     def __init__(self, name, task, data_dir, verbose):
         """Initialize class."""
-        assert name, 'Must input a valid dataset name: {}'.format(name)
-        assert task, 'Must input a valid task name: {}'.format(task)
-        assert data_dir is not None, 'Must input a valid directory path: {}'.format(data_dir)
-        assert verbose is not None, 'verbose cannot be empty'
+        assert isinstance(name, str), 'Must input a valid dataset name.'
+        assert isinstance(task, str), 'Must input a valid task name.'
+        assert isinstance(data_dir, str), 'Must input a valid directory.'
+        assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
 
         self.name = name
         self.data_dir = data_dir
         self.verbose = verbose
         self.cache_manager = self.get_cache_manager()
-        self.db_metadata = self.get_dataset_metadata_obj(name)
         self.task = self.parse_task_name(task)
 
     def get_cache_manager(self):
         return CacheManager()
 
-    def get_dataset_metadata_obj(self, name):
-        return MetadataConstructor(name)
-
     def parse_task_name(self, task):
         """Validate the task name."""
-        return self.db_metadata.parse_task_name(task)
+        db_metadata = self.get_dataset_metadata_obj(self.name)
+        return db_metadata.parse_task_name(task)
+
+    def get_dataset_metadata_obj(self, name):
+        return MetadataConstructor(name)
 
     def run(self):
         """Main method."""
@@ -182,16 +182,20 @@ class LoadAPI(object):
         return data_loader
 
     def get_data_dir_path_from_cache(self):
-        dataset_metadata = self.cache_manager.dataset.get(self.name)
+        dataset_metadata = self.get_dataset_metadata(self.name)
         return dataset_metadata["data_dir"]
 
+    def get_dataset_metadata(self, name):
+        return self.cache_manager.dataset.get(name)
+
     def get_hdf5_file_path_from_cache(self):
-        task_metadata = self.cache_manager.task.get(self.name, self.task)
+        task_metadata = self.get_task_metadata(self.name, self.task)
         return task_metadata["filename"]
 
+    def get_task_metadata(self, name, task):
+        return self.cache_manager.task.get(name, task)
+
     def get_loader_obj(self, data_dir, hdf5_filepath):
-        assert data_dir
-        assert hdf5_filepath
         return DataLoader(name=self.name,
                           task=self.task,
                           data_dir=data_dir,
