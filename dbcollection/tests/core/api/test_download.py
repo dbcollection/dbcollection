@@ -185,15 +185,22 @@ class TestClassDownloadAPI:
         assert result == os.path.join('/cache/dir/path', download_api_cls.name)
 
     def test_download_dataset(self, mocker, download_api_cls):
-        mock_constructor = mocker.patch.object(DownloadAPI, "get_dataset_constructor", return_value=mocker.MagicMock())
         mock_data_dir = mocker.patch.object(DownloadAPI, 'get_download_data_dir', return_value='/some/path/data/dir')
         mock_cache_dir = mocker.patch.object(DownloadAPI, 'get_download_cache_dir', return_value='/some/path/cache/dir')
+        mock_download = mocker.patch.object(DownloadAPI, "download_dataset_files")
 
         download_api_cls.download_dataset()
 
-        assert mock_constructor.called
         assert mock_data_dir.called
         assert mock_cache_dir.called
+        assert mock_download.called
+
+    def test_download_dataset_files(self, mocker, download_api_cls):
+        mock_constructor = mocker.patch.object(DownloadAPI, "get_dataset_constructor", return_value=mocker.MagicMock())
+
+        download_api_cls.download_dataset_files('/some/path/data', '/some/path/cache')
+
+        assert mock_constructor.called
 
     def test_update_cache__dataset_exists_in_cache(self, mocker, download_api_cls):
         mock_data_dir = mocker.patch.object(DownloadAPI, "get_download_data_dir", return_value='/some/path/data/dir')

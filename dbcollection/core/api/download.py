@@ -118,14 +118,9 @@ class DownloadAPI(object):
 
     def download_dataset(self):
         """Download the dataset to disk."""
-        constructor = self.get_dataset_constructor()
-        save_data_dir = self.get_download_data_dir()
-        save_cache_dir = self.get_download_cache_dir()
-        db = constructor(data_path=save_data_dir,
-                         cache_path=save_cache_dir,
-                         extract_data=self.extract_data,
-                         verbose=self.verbose)
-        db.download()
+        data_dir = self.get_download_data_dir()
+        cache_dir = self.get_download_cache_dir()
+        self.download_dataset_files(data_dir, cache_dir)
 
     def get_dataset_constructor(self):
         db_metadata = self.get_dataset_metadata_obj(self.name)
@@ -165,6 +160,14 @@ class DownloadAPI(object):
 
     def get_cache_dir(self):
         return self.cache_manager.manager.cache_dir
+
+    def download_dataset_files(self, data_dir, cache_dir):
+        constructor = self.get_dataset_constructor()
+        db = constructor(data_path=data_dir,
+                         cache_path=cache_dir,
+                         extract_data=self.extract_data,
+                         verbose=self.verbose)
+        db.download()
 
     def update_cache(self):
         """Update the cache manager information for this dataset."""
