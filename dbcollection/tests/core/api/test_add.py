@@ -35,7 +35,7 @@ def test_data():
 class TestCallAdd:
     """Unit tests for the core api add method."""
 
-    def test_call(self, mocker, mocks_init_class, test_data):
+    def test_call_with_all_input_args(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(AddAPI, "run")
 
         add(test_data['dataset'],
@@ -49,7 +49,7 @@ class TestCallAdd:
         assert_mock_call(mocks_init_class)
         assert mock_run.called
 
-    def test_call_with_named_args(self, mocker, mocks_init_class, test_data):
+    def test_call_with_named_input_args(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(AddAPI, "run")
 
         add(name=test_data['dataset'],
@@ -63,7 +63,7 @@ class TestCallAdd:
         assert_mock_call(mocks_init_class)
         assert mock_run.called
 
-    def test_call_without_optional_inputs(self, mocker, mocks_init_class, test_data):
+    def test_call_without_optional_input_args(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(AddAPI, "run")
 
         add(test_data['dataset'], test_data['task'], test_data['data_dir'], test_data['hdf5_filename'])
@@ -71,11 +71,11 @@ class TestCallAdd:
         assert_mock_call(mocks_init_class)
         assert mock_run.called
 
-    def test_call__raises_error_missing_inputs(self, mocker):
+    def test_call__raises_error_no_inputs(self, mocker):
         with pytest.raises(TypeError):
             add("db", "task", "data dir")
 
-    def test_call__raises_error_too_many_inputs(self, mocker):
+    def test_call__raises_error_extra_inputs(self, mocker):
         with pytest.raises(TypeError):
             add("db", "task", "data dir", "filename", [], False, False, 'extra field')
 
@@ -96,7 +96,7 @@ def add_api_cls(mocker, mocks_init_class, test_data):
 class TestClassAddAPI:
     """Unit tests for the AddAPI class."""
 
-    def test_init_with_all_inputs(self, mocker, mocks_init_class, test_data):
+    def test_init_with_all_input_args(self, mocker, mocks_init_class, test_data):
         add_api = AddAPI(name=test_data['dataset'],
                          task=test_data['task'],
                          data_dir=test_data['data_dir'],
@@ -114,15 +114,15 @@ class TestClassAddAPI:
         assert add_api.verbose == test_data['verbose']
         assert add_api.force_overwrite == test_data['force_overwrite']
 
-    def test_init__raises_error_missing_inputs(self, mocker):
+    def test_init__raises_error_no_input_args(self, mocker):
         with pytest.raises(TypeError):
             AddAPI()
 
-    def test_init__raises_error_too_many_inputs(self, mocker):
+    def test_init__raises_error_too_many_input_args(self, mocker):
         with pytest.raises(TypeError):
             AddAPI("db", "task", "data dir", "filename", [], False, True, 'extra field')
 
-    def test_init__raises_error_missing_one_input(self, mocker):
+    def test_init__raises_error_missing_one_input_arg(self, mocker):
         with pytest.raises(TypeError):
             AddAPI("db", "data dir", "filename", [], False, True)
 

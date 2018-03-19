@@ -69,14 +69,20 @@ def info(by_dataset=(), by_task=(), by_category=(),
     """
     if isinstance(by_dataset, str):
         by_dataset = (by_dataset, )
+    else:
+        by_dataset = tuple(by_dataset)
     if isinstance(by_task, str):
         by_task = (by_task, )
+    else:
+        by_task = tuple(by_task)
     if isinstance(by_category, str):
         by_category = (by_category, )
+    else:
+        by_category = tuple(by_category)
 
-    db_info = InfoAPI(by_dataset=tuple(by_dataset),
-                      by_task=tuple(by_task),
-                      by_category=tuple(by_category),
+    db_info = InfoAPI(by_dataset=by_dataset,
+                      by_task=by_task,
+                      by_category=by_category,
                       show_info=show_info,
                       show_datasets=show_datasets,
                       show_categories=show_categories,
@@ -169,16 +175,13 @@ class InfoAPI(object):
         if self.show_system or self.show_available:
             if self.show_system:
                 self.display_registered_datasets_in_cache()
-
             if self.show_available:
                 self.display_available_datasets_supported_by_dbcollection()
         else:
             if self.show_info:
                 self.display_info_section_from_cache()
-
             if self.show_datasets:
                 self.display_dataset_section_from_cache()
-
             if self.show_categories:
                 self.display_category_section_from_cache()
 

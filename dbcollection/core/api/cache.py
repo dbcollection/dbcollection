@@ -71,8 +71,10 @@ def cache(query=(), delete_cache=False, delete_cache_dir=False, delete_cache_fil
     """
     if isinstance(query, str):
         query = (query, )
+    else:
+        query = tuple(query)
 
-    cache = CacheAPI(query=tuple(query),
+    cache = CacheAPI(query=query,
                      delete_cache=delete_cache,
                      delete_cache_dir=delete_cache_dir,
                      delete_cache_file=delete_cache_file,
@@ -177,12 +179,10 @@ class CacheAPI(object):
         """Main method."""
         if any(self.query):
             result = self.get_matching_metadata_from_cache(self.query)
-
             if self.verbose:
                 print('==> Patterns found in cache:')
                 for i, pattern in enumerate(self.query):
                     print('    - {}: {} found'.format(pattern, len(result[i])))
-
             return result
 
         if self.delete_cache_dir or self.delete_cache:

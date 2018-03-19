@@ -91,7 +91,7 @@ class RemoveAPI(object):
 
     def __init__(self, name, task, delete_data, verbose):
         """Initialize class."""
-        assert name, 'Must input a valid dataset name.'
+        assert isinstance(name, str), 'Must input a valid dataset name.'
         assert isinstance(task, str), 'Must input a valid task name.'
         assert isinstance(delete_data, bool), "Must input a valid boolean for delete_data."
         assert isinstance(verbose, bool), "Must input a valid boolean for verbose."

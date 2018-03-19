@@ -36,7 +36,7 @@ def test_data():
 class TestCallInfo:
     """Unit tests for the core api info method."""
 
-    def test_call(self, mocker, mocks_init_class, test_data):
+    def test_call_with_all_input_args(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(InfoAPI, "run")
 
         info(test_data['by_dataset'],
@@ -50,7 +50,7 @@ class TestCallInfo:
 
         assert mock_run.called
 
-    def test_call_with_named_args(self, mocker, mocks_init_class, test_data):
+    def test_call_with_named_input_args(self, mocker, mocks_init_class, test_data):
         mock_run = mocker.patch.object(InfoAPI, "run")
 
         info(by_dataset=test_data['by_dataset'],
@@ -64,14 +64,14 @@ class TestCallInfo:
 
         assert mock_run.called
 
-    def test_call_without_optional_args(self, mocker):
+    def test_call_without_optional_input_args(self, mocker):
         mock_run = mocker.patch.object(InfoAPI, "run")
 
         info()
 
         assert mock_run.called
 
-    def test_call__raises_error_too_many_input_args(self, mocker, test_data):
+    def test_call__raises_error_too_many_args(self, mocker, test_data):
         with pytest.raises(TypeError):
             info(test_data['by_dataset'],
                  test_data['by_task'],
