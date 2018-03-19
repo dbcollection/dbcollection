@@ -85,7 +85,7 @@ class DownloadAPI(object):
 
     def __init__(self, name, data_dir, extract_data, verbose):
         """Initialize class."""
-        assert name, 'Must input a valid dataset name.'
+        assert isinstance(name, str), 'Must input a valid dataset name.'
         assert isinstance(data_dir, str), 'Must input a valid directory.'
         assert isinstance(extract_data, bool), "Must input a valid boolean for extract_data."
         assert isinstance(verbose, bool), "Must input a valid boolean for verbose."

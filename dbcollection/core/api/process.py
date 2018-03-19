@@ -86,7 +86,7 @@ class ProcessAPI(object):
 
     def __init__(self, name, task, verbose):
         """Initialize class."""
-        assert name, 'Must input a valid dataset name.'
+        assert isinstance(name, str), 'Must input a valid dataset name.'
         assert isinstance(task, str), 'Must input a valid task name.'
         assert isinstance(verbose, bool), "Must input a valid boolean for verbose."
 
