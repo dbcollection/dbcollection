@@ -138,3 +138,19 @@ class TestBaseDatasetNew:
         result = mock_dataset_class.get_task_constructor(task)
 
         assert result == 'some_data'
+
+
+class TestBaseTask:
+    """Unit tests for the BaseTask class."""
+
+    def test_init_with_all_input_args(self, mocker):
+        pass
+
+    def test_init_withouth_optional_input_args(self, mocker):
+        pass
+
+    def test_init__raises_error_no_input_args(self, mocker):
+        pass
+
+    def test_init__raises_error_too_many_input_args(self, mocker):
+        pass
