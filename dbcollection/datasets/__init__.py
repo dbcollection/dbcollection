@@ -284,6 +284,10 @@ class BaseDatasetNew(object):
 
 
 class BaseTask(object):
+    pass
+
+
+class BaseTaskNew(object):
     """Base class for processing the metadata of a task of a dataset.
 
     Parameters
