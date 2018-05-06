@@ -13,6 +13,7 @@ import h5py
 
 from dbcollection.utils.url import download_extract_all
 
+
 class BaseDataset(object):
     """ Base class for download/processing a dataset.
 
@@ -193,9 +194,7 @@ class BaseDatasetNew(object):
     urls = ()  # list of urls to download
     keywords = ()  # List of keywords to classify/categorize datasets in the cache.
     tasks = {}  # dictionary of available tasks to process
-                # Example: tasks = {'classification':Classification}
-    default_task = ''  # Defines the default class!
-                       # Example: default_task='classification'
+    default_task = ''  # Defines the default class
 
     def __init__(self, data_path, cache_path, extract_data=True, verbose=True):
         """Initialize class."""
