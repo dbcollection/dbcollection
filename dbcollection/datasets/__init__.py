@@ -156,6 +156,133 @@ class BaseDataset(object):
             return {task_: task_filename}
 
 
+class BaseDatasetNew(object):
+    """Base class for download/processing a dataset.
+
+    Parameters
+    ----------
+    data_path : str
+        Path to the data directory.
+    cache_path : str
+        Path to the cache file
+    extract_data : bool, optional
+        Extracts the downloaded files if they are compacted.
+    verbose : bool, optional
+         Displays text information to the screen (if true).
+
+    Attributes
+    ----------
+    data_path : str
+        Path to the data directory.
+    cache_path : str
+        Path to the cache file
+    extract_data : bool
+        Extracts the downloaded files if they are compacted.
+    verbose : bool
+        Displays text information to the screen (if true).
+    urls : list
+        List of URL paths to download.
+    keywords : list
+        List of keywords to classify datasets.
+    tasks : dict
+        Dataset's tasks for processing.
+    default_task : str
+        Default task name.
+
+    """
+
+    urls = ()  # list of urls to download
+    keywords = ()  # List of keywords to classify/categorize datasets in the cache.
+    tasks = {}  # dictionary of available tasks to process
+    default_task = ''  # Defines the default class
+
+    def __init__(self, data_path, cache_path, extract_data=True, verbose=True):
+        """Initialize class."""
+        assert data_path, "Must insert a valid data path"
+        assert cache_path, "Must insert a valid cache path"
+        self.data_path = data_path
+        self.cache_path = cache_path
+        self.extract_data = extract_data
+        self.verbose = verbose
+
+    def download(self):
+        """Downloads and extract files to disk.
+
+        Returns
+        -------
+        tuple
+            A list of keywords.
+
+        """
+        download_extract_all(urls=self.urls,
+                             dir_save=self.data_path,
+                             extract_data=self.extract_data,
+                             verbose=self.verbose)
+
+    def process(self, task='default'):
+        """Processes the metadata of a task.
+
+        Parameters
+        ----------
+        task : str, optional
+            Name of the task.
+
+        Returns
+        -------
+        dict
+            Returns a dictionary with the task name as key and the filename as value.
+
+        """
+        task_ = self.parse_task_name(task)
+        if self.verbose:
+            print("\nProcessing '{}' task:".format(task_))
+        hdf5_filename = self.process_metadata(task_)
+        return {task_: {"filename": hdf5_filename, "categories": self.keywords}}
+
+    def parse_task_name(self, task):
+        """Parses the task name to a valid name."""
+        if task == '' or task == 'default':
+            return self.default_task
+        else:
+            return task
+
+    def process_metadata(self, task):
+        """Processes the metadata for a task.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        str
+            File name + path of the resulting HDFR5 metadata file of the task.
+        """
+        constructor = self.get_task_constructor(task)
+        processer = constructor(data_path=self.data_path,
+                                cache_path=self.cache_path,
+                                verbose=self.verbose)
+        return processer.run()
+
+    def get_task_constructor(self, task):
+        """Returns the class constructor for the input task.
+
+        Parameters
+        ----------
+        task : str
+            Name of the task.
+
+        Returns
+        -------
+        BaseTask
+            Constructor to process the metadata of a task.
+
+        """
+        assert task
+        return self.tasks[task]
+
+
 class BaseTask(object):
     """Base class for processing a task of a dataset.
 
