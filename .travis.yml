@@ -20,7 +20,7 @@ install:
 # command to run tests
 script:
     - echo "Run tests"
-    - pipenv run pytest --cov=dbcollection dbcollection/tests/
+    - pipenv run pytest --cov=dbcollection tests/
     - echo "Test complete."
 
 after_success:
