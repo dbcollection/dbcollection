@@ -53,27 +53,27 @@ test:
 .PHONY: test-api
 test-api:
 	make build
-	pipenv run pytest -v dbcollection/tests/core/api/
+	pipenv run pytest -v tests/core/api/
 
 .PHONY: test-manager
 test-manager:
 	make build
-	pipenv run pytest -v dbcollection/tests/core/test_manager.py
+	pipenv run pytest -v tests/core/test_manager.py
 
 .PHONY: test-loader
 test-loader:
 	make build
-	pipenv run pytest -v dbcollection/tests/core/test_loader.py
+	pipenv run pytest -v tests/core/test_loader.py
 
 .PHONY: test-utils
 test-utils:
 	make build
-	pipenv run pytest -v dbcollection/tests/utils
+	pipenv run pytest -v tests/utils
 
 .PHONY: test-datasets
 test-datasets:
 	make build
-	pipenv run pytest -v dbcollection/tests/datasets
+	pipenv run pytest -v tests/datasets
 
 .PHONY: lint
 lint:
