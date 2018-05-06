@@ -7,8 +7,9 @@ from __future__ import print_function, division
 import os
 import shutil
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.datasets import BaseDatasetNew
 from .classification import Classification
+
 
 urls = (
     "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
@@ -21,7 +22,7 @@ tasks = {"classification": Classification}
 default_task = 'classification'
 
 
-class Dataset(BaseDataset):
+class Dataset(BaseDatasetNew):
     """MNIST preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
