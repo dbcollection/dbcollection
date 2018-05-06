@@ -91,4 +91,4 @@ install:
 test_script:
   # tests
   - cmd: activate dbcollection
-  - pipenv run pytest dbcollection\tests\
+  - pipenv run pytest tests\
