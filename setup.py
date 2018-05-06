@@ -69,7 +69,7 @@ setup(
                                     'notebooks',
                                     'ci',
                                     'conda-recipe',
-                                    'dbcollection.tests']),
+                                    'tests']),
     install_requires=get_requirements(),
     include_package_data=True,
 )
