@@ -51,12 +51,12 @@ class TestBaseDB:
     def delete_cache(self):
         """Delete all cache data + dir"""
         print('\n==> dbcollection: config_cache()')
-        dbc.config_cache(delete_cache=True, is_test=True)
+        dbc.cache(delete_cache=True)
 
     def list_datasets(self):
         """Print dbcollection info"""
         print('\n==> dbcollection: info()')
-        dbc.info_cache(is_test=True)
+        dbc.info()
 
     def print_info(self, loader):
         """Print information about the dataset to the screen
@@ -84,8 +84,7 @@ class TestBaseDB:
         return dbc.load(name=self.name,
                         task=self.task,
                         data_dir=self.data_dir,
-                        verbose=self.verbose,
-                        is_test=True)
+                        verbose=self.verbose)
 
     def download(self, extract_data=True):
         """Download a dataset to disk.
@@ -99,16 +98,14 @@ class TestBaseDB:
         dbc.download(name=self.name,
                      data_dir=self.data_dir,
                      extract_data=extract_data,
-                     verbose=self.verbose,
-                     is_test=True)
+                     verbose=self.verbose)
 
     def process(self):
         """Process dataset"""
         print('\n==> dbcollection: process()')
         dbc.process(name=self.name,
                     task=self.task,
-                    verbose=self.verbose,
-                    is_test=True)
+                    verbose=self.verbose)
 
     def run(self, mode):
         """Run the test script.
