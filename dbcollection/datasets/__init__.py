@@ -152,9 +152,8 @@ class BaseDataset(object):
         task_loader = task_constructor(self.data_path, self.cache_path, suffix, self.verbose)
         task_filename = task_loader.run()
         if suffix:
-            return {task_ + suffix: task_filename}
-        else:
-            return {task_: task_filename}
+            task_ = task_ + suffix
+        return {task_: {"filename": task_filename, "categories": self.keywords}}
 
 
 class BaseDatasetNew(object):
