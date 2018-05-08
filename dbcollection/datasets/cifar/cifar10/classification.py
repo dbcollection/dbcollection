@@ -115,18 +115,19 @@ class Classification(BaseTaskNew):
             images_per_class.append(images_idx)
         return np.array(pad_list(images_per_class, 1), dtype=np.int32)
 
-    def add_data_to_default(self, hdf5_handler, data, set_name=None):
+    def process_set_metadata(self, data, set_name):
         """
-        Add data of a set to the default group.
-
-        For each field, the data is organized into a single big matrix.
+        Saves the metadata of a set.
         """
-        hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=1)
-        hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids',
-                        data["object_ids"], dtype=np.int32, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields',
-                        data["object_fields"], dtype=np.uint8, fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'list_images_per_class',
-                        data["list_images_per_class"], dtype=np.int32, fillvalue=-1)
+        self.save_field_to_hdf5(set_name, 'classes', data["classes"],
+                                dtype=np.uint8, fillvalue=0)
+        self.save_field_to_hdf5(set_name, 'images', data["images"],
+                                dtype=np.uint8, fillvalue=-1)
+        self.save_field_to_hdf5(set_name, 'labels', data["labels"],
+                                dtype=np.uint8, fillvalue=0)
+        self.save_field_to_hdf5(set_name, 'object_fields', data["object_fields"],
+                                dtype=np.uint8, fillvalue=0)
+        self.save_field_to_hdf5(set_name, 'object_ids', data["object_ids"],
+                                dtype=np.int32, fillvalue=-1)
+        self.save_field_to_hdf5(set_name, 'list_images_per_class', data["list_images_per_class"],
+                                dtype=np.int32, fillvalue=-1)
