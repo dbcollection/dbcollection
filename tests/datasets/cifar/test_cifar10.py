@@ -47,3 +47,24 @@ class TestClassification:
         assert set_data['labels'] == 'labels'
         assert set_data['object_ids'] == list(range(10))
         assert set_data['list_images_per_class'] == list(range(5))
+
+    @pytest.mark.parametrize('is_test', [False, True])
+    def test_load_data_annotations_for_train_set(self, mocker, mock_classification_class, is_test):
+        random_data = np.random.rand(20,3,32,32)
+        mock_get_names = mocker.patch.object(Classification, "get_class_names", return_value=['some', 'class', 'names'])
+        mock_get_data_test = mocker.patch.object(Classification, "get_data_test", return_value=(random_data, np.array(range(10))))
+        mock_get_data_train = mocker.patch.object(Classification, "get_data_train", return_value=(random_data, np.array(range(10))))
+
+        data_path = os.path.join(mock_classification_class.data_path, 'cifar-10-batches-py')
+        data, labels, class_names = mock_classification_class.load_data_annotations(is_test=is_test)
+
+        mock_get_names.assert_called_once_with(data_path)
+        if is_test:
+            mock_get_data_test.assert_called_once_with(data_path)
+            assert not mock_get_data_train.called
+        else:
+            assert not mock_get_data_test.called
+            mock_get_data_train.assert_called_once_with(data_path)
+        assert_array_equal(data, np.transpose(random_data, (0, 2, 3, 1)))
+        assert_array_equal(labels, np.array(range(10)))
+        assert class_names == ['some', 'class', 'names']
