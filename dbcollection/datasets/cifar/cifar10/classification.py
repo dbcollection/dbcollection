@@ -30,16 +30,12 @@ class Classification(BaseTaskNew):
         "test_batch"
     ]
 
-    def get_object_list(self, data, labels):
+    def load_data(self):
         """
-        Groups the data + labels info in a 'list' of indexes.
+        Loads data from annotation files.
         """
-        # object_id = np.ndarray((data.shape[0], 2), dtype=np.uint16)
-        object_id = np.ndarray((data.shape[0], 2), dtype=int)
-        for i in range(data.shape[0]):
-            object_id[i][0] = i
-            object_id[i][1] = labels[i]
-        return object_id
+        yield {"train": self.load_data_set(False)}
+        yield {"test": self.load_data_set(True)}
 
     def get_class_names(self, path):
         """
