@@ -20,6 +20,16 @@ def mock_classification_class():
 class TestClassification:
     """Unit tests for the BaseDatasetNew class."""
 
+    def test_task_attributes(self, mocker, mock_classification_class):
+        assert mock_classification_class.filename_h5 == 'classification'
+        assert mock_classification_class.data_files == ["batches.meta",
+                                                        "data_batch_1",
+                                                        "data_batch_2",
+                                                        "data_batch_3",
+                                                        "data_batch_4",
+                                                        "data_batch_5",
+                                                        "test_batch"]
+
     def test_load_data(self, mocker, mock_classification_class):
         mock_load_data = mocker.patch.object(Classification, "load_data_set", return_value=['some_data'])
 
