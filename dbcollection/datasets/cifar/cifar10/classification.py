@@ -71,7 +71,8 @@ class Classification(BaseTaskNew):
     def get_class_names(self, path):
         """Returns the class names/labels."""
         assert path, "Must input a valid path."
-        return load_pickle(os.path.join(path, self.data_files[0]))
+        filename = os.path.join(path, self.data_files[0])
+        return load_pickle(filename)
 
     def get_data_train(self, path):
         batch1 = load_pickle(os.path.join(path, self.data_files[1]))
