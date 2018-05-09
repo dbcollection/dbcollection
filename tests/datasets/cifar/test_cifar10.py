@@ -17,7 +17,7 @@ def mock_classification_class():
     return Classification(data_path='/some/path/data', cache_path='/some/path/cache')
 
 
-class TestClassification:
+class TestClassificationTask:
     """Unit tests for the BaseDatasetNew class."""
 
     def test_task_attributes(self, mocker, mock_classification_class):
