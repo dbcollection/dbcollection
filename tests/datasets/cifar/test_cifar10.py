@@ -68,3 +68,11 @@ class TestClassification:
         assert_array_equal(data, np.transpose(random_data, (0, 2, 3, 1)))
         assert_array_equal(labels, np.array(range(10)))
         assert class_names == ['some', 'class', 'names']
+
+    def test_get_object_list(self, mocker, mock_classification_class):
+        data = np.random.rand(20,2,32,32)
+        labels = np.array(range(20))
+
+        object_ids = mock_classification_class.get_object_list(data, labels)
+
+        assert_array_equal(object_ids, np.array([[i, labels[i]] for i in range(20)]))
