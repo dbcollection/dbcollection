@@ -86,3 +86,13 @@ class TestClassification:
                              [0, 1, 2, 3, 5, 6]],
                              dtype=np.int32)
         assert_array_equal(images_per_class, expected)
+
+    def test_process_set_metadata(self, mocker, mock_classification_class):
+        mock_save_hdf5 = mocker.patch.object(Classification, "save_field_to_hdf5")
+
+        data = {"classes": 1, "images": 1, "labels": 1,
+                "object_fields": 1, "object_ids": 1, "list_images_per_class": 1}
+        mock_classification_class.process_set_metadata(data, 'train')
+
+        assert mock_save_hdf5.called
+        assert mock_save_hdf5.call_count == 6
