@@ -114,7 +114,7 @@ class Classification(BaseTaskNew):
         for label in unique_labels:
             images_idx = np.where(labels == label)[0].tolist()
             images_per_class.append(images_idx)
-        return np.array(pad_list(images_per_class, 1), dtype=np.int32)
+        return np.array(pad_list(images_per_class, -1), dtype=np.int32)
 
     def process_set_metadata(self, data, set_name):
         """
