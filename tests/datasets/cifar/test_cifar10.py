@@ -4,6 +4,7 @@ Test the base classes for managing datasets and tasks.
 
 
 import os
+import sys
 import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
@@ -34,8 +35,12 @@ class TestClassificationTask:
         mock_load_data = mocker.patch.object(Classification, "load_data_set", return_value=['some_data'])
 
         load_data_generator = mock_classification_class.load_data()
-        train_data = load_data_generator.__next__()
-        test_data = load_data_generator.__next__()
+        if sys.version[0] == '3':
+            train_data = load_data_generator.__next__()
+            test_data = load_data_generator.__next__()
+        else:
+            train_data = load_data_generator.next()
+            test_data = load_data_generator.next()
 
         assert mock_load_data.called
         assert train_data == {"train": ['some_data']}
