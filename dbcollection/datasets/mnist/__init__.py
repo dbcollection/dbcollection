@@ -3,7 +3,6 @@ MNIST download/process functions.
 """
 
 
-from __future__ import print_function, division
 import os
 import shutil
 
