@@ -62,3 +62,15 @@ class TestClassificationTask:
         assert_array_equal(set_data['object_fields'], str2ascii(['images', 'labels']))
         assert_array_equal(set_data['object_ids'], np.array([[i, labels[i]] for i in range(size_train)]))
         assert set_data['list_images_per_class'] == list(range(10))
+
+    def test_get_train_data(self, mocker, mock_classification_class):
+        mock_load_images = mocker.patch.object(Classification, "load_images_numpy", return_value=np.zeros((5,768)))
+        mock_load_labels = mocker.patch.object(Classification, "load_labels_numpy", return_value=np.ones(5))
+
+        train_images, train_labels, size_train = mock_classification_class.get_train_data()
+
+        mock_load_images.assert_called_once_with('/some/path/data/train-images.idx3-ubyte')
+        mock_load_labels.assert_called_once_with('/some/path/data/train-labels.idx1-ubyte')
+        assert_array_equal(train_images, np.zeros((5,768)))
+        assert_array_equal(train_labels, np.ones(5))
+        assert size_train == 60000
