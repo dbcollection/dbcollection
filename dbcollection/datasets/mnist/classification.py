@@ -82,25 +82,6 @@ class Classification(BaseTaskNew):
             data = np.fromfile(f, dtype=np.int8)
         return data
 
-    def load_data_test(self):
-        """
-        Fetch test data.
-        """
-        test_images, test_labels, size_test = self.get_test_data()
-
-        test_data = test_images.reshape(size_test, 28, 28)
-        test_object_list = np.array([[i, test_labels[i]] for i in range(size_test)])
-        classes = str2ascii(self.classes)
-
-        return {
-            "classes": classes,
-            "images": test_data,
-            "labels": test_labels,
-            "object_fields": str2ascii(['images', 'labels']),
-            "object_ids": test_object_list,
-            "list_images_per_class": self.get_list_images_per_class(test_labels)
-        }
-
     def get_test_data(self):
         """Loads the data of the test set."""
         fname_test_imgs = os.path.join(self.data_path, 't10k-images.idx3-ubyte')
