@@ -89,3 +89,15 @@ class TestClassificationTask:
                              [0, 1, 2, 3, 5, 6]],
                              dtype=np.int32)
         assert_array_equal(images_per_class, expected)
+
+    def test_get_test_data(self, mocker, mock_classification_class):
+        mock_load_images = mocker.patch.object(Classification, "load_images_numpy", return_value=np.zeros((5,768)))
+        mock_load_labels = mocker.patch.object(Classification, "load_labels_numpy", return_value=np.ones(5))
+
+        test_images, test_labels, size_test = mock_classification_class.get_test_data()
+
+        mock_load_images.assert_called_once_with('/some/path/data/t10k-images.idx3-ubyte')
+        mock_load_labels.assert_called_once_with('/some/path/data/t10k-labels.idx1-ubyte')
+        assert_array_equal(test_images, np.zeros((5,768)))
+        assert_array_equal(test_labels, np.ones(5))
+        assert size_test == 10000
