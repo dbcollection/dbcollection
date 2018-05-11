@@ -24,8 +24,31 @@ class Classification(BaseTaskNew):
         """
         Loads data from annotation files.
         """
-        yield {"train": self.load_data_train()}
-        yield {"test": self.load_data_test()}
+        yield {"train": self.load_data_set(is_test=False)}
+        yield {"test": self.load_data_set(is_test=True)}
+
+    def load_data_set(self, is_test):
+        """
+        Fetches the train/test data.
+        """
+        assert isinstance(is_test, bool), "Must input a valid boolean input."
+        if is_test:
+            images, labels, size_set = self.get_test_data()
+        else:
+            images, labels, size_set = self.get_train_data()
+
+        data = images.reshape(size_set, 28, 28)
+        object_list = np.array([[i, labels[i]] for i in range(size_set)])
+        classes = str2ascii(self.classes)
+
+        return {
+            "classes": classes,
+            "images": data,
+            "labels": labels,
+            "object_fields": str2ascii(['images', 'labels']),
+            "object_ids": object_list,
+            "list_images_per_class": self.get_list_images_per_class(labels)
+        }
 
     def load_data_train(self):
         """
