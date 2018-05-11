@@ -74,3 +74,13 @@ class TestClassificationTask:
         assert_array_equal(train_images, np.zeros((5,768)))
         assert_array_equal(train_labels, np.ones(5))
         assert size_train == 60000
+
+    def test_get_list_images_per_class(self, mocker, mock_classification_class):
+        labels = np.array([1,1,1,1,0,1,1,0])
+
+        images_per_class = mock_classification_class.get_list_images_per_class(labels)
+
+        expected = np.array([[4, 7, -1, -1, -1, -1],
+                             [0, 1, 2, 3, 5, 6]],
+                             dtype=np.int32)
+        assert_array_equal(images_per_class, expected)
