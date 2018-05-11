@@ -19,7 +19,7 @@ def mock_classification_class():
 
 
 class TestClassificationTask:
-    """Unit tests for the BaseDatasetNew class."""
+    """Unit tests for the cifar10 Classification task."""
 
     def test_task_attributes(self, mocker, mock_classification_class):
         assert mock_classification_class.filename_h5 == 'classification'
