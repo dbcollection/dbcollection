@@ -22,7 +22,7 @@ class Classification(BaseTaskNew):
 
     def load_data(self):
         """
-        Load the data from the files.
+        Loads data from annotation files.
         """
         yield {"train": self.load_data_train()}
         yield {"test": self.load_data_test()}
@@ -56,7 +56,7 @@ class Classification(BaseTaskNew):
         return train_images, train_labels, size_train
 
     def get_list_images_per_class(self, set_labels):
-        """Builds a list of images per class."""
+        """Builds a list of image indexes per class."""
         images_per_class = []
         labels = np.unique(set_labels)
         for label in labels:
