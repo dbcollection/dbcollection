@@ -62,7 +62,7 @@ class Classification(BaseTaskNew):
         for label in labels:
             images_idx = np.where(set_labels == label)[0].tolist()
             images_per_class.append(images_idx)
-        return np.array(pad_list(images_per_class, 1), dtype=np.int32)
+        return np.array(pad_list(images_per_class, -1), dtype=np.int32)
 
     def load_images_numpy(self, fname):
         """Load images from file as numpy array."""
