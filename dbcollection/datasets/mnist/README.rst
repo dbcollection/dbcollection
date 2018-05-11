@@ -75,6 +75,7 @@ Properties
     - :ref:`object_ids <classification_fields_object_ids>`
     - :ref:`list_images_per_class <classification_fields_list_images_per_class>`
 
+
 .. _classification_hdf5_file_structure:
 
 HDF5 file structure
