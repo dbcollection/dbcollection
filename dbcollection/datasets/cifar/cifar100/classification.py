@@ -75,6 +75,14 @@ class Classification(BaseTaskNew):
         'lawn-mower', 'rocket', 'streetcar', 'tank', 'tractor'
     ]
 
+    def load_data(self):
+        """
+        Fetches the train/test data.
+        """
+        yield {"train": self.load_data_set(is_test=False)}
+        yield {"test": self.load_data_set(is_test=True)}
+
+
     def get_object_list(self, data, fine_labels, coarse_labels):
         """
         Groups the data + labels info in a 'list' of indexes.
@@ -141,16 +149,6 @@ class Classification(BaseTaskNew):
             "list_images_per_superclass": np.array(pad_list(images_per_superclass, 1),
                                                    dtype=np.int32),
         }
-
-    def load_data(self):
-        """
-        Load the data from the files.
-        """
-        # train set
-        yield {"train": self.load_data_set(False)}
-
-        # test set
-        yield {"test": self.load_data_set(True)}
 
     # def add_data_to_source(self, hdf5_handler, data, set_name=None):
     #    """
