@@ -45,6 +45,29 @@ class TestClassificationTask:
         assert train_data == {"train": ['some_data']}
         assert test_data == {"test": ['some_data']}
 
+    @pytest.mark.parametrize('is_test', [False, True])
+    def test_load_data_set(self, mocker, mock_classification_class, classes_classification, is_test):
+        images, labels, size_set = (np.random.rand(10, 784), np.array(range(10)), 10)
+        mock_get_data_train= mocker.patch.object(Classification, "get_train_data", return_value=(images, labels, size_set))
+        mock_get_data_test= mocker.patch.object(Classification, "get_test_data", return_value=(images, labels, size_set))
+        mock_get_list = mocker.patch.object(Classification, "get_list_images_per_class", return_value=list(range(10)))
+
+        set_data = mock_classification_class.load_data_set(is_test=is_test)
+
+        if is_test:
+            mock_get_data_test.assert_called_once_with()
+            assert not mock_get_data_train.called
+        else:
+            mock_get_data_train.assert_called_once_with()
+            assert not mock_get_data_test.called
+        mock_get_list.assert_called_once_with(labels)
+        assert_array_equal(set_data['classes'], str2ascii(classes_classification))
+        assert_array_equal(set_data['images'], images.reshape(size_set, 28, 28))
+        assert_array_equal(set_data['labels'], labels)
+        assert_array_equal(set_data['object_fields'], str2ascii(['images', 'labels']))
+        assert_array_equal(set_data['object_ids'], np.array([[i, labels[i]] for i in range(size_set)]))
+        assert set_data['list_images_per_class'] == list(range(10))
+
     def test_load_data_train(self, mocker, mock_classification_class, classes_classification):
         images, labels, size_train = (np.random.rand(10, 784), np.array(range(10)), 10)
         mock_get_data_train= mocker.patch.object(Classification, "get_train_data", return_value=(images, labels, size_train))
