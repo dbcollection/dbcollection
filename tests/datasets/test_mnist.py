@@ -26,10 +26,9 @@ def classes_classification():
 class TestClassificationTask:
     """Unit tests for the mnist Classification task."""
 
-    def test_task_attributes(self, mocker, mock_classification_class):
+    def test_task_attributes(self, mocker, mock_classification_class, classes_classification):
         assert mock_classification_class.filename_h5 == 'classification'
-        classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
-        assert mock_classification_class.classes == classes
+        assert mock_classification_class.classes == classes_classification
 
     def test_load_data(self, mocker, mock_classification_class):
         mock_load_data_train = mocker.patch.object(Classification, "load_data_train", return_value=['some_train_data'])
