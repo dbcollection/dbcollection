@@ -101,3 +101,13 @@ class TestClassificationTask:
         assert_array_equal(test_images, np.zeros((5,768)))
         assert_array_equal(test_labels, np.ones(5))
         assert size_test == 10000
+
+    def test_process_set_metadata(self, mocker, mock_classification_class):
+        mock_save_hdf5 = mocker.patch.object(Classification, "save_field_to_hdf5")
+
+        data = {"classes": 1, "images": 1, "labels": 1,
+                "object_fields": 1, "object_ids": 1, "list_images_per_class": 1}
+        mock_classification_class.process_set_metadata(data, 'train')
+
+        assert mock_save_hdf5.called
+        assert mock_save_hdf5.call_count == 6
