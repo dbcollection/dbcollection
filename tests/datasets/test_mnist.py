@@ -74,8 +74,8 @@ class TestClassificationTask:
 
         train_images, train_labels, size_train = mock_classification_class.get_train_data()
 
-        mock_load_images.assert_called_once_with('/some/path/data/train-images.idx3-ubyte')
-        mock_load_labels.assert_called_once_with('/some/path/data/train-labels.idx1-ubyte')
+        mock_load_images.assert_called_once_with(os.path.join('/some/path/data', 'train-images.idx3-ubyte'))
+        mock_load_labels.assert_called_once_with(os.path.join('/some/path/data', 'train-labels.idx1-ubyte'))
         assert_array_equal(train_images, np.zeros((5,768)))
         assert_array_equal(train_labels, np.ones(5))
         assert size_train == 60000
@@ -96,8 +96,8 @@ class TestClassificationTask:
 
         test_images, test_labels, size_test = mock_classification_class.get_test_data()
 
-        mock_load_images.assert_called_once_with('/some/path/data/t10k-images.idx3-ubyte')
-        mock_load_labels.assert_called_once_with('/some/path/data/t10k-labels.idx1-ubyte')
+        mock_load_images.assert_called_once_with(os.path.join('/some/path/data', 't10k-images.idx3-ubyte'))
+        mock_load_labels.assert_called_once_with(os.path.join('/some/path/data', 't10k-labels.idx1-ubyte'))
         assert_array_equal(test_images, np.zeros((5,768)))
         assert_array_equal(test_labels, np.ones(5))
         assert size_test == 10000
