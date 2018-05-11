@@ -22,28 +22,32 @@ class Classification(BaseTaskNew):
 
     def load_data(self):
         """
-        Load the data from the files.
+        Loads data from annotation files.
         """
-        yield {"train": self.load_data_train()}
-        yield {"test": self.load_data_test()}
+        yield {"train": self.load_data_set(is_test=False)}
+        yield {"test": self.load_data_set(is_test=True)}
 
-    def load_data_train(self):
+    def load_data_set(self, is_test):
         """
-        Fetch train data.
+        Fetches the train/test data.
         """
-        train_images, train_labels, size_train = self.get_train_data()
+        assert isinstance(is_test, bool), "Must input a valid boolean input."
+        if is_test:
+            images, labels, size_set = self.get_test_data()
+        else:
+            images, labels, size_set = self.get_train_data()
 
-        train_data = train_images.reshape(size_train, 28, 28)
-        train_object_list = np.array([[i, train_labels[i]] for i in range(size_train)])
+        data = images.reshape(size_set, 28, 28)
+        object_list = np.array([[i, labels[i]] for i in range(size_set)])
         classes = str2ascii(self.classes)
 
         return {
             "classes": classes,
-            "images": train_data,
-            "labels": train_labels,
+            "images": data,
+            "labels": labels,
             "object_fields": str2ascii(['images', 'labels']),
-            "object_ids": train_object_list,
-            "list_images_per_class": self.get_list_images_per_class(train_labels)
+            "object_ids": object_list,
+            "list_images_per_class": self.get_list_images_per_class(labels)
         }
 
     def get_train_data(self):
@@ -56,13 +60,13 @@ class Classification(BaseTaskNew):
         return train_images, train_labels, size_train
 
     def get_list_images_per_class(self, set_labels):
-        """Builds a list of images per class."""
+        """Builds a list of image indexes per class."""
         images_per_class = []
         labels = np.unique(set_labels)
         for label in labels:
             images_idx = np.where(set_labels == label)[0].tolist()
             images_per_class.append(images_idx)
-        return np.array(pad_list(images_per_class, 1), dtype=np.int32)
+        return np.array(pad_list(images_per_class, -1), dtype=np.int32)
 
     def load_images_numpy(self, fname):
         """Load images from file as numpy array."""
@@ -77,25 +81,6 @@ class Classification(BaseTaskNew):
             annotations = f.read(8)
             data = np.fromfile(f, dtype=np.int8)
         return data
-
-    def load_data_test(self):
-        """
-        Fetch test data.
-        """
-        test_images, test_labels, size_test = self.get_test_data()
-
-        test_data = test_images.reshape(size_test, 28, 28)
-        test_object_list = np.array([[i, test_labels[i]] for i in range(size_test)])
-        classes = str2ascii(self.classes)
-
-        return {
-            "classes": classes,
-            "images": test_data,
-            "labels": test_labels,
-            "object_fields": str2ascii(['images', 'labels']),
-            "object_ids": test_object_list,
-            "list_images_per_class": self.get_list_images_per_class(test_labels)
-        }
 
     def get_test_data(self):
         """Loads the data of the test set."""
