@@ -50,25 +50,6 @@ class Classification(BaseTaskNew):
             "list_images_per_class": self.get_list_images_per_class(labels)
         }
 
-    def load_data_train(self):
-        """
-        Fetch train data.
-        """
-        train_images, train_labels, size_train = self.get_train_data()
-
-        train_data = train_images.reshape(size_train, 28, 28)
-        train_object_list = np.array([[i, train_labels[i]] for i in range(size_train)])
-        classes = str2ascii(self.classes)
-
-        return {
-            "classes": classes,
-            "images": train_data,
-            "labels": train_labels,
-            "object_fields": str2ascii(['images', 'labels']),
-            "object_ids": train_object_list,
-            "list_images_per_class": self.get_list_images_per_class(train_labels)
-        }
-
     def get_train_data(self):
         """Loads the data of the train set."""
         fname_train_imgs = os.path.join(self.data_path, 'train-images.idx3-ubyte')

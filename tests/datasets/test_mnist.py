@@ -68,22 +68,6 @@ class TestClassificationTask:
         assert_array_equal(set_data['object_ids'], np.array([[i, labels[i]] for i in range(size_set)]))
         assert set_data['list_images_per_class'] == list(range(10))
 
-    def test_load_data_train(self, mocker, mock_classification_class, classes_classification):
-        images, labels, size_train = (np.random.rand(10, 784), np.array(range(10)), 10)
-        mock_get_data_train= mocker.patch.object(Classification, "get_train_data", return_value=(images, labels, size_train))
-        mock_get_list = mocker.patch.object(Classification, "get_list_images_per_class", return_value=list(range(10)))
-
-        set_data = mock_classification_class.load_data_train()
-
-        mock_get_data_train.assert_called_once_with()
-        mock_get_list.assert_called_once_with(labels)
-        assert_array_equal(set_data['classes'], str2ascii(classes_classification))
-        assert_array_equal(set_data['images'], images.reshape(size_train, 28, 28))
-        assert_array_equal(set_data['labels'], labels)
-        assert_array_equal(set_data['object_fields'], str2ascii(['images', 'labels']))
-        assert_array_equal(set_data['object_ids'], np.array([[i, labels[i]] for i in range(size_train)]))
-        assert set_data['list_images_per_class'] == list(range(10))
-
     def test_get_train_data(self, mocker, mock_classification_class):
         mock_load_images = mocker.patch.object(Classification, "load_images_numpy", return_value=np.zeros((5,768)))
         mock_load_labels = mocker.patch.object(Classification, "load_labels_numpy", return_value=np.ones(5))
