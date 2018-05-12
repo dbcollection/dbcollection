@@ -113,3 +113,20 @@ class TestClassificationTask:
         assert set_data['object_ids'] == list(range(10))
         assert set_data['list_images_per_class'] == list(range(5))
         assert set_data['list_images_per_superclass'] == list(range(5))
+
+    @pytest.mark.parametrize('is_test', [False, True])
+    def test_load_data_annotations(self, mocker, mock_classification_class, is_test):
+        mock_get_data_test = mocker.patch.object(Classification, "get_data_test", return_value='test')
+        mock_get_data_train = mocker.patch.object(Classification, "get_data_train", return_value='train')
+
+        annotations = mock_classification_class.load_data_annotations(is_test=is_test)
+
+        data_path = os.path.join('/some/path/data', 'cifar-100-python')
+        if is_test:
+            mock_get_data_test.assert_called_once_with(data_path)
+            mock_get_data_train.assert_not_called()
+            assert annotations == 'test'
+        else:
+            mock_get_data_test.assert_not_called()
+            mock_get_data_train.assert_called_once_with(data_path)
+            assert annotations == 'train'
