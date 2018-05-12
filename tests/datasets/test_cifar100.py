@@ -177,3 +177,14 @@ class TestClassificationTask:
 
         expected_object_ids = np.column_stack((np.array(range(10)), fine_labels, coarse_labels))
         assert_array_equal(object_ids, expected_object_ids)
+
+    def test_get_images_per_class(self, mocker, mock_classification_class):
+        labels = np.array([1,1,1,1,0,1,1,0])
+
+        images_per_class = mock_classification_class.get_images_per_class(labels)
+
+        expected = np.array([[4, 7, -1, -1, -1, -1],
+                             [0, 1, 2, 3, 5, 6]],
+                             dtype=np.int32)
+        assert_array_equal(images_per_class, expected)
+

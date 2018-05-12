@@ -147,7 +147,6 @@ class Classification(BaseTaskNew):
 
     def get_images_per_class(self, labels):
         """Returns a list of image indexes per class."""
-        assert labels, 'Must input valid labels'
         images_per_class = []
         unique_labels = np.unique(labels)
         for label in unique_labels:
