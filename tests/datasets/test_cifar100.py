@@ -142,6 +142,21 @@ class TestClassificationTask:
         mock_parse_data.assert_called_once_with('annotations', 10000)
         assert data == 'dummy_data'
 
+    def test_parse_data_annotations(self, mocker, mock_classification_class):
+        images = np.random.random((10, 3072))
+        annotations = {
+            "data": images,
+            "fine_labels": range(10),
+            "coarse_labels": range(5)
+        }
+
+        data, labels, coarse_labels = mock_classification_class.parse_data_annotations(annotations, 10)
+
+        expected_images = np.transpose(images.reshape(10, 3, 32, 32), (0, 2, 3, 1))
+        assert_array_equal(data, expected_images)
+        assert_array_equal(labels, np.array(range(10), dtype=np.uint8))
+        assert_array_equal(coarse_labels, np.array(range(5), dtype=np.uint8))
+
     def test_get_data_train(self, mocker, mock_classification_class):
         mock_load_file = mocker.patch.object(Classification, "load_annotation_file", return_value='annotations')
         mock_parse_data = mocker.patch.object(Classification, "parse_data_annotations", return_value='dummy_data')
