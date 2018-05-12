@@ -167,3 +167,13 @@ class TestClassificationTask:
         mock_load_file.assert_called_once_with(os.path.join(data_path, 'train'))
         mock_parse_data.assert_called_once_with('annotations', 50000)
         assert data == 'dummy_data'
+
+    def test_get_object_list(self, mocker, mock_classification_class):
+        data = np.random.rand(10,3,32,32)
+        fine_labels = np.array([1]*10, dtype=np.uint8)
+        coarse_labels = np.array([2]*10, dtype=np.uint8)
+
+        object_ids = mock_classification_class.get_object_list(data, fine_labels, coarse_labels)
+
+        expected_object_ids = np.column_stack((np.array(range(10)), fine_labels, coarse_labels))
+        assert_array_equal(object_ids, expected_object_ids)
