@@ -3,7 +3,7 @@ Cifar100 download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.datasets import BaseDatasetNew
 from .classification import Classification
 
 
@@ -14,7 +14,7 @@ tasks = {"classification": Classification}
 default_task = 'classification'
 
 
-class Dataset(BaseDataset):
+class Dataset(BaseDatasetNew):
     """ Cifar100 preprocessing/downloading functions """
     urls = urls
     keywords = keywords
