@@ -104,7 +104,7 @@ class TestClassificationTask:
 
         mock_load_annotations.assert_called_once_with(False)
         mock_get_object_list.assert_called_once_with('images', 'labels', 'coarse_labels')
-        mock_get_list.assert_called()
+        assert mock_get_list.called
         assert_array_equal(set_data['classes'], str2ascii(classification_classes))
         assert_array_equal(set_data['coarse_classes'], str2ascii(classification_coarse_classes))
         assert set_data['images'] == 'images'
