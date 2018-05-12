@@ -154,20 +154,6 @@ class Classification(BaseTaskNew):
             images_per_class.append(images_idx)
         return np.array(pad_list(images_per_class, -1), dtype=np.int32)
 
-    # def add_data_to_source(self, hdf5_handler, data, set_name=None):
-    #    """
-    #    Store data annotations in a nested tree fashion.
-    #
-    #    It closely follows the tree structure of the data.
-    #    """
-    #    hdf5_write_data(hdf5_handler, 'classes', data["class_name"], dtype=np.uint8, fillvalue=0)
-    #    hdf5_write_data(hdf5_handler, 'superclasses', data["coarse_class_name"], dtype=np.uint8,
-    #                    fillvalue=0)
-    #    hdf5_write_data(hdf5_handler, 'images', data["data"], dtype=np.uint8, fillvalue=-1)
-    #    hdf5_write_data(hdf5_handler, 'labels', data["labels"], dtype=np.uint8, fillvalue=-1)
-    #    hdf5_write_data(hdf5_handler, 'coarse_labels', data["coarse_labels"], dtype=np.uint8,
-    #                    fillvalue=-1)
-
     def add_data_to_default(self, hdf5_handler, data, set_name=None):
         """
         Add data of a set to the default group.
