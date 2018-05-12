@@ -133,7 +133,7 @@ class Classification(BaseTaskNew):
     def get_data_train(self, path):
         """Loads the train data annotations from disk."""
         assert path, "Must input a valid path."
-        annotations = load_pickle(os.path.join(path, self.data_files[1]))
+        annotations = self.load_annotation_file(os.path.join(path, self.data_files[1]))
         return self.parse_data_annotations(annotations, 50000)
 
     def get_object_list(self, data, fine_labels, coarse_labels):
