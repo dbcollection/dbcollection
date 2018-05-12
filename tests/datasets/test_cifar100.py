@@ -7,8 +7,10 @@ import os
 import sys
 import pytest
 import numpy as np
+from numpy.testing import assert_array_equal
 
 from dbcollection.datasets.cifar.cifar100 import Classification
+from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
 @pytest.fixture()
@@ -16,13 +18,9 @@ def mock_classification_class():
     return Classification(data_path='/some/path/data', cache_path='/some/path/cache')
 
 
-class TestClassificationTask:
-    """Unit tests for the cifar100 Classification task."""
-
-    def test_task_attributes(self, mocker, mock_classification_class):
-        assert mock_classification_class.filename_h5 == 'classification'
-        assert mock_classification_class.data_files == ["meta", "train", "test"]
-        assert mock_classification_class.coarse_classes == [
+@pytest.fixture()
+def classification_coarse_classes():
+    return [
             'aquatic mammals',
             'fish',
             'flowers',
@@ -44,7 +42,11 @@ class TestClassificationTask:
             'vehicles 1',
             'vehicles 2',
         ]
-        assert mock_classification_class.finer_classes == [
+
+
+@pytest.fixture()
+def classification_classes():
+    return [
             'beaver', 'dolphin', 'otter', 'seal', 'whale',
             'aquarium fish', 'flatfish', 'ray', 'shark', 'trout',
             'orchids', 'poppies', 'roses', 'sunflowers', 'tulips',
@@ -81,3 +83,33 @@ class TestClassificationTask:
         assert mock_load_data.called
         assert train_data == {"train": ['some_data']}
         assert test_data == {"test": ['some_data']}
+        load_data_generator = mock_classification_class.load_data()
+        if sys.version[0] == '3':
+            train_data = load_data_generator.__next__()
+            test_data = load_data_generator.__next__()
+        else:
+            train_data = load_data_generator.next()
+            test_data = load_data_generator.next()
+
+        assert mock_load_data.called
+        assert train_data == {"train": ['some_data']}
+        assert test_data == {"test": ['some_data']}
+
+    def test_load_data_set(self, mocker, mock_classification_class, classification_classes, classification_coarse_classes):
+        mock_load_annotations = mocker.patch.object(Classification, "load_data_annotations", return_value=('images', 'labels', 'coarse_labels'))
+        mock_get_object_list = mocker.patch.object(Classification, "get_object_list", return_value=list(range(10)))
+        mock_get_list = mocker.patch.object(Classification, "get_images_per_class", return_value=list(range(5)))
+
+        set_data = mock_classification_class.load_data_set(False)
+
+        mock_load_annotations.assert_called_once_with(False)
+        mock_get_object_list.assert_called_once_with('images', 'labels', 'coarse_labels')
+        mock_get_list.assert_called()
+        assert_array_equal(set_data['classes'], str2ascii(classification_classes))
+        assert_array_equal(set_data['coarse_classes'], str2ascii(classification_coarse_classes))
+        assert set_data['images'] == 'images'
+        assert set_data['labels'] == 'labels'
+        assert_array_equal(set_data['object_fields'], str2ascii(['images', 'classes', 'superclasses']))
+        assert set_data['object_ids'] == list(range(10))
+        assert set_data['list_images_per_class'] == list(range(5))
+        assert set_data['list_images_per_superclass'] == list(range(5))
