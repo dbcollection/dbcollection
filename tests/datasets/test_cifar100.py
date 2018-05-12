@@ -141,3 +141,14 @@ class TestClassificationTask:
         mock_load_file.assert_called_once_with(os.path.join(data_path, 'test'))
         mock_parse_data.assert_called_once_with('annotations', 10000)
         assert data == 'dummy_data'
+
+    def test_get_data_train(self, mocker, mock_classification_class):
+        mock_load_file = mocker.patch.object(Classification, "load_annotation_file", return_value='annotations')
+        mock_parse_data = mocker.patch.object(Classification, "parse_data_annotations", return_value='dummy_data')
+
+        data_path = os.path.join('/some/path/data', 'cifar-100-python')
+        data = mock_classification_class.get_data_train(data_path)
+
+        mock_load_file.assert_called_once_with(os.path.join(data_path, 'train'))
+        mock_parse_data.assert_called_once_with('annotations', 50000)
+        assert data == 'dummy_data'
