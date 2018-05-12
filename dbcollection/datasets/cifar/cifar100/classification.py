@@ -115,8 +115,12 @@ class Classification(BaseTaskNew):
     def get_data_test(self, path):
         """Loads the test data annotations from disk."""
         assert path, "Must input a valid path."
-        annotations = load_pickle(os.path.join(path, self.data_files[2]))
+        annotations = self.load_annotation_file(os.path.join(path, self.data_files[2]))
         return self.parse_data_annotations(annotations, 10000)
+
+    def load_annotation_file(self, path):
+        """Reads the data from annotation file from disk."""
+        return load_pickle(path)
 
     def parse_data_annotations(self, annotations, size_data):
         """Parses the annotations' data."""
