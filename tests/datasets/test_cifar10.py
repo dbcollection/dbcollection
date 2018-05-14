@@ -118,6 +118,20 @@ class TestClassificationTask:
         assert_array_equal(data, expected_data)
         assert_array_equal(labels, expected_labels)
 
+    def test_get_data_test(self, mocker, mock_classification_class):
+        test_data = {
+            "data": np.random.rand(10000, 3*32*32),
+            "labels": np.random.randint(0, 9, (10000,))
+        }
+        mock_load_annot_file = mocker.patch.object(Classification, "load_annotation_file", return_value=test_data)
+
+        path = mock_classification_class.data_path
+        data, labels = mock_classification_class.get_data_test(path)
+
+        mock_load_annot_file.assert_called_once_with(os.path.join(path, 'test_batch'))
+        assert_array_equal(data, test_data['data'].reshape((10000, 3, 32, 32)))
+        assert_array_equal(labels, test_data['labels'])
+
     def test_get_object_list(self, mocker, mock_classification_class):
         data = np.random.rand(20,2,32,32)
         labels = np.array(range(20))
