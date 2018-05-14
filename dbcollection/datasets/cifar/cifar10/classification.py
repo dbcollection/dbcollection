@@ -88,7 +88,7 @@ class Classification(BaseTaskNew):
             (batch1['data'], batch2['data'], batch3['data'], batch4['data'], batch5['data']),
             axis=0
         )
-        data = data.reshape((50000, 3, 32, 32))
+        data = self.reshape_array(data, 50000)
         labels = np.concatenate(
             (batch1['labels'], batch2['labels'], batch3['labels'], batch4['labels'], batch5['labels']),
             axis=0
@@ -96,12 +96,18 @@ class Classification(BaseTaskNew):
 
         return data, labels
 
+    def reshape_array(self, data, size_array):
+        """Reshapes the numpy array to a fixed format."""
+        return data.reshape(size_array, 3, 32, 32)
+
     def get_data_test(self, path):
         assert path, "Must input a valid path."
         batch = self.load_annotation_file(os.path.join(path, self.data_files[6]))
-        data = batch['data'].reshape(10000, 3, 32, 32)
+        data = self.reshape_array(batch['data'], 10000)
         labels = np.array(batch['labels'], dtype=np.uint8)
         return data, labels
+
+
 
     def get_object_list(self, data, labels):
         """Groups the data + labels to a list of indexes."""
