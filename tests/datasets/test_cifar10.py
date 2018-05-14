@@ -94,6 +94,30 @@ class TestClassificationTask:
         mock_load_annot_file.assert_called_once_with(filename)
         assert result == 'dummy_data'
 
+    def test_get_data_train(self, mocker, mock_classification_class):
+        test_data = {
+            "data": np.random.rand(10000, 3*32*32),
+            "labels": np.random.randint(0, 9, (10000,))
+        }
+        mock_load_annot_file = mocker.patch.object(Classification, "load_annotation_file", return_value=test_data)
+
+        path = mock_classification_class.data_path
+        data, labels = mock_classification_class.get_data_train(path)
+
+        expected_data = np.concatenate(
+            (test_data['data'], test_data['data'], test_data['data'], test_data['data'], test_data['data']),
+            axis=0
+        ).reshape((50000, 3, 32, 32))
+        expected_labels = np.concatenate(
+            (test_data['labels'], test_data['labels'], test_data['labels'], test_data['labels'], test_data['labels']),
+            axis=0
+        )
+
+        assert mock_load_annot_file.called
+        assert mock_load_annot_file.call_count == 5
+        assert_array_equal(data, expected_data)
+        assert_array_equal(labels, expected_labels)
+
     def test_get_object_list(self, mocker, mock_classification_class):
         data = np.random.rand(20,2,32,32)
         labels = np.array(range(20))
