@@ -113,7 +113,7 @@ class TestClassificationTask:
         assert mock_load_annot_file.called
         assert mock_load_annot_file.call_count == 5
         #mock_reshape_array.assert_called_once_with(test_data_concat, 50000)
-        mock_reshape_array.assert_called_once()
+        assert mock_reshape_array.called
         assert_array_equal(data, output_data)
         assert_array_equal(labels, np.concatenate(
             (test_data['labels'], test_data['labels'], test_data['labels'], test_data['labels'], test_data['labels']),
