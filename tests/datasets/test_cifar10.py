@@ -113,10 +113,12 @@ class TestClassificationTask:
             axis=0
         )
 
-        assert mock_load_annot_file.called
-        assert mock_load_annot_file.call_count == 5
-        assert_array_equal(data, expected_data)
-        assert_array_equal(labels, expected_labels)
+    def test_reshape_array(self, mocker, mock_classification_class):
+        data = np.random.rand(20, 3*32*32)
+
+        result = mock_classification_class.reshape_array(data, 20)
+
+        assert_array_equal(result, data.reshape(20, 3, 32, 32))
 
     def test_get_data_test(self, mocker, mock_classification_class):
         test_data = {
