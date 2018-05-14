@@ -38,9 +38,7 @@ class Classification(BaseTaskNew):
         yield {"test": self.load_data_set(is_test=True)}
 
     def load_data_set(self, is_test):
-        """
-        Fetches the train/test data.
-        """
+        """Fetches the train/test data."""
         assert isinstance(is_test, bool), "Must input a valid boolean input."
         images, labels, class_names = self.load_data_annotations(is_test)
 
