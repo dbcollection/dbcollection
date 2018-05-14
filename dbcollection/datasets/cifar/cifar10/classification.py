@@ -107,8 +107,6 @@ class Classification(BaseTaskNew):
         labels = np.array(batch['labels'], dtype=np.uint8)
         return data, labels
 
-
-
     def get_object_list(self, data, labels):
         """Groups the data + labels to a list of indexes."""
         object_id = np.ndarray((data.shape[0], 2), dtype=np.int32)
