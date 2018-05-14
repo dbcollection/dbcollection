@@ -38,9 +38,7 @@ class Classification(BaseTaskNew):
         yield {"test": self.load_data_set(is_test=True)}
 
     def load_data_set(self, is_test):
-        """
-        Fetches the train/test data.
-        """
+        """Fetches the train/test data."""
         assert isinstance(is_test, bool), "Must input a valid boolean input."
         images, labels, class_names = self.load_data_annotations(is_test)
 
@@ -72,20 +70,25 @@ class Classification(BaseTaskNew):
         """Returns the class names/labels."""
         assert path, "Must input a valid path."
         filename = os.path.join(path, self.data_files[0])
-        return load_pickle(filename)
+        return self.load_annotation_file(filename)
+
+    def load_annotation_file(self, path):
+        """Reads the data from annotation file from disk."""
+        return load_pickle(path)
 
     def get_data_train(self, path):
-        batch1 = load_pickle(os.path.join(path, self.data_files[1]))
-        batch2 = load_pickle(os.path.join(path, self.data_files[2]))
-        batch3 = load_pickle(os.path.join(path, self.data_files[3]))
-        batch4 = load_pickle(os.path.join(path, self.data_files[4]))
-        batch5 = load_pickle(os.path.join(path, self.data_files[5]))
+        assert path, "Must input a valid path."
+        batch1 = self.load_annotation_file(os.path.join(path, self.data_files[1]))
+        batch2 = self.load_annotation_file(os.path.join(path, self.data_files[2]))
+        batch3 = self.load_annotation_file(os.path.join(path, self.data_files[3]))
+        batch4 = self.load_annotation_file(os.path.join(path, self.data_files[4]))
+        batch5 = self.load_annotation_file(os.path.join(path, self.data_files[5]))
 
         data = np.concatenate(
             (batch1['data'], batch2['data'], batch3['data'], batch4['data'], batch5['data']),
             axis=0
         )
-        data = data.reshape((50000, 3, 32, 32))
+        data = self.reshape_array(data, 50000)
         labels = np.concatenate(
             (batch1['labels'], batch2['labels'], batch3['labels'], batch4['labels'], batch5['labels']),
             axis=0
@@ -93,9 +96,14 @@ class Classification(BaseTaskNew):
 
         return data, labels
 
+    def reshape_array(self, data, size_array):
+        """Reshapes the numpy array to a fixed format."""
+        return data.reshape(size_array, 3, 32, 32)
+
     def get_data_test(self, path):
-        batch = load_pickle(os.path.join(path, self.data_files[6]))
-        data = batch['data'].reshape(10000, 3, 32, 32)
+        assert path, "Must input a valid path."
+        batch = self.load_annotation_file(os.path.join(path, self.data_files[6]))
+        data = self.reshape_array(batch['data'], 10000)
         labels = np.array(batch['labels'], dtype=np.uint8)
         return data, labels
 

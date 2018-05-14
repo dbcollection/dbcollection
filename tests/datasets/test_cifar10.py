@@ -84,6 +84,65 @@ class TestClassificationTask:
         assert_array_equal(labels, np.array(range(10)))
         assert class_names == ['some', 'class', 'names']
 
+    def test_get_class_names(self, mocker, mock_classification_class):
+        mock_load_annot_file = mocker.patch.object(Classification, "load_annotation_file", return_value='dummy_data')
+
+        path = mock_classification_class.data_path
+        result = mock_classification_class.get_class_names(path)
+
+        filename = os.path.join(path, "batches.meta")
+        mock_load_annot_file.assert_called_once_with(filename)
+        assert result == 'dummy_data'
+
+    def test_get_data_train(self, mocker, mock_classification_class):
+        test_data = {
+            "data": np.random.rand(10, 3*32*32),
+            "labels": np.random.randint(0, 9, (10,))
+        }
+        test_data_concat = np.concatenate(
+            (test_data['data'], test_data['data'], test_data['data'], test_data['data'], test_data['data']),
+            axis=0
+        )
+        output_data = test_data_concat.reshape(50,3,32,32)
+        mock_load_annot_file = mocker.patch.object(Classification, "load_annotation_file", return_value=test_data)
+        mock_reshape_array = mocker.patch.object(Classification, "reshape_array", return_value=output_data)
+
+        path = mock_classification_class.data_path
+        data, labels = mock_classification_class.get_data_train(path)
+
+        assert mock_load_annot_file.called
+        assert mock_load_annot_file.call_count == 5
+        #mock_reshape_array.assert_called_once_with(test_data_concat, 50000)
+        assert mock_reshape_array.called
+        assert_array_equal(data, output_data)
+        assert_array_equal(labels, np.concatenate(
+            (test_data['labels'], test_data['labels'], test_data['labels'], test_data['labels'], test_data['labels']),
+            axis=0)
+        )
+
+    def test_reshape_array(self, mocker, mock_classification_class):
+        data = np.random.rand(20, 3*32*32)
+
+        result = mock_classification_class.reshape_array(data, 20)
+
+        assert_array_equal(result, data.reshape(20, 3, 32, 32))
+
+    def test_get_data_test(self, mocker, mock_classification_class):
+        test_data = {
+            "data": np.random.rand(10, 3*32*32),
+            "labels": np.random.randint(0, 9, (10,))
+        }
+        mock_load_annot_file = mocker.patch.object(Classification, "load_annotation_file", return_value=test_data)
+        mock_reshape_array = mocker.patch.object(Classification, "reshape_array", return_value=test_data['data'].reshape(10, 3, 32, 32))
+
+        path = mock_classification_class.data_path
+        data, labels = mock_classification_class.get_data_test(path)
+
+        mock_load_annot_file.assert_called_once_with(os.path.join(path, 'test_batch'))
+        mock_reshape_array.assert_called_once_with(test_data['data'], 10000)
+        assert_array_equal(data, test_data['data'].reshape((10, 3, 32, 32)))
+        assert_array_equal(labels, test_data['labels'])
+
     def test_get_object_list(self, mocker, mock_classification_class):
         data = np.random.rand(20,2,32,32)
         labels = np.array(range(20))
