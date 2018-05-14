@@ -70,14 +70,19 @@ class Classification(BaseTaskNew):
         """Returns the class names/labels."""
         assert path, "Must input a valid path."
         filename = os.path.join(path, self.data_files[0])
-        return load_pickle(filename)
+        return self.load_annotation_file(filename)
+
+    def load_annotation_file(self, path):
+        """Reads the data from annotation file from disk."""
+        return load_pickle(path)
 
     def get_data_train(self, path):
-        batch1 = load_pickle(os.path.join(path, self.data_files[1]))
-        batch2 = load_pickle(os.path.join(path, self.data_files[2]))
-        batch3 = load_pickle(os.path.join(path, self.data_files[3]))
-        batch4 = load_pickle(os.path.join(path, self.data_files[4]))
-        batch5 = load_pickle(os.path.join(path, self.data_files[5]))
+        assert path, "Must input a valid path."
+        batch1 = self.load_annotation_file(os.path.join(path, self.data_files[1]))
+        batch2 = self.load_annotation_file(os.path.join(path, self.data_files[2]))
+        batch3 = self.load_annotation_file(os.path.join(path, self.data_files[3]))
+        batch4 = self.load_annotation_file(os.path.join(path, self.data_files[4]))
+        batch5 = self.load_annotation_file(os.path.join(path, self.data_files[5]))
 
         data = np.concatenate(
             (batch1['data'], batch2['data'], batch3['data'], batch4['data'], batch5['data']),
@@ -92,7 +97,8 @@ class Classification(BaseTaskNew):
         return data, labels
 
     def get_data_test(self, path):
-        batch = load_pickle(os.path.join(path, self.data_files[6]))
+        assert path, "Must input a valid path."
+        batch = self.load_annotation_file(os.path.join(path, self.data_files[6]))
         data = batch['data'].reshape(10000, 3, 32, 32)
         labels = np.array(batch['labels'], dtype=np.uint8)
         return data, labels
