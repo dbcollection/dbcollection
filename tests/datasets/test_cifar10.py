@@ -84,6 +84,16 @@ class TestClassificationTask:
         assert_array_equal(labels, np.array(range(10)))
         assert class_names == ['some', 'class', 'names']
 
+    def test_get_class_names(self, mocker, mock_classification_class):
+        mock_load_annot_file = mocker.patch.object(Classification, "load_annotation_file", return_value='dummy_data')
+
+        path = mock_classification_class.data_path
+        result = mock_classification_class.get_class_names(path)
+
+        filename = os.path.join(path, "batches.meta")
+        mock_load_annot_file.assert_called_once_with(filename)
+        assert result == 'dummy_data'
+
     def test_get_object_list(self, mocker, mock_classification_class):
         data = np.random.rand(20,2,32,32)
         labels = np.array(range(20))
