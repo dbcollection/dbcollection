@@ -3,7 +3,7 @@ Caltech Pedestrian Dataset download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.datasets import BaseDatasetNew
 from .detection import Detection, Detection10x, Detection30x
 
 url_path = 'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/'
@@ -30,8 +30,8 @@ tasks = {
 default_task = 'detection'
 
 
-class Dataset(BaseDataset):
-    """ Caltech Pedestrian Dataset preprocessing/downloading functions """
+class Dataset(BaseDatasetNew):
+    """Caltech Pedestrian Dataset preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
     tasks = tasks
