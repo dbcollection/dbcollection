@@ -18,15 +18,14 @@ from dbcollection.utils.db.caltech_pedestrian_extractor.converter import extract
 
 
 class Detection(BaseTaskNew):
-    """ Caltech Pedestrian detection preprocessing functions """
+    """Caltech Pedestrian detection preprocessing functions."""
 
-    # metadata filename
     filename_h5 = 'detection'
     skip_step = 30
-    classes = ['person', 'person-fa', 'people', 'person?']
+    classes = ('person', 'person-fa', 'people', 'person?')
     sets = {
-        "train": ['set00', 'set01', 'set02', 'set03', 'set04', 'set05'],
-        "test": ['set06', 'set07', 'set08', 'set09', 'set10']
+        "train": ('set00', 'set01', 'set02', 'set03', 'set04', 'set05'),
+        "test": ('set06', 'set07', 'set08', 'set09', 'set10')
     }
 
     def convert_extract_data(self):
