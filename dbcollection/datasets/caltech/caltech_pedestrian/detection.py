@@ -8,7 +8,7 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTask
+from dbcollection.datasets import BaseTaskNew
 
 from dbcollection.utils.file_load import load_json
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -17,7 +17,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 from dbcollection.utils.db.caltech_pedestrian_extractor.converter import extract_data
 
 
-class Detection(BaseTask):
+class Detection(BaseTaskNew):
     """ Caltech Pedestrian detection preprocessing functions """
 
     # metadata filename
