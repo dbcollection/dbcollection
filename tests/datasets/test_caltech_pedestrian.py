@@ -33,3 +33,18 @@ class TestDetectionTask:
             "test": ('set06', 'set07', 'set08', 'set09', 'set10')
         }
 
+    def test_load_data(self, mocker, mock_detection_class):
+        mock_load_data = mocker.patch.object(Detection, "load_data_set", return_value=['some_data'])
+
+        load_data_generator = mock_detection_class.load_data()
+        if sys.version[0] == '3':
+            train_data = load_data_generator.__next__()
+            test_data = load_data_generator.__next__()
+        else:
+            train_data = load_data_generator.next()
+            test_data = load_data_generator.next()
+
+        assert mock_load_data.called
+        assert train_data == {"train": ['some_data']}
+        assert test_data == {"test": ['some_data']}
+
