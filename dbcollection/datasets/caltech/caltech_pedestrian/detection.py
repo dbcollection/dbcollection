@@ -28,77 +28,104 @@ class Detection(BaseTaskNew):
         "test": ('set06', 'set07', 'set08', 'set09', 'set10')
     }
 
-    def convert_extract_data(self):
-        """
-        Extract + convert .jpg + .json files from the .seq and .vbb files.
-        """
-        if not os.path.exists(self.extracted_data_path):
-            sets = [val for l in self.sets.values() for val in l]
-            sets.sort()
-            extract_data(self.data_path, self.extracted_data_path, sets)
-
     def load_data(self):
         """
-        Load the data from the dataset's files.
+        Fetches the train/test data.
         """
-        self.extracted_data_path = os.path.join(self.data_path, 'extracted_data')
+        yield {"train": self.load_data_set(is_test=False)}
+        yield {"test": self.load_data_set(is_test=True)}
 
-        # extract data
-        self.convert_extract_data()
+    def load_data_set(self, is_test):
+        """Fetches the train/test data."""
+        assert isinstance(is_test, bool), "Must input a valid boolean input."
+        unpack_dir = self.unpack_raw_data_files()
+        set_name, partitions = self.get_set_partitions(is_test=is_test)
+        image_filenames, annotation_filenames = self.get_annotations_data(set_name, partitions, unpack_dir)
+        return {
+            "image_filenames": image_filenames,
+            "annotation_filenames": annotation_filenames
+        }
 
-        for set_name in self.sets:
-            data = {set_name: {}}
+    def unpack_raw_data_files(self):
+        """Unpacks images and annotations data (.jpg, .json) from raw data files (.seq, .vbb)."""
+        extract_dir = os.path.join(self.data_path, 'extracted_data')
+        if not os.path.exists(extract_dir):
+            sets = [partition for partitions in self.sets.values() for partition in partitions]
+            sets.sort()
+            extract_data(self.data_path, extract_dir, sets)
+        return extract_dir
 
+    def get_set_partitions(self, is_test):
+        """Returns the set partitions for the train/test set."""
+        if is_test:
+            return "test", self.sets["test"]
+        else:
+            return "train", self.sets["train"]
+
+    def get_annotations_data(self, set_name, partitions, unpack_dir):
+        """Returns the images and annotations filenames of a set from disk."""
+        image_filenames, annotation_filenames = {}, {}
+
+        if self.verbose:
+            print('\n> Loading data files for the set: {}'.format(set_name))
+            prgbar = progressbar.ProgressBar(max_value=len(partitions))
+
+        for i, partition in enumerate(partitions):
+            data = self.get_annotations_from_partition(unpack_dir, partition)
+            image_filenames[partition] = data["images"]
+            annotation_filenames[partition] = data["annotations"]
             if self.verbose:
-                print('\n> Loading data files for the set: {}'.format(set_name))
+                prgbar.update(i)  # update progressbar
 
-            # progressbar
-            if self.verbose:
-                prgbar = progressbar.ProgressBar(max_value=len(self.sets[set_name]))
+        if self.verbose:
+            prgbar.finish()  # reset progressbar
+        return image_filenames, annotation_filenames
 
-            for i, set_data in enumerate(self.sets[set_name]):
-                data[set_name][set_data] = {}
+    def get_annotations_from_partition(self, path, partition):
+        """Returns all image and annotation filenames (ordered) of a set partition from disk."""
+        partition_annotations = {}
+        dirs = self.get_sorted_dirs_from_partition(path, partition)
+        for video in dirs:
+            image_filenames = self.get_image_filenames_from_dir(path, partition, video)
+            annotation_filenames = self.get_annotation_filenames_from_dir(path, partition, video)
+            partition_annotations[video] = {
+                "images": image_filenames,
+                "annotations": annotation_filenames
+            }
+        return partition_annotations
 
-                extracted_data_dir = os.path.join(self.extracted_data_path, set_data)
+    def get_sorted_dirs_from_partition(self, path, partition):
+        """Returns a list of sorted dirs for a partition set."""
+        dirs = os.listdir(os.path.join(path, partition))
+        dirs.sort()
+        return dirs
 
-                # list all folders
-                folders = os.listdir(extracted_data_dir)
-                folders.sort()
+    def get_image_filenames_from_dir(self, path, partition, video):
+        """Returns a list of ordered image filenames sampled from a directory."""
+        return self.get_sample_data_from_dir(path, partition, video, 'images')
 
-                for video in folders:
-                    # fetch all images filenames
-                    img_fnames = os.listdir(os.path.join(extracted_data_dir, video, 'images'))
-                    img_fnames = [os.path.join(self.data_path, 'extracted_data', set_data,
-                                               video, 'images', fname)
-                                  for fname in img_fnames]
-                    img_fnames.sort()
-                    range_imgs = range(self.skip_step - 1, len(img_fnames), self.skip_step)
-                    img_fnames_list = [img_fnames[i] for i in range_imgs]
+    def get_sample_data_from_dir(self, path, partition, video, type_data):
+        """Returns a sampled list of ordered image / annnotation file path + names from a directory."""
+        path_ = os.path.join(path, partition, video, type_data)
+        filenames = self.get_sorted_filenames_from_dir(path_)
+        annot_path = os.path.join(self.data_path, 'extracted_data', partition, video, type_data)
+        filepaths = [os.path.join(annot_path, filename) for filename in filenames]
+        sample_filepaths = self.get_sample_filenames(filepaths, self.skip_step)
+        return sample_filepaths
 
-                    # fetch all annotations filenames
-                    annotation_fnames = os.listdir(os.path.join(extracted_data_dir, video,
-                                                                'annotations'))
-                    annotation_fnames = [os.path.join(self.data_path, 'extracted_data', set_data,
-                                                      video, 'annotations', fname)
-                                         for fname in annotation_fnames]
-                    annotation_fnames.sort()
-                    range_annot = range(self.skip_step - 1, len(annotation_fnames), self.skip_step)
-                    annotation_fnames_list = [annotation_fnames[i] for i in range_annot]
+    def get_sorted_filenames_from_dir(self, path):
+        """Returns a sorted list of file names inside a directory path."""
+        filenames = os.listdir(path)
+        filenames.sort()
+        return filenames
 
-                    data[set_name][set_data][video] = {
-                        "images": img_fnames_list,
-                        "annotations": annotation_fnames_list
-                    }
+    def get_sample_filenames(self, filenames, skip_step):
+        """Returns a sample of filenames using a sampling step."""
+        return [filenames[i] for i in range(skip_step - 1, len(filenames), skip_step)]
 
-                # update progressbar
-                if self.verbose:
-                    prgbar.update(i)
-
-            # reset progressbar
-            if self.verbose:
-                prgbar.finish()
-
-            yield data
+    def get_annotation_filenames_from_dir(self, path, partition, video):
+        """Returns a list of ordered annotation filenames sampled from a directory."""
+        return self.get_sample_data_from_dir(path, partition, video, 'annotations')
 
     def add_data_to_source(self, hdf5_handler, data, set_name):
         """
