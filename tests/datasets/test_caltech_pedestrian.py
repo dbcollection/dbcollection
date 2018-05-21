@@ -11,7 +11,7 @@ import os
 import sys
 import pytest
 import numpy as np
-
+from numpy.testing import assert_array_equal
 
 from dbcollection.datasets.caltech.caltech_pedestrian import Detection
 
@@ -48,3 +48,16 @@ class TestDetectionTask:
         assert train_data == {"train": ['some_data']}
         assert test_data == {"test": ['some_data']}
 
+    def test_load_data_set(self, mocker, mock_detection_class):
+        mock_unpack_data = mocker.patch.object(Detection, "unpack_raw_data_files", return_value='/some/path/data/')
+        mock_get_partitions = mocker.patch.object(Detection, "get_set_partitions", return_value=('train', ('set00', 'set01')))
+        mock_get_annotations = mocker.patch.object(Detection, "get_annotations_data", return_value=(['image1', 'image2'], ['annot1', 'annot2']))
+
+        set_data = mock_detection_class.load_data_set(False)
+
+        mock_unpack_data.assert_called_once_with()
+        mock_get_partitions.assert_called_once_with(is_test=False)
+        mock_get_annotations.assert_called_once_with('train', ('set00', 'set01'), '/some/path/data/')
+        assert sorted(list(set_data.keys())) == ["annotation_filenames", "image_filenames"]
+        assert set_data["image_filenames"] == ['image1', 'image2']
+        assert set_data["annotation_filenames"] == ['annot1', 'annot2']
