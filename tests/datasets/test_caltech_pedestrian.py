@@ -138,3 +138,11 @@ class TestDetectionTask:
         mock_get_filenames.assert_called_once_with(os.path.join(path, partition, video, type_data))
         mock_get_sample.assert_called_once_with(filepaths, mock_detection_class.skip_step)
         assert sample_filepaths == ['filename1', 'filename2']
+
+    def test_get_sample_filenames(self, mocker, mock_detection_class):
+        filenames = ['filename1', 'filename2', 'filename3', 'filename4', 'filename5']
+        skip_step = 2
+
+        sample = mock_detection_class.get_sample_filenames(filenames, skip_step)
+
+        assert sample == ['filename2', 'filename4']
