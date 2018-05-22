@@ -146,3 +146,15 @@ class TestDetectionTask:
         sample = mock_detection_class.get_sample_filenames(filenames, skip_step)
 
         assert sample == ['filename2', 'filename4']
+
+    def test_get_annotation_filenames_from_dir(self, mocker, mock_detection_class):
+        mock_get_data = mocker.patch.object(Detection, 'get_sample_data_from_dir', return_value=['annotation1.json', 'annotation2.json'])
+
+        path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
+        partition = 'set00'
+        video = 'V000'
+        annotation_filenames = mock_detection_class.get_annotation_filenames_from_dir(path, partition, video)
+
+        mock_get_data.assert_called_once_with(path, partition, video, 'annotations')
+        assert annotation_filenames == ['annotation1.json', 'annotation2.json']
+
