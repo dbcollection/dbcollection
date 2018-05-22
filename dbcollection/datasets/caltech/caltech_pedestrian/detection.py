@@ -101,12 +101,6 @@ class Detection(BaseTaskNew):
         object_names.sort()
         return object_names
 
-    def get_sorted_dirs_from_partition(self, path, partition):
-        """Returns a list of sorted dirs for a partition set."""
-        dirs = os.listdir(os.path.join(path, partition))
-        dirs.sort()
-        return dirs
-
     def get_image_filenames_from_dir(self, path, partition, video):
         """Returns a list of ordered image filenames sampled from a directory."""
         return self.get_sample_data_from_dir(path, partition, video, 'images')
