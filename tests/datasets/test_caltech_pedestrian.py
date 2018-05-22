@@ -102,3 +102,13 @@ class TestDetectionTask:
             "V000": {"images":  ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']},
             "V001": {"images":  ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']}
         }
+
+    def test_get_sorted_dirs_from_partition(self, mocker, mock_detection_class):
+        mock_listdir = mocker.patch('os.listdir', return_value=['dir2', 'dir1', 'dir3'])
+
+        path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
+        partition = 'set00'
+        dirs = mock_detection_class.get_sorted_dirs_from_partition(path, partition)
+
+        mock_listdir.assert_called_once_with(os.path.join(path, partition))
+        assert dirs == ['dir1', 'dir2', 'dir3']
