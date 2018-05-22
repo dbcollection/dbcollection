@@ -124,7 +124,7 @@ class TestDetectionTask:
         assert image_filenames == ['image1.jpg', 'image2.jpg']
 
     def test_get_sample_data_from_dir(self, mocker, mock_detection_class):
-        mock_get_filenames = mocker.patch.object(Detection, 'get_sorted_filenames_from_dir', return_value=['filename1', 'filename2'])
+        mock_get_filenames = mocker.patch.object(Detection, 'get_sorted_object_names_from_dir', return_value=['filename1', 'filename2'])
         mock_get_sample = mocker.patch.object(Detection, 'get_sample_filenames', return_value=['filename1', 'filename2'])
 
         path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
