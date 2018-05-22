@@ -94,6 +94,13 @@ class Detection(BaseTaskNew):
             }
         return partition_annotations
 
+    def get_sorted_object_names_from_dir(self, path):
+        """Returns a sorted list containing the names of
+        the entries in the directory given by path."""
+        object_names = os.listdir(path)
+        object_names.sort()
+        return object_names
+
     def get_sorted_dirs_from_partition(self, path, partition):
         """Returns a list of sorted dirs for a partition set."""
         dirs = os.listdir(os.path.join(path, partition))
