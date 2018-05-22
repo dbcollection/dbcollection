@@ -85,3 +85,20 @@ class TestDetectionTask:
         assert mock_get_annotations.call_count == 2
         assert image_filenames == {"set00": test_data['images'], "set01": test_data['images']}
         assert annotation_filenames == {"set00": test_data['annotations'], "set01": test_data['annotations']}
+
+    def test_get_annotations_from_partition(self, mocker, mock_detection_class):
+        mock_get_dirs = mocker.patch.object(Detection, 'get_sorted_dirs_from_partition', return_value=('V000', 'V001'))
+        mock_get_image_fnames = mocker.patch.object(Detection, 'get_image_filenames_from_dir', return_value=['image1.jpg', 'image2.jpg'])
+        mock_get_annotation_fnames = mocker.patch.object(Detection, 'get_annotation_filenames_from_dir', return_value=['annotation1.json', 'annotation2.json'])
+
+        path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
+        partition = 'set00'
+        partition_annotations = mock_detection_class.get_annotations_from_partition(path, partition)
+
+        mock_get_dirs.assert_called_once_with(path, partition)
+        assert mock_get_image_fnames.call_count  == 2
+        assert mock_get_annotation_fnames.call_count  == 2
+        assert partition_annotations == {
+            "V000": {"images":  ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']},
+            "V001": {"images":  ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']}
+        }
