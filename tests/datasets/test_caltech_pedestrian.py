@@ -123,3 +123,19 @@ class TestDetectionTask:
 
         mock_get_data.assert_called_once_with(path, partition, video, 'images')
         assert image_filenames == ['image1.jpg', 'image2.jpg']
+
+    def test_get_sample_data_from_dir(self, mocker, mock_detection_class):
+        mock_get_filenames = mocker.patch.object(Detection, 'get_sorted_filenames_from_dir', return_value=['filename1', 'filename2'])
+        mock_get_sample = mocker.patch.object(Detection, 'get_sample_filenames', return_value=['filename1', 'filename2'])
+
+        path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
+        partition = 'set00'
+        video = 'V000'
+        type_data = 'images'
+        sample_filepaths = mock_detection_class.get_sample_data_from_dir(path, partition, video, type_data)
+
+        annot_path = os.path.join(mock_detection_class.data_path, 'extracted_data', partition, video, type_data)
+        filepaths = [os.path.join(annot_path, filename) for filename in ['filename1', 'filename2']]
+        mock_get_filenames.assert_called_once_with(os.path.join(path, partition, video, type_data))
+        mock_get_sample.assert_called_once_with(filepaths, mock_detection_class.skip_step)
+        assert sample_filepaths == ['filename1', 'filename2']
