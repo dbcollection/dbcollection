@@ -72,3 +72,16 @@ class TestDetectionTask:
         else:
             assert set_name == 'train'
             assert partitions == ('set00', 'set01', 'set02', 'set03', 'set04', 'set05')
+
+    def test_get_annotations_data(self, mocker, mock_detection_class):
+        test_data = {"images": ['image1', 'image2'], "annotations": ['annotation1', 'annotation2']}
+        mock_get_annotations = mocker.patch.object(Detection, 'get_annotations_from_partition', return_value=test_data)
+
+        set_name = 'train'
+        partitions = ('set00', 'set01')
+        unpack_dir = os.path.join('some', 'path', 'to', 'extracted', 'data', 'dir')
+        image_filenames, annotation_filenames = mock_detection_class.get_annotations_data(set_name, partitions, unpack_dir)
+
+        assert mock_get_annotations.call_count == 2
+        assert image_filenames == {"set00": test_data['images'], "set01": test_data['images']}
+        assert annotation_filenames == {"set00": test_data['annotations'], "set01": test_data['annotations']}
