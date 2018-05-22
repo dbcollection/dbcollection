@@ -61,3 +61,14 @@ class TestDetectionTask:
         assert sorted(list(set_data.keys())) == ["annotation_filenames", "image_filenames"]
         assert set_data["image_filenames"] == ['image1', 'image2']
         assert set_data["annotation_filenames"] == ['annot1', 'annot2']
+
+    @pytest.mark.parametrize('is_test', [False, True])
+    def test_get_set_partitions(self, mocker, mock_detection_class, is_test):
+        set_name, partitions = mock_detection_class.get_set_partitions(is_test=is_test)
+
+        if is_test:
+            assert set_name == 'test'
+            assert partitions == ('set06', 'set07', 'set08', 'set09', 'set10')
+        else:
+            assert set_name == 'train'
+            assert partitions == ('set00', 'set01', 'set02', 'set03', 'set04', 'set05')
