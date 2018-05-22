@@ -108,17 +108,11 @@ class Detection(BaseTaskNew):
     def get_sample_data_from_dir(self, path, partition, video, type_data):
         """Returns a sampled list of ordered image / annnotation file path + names from a directory."""
         path_ = os.path.join(path, partition, video, type_data)
-        filenames = self.get_sorted_filenames_from_dir(path_)
+        filenames = self.get_sorted_object_names_from_dir(path_)
         annot_path = os.path.join(self.data_path, 'extracted_data', partition, video, type_data)
         filepaths = [os.path.join(annot_path, filename) for filename in filenames]
         sample_filepaths = self.get_sample_filenames(filepaths, self.skip_step)
         return sample_filepaths
-
-    def get_sorted_filenames_from_dir(self, path):
-        """Returns a sorted list of file names inside a directory path."""
-        filenames = os.listdir(path)
-        filenames.sort()
-        return filenames
 
     def get_sample_filenames(self, filenames, skip_step):
         """Returns a sample of filenames using a sampling step."""
