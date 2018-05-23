@@ -22,6 +22,20 @@ def mock_detection_class():
     return Detection(data_path='/some/path/data', cache_path='/some/path/cache')
 
 
+@pytest.fixture()
+def test_data():
+    return {
+        "set00": {
+            "V000": {"images": ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']},
+            "V001": {"images": ['image3.jpg', 'image4.jpg'], "annotations": ['annotation3.json', 'annotation4.json']}
+        },
+        "set01": {
+            "V000": {"images": ['image5.jpg', 'image6.jpg'], "annotations": ['annotation5.json', 'annotation6.json']},
+            "V001": {"images": ['image7.jpg', 'image8.jpg'], "annotations": ['annotation7.json', 'annotation8.json']}
+        },
+    }
+
+
 class TestDetectionTask:
     """Unit tests for the caltech pedestrian Detection task."""
 
@@ -208,6 +222,19 @@ class TestDetectionTask:
 
         assert image_filenames == ['image1.jpg', 'image2.jpg' ,'image3.jpg', 'image4.jpg',
                                    'image5.jpg', 'image6.jpg', 'image7.jpg', 'image8.jpg']
+
+    @pytest.mark.parametrize('is_clean', [False, True])
+    def test_get_image_filenames_obj_ids_from_data(self, mocker, mock_detection_class, test_data, is_clean):
+        mock_load_file = mocker.patch.object(Detection, "load_annotation_file", return_value=[{"pos": [0, 0, 0, 0]}, {"pos": [1, 1, 30, 30]}])
+
+        mock_detection_class.is_clean = is_clean
+        ids = mock_detection_class.get_image_filenames_obj_ids_from_data(test_data)
+
+        assert mock_load_file.call_count == 8
+        if is_clean:
+            assert ids == [0, 1, 2, 3, 4, 5, 6, 7]
+        else:
+            assert ids == [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7]
 
     def test_process_object_fields(self, mocker, mock_detection_class):
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
