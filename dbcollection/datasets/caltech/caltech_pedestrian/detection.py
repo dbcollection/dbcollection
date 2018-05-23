@@ -128,7 +128,7 @@ class Detection(BaseTaskNew):
         Saves the metadata of a set.
         """
         image_filenames_ids = self.process_image_filenames(data, set_name)
-        bbox_ids = []
+        bbox_ids = self.process_bboxes_metadata(data, set_name)
         bboxv_ids = []
         label_ids = []
         occlusion_ids = []
@@ -185,6 +185,56 @@ class Detection(BaseTaskNew):
     def load_annotation_file(self, path):
         """Loads the annotation's file data from disk."""
         return load_json(path)
+
+    def process_bboxes_metadata(self, data, set_name):
+        """Processes and saves the annotation's bounding boxes metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the pedestrian bounding boxes metadata...')
+
+        bboxes, bboxes_ids = self.get_bboxes_from_data(data)
+
+        self.save_field_to_hdf5(
+            set_name=set_name,
+            field='bboxes',
+            data=np.array(bboxes, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=-1
+        )
+
+        return bboxes_ids
+
+    def get_bboxes_from_data(self, data):
+        """Returns a list of bounding boxes and a list
+        of ids for each row of 'object_ids' field."""
+        bbox, bbox_ids = [], []
+
+        bbox_counter = 0
+        for partition in sorted(data):
+            for video in sorted(data[partition]):
+                annotation_filenames_video = data[partition][video]["annotations"]
+                for annotation_filename in sorted(annotation_filenames_video):
+                    annotation_data = self.load_annotation_file(annotation_filename)
+                    if any(annotation_data):
+                        for obj in annotation_data:
+                            if self.is_clean:
+                                if obj['pos'][2] >= 5 and obj['pos'][3] >= 5:
+                                    bbox.append(self.bbox_correct_format(obj['pos']))
+                                    bbox_ids.append(bbox_counter)
+                                    bbox_counter += 1
+                            else:
+                                bbox.append(self.bbox_correct_format(obj['pos']))
+                                bbox_ids.append(bbox_counter)
+                                bbox_counter += 1
+
+        return bbox, bbox_ids
+
+    def bbox_correct_format(self, bbox):
+        """Converts the bounding box [x,y,wh,h] format to [x1,y1,x2,y2]."""
+        x1 = bbox[0]
+        y1 = bbox[1]
+        x2 = bbox[0] + bbox[2] - 1
+        y2 = bbox[1] + bbox[3] - 1
+        return [x1, y1, x2, y2]
 
     def process_object_fields(self, set_name):
         """Processes and saves the 'object_fields' metadata to hdf5."""
