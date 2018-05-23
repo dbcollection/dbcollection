@@ -167,3 +167,15 @@ class TestDetectionTask:
 
         mock_object_fields.assert_called_once_with(set_name)
 
+    def test_process_object_fields(self, mocker, mock_detection_class):
+        mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
+
+        mock_detection_class.process_object_fields('train')
+
+        mock_save_hdf5.assert_called_once_with(
+            set_name='train',
+            field='object_fields',
+            data=['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion'],
+            dtype=np.uint8,
+            fillvalue=0
+        )
