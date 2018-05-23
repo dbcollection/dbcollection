@@ -185,22 +185,20 @@ class TestDetectionTask:
         mock_bbox_metadata.assert_called_once_with(test_data, set_name)
         mock_object_fields.assert_called_once_with(set_name)
 
-    def test_process_image_filenames(self, mocker, mock_detection_class):
-        mock_get_filenames = mocker.patch.object(Detection, "get_image_filenames_from_data", return_value=['image1', 'image2'])
-        mock_get_ids = mocker.patch.object(Detection, "get_image_filenames_obj_ids_from_data", return_value=[0, 0, 0, 1, 1, 1])
+    def test_process_image_filenames(self, mocker, mock_detection_class, test_data):
+        mock_get_filenames = mocker.patch.object(Detection, "get_image_filenames_from_data", return_value=['image1.jpg', 'image2.jpg'])
+        mock_get_ids = mocker.patch.object(Detection, "get_image_filenames_obj_ids_from_data", return_value=[0, 0, 1, 1])
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
 
-        data = []
-        set_name = 'train'
-        ids = mock_detection_class.process_image_filenames(data, set_name)
+        img_ids = mock_detection_class.process_image_filenames(test_data, 'train')
 
-        assert ids == [0, 0, 0, 1, 1, 1]
-        mock_get_filenames.assert_called_once_with(data)
-        mock_get_ids.assert_called_once_with(data)
+        assert img_ids == [0, 0, 1, 1]
+        mock_get_filenames.assert_called_once_with(test_data)
+        mock_get_ids.assert_called_once_with(test_data)
         mock_save_hdf5.assert_called_once()
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
-        #     set_name=set_name,
+        #     set_name='train',
         #     field='image_filenames',
         #     data=str2ascii(['image1', 'image2']),
         #     dtype=np.uint8,
