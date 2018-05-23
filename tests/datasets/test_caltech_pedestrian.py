@@ -226,6 +226,26 @@ class TestDetectionTask:
         else:
             assert ids == [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7]
 
+    def test_process_bboxes_metadata(self, mocker, mock_detection_class, test_data):
+        bboxes = [[1, 1, 10, 10], [1, 1, 20, 20], [1, 1, 30, 30], [1, 1, 40, 40]]
+        bboxes_ids = [0, 1, 2, 3]
+        mock_get_bboxes = mocker.patch.object(Detection, "get_bboxes_from_data", return_value=[bboxes, bboxes_ids])
+        mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
+
+        bb_ids = mock_detection_class.process_bboxes_metadata(test_data, 'train')
+
+        assert bb_ids == bboxes_ids
+        mock_get_bboxes.assert_called_once_with(test_data)
+        mock_save_hdf5.assert_called_once()
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='bboxes',
+        #     data=np.array(bboxes, dtype=np.float32),
+        #     dtype=np.float32,
+        #     fillvalue=-1
+        # )
+
     def test_process_object_fields(self, mocker, mock_detection_class):
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
 
@@ -240,3 +260,4 @@ class TestDetectionTask:
         #     dtype=np.uint8,
         #     fillvalue=0
         # )
+
