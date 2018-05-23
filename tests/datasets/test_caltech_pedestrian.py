@@ -259,6 +259,15 @@ class TestDetectionTask:
             assert bbox == [[0, 0, -1, -1], [1, 1, 30, 30]] * 8
             assert bbox_ids == list(range(16))
 
+    @pytest.mark.parametrize('bbox, bbox_converted', [
+        ([0, 0, 0, 0], [0, 0, -1, -1]),
+        ([1, 1, 10, 10], [1, 1, 10, 10]),
+        ([10, 10, 10, 10], [10, 10, 19, 19])
+    ])
+    def test_bbox_correct_format(self, mocker, mock_detection_class, bbox, bbox_converted):
+        result_bbox = mock_detection_class.bbox_correct_format(bbox)
+
+        assert result_bbox == bbox_converted
 
     def test_process_object_fields(self, mocker, mock_detection_class):
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
