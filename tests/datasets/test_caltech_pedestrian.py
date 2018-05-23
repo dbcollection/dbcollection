@@ -14,6 +14,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 from dbcollection.datasets.caltech.caltech_pedestrian import Detection
+from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
 @pytest.fixture()
@@ -168,6 +169,28 @@ class TestDetectionTask:
 
         mock_image_filenames.assert_called_once_with(data, set_name)
         mock_object_fields.assert_called_once_with(set_name)
+
+    def test_process_image_filenames(self, mocker, mock_detection_class):
+        mock_get_filenames = mocker.patch.object(Detection, "get_image_filenames_from_data", return_value=['image1', 'image2'])
+        mock_get_ids = mocker.patch.object(Detection, "get_image_filenames_obj_ids_from_data", return_value=[0, 0, 0, 1, 1, 1])
+        mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
+
+        data = []
+        set_name = 'train'
+        ids = mock_detection_class.process_image_filenames(data, set_name)
+
+        assert ids == [0, 0, 0, 1, 1, 1]
+        mock_get_filenames.assert_called_once_with(data)
+        mock_get_ids.assert_called_once_with(data)
+        mock_save_hdf5.assert_called_once()
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name=set_name,
+        #     field='image_filenames',
+        #     data=str2ascii(['image1', 'image2']),
+        #     dtype=np.uint8,
+        #     fillvalue=0
+        # )
 
     def test_process_object_fields(self, mocker, mock_detection_class):
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
