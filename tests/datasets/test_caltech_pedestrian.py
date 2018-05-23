@@ -244,6 +244,22 @@ class TestDetectionTask:
         #     fillvalue=-1
         # )
 
+    @pytest.mark.parametrize('is_clean', [False, True])
+    def test_get_bboxes_from_data(self, mocker, mock_detection_class, test_data, is_clean):
+        mock_load_file = mocker.patch.object(Detection, "load_annotation_file", return_value=[{"pos": [0, 0, 0, 0]}, {"pos": [1, 1, 30, 30]}])
+
+        mock_detection_class.is_clean = is_clean
+        bbox, bbox_ids = mock_detection_class.get_bboxes_from_data(test_data)
+
+        assert mock_load_file.call_count == 8
+        if is_clean:
+            assert bbox == [[1, 1, 30, 30]] * 8
+            assert bbox_ids == [0, 1, 2, 3, 4, 5, 6, 7]
+        else:
+            assert bbox == [[0, 0, -1, -1], [1, 1, 30, 30]] * 8
+            assert bbox_ids == list(range(16))
+
+
     def test_process_object_fields(self, mocker, mock_detection_class):
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
 
