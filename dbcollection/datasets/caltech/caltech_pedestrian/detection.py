@@ -127,7 +127,7 @@ class Detection(BaseTaskNew):
         """
         Saves the metadata of a set.
         """
-        image_filenames_ids = []#self.process_image_filenames(data, set_name)
+        image_filenames_ids = self.process_image_filenames(data, set_name)
         bbox_ids = []
         bboxv_ids = []
         label_ids = []
