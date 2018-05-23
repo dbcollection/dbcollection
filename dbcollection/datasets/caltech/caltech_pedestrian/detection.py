@@ -141,7 +141,7 @@ class Detection(BaseTaskNew):
         self.save_field_to_hdf5(
             set_name=set_name,
             field='object_fields',
-            data=object_fields,
+            data=str2ascii(object_fields),
             dtype=np.uint8,
             fillvalue=0
         )
