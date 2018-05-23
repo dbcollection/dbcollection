@@ -137,7 +137,13 @@ class Detection(BaseTaskNew):
     def process_object_fields(self, set_name):
         """Processes and saves the 'object_fields' metadata to hdf5."""
         object_fields = ['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']
-        self.save_field_to_hdf5(set_name, 'object_fields', object_fields, dtype=np.uint8, fillvalue=0)
+        self.save_field_to_hdf5(
+            set_name=set_name,
+            field='object_fields',
+            data=object_fields,
+            dtype=np.uint8,
+            fillvalue=0
+        )
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
