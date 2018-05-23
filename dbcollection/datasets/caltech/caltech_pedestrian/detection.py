@@ -135,6 +135,57 @@ class Detection(BaseTaskNew):
         object_id = []
         self.process_object_fields(set_name)
 
+    def process_image_filenames(self, data, set_name):
+        """Processes and saves the image filenames metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the image filenames metadata...')
+
+        image_filenames = self.get_image_filenames_from_data(data)
+        image_filenames_ids = self.get_image_filenames_obj_ids_from_data(data)
+
+        self.save_field_to_hdf5(
+            set_name=set_name,
+            field='image_filenames',
+            data=str2ascii(image_filenames),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+        return image_filenames_ids
+
+    def get_image_filenames_from_data(self, data):
+        """Returns a list of sorted image filenames for a sequence of partitions + video sets."""
+        image_filenames = []
+        for partition in sorted(data):
+            for video in sorted(data[partition]):
+                image_filenames += data[partition][video]["images"]
+        return image_filenames
+
+    def get_image_filenames_obj_ids_from_data(self, data):
+        """Returns a list of image ids for each row of 'object_ids' field."""
+        image_filenames_ids = []
+
+        img_counter = 0
+        for partition in sorted(data):
+            for video in sorted(data[partition]):
+                annotation_filenames_video = data[partition][video]["annotations"]
+                for annotation_filename in sorted(annotation_filenames_video):
+                    annotation_data = self.load_annotation_file(annotation_filename)
+                    if any(annotation_data):
+                        for obj in annotation_data:
+                            if self.is_clean:
+                                if obj['pos'][2] >= 5 and obj['pos'][3] >= 5:
+                                    image_filenames_ids.append(img_counter)
+                            else:
+                                image_filenames_ids.append(img_counter)
+                    img_counter += 1
+
+        return image_filenames_ids
+
+    def load_annotation_file(self, path):
+        """Loads the annotation's file data from disk."""
+        return load_json(path)
+
     def process_object_fields(self, set_name):
         """Processes and saves the 'object_fields' metadata to hdf5."""
         object_fields = ['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']
