@@ -122,6 +122,23 @@ class Detection(BaseTaskNew):
         """Returns a list of ordered annotation filenames sampled from a directory."""
         return self.get_sample_data_from_dir(path, partition, video, 'annotations')
 
+    def process_set_metadata(self, data, set_name):
+        """
+        Saves the metadata of a set.
+        """
+        image_filenames_ids = []#self.process_image_filenames(data, set_name)
+        bbox_ids = []
+        bboxv_ids = []
+        label_ids = []
+        occlusion_ids = []
+        object_id = []
+        self.process_object_fields(set_name)
+
+    def process_object_fields(self, set_name):
+        """Processes and saves the 'object_fields' metadata to hdf5."""
+        object_fields = ['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']
+        self.save_field_to_hdf5(set_name, 'object_fields', object_fields, dtype=np.uint8, fillvalue=0)
+
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default file.
