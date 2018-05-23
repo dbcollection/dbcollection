@@ -122,35 +122,6 @@ class Detection(BaseTaskNew):
         """Returns a list of ordered annotation filenames sampled from a directory."""
         return self.get_sample_data_from_dir(path, partition, video, 'annotations')
 
-    def add_data_to_source(self, hdf5_handler, data, set_name):
-        """
-        Add data of a set to the source group.
-        """
-        if self.verbose:
-            print('> Adding data to the source group')
-            prgbar = progressbar.ProgressBar(max_value=len(data))
-
-        # create set group
-        set_name_grp = hdf5_handler.create_group('source/' + set_name)
-
-        for i, set_data in enumerate(sorted(data)):
-            set_grp = set_name_grp.create_group(set_data)
-            for video in sorted(data[set_data]):
-                video_grp = set_grp.create_group(video)
-                for j in range(len(data[set_data][video]['images'])):
-                    set_data_video = data[set_data][video]
-                    file_grp = video_grp.create_group(str(j))
-                    file_grp['image_filenames'] = str2ascii(set_data_video['images'][j])
-                    file_grp['annotation_filenames'] = str2ascii(set_data_video['annotations'][j])
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
-
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default file.
