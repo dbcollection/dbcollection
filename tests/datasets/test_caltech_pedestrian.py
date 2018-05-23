@@ -159,12 +159,14 @@ class TestDetectionTask:
         assert annotation_filenames == ['annotation1.json', 'annotation2.json']
 
     def test_process_set_metadata(self, mocker, mock_detection_class):
+        mock_image_filenames = mocker.patch.object(Detection, "process_image_filenames", return_value=[0, 0, 0, 1, 1, 1])
         mock_object_fields = mocker.patch.object(Detection, "process_object_fields")
 
         data = []
         set_name = 'train'
         mock_detection_class.process_set_metadata(data, set_name)
 
+        mock_image_filenames.assert_called_once_with(data, set_name)
         mock_object_fields.assert_called_once_with(set_name)
 
     def test_process_object_fields(self, mocker, mock_detection_class):
