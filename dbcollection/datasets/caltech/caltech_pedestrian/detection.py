@@ -27,6 +27,7 @@ class Detection(BaseTaskNew):
         "train": ('set00', 'set01', 'set02', 'set03', 'set04', 'set05'),
         "test": ('set06', 'set07', 'set08', 'set09', 'set10')
     }
+    is_clean = False  # If True, discards detection boxes smaller than 5px
 
     def load_data(self):
         """
