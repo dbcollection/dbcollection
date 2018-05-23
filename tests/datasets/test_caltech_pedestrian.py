@@ -192,6 +192,23 @@ class TestDetectionTask:
         #     fillvalue=0
         # )
 
+    def test_get_image_filenames_from_data(self, mocker, mock_detection_class):
+        data = {
+            "set00": {
+                "V000": {"images": ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']},
+                "V001": {"images": ['image3.jpg', 'image4.jpg'], "annotations": ['annotation3.json', 'annotation4.json']}
+            },
+            "set01": {
+                "V000": {"images": ['image5.jpg', 'image6.jpg'], "annotations": ['annotation5.json', 'annotation6.json']},
+                "V001": {"images": ['image7.jpg', 'image8.jpg'], "annotations": ['annotation7.json', 'annotation8.json']}
+            },
+        }
+
+        image_filenames = mock_detection_class.get_image_filenames_from_data(data)
+
+        assert image_filenames == ['image1.jpg', 'image2.jpg' ,'image3.jpg', 'image4.jpg',
+                                   'image5.jpg', 'image6.jpg', 'image7.jpg', 'image8.jpg']
+
     def test_process_object_fields(self, mocker, mock_detection_class):
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
 
