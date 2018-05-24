@@ -209,6 +209,18 @@ class TestDetectionTask:
         #     fillvalue=-1
         # )
 
+    def test_get_class_labels_ids(self, mocker, mock_detection_class, test_data):
+        def dummy_generator():
+            labels = ('person', 'person-fa', 'people', 'person?')
+            for label in labels:
+                yield {"obj": {"lbl": label}}
+        mock_get_generator = mocker.patch.object(Detection, "get_annotation_objects_generator", return_value=dummy_generator)
+
+        class_ids = mock_detection_class.get_class_labels_ids(test_data)
+
+        mock_get_generator.assert_called_once_with(test_data)
+        assert class_ids == list(range(4))
+
     def test_process_image_filenames(self, mocker, mock_detection_class, test_data):
         mock_get_filenames = mocker.patch.object(Detection, "get_image_filenames_from_data", return_value=['image1.jpg', 'image2.jpg'])
         mock_get_ids = mocker.patch.object(Detection, "get_image_filenames_obj_ids_from_data", return_value=[0, 0, 1, 1])
