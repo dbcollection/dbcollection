@@ -127,6 +127,7 @@ class Detection(BaseTaskNew):
         """
         Saves the metadata of a set.
         """
+        self.process_classes_metadata(data, set_name)
         image_filenames_ids = self.process_image_filenames(data, set_name)
         bbox_ids = self.process_bboxes_metadata(data, set_name)
         bboxv_ids = self.process_bboxesv_metadata(data, set_name)
@@ -134,6 +135,70 @@ class Detection(BaseTaskNew):
         occlusion_ids = []
         object_id = []
         self.process_object_fields(set_name)
+
+    def process_classes_metadata(self, data, set_name):
+        """Processes and saves the classes metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the class labels metadata...')
+
+        classes_ids = self.get_class_labels_ids(data)
+
+        self.save_field_to_hdf5(
+            set_name=set_name,
+            field='classes',
+            data=str2ascii(self.classes),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+        return classes_ids
+
+    def get_class_labels_ids(self, data):
+        """Returns a list of label ids for each row of 'object_ids' field."""
+        class_ids = []
+        annotations_generator = self.get_annotation_objects_generator(data)
+        for annotation in annotations_generator():
+            obj = annotation['obj']
+            class_ids.append(self.classes.index(obj['lbl']))
+        return class_ids
+
+    def get_annotation_objects_generator(self, data):
+        """Returns a generator for all object annotations of the data.
+
+        This method cycles all annotation objects for a set of partitions
+        plus videos in order and returns for each object its annotation and
+        two counters at specific points of the loops.
+
+        Since most annotations of this dataset require different parameters
+        at a common stage of the loop cycle(s), this generator allows to get
+        such information in a flexible way by yielding the common data for
+        all data fields.
+        """
+        img_counter = 0
+        obj_counter = 0
+        for partition in sorted(data):
+            for video in sorted(data[partition]):
+                annotation_filenames_video = data[partition][video]["annotations"]
+                for annotation_filename in sorted(annotation_filenames_video):
+                    annotation_data = self.load_annotation_file(annotation_filename)
+                    if any(annotation_data):
+                        for obj in annotation_data:
+                            if self.is_clean:
+                                if obj['pos'][2] >= 5 and obj['pos'][3] >= 5:
+                                    yield {
+                                        "obj": obj,
+                                        "image_counter": img_counter,
+                                        "obj_counter": obj_counter
+                                    }
+                                    obj_counter += 1
+                            else:
+                                yield {
+                                    "obj": obj,
+                                    "image_counter": img_counter,
+                                    "obj_counter": obj_counter
+                                }
+                                obj_counter += 1
+                    img_counter += 1
 
     def process_image_filenames(self, data, set_name):
         """Processes and saves the image filenames metadata to hdf5."""
