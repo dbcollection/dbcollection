@@ -195,7 +195,7 @@ class TestDetectionTask:
         assert img_ids == [0, 0, 1, 1]
         mock_get_filenames.assert_called_once_with(test_data)
         mock_get_ids.assert_called_once_with(test_data)
-        mock_save_hdf5.assert_called_once()
+        assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
@@ -295,7 +295,7 @@ class TestDetectionTask:
 
         mock_detection_class.process_object_fields('train')
 
-        mock_save_hdf5.assert_called_once()
+        assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
