@@ -221,6 +221,27 @@ class TestDetectionTask:
         mock_get_generator.assert_called_once_with(test_data)
         assert class_ids == list(range(4))
 
+    @pytest.mark.parametrize('is_clean', [False, True])
+    def test_get_annotation_objects_generator(self, mocker, mock_detection_class, test_data, is_clean):
+        dummy_annotation = [{"pos": [0, 0, 0, 0]}, {"pos": [10, 10, 10, 10]}]
+        mock_load_annotation = mocker.patch.object(Detection, "load_annotation_file", return_value=dummy_annotation)
+
+        mock_detection_class.is_clean = is_clean
+        generator = mock_detection_class.get_annotation_objects_generator(test_data)
+
+        results = [d for d in generator]
+        if is_clean:
+            assert mock_load_annotation.call_count == 8
+            assert results == [{"obj": {"pos": [10, 10, 10, 10]}, "image_counter": i, "obj_counter": i} for i in range(8)]
+        else:
+            assert mock_load_annotation.call_count == 8
+            expected, counter = [], 0
+            for i in range(8):
+                for annot in dummy_annotation:
+                    expected.append({"obj": annot, "image_counter": i, "obj_counter": counter})
+                    counter += 1
+            assert results == expected
+
     def test_process_image_filenames(self, mocker, mock_detection_class, test_data):
         mock_get_filenames = mocker.patch.object(Detection, "get_image_filenames_from_data", return_value=['image1.jpg', 'image2.jpg'])
         mock_get_ids = mocker.patch.object(Detection, "get_image_filenames_obj_ids_from_data", return_value=[0, 0, 1, 1])
