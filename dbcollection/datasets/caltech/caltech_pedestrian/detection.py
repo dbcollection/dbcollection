@@ -129,7 +129,7 @@ class Detection(BaseTaskNew):
         """
         image_filenames_ids = self.process_image_filenames(data, set_name)
         bbox_ids = self.process_bboxes_metadata(data, set_name)
-        bboxv_ids = []
+        bboxv_ids = self.process_bboxesv_metadata(data, set_name)
         label_ids = []
         occlusion_ids = []
         object_id = []
@@ -191,7 +191,7 @@ class Detection(BaseTaskNew):
         if self.verbose:
             print('> Processing the pedestrian bounding boxes metadata...')
 
-        bboxes, bboxes_ids = self.get_bboxes_from_data(data)
+        bboxes, bboxes_ids = self.get_bboxes_from_data(data, bbox_type='pos')
 
         self.save_field_to_hdf5(
             set_name=set_name,
@@ -203,7 +203,7 @@ class Detection(BaseTaskNew):
 
         return bboxes_ids
 
-    def get_bboxes_from_data(self, data):
+    def get_bboxes_from_data(self, data, bbox_type='pos'):
         """Returns a list of bounding boxes and a list
         of ids for each row of 'object_ids' field."""
         bbox, bbox_ids = [], []
@@ -218,15 +218,25 @@ class Detection(BaseTaskNew):
                         for obj in annotation_data:
                             if self.is_clean:
                                 if obj['pos'][2] >= 5 and obj['pos'][3] >= 5:
-                                    bbox.append(self.bbox_correct_format(obj['pos']))
+                                    bbox.append(self.get_bbox_by_type(obj, bbox_type))
                                     bbox_ids.append(bbox_counter)
                                     bbox_counter += 1
                             else:
-                                bbox.append(self.bbox_correct_format(obj['pos']))
+                                bbox.append(self.get_bbox_by_type(obj, bbox_type))
                                 bbox_ids.append(bbox_counter)
                                 bbox_counter += 1
 
         return bbox, bbox_ids
+
+    def get_bbox_by_type(self, obj, bbox_type):
+        if bbox_type == 'pos':
+            bbox = self.bbox_correct_format(obj['pos'])
+        else:
+            if isinstance(obj['posv'], list):
+                bbox = self.bbox_correct_format(obj['posv'])
+            else:
+                bbox = [0, 0, 0, 0]
+        return bbox
 
     def bbox_correct_format(self, bbox):
         """Converts the bounding box [x,y,wh,h] format to [x1,y1,x2,y2]."""
@@ -235,6 +245,23 @@ class Detection(BaseTaskNew):
         x2 = bbox[0] + bbox[2] - 1
         y2 = bbox[1] + bbox[3] - 1
         return [x1, y1, x2, y2]
+
+    def process_bboxesv_metadata(self, data, set_name):
+        """Processes and saves the annotation's bounding boxes (v) metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the pedestrian bounding boxes metadata...')
+
+        bboxesv, bboxesv_ids = self.get_bboxes_from_data(data, bbox_type='posv')
+
+        self.save_field_to_hdf5(
+            set_name=set_name,
+            field='bboxesv',
+            data=np.array(bboxesv, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=-1
+        )
+
+        return bboxesv_ids
 
     def process_object_fields(self, set_name):
         """Processes and saves the 'object_fields' metadata to hdf5."""
