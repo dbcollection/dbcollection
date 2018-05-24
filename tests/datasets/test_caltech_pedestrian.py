@@ -176,6 +176,7 @@ class TestDetectionTask:
     def test_process_set_metadata(self, mocker, mock_detection_class, test_data):
         mock_image_filenames = mocker.patch.object(Detection, "process_image_filenames", return_value=[0, 0, 0, 1, 1, 1])
         mock_bbox_metadata = mocker.patch.object(Detection, "process_bboxes_metadata", return_value=[0, 0, 0, 1, 1, 1])
+        mock_bboxv_metadata = mocker.patch.object(Detection, "process_bboxesv_metadata", return_value=[0, 0, 0, 1, 1, 1])
         mock_object_fields = mocker.patch.object(Detection, "process_object_fields")
 
         set_name = 'train'
@@ -183,6 +184,7 @@ class TestDetectionTask:
 
         mock_image_filenames.assert_called_once_with(test_data, set_name)
         mock_bbox_metadata.assert_called_once_with(test_data, set_name)
+        mock_bboxv_metadata.assert_called_once_with(test_data, set_name)
         mock_object_fields.assert_called_once_with(set_name)
 
     def test_process_image_filenames(self, mocker, mock_detection_class, test_data):
@@ -233,8 +235,8 @@ class TestDetectionTask:
         bb_ids = mock_detection_class.process_bboxes_metadata(test_data, 'train')
 
         assert bb_ids == bboxes_ids
-        mock_get_bboxes.assert_called_once_with(test_data)
-        mock_save_hdf5.assert_called_once()
+        mock_get_bboxes.assert_called_once_with(test_data, bbox_type='pos')
+        assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
@@ -247,16 +249,18 @@ class TestDetectionTask:
     @pytest.mark.parametrize('is_clean', [False, True])
     def test_get_bboxes_from_data(self, mocker, mock_detection_class, test_data, is_clean):
         mock_load_file = mocker.patch.object(Detection, "load_annotation_file", return_value=[{"pos": [0, 0, 0, 0]}, {"pos": [1, 1, 30, 30]}])
+        mock_get_bbox = mocker.patch.object(Detection, "get_bbox_by_type", return_value=[1, 1, 1, 1])
 
         mock_detection_class.is_clean = is_clean
-        bbox, bbox_ids = mock_detection_class.get_bboxes_from_data(test_data)
+        bbox, bbox_ids = mock_detection_class.get_bboxes_from_data(test_data, bbox_type='pos')
 
         assert mock_load_file.call_count == 8
+        assert mock_get_bbox.called
         if is_clean:
-            assert bbox == [[1, 1, 30, 30]] * 8
+            assert bbox == [[1, 1, 1, 1]] * 8
             assert bbox_ids == [0, 1, 2, 3, 4, 5, 6, 7]
         else:
-            assert bbox == [[0, 0, -1, -1], [1, 1, 30, 30]] * 8
+            assert bbox == [[1, 1, 1, 1]] * 8 * 2
             assert bbox_ids == list(range(16))
 
     @pytest.mark.parametrize('bbox, bbox_converted', [
