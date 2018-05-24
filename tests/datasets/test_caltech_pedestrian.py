@@ -263,6 +263,28 @@ class TestDetectionTask:
             assert bbox == [[1, 1, 1, 1]] * 8 * 2
             assert bbox_ids == list(range(16))
 
+    @pytest.mark.parametrize('obj, bbox_type', [
+        ({'pos': [1, 1, 10, 10]}, 'pos'),
+        ({'posv': [10, 10, 20, 20]}, 'posv'),
+        ({'posv': 0}, 'posv'),
+    ])
+    def test_get_bbox_by_type(self, mocker, mock_detection_class, obj, bbox_type):
+        dummy_bbox = [1, 1, 1, 1]
+        mock_bbox_correct = mocker.patch.object(Detection, "bbox_correct_format", return_value=dummy_bbox)
+
+        bbox = mock_detection_class.get_bbox_by_type(obj, bbox_type)
+
+        if bbox_type == 'pos':
+            mock_bbox_correct.assert_called_once_with(obj['pos'])
+            assert bbox == dummy_bbox
+        else:
+            if isinstance(obj['posv'], list):
+                mock_bbox_correct.assert_called_once_with(obj['posv'])
+                assert bbox == dummy_bbox
+            else:
+                assert not mock_bbox_correct.called
+                assert bbox == [0, 0, 0, 0]
+
     @pytest.mark.parametrize('bbox, bbox_converted', [
         ([0, 0, 0, 0], [0, 0, -1, -1]),
         ([1, 1, 10, 10], [1, 1, 10, 10]),
