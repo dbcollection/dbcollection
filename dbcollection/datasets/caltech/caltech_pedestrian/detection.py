@@ -42,9 +42,10 @@ class Detection(BaseTaskNew):
         unpack_dir = self.unpack_raw_data_files()
         set_name, partitions = self.get_set_partitions(is_test=is_test)
         image_filenames, annotation_filenames = self.get_annotations_data(set_name, partitions, unpack_dir)
+        annotations = self.load_annotations(annotation_filenames)
         return {
             "image_filenames": image_filenames,
-            "annotation_filenames": annotation_filenames
+            "annotations": annotations
         }
 
     def unpack_raw_data_files(self):
@@ -122,6 +123,23 @@ class Detection(BaseTaskNew):
     def get_annotation_filenames_from_dir(self, path, partition, video):
         """Returns a list of ordered annotation filenames sampled from a directory."""
         return self.get_sample_data_from_dir(path, partition, video, 'annotations')
+
+    def load_annotations(self, annotation_filenames):
+        """Loads the annotations' files data to memory."""
+        annotations = {}
+        for partition in sorted(annotation_filenames):
+            annotations[partition] = {}
+            for video in sorted(annotation_filenames[partition]):
+                annotations_video = []
+                for annotation_filename in sorted(annotation_filenames[partition][video]["annotations"]):
+                    annotation_data = self.load_annotation_file(annotation_filename)
+                    annotations_video.append(annotation_data)
+                annotations[partition][video] = annotations_video
+        return annotations
+
+    def load_annotation_file(self, path):
+        """Loads the annotation's file data from disk."""
+        return load_json(path)
 
     def process_set_metadata(self, data, set_name):
         """
@@ -233,10 +251,6 @@ class Detection(BaseTaskNew):
         for annotation in annotations_generator():
             image_filenames_ids.append(annotation['img_counter'])
         return image_filenames_ids
-
-    def load_annotation_file(self, path):
-        """Loads the annotation's file data from disk."""
-        return load_json(path)
 
     def process_bboxes_metadata(self, data, set_name):
         """Processes and saves the annotation's bounding boxes metadata to hdf5."""
