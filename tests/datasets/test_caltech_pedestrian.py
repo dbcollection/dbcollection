@@ -64,18 +64,22 @@ class TestDetectionTask:
         assert test_data == {"test": ['some_data']}
 
     def test_load_data_set(self, mocker, mock_detection_class):
+        dummy_images, dummy_annotations = ['image1.jpg', 'image2.jpg'], ['annot1.json', 'annot2.json']
+        dummy_annot_data = ['obj1', 'obj2']
         mock_unpack_data = mocker.patch.object(Detection, "unpack_raw_data_files", return_value='/some/path/data/')
         mock_get_partitions = mocker.patch.object(Detection, "get_set_partitions", return_value=('train', ('set00', 'set01')))
-        mock_get_annotations = mocker.patch.object(Detection, "get_annotations_data", return_value=(['image1', 'image2'], ['annot1', 'annot2']))
+        mock_get_annotations = mocker.patch.object(Detection, "get_annotations_data", return_value=(dummy_images, dummy_annotations))
+        mock_load_annotations = mocker.patch.object(Detection, "load_annotations", return_value=dummy_annot_data)
 
         set_data = mock_detection_class.load_data_set(False)
 
         mock_unpack_data.assert_called_once_with()
         mock_get_partitions.assert_called_once_with(is_test=False)
         mock_get_annotations.assert_called_once_with('train', ('set00', 'set01'), '/some/path/data/')
-        assert sorted(list(set_data.keys())) == ["annotation_filenames", "image_filenames"]
-        assert set_data["image_filenames"] == ['image1', 'image2']
-        assert set_data["annotation_filenames"] == ['annot1', 'annot2']
+        mock_load_annotations.assert_called_once_with(dummy_annotations)
+        assert sorted(list(set_data.keys())) == ["annotations", "image_filenames"]
+        assert set_data["image_filenames"] == dummy_images
+        assert set_data["annotations"] == dummy_annot_data
 
     @pytest.mark.parametrize('is_test', [False, True])
     def test_get_set_partitions(self, mocker, mock_detection_class, is_test):
