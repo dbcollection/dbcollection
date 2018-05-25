@@ -278,7 +278,7 @@ class TestDetectionTask:
 
         mock_get_generator.assert_called_once_with(test_data)
         assert ids == list(range(5))
-        
+
     def test_process_bboxes_metadata(self, mocker, mock_detection_class, test_data):
         bboxes = [[1, 1, 10, 10], [1, 1, 20, 20], [1, 1, 30, 30], [1, 1, 40, 40]]
         bboxes_ids = [0, 1, 2, 3]
@@ -299,22 +299,20 @@ class TestDetectionTask:
         #     fillvalue=-1
         # )
 
-    @pytest.mark.parametrize('is_clean', [False, True])
-    def test_get_bboxes_from_data(self, mocker, mock_detection_class, test_data, is_clean):
-        mock_load_file = mocker.patch.object(Detection, "load_annotation_file", return_value=[{"pos": [0, 0, 0, 0]}, {"pos": [1, 1, 30, 30]}])
+    @pytest.mark.parametrize('bbox_type', ['pos', 'posv'])
+    def test_get_bboxes_from_data(self, mocker, mock_detection_class, test_data, bbox_type):
+        def dummy_generator():
+            for i in range(5):
+                yield {"obj": {"pos": [1, 1, 10, 10], "posv": [1, 1, 1, 1]}, "obj_counter": i}
+        mock_get_generator = mocker.patch.object(Detection, "get_annotation_objects_generator", return_value=dummy_generator)
         mock_get_bbox = mocker.patch.object(Detection, "get_bbox_by_type", return_value=[1, 1, 1, 1])
 
-        mock_detection_class.is_clean = is_clean
-        bbox, bbox_ids = mock_detection_class.get_bboxes_from_data(test_data, bbox_type='pos')
+        boxes, ids = mock_detection_class.get_bboxes_from_data(test_data, bbox_type)
 
-        assert mock_load_file.call_count == 8
-        assert mock_get_bbox.called
-        if is_clean:
-            assert bbox == [[1, 1, 1, 1]] * 8
-            assert bbox_ids == [0, 1, 2, 3, 4, 5, 6, 7]
-        else:
-            assert bbox == [[1, 1, 1, 1]] * 8 * 2
-            assert bbox_ids == list(range(16))
+        mock_get_generator.assert_called_once_with(test_data)
+        assert mock_get_bbox.call_count == 5
+        assert boxes == [[1, 1, 1, 1] for i in range(5)]
+        assert ids == list(range(5))
 
     @pytest.mark.parametrize('obj, bbox_type', [
         ({'pos': [1, 1, 10, 10]}, 'pos'),

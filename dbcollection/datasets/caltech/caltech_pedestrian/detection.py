@@ -255,29 +255,14 @@ class Detection(BaseTaskNew):
 
         return bboxes_ids
 
-    def get_bboxes_from_data(self, data, bbox_type='pos'):
+    def get_bboxes_from_data(self, data, bbox_type):
         """Returns a list of bounding boxes and a list
         of ids for each row of 'object_ids' field."""
         bbox, bbox_ids = [], []
-
-        bbox_counter = 0
-        for partition in sorted(data):
-            for video in sorted(data[partition]):
-                annotation_filenames_video = data[partition][video]["annotations"]
-                for annotation_filename in sorted(annotation_filenames_video):
-                    annotation_data = self.load_annotation_file(annotation_filename)
-                    if any(annotation_data):
-                        for obj in annotation_data:
-                            if self.is_clean:
-                                if obj['pos'][2] >= 5 and obj['pos'][3] >= 5:
-                                    bbox.append(self.get_bbox_by_type(obj, bbox_type))
-                                    bbox_ids.append(bbox_counter)
-                                    bbox_counter += 1
-                            else:
-                                bbox.append(self.get_bbox_by_type(obj, bbox_type))
-                                bbox_ids.append(bbox_counter)
-                                bbox_counter += 1
-
+        annotations_generator = self.get_annotation_objects_generator(data)
+        for annotation in annotations_generator():
+            bbox.append(self.get_bbox_by_type(annotation["obj"], bbox_type))
+            bbox_ids.append(annotation['obj_counter'])
         return bbox, bbox_ids
 
     def get_bbox_by_type(self, obj, bbox_type):
