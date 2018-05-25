@@ -103,7 +103,7 @@ def convert_str_to_ascii(inp_str):
     if isinstance(inp_str, tuple):
         inp_str = list(inp_str)
     elif isinstance(inp_str, str):
-        inp_str = list(inp_str)
+        inp_str = [inp_str]
 
     # get max size of the list strings
     max_size = max([len(a) for a in inp_str])
