@@ -177,6 +177,24 @@ class TestDetectionTask:
         mock_get_data.assert_called_once_with(path, partition, video, 'annotations')
         assert annotation_filenames == ['annotation1.json', 'annotation2.json']
 
+    def test_load_annotations(self, mocker, mock_detection_class, test_data):
+        dummy_annotation = [{"pos": [0, 0, 0, 0]}, {"pos": [10, 10, 10, 10]}]
+        mock_load_annotation = mocker.patch.object(Detection, "load_annotation_file", return_value=dummy_annotation)
+
+        annotations = mock_detection_class.load_annotations(test_data)
+
+        assert mock_load_annotation.call_count== 8
+        assert annotations == {
+            "set00": {
+                "V000": [dummy_annotation, dummy_annotation],
+                "V001": [dummy_annotation, dummy_annotation]
+                },
+            "set01": {
+                    "V000": [dummy_annotation, dummy_annotation],
+                    "V001": [dummy_annotation, dummy_annotation]
+                },
+        }
+
     def test_process_set_metadata(self, mocker, mock_detection_class, test_data):
         dummy_ids = [0, 0, 0, 1, 1, 1]
         mock_classes_metadata = mocker.patch.object(Detection, "process_classes_metadata", return_value=dummy_ids)
