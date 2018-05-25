@@ -268,19 +268,17 @@ class TestDetectionTask:
         assert image_filenames == ['image1.jpg', 'image2.jpg' ,'image3.jpg', 'image4.jpg',
                                    'image5.jpg', 'image6.jpg', 'image7.jpg', 'image8.jpg']
 
-    @pytest.mark.parametrize('is_clean', [False, True])
     def test_get_image_filenames_obj_ids_from_data(self, mocker, mock_detection_class, test_data, is_clean):
-        mock_load_file = mocker.patch.object(Detection, "load_annotation_file", return_value=[{"pos": [0, 0, 0, 0]}, {"pos": [1, 1, 30, 30]}])
+        def dummy_generator():
+            for i in range(5):
+                yield {"img_counter": i}
+        mock_get_generator = mocker.patch.object(Detection, "get_annotation_objects_generator", return_value=dummy_generator)
 
-        mock_detection_class.is_clean = is_clean
         ids = mock_detection_class.get_image_filenames_obj_ids_from_data(test_data)
 
-        assert mock_load_file.call_count == 8
-        if is_clean:
-            assert ids == [0, 1, 2, 3, 4, 5, 6, 7]
-        else:
-            assert ids == [0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7]
-
+        mock_get_generator.assert_called_once_with(test_data)
+        assert ids == list(range(5))
+        
     def test_process_bboxes_metadata(self, mocker, mock_detection_class, test_data):
         bboxes = [[1, 1, 10, 10], [1, 1, 20, 20], [1, 1, 30, 30], [1, 1, 40, 40]]
         bboxes_ids = [0, 1, 2, 3]

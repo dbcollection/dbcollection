@@ -229,22 +229,9 @@ class Detection(BaseTaskNew):
     def get_image_filenames_obj_ids_from_data(self, data):
         """Returns a list of image ids for each row of 'object_ids' field."""
         image_filenames_ids = []
-
-        img_counter = 0
-        for partition in sorted(data):
-            for video in sorted(data[partition]):
-                annotation_filenames_video = data[partition][video]["annotations"]
-                for annotation_filename in sorted(annotation_filenames_video):
-                    annotation_data = self.load_annotation_file(annotation_filename)
-                    if any(annotation_data):
-                        for obj in annotation_data:
-                            if self.is_clean:
-                                if obj['pos'][2] >= 5 and obj['pos'][3] >= 5:
-                                    image_filenames_ids.append(img_counter)
-                            else:
-                                image_filenames_ids.append(img_counter)
-                    img_counter += 1
-
+        annotations_generator = self.get_annotation_objects_generator(data)
+        for annotation in annotations_generator():
+            image_filenames_ids.append(annotation['img_counter'])
         return image_filenames_ids
 
     def load_annotation_file(self, path):
