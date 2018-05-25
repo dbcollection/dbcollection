@@ -268,7 +268,7 @@ class TestDetectionTask:
         assert image_filenames == ['image1.jpg', 'image2.jpg' ,'image3.jpg', 'image4.jpg',
                                    'image5.jpg', 'image6.jpg', 'image7.jpg', 'image8.jpg']
 
-    def test_get_image_filenames_obj_ids_from_data(self, mocker, mock_detection_class, test_data, is_clean):
+    def test_get_image_filenames_obj_ids_from_data(self, mocker, mock_detection_class, test_data):
         def dummy_generator():
             for i in range(5):
                 yield {"img_counter": i}
