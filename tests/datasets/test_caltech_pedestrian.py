@@ -492,7 +492,7 @@ def mock_classlabel_class(test_data_loaded):
 class TestClassLabelField:
     """Unit tests for the ClassLabelField class."""
 
-    def test_process(self, mocker, mock_classlabel_class, test_data):
+    def test_process(self, mocker, mock_classlabel_class):
         dummy_ids = [0, 1, 2, 3]
         mock_get_class_ids = mocker.patch.object(ClassLabelField, "get_class_labels_ids", return_value=dummy_ids)
         mock_save_hdf5 = mocker.patch.object(ClassLabelField, "save_field_to_hdf5")
@@ -512,6 +512,18 @@ class TestClassLabelField:
         #     fillvalue=-1
         # )
 
+    def test_get_class_labels_ids(self, mocker, mock_classlabel_class, test_data_loaded):
+        def dummy_generator():
+            labels = ('person', 'person-fa', 'people', 'person?')
+            for label in labels:
+                yield {"obj": {"lbl": label}}
+        mock_get_generator = mocker.patch.object(ClassLabelField, "get_annotation_objects_generator", return_value=dummy_generator)
+
+        classes = ('person', 'person-fa', 'people', 'person?')
+        class_ids = mock_classlabel_class.get_class_labels_ids(classes)
+
+        mock_get_generator.assert_called_once_with(test_data_loaded)
+        assert class_ids == list(range(4))
 
 
 @pytest.fixture()

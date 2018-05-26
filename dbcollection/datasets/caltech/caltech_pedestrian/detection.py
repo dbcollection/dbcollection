@@ -537,7 +537,7 @@ class ClassLabelField(BaseField):
         class_ids = []
         annotations_generator = self.get_annotation_objects_generator(self.data)
         for annotation in annotations_generator():
-            class_ids.append(classes.index(annotation['lbl']))
+            class_ids.append(classes.index(annotation['obj']['lbl']))
         return class_ids
 
 
