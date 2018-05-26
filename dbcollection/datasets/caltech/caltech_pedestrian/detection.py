@@ -153,7 +153,6 @@ class Detection(BaseTaskNew):
             "verbose": self.verbose
         }
 
-        self.process_classes_metadata(data, set_name)
         class_ids = ClassLabelField(**args).process(self.classes)
         image_filenames_ids = ImageFilenamesField(**args).process()
         bbox_ids = self.process_bboxes_metadata(data, set_name)
@@ -162,32 +161,6 @@ class Detection(BaseTaskNew):
         occlusion_ids = []
         object_id = []
         self.process_object_fields(set_name)
-
-    def process_classes_metadata(self, data, set_name):
-        """Processes and saves the classes metadata to hdf5."""
-        if self.verbose:
-            print('> Processing the class labels metadata...')
-
-        classes_ids = self.get_class_labels_ids(data)
-
-        self.save_field_to_hdf5(
-            set_name=set_name,
-            field='classes',
-            data=str2ascii(self.classes),
-            dtype=np.uint8,
-            fillvalue=0
-        )
-
-        return classes_ids
-
-    def get_class_labels_ids(self, data):
-        """Returns a list of label ids for each row of 'object_ids' field."""
-        class_ids = []
-        annotations_generator = self.get_annotation_objects_generator(data)
-        for annotation in annotations_generator():
-            obj = annotation['obj']
-            class_ids.append(self.classes.index(obj['lbl']))
-        return class_ids
 
     def get_annotation_objects_generator(self, data):
         """Returns a generator for all object annotations of the data.

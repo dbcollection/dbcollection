@@ -202,7 +202,6 @@ class TestDetectionTask:
 
     def test_process_set_metadata(self, mocker, mock_detection_class, test_data):
         dummy_ids = [0, 0, 0, 1, 1, 1]
-        mock_classes_metadata = mocker.patch.object(Detection, "process_classes_metadata", return_value=dummy_ids)
         mock_classes_field = mocker.patch.object(ClassLabelField, "process", return_value=dummy_ids)
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_bbox_metadata = mocker.patch.object(Detection, "process_bboxes_metadata", return_value=dummy_ids)
@@ -212,43 +211,11 @@ class TestDetectionTask:
         set_name = 'train'
         mock_detection_class.process_set_metadata(test_data, set_name)
 
-        mock_classes_metadata.assert_called_once_with(test_data, set_name)
         mock_classes_field.assert_called_once_with(('person', 'person-fa', 'people', 'person?'))
         mock_image_field.assert_called_once_with()
         mock_bbox_metadata.assert_called_once_with(test_data, set_name)
         mock_bboxv_metadata.assert_called_once_with(test_data, set_name)
         mock_object_fields.assert_called_once_with(set_name)
-
-    def test_process_classes_metadata(self, mocker, mock_detection_class, test_data):
-        dummy_ids = [0, 1, 2, 3]
-        mock_get_class_ids = mocker.patch.object(Detection, "get_class_labels_ids", return_value=dummy_ids)
-        mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
-
-        class_ids = mock_detection_class.process_classes_metadata(test_data, 'train')
-
-        assert class_ids == dummy_ids
-        mock_get_class_ids.assert_called_once_with(test_data)
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='bboxesv',
-        #     data=np.array(bboxes, dtype=np.float32),
-        #     dtype=np.float32,
-        #     fillvalue=-1
-        # )
-
-    def test_get_class_labels_ids(self, mocker, mock_detection_class, test_data):
-        def dummy_generator():
-            labels = ('person', 'person-fa', 'people', 'person?')
-            for label in labels:
-                yield {"obj": {"lbl": label}}
-        mock_get_generator = mocker.patch.object(Detection, "get_annotation_objects_generator", return_value=dummy_generator)
-
-        class_ids = mock_detection_class.get_class_labels_ids(test_data)
-
-        mock_get_generator.assert_called_once_with(test_data)
-        assert class_ids == list(range(4))
 
     @pytest.mark.parametrize('is_clean', [False, True])
     def test_get_annotation_objects_generator(self, mocker, mock_detection_class, test_data, is_clean):
