@@ -17,6 +17,7 @@ from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     Detection,
     BaseField,
+    BoundingBoxBaseField,
     ClassLabelField,
     ImageFilenamesField
 )
@@ -368,15 +369,19 @@ def test_data_loaded():
 
 
 @pytest.fixture()
-def mock_base_class(test_data_loaded):
-    dummy_object = {'dummy': 'object'}
-    return BaseField(
-        data=test_data_loaded,
-        set_name='train',
-        is_clean=True,
-        hdf5_manager=dummy_object,
-        verbose=True
-    )
+def field_kwargs(test_data_loaded):
+    return {
+        "data": test_data_loaded,
+        "set_name": 'train',
+        "is_clean": True,
+        "hdf5_manager": {'dummy': 'object'},
+        "verbose": True
+    }
+
+
+@pytest.fixture()
+def mock_base_class(field_kwargs):
+    return BaseField(**field_kwargs)
 
 
 class TestBaseField:
@@ -447,15 +452,8 @@ class TestBaseField:
 
 
 @pytest.fixture()
-def mock_classlabel_class(test_data_loaded):
-    dummy_object = {'dummy': 'object'}
-    return ClassLabelField(
-        data=test_data_loaded,
-        set_name='train',
-        is_clean=True,
-        hdf5_manager=dummy_object,
-        verbose=True
-    )
+def mock_classlabel_class(field_kwargs):
+    return ClassLabelField(**field_kwargs)
 
 
 class TestClassLabelField:
@@ -496,15 +494,8 @@ class TestClassLabelField:
 
 
 @pytest.fixture()
-def mock_imagefilename_class(test_data_loaded):
-    dummy_object = {'dummy': 'object'}
-    return ImageFilenamesField(
-        data=test_data_loaded,
-        set_name='train',
-        is_clean=True,
-        hdf5_manager=dummy_object,
-        verbose=True
-    )
+def mock_imagefilename_class(field_kwargs):
+    return ImageFilenamesField(**field_kwargs)
 
 
 class TestImageFilenamesField:
@@ -545,3 +536,58 @@ class TestImageFilenamesField:
 
         mock_get_generator.assert_called_once_with()
         assert ids == list(range(5))
+
+
+@pytest.fixture()
+def mock_bboxbase_class(field_kwargs):
+    return BoundingBoxBaseField(**field_kwargs)
+
+
+class TestBoundingBoxBaseField:
+    """Unit tests for the BoundingBoxBaseField class."""
+
+    @pytest.mark.parametrize('bbox_type', ['pos', 'posv'])
+    def test_get_bboxes_from_data(self, mocker, mock_bboxbase_class, test_data_loaded, bbox_type):
+        def dummy_generator():
+            for i in range(5):
+                yield {"obj": {"pos": [1, 1, 10, 10], "posv": [1, 1, 1, 1]}, "obj_counter": i}
+        mock_get_generator = mocker.patch.object(BoundingBoxBaseField, "get_annotation_objects_generator", return_value=dummy_generator)
+        mock_get_bbox = mocker.patch.object(BoundingBoxBaseField, "get_bbox_by_type", return_value=[1, 1, 1, 1])
+
+        boxes, ids = mock_bboxbase_class.get_bboxes_from_data(bbox_type)
+
+        mock_get_generator.assert_called_once_with(test_data_loaded)
+        assert mock_get_bbox.call_count == 5
+        assert boxes == [[1, 1, 1, 1] for i in range(5)]
+        assert ids == list(range(5))
+
+    @pytest.mark.parametrize('obj, bbox_type', [
+        ({'pos': [1, 1, 10, 10]}, 'pos'),
+        ({'posv': [10, 10, 20, 20]}, 'posv'),
+        ({'posv': 0}, 'posv'),
+    ])
+    def test_get_bbox_by_type(self, mocker, mock_bboxbase_class, obj, bbox_type):
+        dummy_bbox = [1, 1, 1, 1]
+        mock_bbox_correct = mocker.patch.object(BoundingBoxBaseField, "bbox_correct_format", return_value=dummy_bbox)
+
+        bbox = mock_bboxbase_class.get_bbox_by_type(obj, bbox_type)
+
+        if bbox_type == 'pos':
+            mock_bbox_correct.assert_called_once_with(obj['pos'])
+            assert bbox == dummy_bbox
+        else:
+            if isinstance(obj['posv'], list):
+                mock_bbox_correct.assert_called_once_with(obj['posv'])
+                assert bbox == dummy_bbox
+            else:
+                assert not mock_bbox_correct.called
+                assert bbox == [0, 0, 0, 0]
+
+    @pytest.mark.parametrize('bbox, bbox_converted', [
+        ([0, 0, 0, 0], [0, 0, -1, -1]),
+        ([1, 1, 10, 10], [1, 1, 10, 10]),
+        ([10, 10, 10, 10], [10, 10, 19, 19])
+    ])
+    def test_bbox_correct_format(self, mocker, mock_bboxbase_class, bbox, bbox_converted):
+        result_bbox = mock_bboxbase_class.bbox_correct_format(bbox)
+        assert result_bbox == bbox_converted
