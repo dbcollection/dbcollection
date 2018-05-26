@@ -19,6 +19,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     BaseField,
     BoundingBoxBaseField,
     BoundingBoxField,
+    BoundingBoxvField,
     ClassLabelField,
     ImageFilenamesField
 )
@@ -592,6 +593,35 @@ class TestBoundingBoxField:
 
         assert bbox_ids == dummy_ids
         mock_get_bboxes.assert_called_once_with('pos')
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='bboxes',
+        #     data=np.array(dummy_boxes, dtype=np.float32),
+        #     dtype=np.float32,
+        #     fillvalue=-1
+        # )
+
+
+@pytest.fixture()
+def mock_bboxv_class(field_kwargs):
+    return BoundingBoxvField(**field_kwargs)
+
+
+class TestBoundingBoxvField:
+    """Unit tests for the BoundingBoxvField class."""
+
+    def test_process(self, mocker, mock_bboxv_class):
+        dummy_boxes = []
+        dummy_ids = [0, 0, 1, 1]
+        mock_get_bboxesv = mocker.patch.object(BoundingBoxvField, "get_bboxes_from_data", return_value=(dummy_boxes, dummy_ids))
+        mock_save_hdf5 = mocker.patch.object(BoundingBoxvField, "save_field_to_hdf5")
+
+        bboxv_ids = mock_bboxv_class.process()
+
+        assert bboxv_ids == dummy_ids
+        mock_get_bboxesv.assert_called_once_with('posv')
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(

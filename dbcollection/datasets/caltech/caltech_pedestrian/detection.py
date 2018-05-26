@@ -584,6 +584,24 @@ class BoundingBoxField(BoundingBoxBaseField):
         return bboxes_ids
 
 
+class BoundingBoxvField(BoundingBoxBaseField):
+    """Bounding boxesv' field metadata process/save class."""
+
+    def process(self):
+        """Processes and saves the annotation's bounding boxes metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the pedestrian bounding boxes (v) metadata...')
+        bboxesv, bboxesv_ids = self.get_bboxes_from_data('posv')
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='bboxesv',
+            data=np.array(bboxesv, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=-1
+        )
+        return bboxesv_ids
+
+
 class Detection10x(Detection):
     """ Caltech Pedestrian detection (10x data) preprocessing functions """
 
