@@ -551,6 +551,38 @@ class ImageFilenamesField(BaseField):
         return image_filenames_ids
 
 
+class BoundingBoxBaseField(BaseField):
+    """Base class for parsing bounding box annotations."""
+
+    def get_bboxes_from_data(self, bbox_type):
+        """Returns a list of bounding boxes and a list
+        of ids for each row of 'object_ids' field."""
+        bbox, bbox_ids = [], []
+        annotations_generator = self.get_annotation_objects_generator(self.data)
+        for annotation in annotations_generator():
+            bbox.append(self.get_bbox_by_type(annotation["obj"], bbox_type))
+            bbox_ids.append(annotation['obj_counter'])
+        return bbox, bbox_ids
+
+    def get_bbox_by_type(self, obj, bbox_type):
+        if bbox_type == 'pos':
+            bbox = self.bbox_correct_format(obj['pos'])
+        else:
+            if isinstance(obj['posv'], list):
+                bbox = self.bbox_correct_format(obj['posv'])
+            else:
+                bbox = [0, 0, 0, 0]
+        return bbox
+
+    def bbox_correct_format(self, bbox):
+        """Converts the bounding box [x,y,wh,h] format to [x1,y1,x2,y2]."""
+        x1 = bbox[0]
+        y1 = bbox[1]
+        x2 = bbox[0] + bbox[2] - 1
+        y2 = bbox[1] + bbox[3] - 1
+        return [x1, y1, x2, y2]
+
+
 class Detection10x(Detection):
     """ Caltech Pedestrian detection (10x data) preprocessing functions """
 
