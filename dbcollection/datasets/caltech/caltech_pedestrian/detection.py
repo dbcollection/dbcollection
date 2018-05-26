@@ -475,11 +475,12 @@ class Detection(BaseTaskNew):
 class BaseField(object):
     """Base class for the dataset's data fields processor."""
 
-    def __init__(self, data, set_name, is_clean, hdf5_manager):
+    def __init__(self, data, set_name, is_clean, hdf5_manager, verbose):
         self.data = data
         self.set_name = set_name
         self.is_clean = is_clean
         self.hdf5_manager = hdf5_manager
+        self.verbose = verbose
 
     def get_annotation_objects_generator(self):
         """Returns a generator for all object annotations of the data.

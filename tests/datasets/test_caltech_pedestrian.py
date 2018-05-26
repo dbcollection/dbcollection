@@ -424,7 +424,13 @@ def test_data_loaded():
 @pytest.fixture()
 def mock_base_class(test_data_loaded):
     dummy_object = {'dummy': 'object'}
-    return BaseField(data=test_data_loaded, set_name='train', is_clean=True, hdf5_manager=dummy_object)
+    return BaseField(
+        data=test_data_loaded,
+        set_name='train',
+        is_clean=True,
+        hdf5_manager=dummy_object,
+        verbose=True
+    )
 
 
 class TestBaseField:
@@ -435,13 +441,15 @@ class TestBaseField:
         set_name = 'train'
         is_clean = True
         hdf5_manager = {'dummy': 'object'}
+        verbose = True
 
-        base_field = BaseField(data, set_name, is_clean, hdf5_manager)
+        base_field = BaseField(data, set_name, is_clean, hdf5_manager, verbose)
 
         assert base_field.data == data
         assert base_field.set_name == set_name
         assert base_field.is_clean == is_clean
         assert base_field.hdf5_manager == hdf5_manager
+        assert base_field.verbose == verbose
 
     @pytest.mark.parametrize('is_clean', [False, True])
     def test_get_annotation_objects_generator(self, mocker, mock_base_class, is_clean):
