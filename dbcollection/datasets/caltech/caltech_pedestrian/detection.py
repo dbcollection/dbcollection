@@ -152,10 +152,9 @@ class Detection(BaseTaskNew):
             "hdf5_manager": self.hdf5_manager,
             "verbose": self.verbose
         }
-        image_filenames_ids = ImageFilenamesField(**args).process()
 
         self.process_classes_metadata(data, set_name)
-        image_filenames_ids = self.process_image_filenames(data, set_name)
+        image_filenames_ids = ImageFilenamesField(**args).process()
         bbox_ids = self.process_bboxes_metadata(data, set_name)
         bboxv_ids = self.process_bboxesv_metadata(data, set_name)
         label_ids = []
@@ -226,40 +225,6 @@ class Detection(BaseTaskNew):
                                 }
                                 obj_counter += 1
                     img_counter += 1
-
-    def process_image_filenames(self, data, set_name):
-        """Processes and saves the image filenames metadata to hdf5."""
-        if self.verbose:
-            print('> Processing the image filenames metadata...')
-
-        image_filenames = self.get_image_filenames_from_data(data)
-        image_filenames_ids = self.get_image_filenames_obj_ids_from_data(data)
-
-        self.save_field_to_hdf5(
-            set_name=set_name,
-            field='image_filenames',
-            data=str2ascii(image_filenames),
-            dtype=np.uint8,
-            fillvalue=0
-        )
-
-        return image_filenames_ids
-
-    def get_image_filenames_from_data(self, data):
-        """Returns a list of sorted image filenames for a sequence of partitions + video sets."""
-        image_filenames = []
-        for partition in sorted(data):
-            for video in sorted(data[partition]):
-                image_filenames += data[partition][video]["images"]
-        return image_filenames
-
-    def get_image_filenames_obj_ids_from_data(self, data):
-        """Returns a list of image ids for each row of 'object_ids' field."""
-        image_filenames_ids = []
-        annotations_generator = self.get_annotation_objects_generator(data)
-        for annotation in annotations_generator():
-            image_filenames_ids.append(annotation['img_counter'])
-        return image_filenames_ids
 
     def process_bboxes_metadata(self, data, set_name):
         """Processes and saves the annotation's bounding boxes metadata to hdf5."""

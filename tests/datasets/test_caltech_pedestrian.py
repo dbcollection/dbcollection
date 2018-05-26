@@ -201,9 +201,8 @@ class TestDetectionTask:
 
     def test_process_set_metadata(self, mocker, mock_detection_class, test_data):
         dummy_ids = [0, 0, 0, 1, 1, 1]
-        mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_classes_metadata = mocker.patch.object(Detection, "process_classes_metadata", return_value=dummy_ids)
-        mock_image_filenames = mocker.patch.object(Detection, "process_image_filenames", return_value=dummy_ids)
+        mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_bbox_metadata = mocker.patch.object(Detection, "process_bboxes_metadata", return_value=dummy_ids)
         mock_bboxv_metadata = mocker.patch.object(Detection, "process_bboxesv_metadata", return_value=dummy_ids)
         mock_object_fields = mocker.patch.object(Detection, "process_object_fields")
@@ -212,7 +211,6 @@ class TestDetectionTask:
         mock_detection_class.process_set_metadata(test_data, set_name)
 
         mock_classes_metadata.assert_called_once_with(test_data, set_name)
-        mock_image_filenames.assert_called_once_with(test_data, set_name)
         mock_image_field.assert_called_once_with()
         mock_bbox_metadata.assert_called_once_with(test_data, set_name)
         mock_bboxv_metadata.assert_called_once_with(test_data, set_name)
@@ -269,43 +267,6 @@ class TestDetectionTask:
                     expected.append({"obj": annot, "image_counter": i, "obj_counter": counter})
                     counter += 1
             assert results == expected
-
-    def test_process_image_filenames(self, mocker, mock_detection_class, test_data):
-        mock_get_filenames = mocker.patch.object(Detection, "get_image_filenames_from_data", return_value=['image1.jpg', 'image2.jpg'])
-        mock_get_ids = mocker.patch.object(Detection, "get_image_filenames_obj_ids_from_data", return_value=[0, 0, 1, 1])
-        mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
-
-        img_ids = mock_detection_class.process_image_filenames(test_data, 'train')
-
-        assert img_ids == [0, 0, 1, 1]
-        mock_get_filenames.assert_called_once_with(test_data)
-        mock_get_ids.assert_called_once_with(test_data)
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='image_filenames',
-        #     data=str2ascii(['image1', 'image2']),
-        #     dtype=np.uint8,
-        #     fillvalue=0
-        # )
-
-    def test_get_image_filenames_from_data(self, mocker, mock_detection_class, test_data):
-        image_filenames = mock_detection_class.get_image_filenames_from_data(test_data)
-
-        assert image_filenames == ['image1.jpg', 'image2.jpg' ,'image3.jpg', 'image4.jpg',
-                                   'image5.jpg', 'image6.jpg', 'image7.jpg', 'image8.jpg']
-
-    def test_get_image_filenames_obj_ids_from_data(self, mocker, mock_detection_class, test_data):
-        def dummy_generator():
-            for i in range(5):
-                yield {"img_counter": i}
-        mock_get_generator = mocker.patch.object(Detection, "get_annotation_objects_generator", return_value=dummy_generator)
-
-        ids = mock_detection_class.get_image_filenames_obj_ids_from_data(test_data)
-
-        mock_get_generator.assert_called_once_with(test_data)
-        assert ids == list(range(5))
 
     def test_process_bboxes_metadata(self, mocker, mock_detection_class, test_data):
         bboxes = [[1, 1, 10, 10], [1, 1, 20, 20], [1, 1, 30, 30], [1, 1, 40, 40]]
