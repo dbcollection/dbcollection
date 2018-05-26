@@ -145,6 +145,15 @@ class Detection(BaseTaskNew):
         """
         Saves the metadata of a set.
         """
+        args = {
+            "data": data,
+            "set_name": set_name,
+            "is_clean": self.is_clean,
+            "hdf5_manager": self.hdf5_manager,
+            "verbose": self.verbose
+        }
+        image_filenames_ids = ImageFilenamesField(**args).process()
+
         self.process_classes_metadata(data, set_name)
         image_filenames_ids = self.process_image_filenames(data, set_name)
         bbox_ids = self.process_bboxes_metadata(data, set_name)

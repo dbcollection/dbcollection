@@ -201,6 +201,7 @@ class TestDetectionTask:
 
     def test_process_set_metadata(self, mocker, mock_detection_class, test_data):
         dummy_ids = [0, 0, 0, 1, 1, 1]
+        mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_classes_metadata = mocker.patch.object(Detection, "process_classes_metadata", return_value=dummy_ids)
         mock_image_filenames = mocker.patch.object(Detection, "process_image_filenames", return_value=dummy_ids)
         mock_bbox_metadata = mocker.patch.object(Detection, "process_bboxes_metadata", return_value=dummy_ids)
@@ -212,6 +213,7 @@ class TestDetectionTask:
 
         mock_classes_metadata.assert_called_once_with(test_data, set_name)
         mock_image_filenames.assert_called_once_with(test_data, set_name)
+        mock_image_field.assert_called_once_with()
         mock_bbox_metadata.assert_called_once_with(test_data, set_name)
         mock_bboxv_metadata.assert_called_once_with(test_data, set_name)
         mock_object_fields.assert_called_once_with(set_name)
