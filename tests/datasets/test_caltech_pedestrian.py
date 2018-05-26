@@ -18,6 +18,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     Detection,
     BaseField,
     BoundingBoxBaseField,
+    BoundingBoxField,
     ClassLabelField,
     ImageFilenamesField
 )
@@ -591,3 +592,32 @@ class TestBoundingBoxBaseField:
     def test_bbox_correct_format(self, mocker, mock_bboxbase_class, bbox, bbox_converted):
         result_bbox = mock_bboxbase_class.bbox_correct_format(bbox)
         assert result_bbox == bbox_converted
+
+
+@pytest.fixture()
+def mock_bbox_class(field_kwargs):
+    return BoundingBoxField(**field_kwargs)
+
+
+class TestBoundingBoxField:
+    """Unit tests for the BoundingBoxField class."""
+
+    def test_process(self, mocker, mock_bbox_class):
+        dummy_boxes = []
+        dummy_ids = [0, 0, 1, 1]
+        mock_get_bboxes = mocker.patch.object(BoundingBoxField, "get_bboxes_from_data", return_value=(dummy_boxes, dummy_ids))
+        mock_save_hdf5 = mocker.patch.object(BoundingBoxField, "save_field_to_hdf5")
+
+        bbox_ids = mock_bbox_class.process()
+
+        assert bbox_ids == dummy_ids
+        mock_get_bboxes.assert_called_once_with('pos')
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='bboxes',
+        #     data=np.array(dummy_boxes, dtype=np.float32),
+        #     dtype=np.float32,
+        #     fillvalue=-1
+        # )
