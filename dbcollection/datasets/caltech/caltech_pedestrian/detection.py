@@ -515,6 +515,32 @@ class BaseField(object):
         )
 
 
+class ClassLabelField(BaseField):
+    """Class label names' field metadata process/save class."""
+
+    def process(self, classes):
+        """Processes and saves the classes metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the class labels metadata...')
+        classes_ids = self.get_class_labels_ids(classes)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='classes',
+            data=str2ascii(classes),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+        return classes_ids
+
+    def get_class_labels_ids(self, classes):
+        """Returns a list of label ids for each row of 'object_ids' field."""
+        class_ids = []
+        annotations_generator = self.get_annotation_objects_generator(self.data)
+        for annotation in annotations_generator():
+            class_ids.append(classes.index(annotation['lbl']))
+        return class_ids
+
+
 class ImageFilenamesField(BaseField):
     """Image filenames' field metadata process/save class."""
 
