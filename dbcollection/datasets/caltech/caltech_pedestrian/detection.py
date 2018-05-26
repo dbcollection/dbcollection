@@ -571,7 +571,7 @@ class ImageFilenamesField(BaseField):
     def get_image_filenames_obj_ids_from_data(self):
         """Returns a list of image ids for each row of 'object_ids' field."""
         image_filenames_ids = []
-        annotations_generator = self.get_annotation_objects_generator(data)
+        annotations_generator = self.get_annotation_objects_generator()
         for annotation in annotations_generator():
             image_filenames_ids.append(annotation['img_counter'])
         return image_filenames_ids
