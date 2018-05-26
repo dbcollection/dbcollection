@@ -472,6 +472,74 @@ class Detection(BaseTaskNew):
             print('> Done.')
 
 
+class BaseField(object):
+    """Base class for the dataset's data fields processor."""
+
+    def __init__(self, data, set_name, is_clean, hdf5_manager):
+        self.data = data
+        self.set_name = set_name
+        self.is_clean = is_clean
+        self.hdf5_manager = hdf5_manager
+
+    def get_annotation_objects_generator(self):
+        """Returns a generator for all object annotations of the data.
+
+        This method cycles all annotation objects for a set of partitions
+        plus videos in order and returns for each object its annotation and
+        two counters at specific points of the loops.
+
+        Since most annotations of this dataset require different parameters
+        at a common stage of the loop cycle(s), this generator allows to get
+        such information in a flexible way by yielding the common data for
+        all data fields.
+        """
+        img_counter = 0
+        obj_counter = 0
+        data = self.data["annotations"]
+        for partition in sorted(data):
+            for video in sorted(data[partition]):
+                for annotation_data in data[partition][video]:
+                    if any(annotation_data):
+                        for obj in annotation_data:
+                            if self.is_clean:
+                                if obj['pos'][2] >= 5 and obj['pos'][3] >= 5:
+                                    yield {
+                                        "obj": obj,
+                                        "image_counter": img_counter,
+                                        "obj_counter": obj_counter
+                                    }
+                                    obj_counter += 1
+                            else:
+                                yield {
+                                    "obj": obj,
+                                    "image_counter": img_counter,
+                                    "obj_counter": obj_counter
+                                }
+                                obj_counter += 1
+                    img_counter += 1
+
+
+    def save_field_to_hdf5(self, set_name, field, data, **kwargs):
+        """Saves data of a field into the HDF% metadata file.
+
+        Parameters
+        ----------
+        set_name: str
+            Name of the set split.
+        field : str
+            Name of the data field.
+        data : np.ndarray
+            Numpy ndarray of the field's data.
+
+        """
+        self.hdf5_manager.add_field_to_group(
+            group=set_name,
+            field=field,
+            data=data,
+            **kwargs
+        )
+
+
 class Detection10x(Detection):
     """ Caltech Pedestrian detection (10x data) preprocessing functions """
 
