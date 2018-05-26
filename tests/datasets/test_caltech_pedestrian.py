@@ -552,3 +552,14 @@ class TestImageFilenamesField:
         image_filenames = mock_imagefilename_class.get_image_filenames_from_data()
 
         assert image_filenames == ['image1.jpg', 'image2.jpg' ,'image3.jpg', 'image4.jpg', 'image5.jpg']
+
+    def test_get_image_filenames_obj_ids_from_data(self, mocker, mock_imagefilename_class):
+        def dummy_generator():
+            for i in range(5):
+                yield {"img_counter": i}
+        mock_get_generator = mocker.patch.object(ImageFilenamesField, "get_annotation_objects_generator", return_value=dummy_generator)
+
+        ids = mock_imagefilename_class.get_image_filenames_obj_ids_from_data()
+
+        mock_get_generator.assert_called_once_with()
+        assert ids == list(range(5))
