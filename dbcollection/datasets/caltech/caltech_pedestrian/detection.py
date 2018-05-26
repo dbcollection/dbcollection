@@ -541,6 +541,42 @@ class BaseField(object):
         )
 
 
+class ImageFilenamesField(BaseField):
+    """Image filenames' field metadata process/save class."""
+
+    def process(self):
+        """Processes and saves the image filenames metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the image filenames metadata...')
+        image_filenames, image_filenames_ids = self.get_image_filenames_from_data()
+        image_filenames_ids = self.get_image_filenames_obj_ids_from_data()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='image_filenames',
+            data=str2ascii(image_filenames),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+        return image_filenames_ids
+
+    def get_image_filenames_from_data(self, data):
+        """Returns a list of sorted image filenames for a sequence of partitions + video sets."""
+        image_filenames = []
+        data = self.data["image_filenames"]
+        for partition in sorted(data):
+            for video in sorted(data[partition]):
+                image_filenames += data[partition][video]
+        return image_filenames
+
+    def get_image_filenames_obj_ids_from_data(self, data):
+        """Returns a list of image ids for each row of 'object_ids' field."""
+        image_filenames_ids = []
+        annotations_generator = self.get_annotation_objects_generator(data)
+        for annotation in annotations_generator():
+            image_filenames_ids.append(annotation['img_counter'])
+        return image_filenames_ids
+
+
 class Detection10x(Detection):
     """ Caltech Pedestrian detection (10x data) preprocessing functions """
 
