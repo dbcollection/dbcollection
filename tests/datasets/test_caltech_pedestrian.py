@@ -411,7 +411,16 @@ class TestDetectionTask:
 @pytest.fixture()
 def test_data_loaded():
     return {
-        "image_filenames": [],
+        "image_filenames": {
+           "set00": {
+                "V000": ['image1.jpg'],
+                "V001": ['image2.jpg']
+            },
+            "set01": {
+                "V000": ['image3.jpg'],
+                "V001": ['image4.jpg', 'image5.jpg']
+            },
+        },
         "annotations": {
            "set00": {
                 "V000": [[{"pos": [1,1,3,3]}, {"pos": [10,10,20,20]}]],
@@ -419,9 +428,9 @@ def test_data_loaded():
             },
             "set01": {
                 "V000": [[{"pos": [1,1,1,1]}, {"pos": [5,10,5,20]}]],
-                "V001": [[{"pos": [6,6,6,6]}, {"pos": [10,10,1,1]}]]
+                "V001": [[{"pos": [6,6,6,6]}, {"pos": [10,10,1,1]}], []]
             },
-        },
+        }
     }
 
 
@@ -538,3 +547,8 @@ class TestImageFilenamesField:
         #     dtype=np.uint8,
         #     fillvalue=0
         # )
+
+    def test_get_image_filenames_from_data(self, mocker, mock_imagefilename_class):
+        image_filenames = mock_imagefilename_class.get_image_filenames_from_data()
+
+        assert image_filenames == ['image1.jpg', 'image2.jpg' ,'image3.jpg', 'image4.jpg', 'image5.jpg']
