@@ -13,7 +13,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from dbcollection.datasets.caltech.caltech_pedestrian import Detection
+from dbcollection.datasets.caltech.caltech_pedestrian.detection import Detection, BaseField
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
@@ -402,3 +402,43 @@ class TestDetectionTask:
         #     dtype=np.uint8,
         #     fillvalue=0
         # )
+
+
+@pytest.fixture()
+def test_data_loaded():
+    return {
+        "image_filenames": [],
+        "annotations": {
+           "set00": {
+                "V000": [[{"pos": [1,1,3,3]}, {"pos": [10,10,20,20]}]],
+                "V001": [[{"pos": [1,1,6,6]}, {"pos": [10,10,4,5]}]]
+            },
+            "set01": {
+                "V000": [[{"pos": [1,1,1,1]}, {"pos": [5,10,5,20]}]],
+                "V001": [[{"pos": [6,6,6,6]}, {"pos": [10,10,1,1]}]]
+            },
+        },
+    }
+
+
+@pytest.fixture()
+def mock_base_class(test_data_loaded):
+    dummy_object = {'dummy': 'object'}
+    return BaseField(data=test_data_loaded, set_name='train', is_clean=True, hdf5_manager=dummy_object)
+
+
+class TestBaseField:
+    """Unit tests for the BaseField class."""
+
+    def test_init(self, mocker):
+        data = ['some', 'data']
+        set_name = 'train'
+        is_clean = True
+        hdf5_manager = {'dummy': 'object'}
+
+        base_field = BaseField(data, set_name, is_clean, hdf5_manager)
+
+        assert base_field.data == data
+        assert base_field.set_name == set_name
+        assert base_field.is_clean == is_clean
+        assert base_field.hdf5_manager == hdf5_manager
