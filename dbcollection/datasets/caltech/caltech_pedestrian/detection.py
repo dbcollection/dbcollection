@@ -559,7 +559,7 @@ class ImageFilenamesField(BaseField):
         )
         return image_filenames_ids
 
-    def get_image_filenames_from_data(self, data):
+    def get_image_filenames_from_data(self):
         """Returns a list of sorted image filenames for a sequence of partitions + video sets."""
         image_filenames = []
         data = self.data["image_filenames"]
@@ -568,7 +568,7 @@ class ImageFilenamesField(BaseField):
                 image_filenames += data[partition][video]
         return image_filenames
 
-    def get_image_filenames_obj_ids_from_data(self, data):
+    def get_image_filenames_obj_ids_from_data(self):
         """Returns a list of image ids for each row of 'object_ids' field."""
         image_filenames_ids = []
         annotations_generator = self.get_annotation_objects_generator(data)
