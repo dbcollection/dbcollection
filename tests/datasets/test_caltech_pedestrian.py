@@ -467,3 +467,26 @@ class TestBaseField:
                 {"obj": {"pos": [6,6,6,6]}, "image_counter": 3, "obj_counter": 6},
                 {"obj": {"pos": [10,10,1,1]}, "image_counter": 3, "obj_counter": 7}
             ]
+
+    def test_save_field_to_hdf5(self, mocker, mock_base_class):
+        mock_manager = mocker.MagicMock()
+
+        set_name = 'test'
+        field = 'dummy_field'
+        data = np.random.rand(2,2)
+        args = {"dtype" : np.uint8, "chunks": True}
+
+        mock_base_class.hdf5_manager = mock_manager
+        mock_base_class.save_field_to_hdf5(
+            set_name=set_name,
+            field=field,
+            data=data,
+            **args
+        )
+
+        mock_manager.add_field_to_group.assert_called_once_with(
+            group=set_name,
+            field=field,
+            data=data,
+            **args
+        )
