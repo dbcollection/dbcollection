@@ -155,6 +155,7 @@ class Detection(BaseTaskNew):
 
         class_ids = ClassLabelField(**args).process(self.classes)
         image_filenames_ids = ImageFilenamesField(**args).process()
+        bbox_ids = BoundingBoxField(**args).process()
         bbox_ids = self.process_bboxes_metadata(data, set_name)
         bboxv_ids = self.process_bboxesv_metadata(data, set_name)
         label_ids = []

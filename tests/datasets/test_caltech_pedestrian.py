@@ -206,6 +206,7 @@ class TestDetectionTask:
         dummy_ids = [0, 0, 0, 1, 1, 1]
         mock_classes_field = mocker.patch.object(ClassLabelField, "process", return_value=dummy_ids)
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
+        mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
         mock_bbox_metadata = mocker.patch.object(Detection, "process_bboxes_metadata", return_value=dummy_ids)
         mock_bboxv_metadata = mocker.patch.object(Detection, "process_bboxesv_metadata", return_value=dummy_ids)
         mock_object_fields = mocker.patch.object(Detection, "process_object_fields")
@@ -215,6 +216,7 @@ class TestDetectionTask:
 
         mock_classes_field.assert_called_once_with(('person', 'person-fa', 'people', 'person?'))
         mock_image_field.assert_called_once_with()
+        mock_bbox_field.assert_called_once_with()
         mock_bbox_metadata.assert_called_once_with(test_data, set_name)
         mock_bboxv_metadata.assert_called_once_with(test_data, set_name)
         mock_object_fields.assert_called_once_with(set_name)
