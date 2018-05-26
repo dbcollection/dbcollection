@@ -156,7 +156,6 @@ class Detection(BaseTaskNew):
         class_ids = ClassLabelField(**args).process(self.classes)
         image_filenames_ids = ImageFilenamesField(**args).process()
         bbox_ids = BoundingBoxField(**args).process()
-        bbox_ids = self.process_bboxes_metadata(data, set_name)
         bboxv_ids = self.process_bboxesv_metadata(data, set_name)
         label_ids = []
         occlusion_ids = []
@@ -200,23 +199,6 @@ class Detection(BaseTaskNew):
                                 }
                                 obj_counter += 1
                     img_counter += 1
-
-    def process_bboxes_metadata(self, data, set_name):
-        """Processes and saves the annotation's bounding boxes metadata to hdf5."""
-        if self.verbose:
-            print('> Processing the pedestrian bounding boxes metadata...')
-
-        bboxes, bboxes_ids = self.get_bboxes_from_data(data, bbox_type='pos')
-
-        self.save_field_to_hdf5(
-            set_name=set_name,
-            field='bboxes',
-            data=np.array(bboxes, dtype=np.float32),
-            dtype=np.float32,
-            fillvalue=-1
-        )
-
-        return bboxes_ids
 
     def get_bboxes_from_data(self, data, bbox_type):
         """Returns a list of bounding boxes and a list
