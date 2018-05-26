@@ -442,3 +442,28 @@ class TestBaseField:
         assert base_field.set_name == set_name
         assert base_field.is_clean == is_clean
         assert base_field.hdf5_manager == hdf5_manager
+
+    @pytest.mark.parametrize('is_clean', [False, True])
+    def test_get_annotation_objects_generator(self, mocker, mock_base_class, is_clean):
+        mock_base_class.is_clean = is_clean
+        generator = mock_base_class.get_annotation_objects_generator()
+
+        results = [d for d in generator]
+        if is_clean:
+            assert results == [
+                {"obj": {"pos": [10,10,20,20]}, "image_counter": 0, "obj_counter": 0},
+                {"obj": {"pos": [1,1,6,6]}, "image_counter": 1, "obj_counter": 1},
+                {"obj": {"pos": [5,10,5,20]}, "image_counter": 2, "obj_counter": 2},
+                {"obj": {"pos": [6,6,6,6]}, "image_counter": 3, "obj_counter": 3}
+            ]
+        else:
+            assert results == [
+                {"obj": {"pos": [1,1,3,3]}, "image_counter": 0, "obj_counter": 0},
+                {"obj": {"pos": [10,10,20,20]}, "image_counter": 0, "obj_counter": 1},
+                {"obj": {"pos": [1,1,6,6]}, "image_counter": 1, "obj_counter": 2},
+                {"obj": {"pos": [10,10,4,5]}, "image_counter": 1, "obj_counter": 3},
+                {"obj": {"pos": [1,1,1,1]}, "image_counter": 2, "obj_counter": 4},
+                {"obj": {"pos": [5,10,5,20]}, "image_counter": 2, "obj_counter": 5},
+                {"obj": {"pos": [6,6,6,6]}, "image_counter": 3, "obj_counter": 6},
+                {"obj": {"pos": [10,10,1,1]}, "image_counter": 3, "obj_counter": 7}
+            ]
