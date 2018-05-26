@@ -17,6 +17,7 @@ from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     Detection,
     BaseField,
+    ClassLabelField,
     ImageFilenamesField
 )
 
@@ -474,6 +475,43 @@ class TestBaseField:
             data=data,
             **args
         )
+
+
+@pytest.fixture()
+def mock_classlabel_class(test_data_loaded):
+    dummy_object = {'dummy': 'object'}
+    return ClassLabelField(
+        data=test_data_loaded,
+        set_name='train',
+        is_clean=True,
+        hdf5_manager=dummy_object,
+        verbose=True
+    )
+
+
+class TestClassLabelField:
+    """Unit tests for the ClassLabelField class."""
+
+    def test_process(self, mocker, mock_classlabel_class, test_data):
+        dummy_ids = [0, 1, 2, 3]
+        mock_get_class_ids = mocker.patch.object(ClassLabelField, "get_class_labels_ids", return_value=dummy_ids)
+        mock_save_hdf5 = mocker.patch.object(ClassLabelField, "save_field_to_hdf5")
+
+        classes = ('person', 'person-fa', 'people', 'person?')
+        class_ids = mock_classlabel_class.process(classes)
+
+        assert class_ids == dummy_ids
+        mock_get_class_ids.assert_called_once_with(classes)
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='classes',
+        #     data=str2ascii(classes),
+        #     dtype=np.float32,
+        #     fillvalue=-1
+        # )
+
 
 
 @pytest.fixture()
