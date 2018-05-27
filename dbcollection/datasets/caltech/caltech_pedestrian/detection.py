@@ -158,7 +158,7 @@ class Detection(BaseTaskNew):
         bbox_ids = BoundingBoxField(**args).process()
         bboxv_ids = BoundingBoxvField(**args).process()
         label_ids = LabelIdField(**args).process()
-        occlusion_ids = []
+        occlusion_ids = OcclusionField(**args).process()
         object_id = []
         ObjectFieldNamesField(**args).process()
 
@@ -540,6 +540,33 @@ class LabelIdField(BaseField):
             return obj['id']
         else:
             return 0
+
+
+class OcclusionField(BaseField):
+    """Occlusion field metadata process/save class."""
+
+    def process(self):
+        """Processes and saves the annotation's occlusion metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the pedestrian occlusion metadata...')
+        occlusions, occlusion_ids = self.get_occlusion_ids()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='occlusion',
+            data=np.array(occlusions, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=-1
+        )
+        return occlusion_ids
+
+    def get_occlusion_ids(self):
+        """Returns a list of occlusion labels and ids for each row of 'object_ids' field."""
+        occlusions, occlusion_ids = [], []
+        annotations_generator = self.get_annotation_objects_generator(self.data)
+        for annotation in annotations_generator():
+            occlusions.append(annotation["obj"]["occl"])
+            occlusion_ids.append(annotation['obj_counter'])
+        return occlusions, occlusion_ids
 
 
 class ObjectFieldNamesField(BaseField):

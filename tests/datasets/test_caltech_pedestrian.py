@@ -23,7 +23,8 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     ClassLabelField,
     ImageFilenamesField,
     LabelIdField,
-    ObjectFieldNamesField
+    ObjectFieldNamesField,
+    OcclusionField
 )
 
 
@@ -212,6 +213,7 @@ class TestDetectionTask:
         mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
         mock_bboxv_field = mocker.patch.object(BoundingBoxvField, "process", return_value=dummy_ids)
         mock_lblid_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
+        mock_occlusion_field = mocker.patch.object(OcclusionField, "process", return_value=dummy_ids)
         mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
 
         set_name = 'train'
@@ -222,6 +224,7 @@ class TestDetectionTask:
         mock_bbox_field.assert_called_once_with()
         mock_bboxv_field.assert_called_once_with()
         mock_lblid_field.assert_called_once_with()
+        mock_occlusion_field.assert_called_once_with()
         mock_objfields_field.assert_called_once_with()
 
 
@@ -583,6 +586,47 @@ class TestLabelIdField:
             assert result == obj['id']
         else:
             assert result == 0
+
+
+@pytest.fixture()
+def mock_occlusion_class(field_kwargs):
+    return OcclusionField(**field_kwargs)
+
+
+class TestOcclusionField:
+    """Unit tests for the OcclusionField class."""
+
+    def test_process(self, mocker, mock_occlusion_class):
+        dummy_occlusions = []
+        dummy_ids = [0, 0, 1, 1]
+        mock_get_ids = mocker.patch.object(OcclusionField, "get_occlusion_ids", return_value=(dummy_occlusions, dummy_ids))
+        mock_save_hdf5 = mocker.patch.object(OcclusionField, "save_field_to_hdf5")
+
+        occlusion_ids = mock_occlusion_class.process()
+
+        assert occlusion_ids == dummy_ids
+        mock_get_ids.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='occlusion',
+        #     data=np.array(dummy_occlusions, dtype=np.float32),
+        #     dtype=np.float32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_label_ids(self, mocker, mock_occlusion_class, test_data_loaded):
+        def dummy_generator():
+            for i in range(5):
+                yield {"obj": {"occl": 0}, "obj_counter": i}
+        mock_get_generator = mocker.patch.object(OcclusionField, "get_annotation_objects_generator", return_value=dummy_generator)
+
+        occlusions, occlusion_ids = mock_occlusion_class.get_occlusion_ids()
+
+        assert occlusions == [0 for i in range(5)]
+        mock_get_generator.assert_called_once_with(test_data_loaded)
+        assert occlusion_ids == list(range(5))
 
 
 @pytest.fixture()
