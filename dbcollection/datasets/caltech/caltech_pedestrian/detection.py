@@ -157,7 +157,7 @@ class Detection(BaseTaskNew):
         image_filenames_ids = ImageFilenamesField(**args).process()
         bbox_ids = BoundingBoxField(**args).process()
         bboxv_ids = BoundingBoxvField(**args).process()
-        label_ids = []
+        label_ids = LabelIdField(**args).process()
         occlusion_ids = []
         object_id = []
         ObjectFieldNamesField(**args).process()
@@ -506,6 +506,40 @@ class BoundingBoxvField(BoundingBoxBaseField):
             fillvalue=-1
         )
         return bboxesv_ids
+
+
+class LabelIdField(BaseField):
+    """Label id field metadata process/save class."""
+
+    def process(self):
+        """Processes and saves the annotation's label metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the pedestrian labels metadata...')
+        labels, label_ids = self.get_label_ids()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='id',
+            data=np.array(labels, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=-1
+        )
+        return label_ids
+
+    def get_label_ids(self):
+        """Returns a list of label ids for each row of 'object_ids' field."""
+        labels, label_ids = [], []
+        annotations_generator = self.get_annotation_objects_generator(self.data)
+        for annotation in annotations_generator():
+            labels.append(self.get_id(annotation["obj"]))
+            label_ids.append(annotation['obj_counter'])
+        return labels, label_ids
+
+    def get_id(self, obj):
+        """Returns the label id of an annotation obejct."""
+        if isinstance(obj['id'], int):
+            return obj['id']
+        else:
+            return 0
 
 
 class ObjectFieldNamesField(BaseField):

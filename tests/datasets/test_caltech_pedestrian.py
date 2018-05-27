@@ -22,6 +22,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     BoundingBoxvField,
     ClassLabelField,
     ImageFilenamesField,
+    LabelIdField,
     ObjectFieldNamesField
 )
 
@@ -210,6 +211,7 @@ class TestDetectionTask:
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
         mock_bboxv_field = mocker.patch.object(BoundingBoxvField, "process", return_value=dummy_ids)
+        mock_lblid_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
 
         set_name = 'train'
@@ -219,6 +221,7 @@ class TestDetectionTask:
         mock_image_field.assert_called_once_with()
         mock_bbox_field.assert_called_once_with()
         mock_bboxv_field.assert_called_once_with()
+        mock_lblid_field.assert_called_once_with()
         mock_objfields_field.assert_called_once_with()
 
 
@@ -529,6 +532,57 @@ class TestBoundingBoxvField:
         #     dtype=np.float32,
         #     fillvalue=-1
         # )
+
+
+@pytest.fixture()
+def mock_lblid_class(field_kwargs):
+    return LabelIdField(**field_kwargs)
+
+
+class TestLabelIdField:
+    """Unit tests for the LabelIdField class."""
+
+    def test_process(self, mocker, mock_lblid_class):
+        dummy_labels = []
+        dummy_ids = [0, 0, 1, 1]
+        mock_get_ids = mocker.patch.object(LabelIdField, "get_label_ids", return_value=(dummy_labels, dummy_ids))
+        mock_save_hdf5 = mocker.patch.object(LabelIdField, "save_field_to_hdf5")
+
+        label_ids = mock_lblid_class.process()
+
+        assert label_ids == dummy_ids
+        mock_get_ids.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='id',
+        #     data=np.array(dummy_labels, dtype=np.float32),
+        #     dtype=np.float32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_label_ids(self, mocker, mock_lblid_class, test_data_loaded):
+        def dummy_generator():
+            for i in range(5):
+                yield {"obj": {"id": i}, "obj_counter": i}
+        mock_get_generator = mocker.patch.object(LabelIdField, "get_annotation_objects_generator", return_value=dummy_generator)
+        mock_get_id = mocker.patch.object(LabelIdField, "get_id", return_value=10)
+
+        labels, label_ids = mock_lblid_class.get_label_ids()
+
+        assert labels == [10 for i in range(5)]
+        mock_get_generator.assert_called_once_with(test_data_loaded)
+        assert label_ids == list(range(5))
+
+    @pytest.mark.parametrize('obj', [{'id': None}, {'id': 1}, {'id': 'val'}])
+    def test_get_id(self, mocker, mock_lblid_class, obj):
+        result = mock_lblid_class.get_id(obj)
+
+        if isinstance(obj['id'], int):
+            assert result == obj['id']
+        else:
+            assert result == 0
 
 
 @pytest.fixture()
