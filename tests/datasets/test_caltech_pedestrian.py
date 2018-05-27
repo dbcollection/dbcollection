@@ -24,6 +24,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     ImageFilenamesField,
     LabelIdField,
     ObjectFieldNamesField,
+    ObjectIdsField,
     OcclusionField
 )
 
@@ -215,6 +216,7 @@ class TestDetectionTask:
         mock_lblid_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_occlusion_field = mocker.patch.object(OcclusionField, "process", return_value=dummy_ids)
         mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
+        mock_objids_field = mocker.patch.object(ObjectIdsField, "process")
 
         set_name = 'train'
         mock_detection_class.process_set_metadata(test_data, set_name)
@@ -226,6 +228,14 @@ class TestDetectionTask:
         mock_lblid_field.assert_called_once_with()
         mock_occlusion_field.assert_called_once_with()
         mock_objfields_field.assert_called_once_with()
+        mock_objids_field.assert_called_once_with(
+            image_filenames_ids=dummy_ids,
+            class_ids=dummy_ids,
+            bbox_ids=dummy_ids,
+            bboxv_ids=dummy_ids,
+            label_ids=dummy_ids,
+            occlusion_ids=dummy_ids
+        )
 
 
 @pytest.fixture()
@@ -635,7 +645,7 @@ def mock_objfields_class(field_kwargs):
 
 
 class TestObjectFieldNamesField:
-    """Unit tests for the BoundingBoxvField class."""
+    """Unit tests for the ObjectFieldNamesField class."""
 
     def test_process(self, mocker, mock_objfields_class):
         mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
@@ -650,4 +660,44 @@ class TestObjectFieldNamesField:
         #     data=str2ascii(['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']),
         #     dtype=np.float8,
         #     fillvalue=0
+        # )
+
+
+@pytest.fixture()
+def mock_objfids_class(field_kwargs):
+    return ObjectIdsField(**field_kwargs)
+
+
+class TestObjectIdsField:
+    """Unit tests for the ObjectIdsField class."""
+
+    def test_process(self, mocker, mock_objfids_class):
+        mock_save_hdf5 = mocker.patch.object(ObjectIdsField, "save_field_to_hdf5")
+
+        image_filenames_ids = [0, 0, 0, 1, 1, 1]
+        class_ids = [0, 0, 1, 1, 2, 2]
+        bbox_ids = range(6)
+        bboxv_ids = range(6)
+        label_ids = range(6)
+        occlusion_ids = range(6)
+        mock_objfids_class.process(
+            image_filenames_ids=image_filenames_ids,
+            class_ids=class_ids,
+            bbox_ids=bbox_ids,
+            bboxv_ids=bboxv_ids,
+            label_ids=label_ids,
+            occlusion_ids=occlusion_ids
+        )
+
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # object_ids = [[image_filenames_ids[i], class_ids[i], bbox_ids[i],
+        #               bboxv_ids[i], label_ids[i], occlusion_ids[i]]
+        #               for i in range(len(bbox_ids))]
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='object_ids',
+        #     data=np.array(object_ids, dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
         # )

@@ -159,8 +159,15 @@ class Detection(BaseTaskNew):
         bboxv_ids = BoundingBoxvField(**args).process()
         label_ids = LabelIdField(**args).process()
         occlusion_ids = OcclusionField(**args).process()
-        object_id = []
         ObjectFieldNamesField(**args).process()
+        ObjectIdsField(**args).process(
+            image_filenames_ids=image_filenames_ids,
+            class_ids=class_ids,
+            bbox_ids=bbox_ids,
+            bboxv_ids=bboxv_ids,
+            label_ids=label_ids,
+            occlusion_ids=occlusion_ids
+        )
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
@@ -355,7 +362,6 @@ class BaseField(object):
                                 }
                                 obj_counter += 1
                     img_counter += 1
-
 
     def save_field_to_hdf5(self, set_name, field, data, **kwargs):
         """Saves data of a field into the HDF% metadata file.
@@ -581,6 +587,25 @@ class ObjectFieldNamesField(BaseField):
             data=str2ascii(object_fields),
             dtype=np.uint8,
             fillvalue=0
+        )
+
+
+class ObjectIdsField(BaseField):
+    """Object ids' field metadata process/save class."""
+
+    def process(self, image_filenames_ids, class_ids, bbox_ids,
+                bboxv_ids, label_ids, occlusion_ids):
+        """Processes and saves the object ids metadata to hdf5."""
+        # img, class, bbox, bboxv, id, occlusion
+        object_ids = [[image_filenames_ids[i], class_ids[i], bbox_ids[i],
+                      bboxv_ids[i], label_ids[i], occlusion_ids[i]]
+                      for i in range(len(bbox_ids))]
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='object_ids',
+            data=np.array(object_ids, dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
         )
 
 
