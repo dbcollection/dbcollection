@@ -209,7 +209,6 @@ class TestDetectionTask:
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
         mock_bboxv_field = mocker.patch.object(BoundingBoxvField, "process", return_value=dummy_ids)
-        mock_bboxv_metadata = mocker.patch.object(Detection, "process_bboxesv_metadata", return_value=dummy_ids)
         mock_object_fields = mocker.patch.object(Detection, "process_object_fields")
 
         set_name = 'train'
@@ -219,96 +218,7 @@ class TestDetectionTask:
         mock_image_field.assert_called_once_with()
         mock_bbox_field.assert_called_once_with()
         mock_bboxv_field.assert_called_once_with()
-        mock_bboxv_metadata.assert_called_once_with(test_data, set_name)
         mock_object_fields.assert_called_once_with(set_name)
-
-    @pytest.mark.parametrize('is_clean', [False, True])
-    def test_get_annotation_objects_generator(self, mocker, mock_detection_class, test_data, is_clean):
-        dummy_annotation = [{"pos": [0, 0, 0, 0]}, {"pos": [10, 10, 10, 10]}]
-        mock_load_annotation = mocker.patch.object(Detection, "load_annotation_file", return_value=dummy_annotation)
-
-        mock_detection_class.is_clean = is_clean
-        generator = mock_detection_class.get_annotation_objects_generator(test_data)
-
-        results = [d for d in generator]
-        if is_clean:
-            assert mock_load_annotation.call_count == 8
-            assert results == [{"obj": {"pos": [10, 10, 10, 10]}, "image_counter": i, "obj_counter": i} for i in range(8)]
-        else:
-            assert mock_load_annotation.call_count == 8
-            expected, counter = [], 0
-            for i in range(8):
-                for annot in dummy_annotation:
-                    expected.append({"obj": annot, "image_counter": i, "obj_counter": counter})
-                    counter += 1
-            assert results == expected
-
-    @pytest.mark.parametrize('bbox_type', ['pos', 'posv'])
-    def test_get_bboxes_from_data(self, mocker, mock_detection_class, test_data, bbox_type):
-        def dummy_generator():
-            for i in range(5):
-                yield {"obj": {"pos": [1, 1, 10, 10], "posv": [1, 1, 1, 1]}, "obj_counter": i}
-        mock_get_generator = mocker.patch.object(Detection, "get_annotation_objects_generator", return_value=dummy_generator)
-        mock_get_bbox = mocker.patch.object(Detection, "get_bbox_by_type", return_value=[1, 1, 1, 1])
-
-        boxes, ids = mock_detection_class.get_bboxes_from_data(test_data, bbox_type)
-
-        mock_get_generator.assert_called_once_with(test_data)
-        assert mock_get_bbox.call_count == 5
-        assert boxes == [[1, 1, 1, 1] for i in range(5)]
-        assert ids == list(range(5))
-
-    @pytest.mark.parametrize('obj, bbox_type', [
-        ({'pos': [1, 1, 10, 10]}, 'pos'),
-        ({'posv': [10, 10, 20, 20]}, 'posv'),
-        ({'posv': 0}, 'posv'),
-    ])
-    def test_get_bbox_by_type(self, mocker, mock_detection_class, obj, bbox_type):
-        dummy_bbox = [1, 1, 1, 1]
-        mock_bbox_correct = mocker.patch.object(Detection, "bbox_correct_format", return_value=dummy_bbox)
-
-        bbox = mock_detection_class.get_bbox_by_type(obj, bbox_type)
-
-        if bbox_type == 'pos':
-            mock_bbox_correct.assert_called_once_with(obj['pos'])
-            assert bbox == dummy_bbox
-        else:
-            if isinstance(obj['posv'], list):
-                mock_bbox_correct.assert_called_once_with(obj['posv'])
-                assert bbox == dummy_bbox
-            else:
-                assert not mock_bbox_correct.called
-                assert bbox == [0, 0, 0, 0]
-
-    @pytest.mark.parametrize('bbox, bbox_converted', [
-        ([0, 0, 0, 0], [0, 0, -1, -1]),
-        ([1, 1, 10, 10], [1, 1, 10, 10]),
-        ([10, 10, 10, 10], [10, 10, 19, 19])
-    ])
-    def test_bbox_correct_format(self, mocker, mock_detection_class, bbox, bbox_converted):
-        result_bbox = mock_detection_class.bbox_correct_format(bbox)
-
-        assert result_bbox == bbox_converted
-
-    def test_process_bboxesv_metadata(self, mocker, mock_detection_class, test_data):
-        bboxes = [[1, 1, 10, 10], [1, 1, 20, 20], [1, 1, 30, 30], [1, 1, 40, 40]]
-        bboxesv_ids = [0, 1, 2, 3]
-        mock_get_bboxes = mocker.patch.object(Detection, "get_bboxes_from_data", return_value=[bboxes, bboxesv_ids])
-        mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
-
-        bb_ids = mock_detection_class.process_bboxesv_metadata(test_data, 'train')
-
-        assert bb_ids == bboxesv_ids
-        mock_get_bboxes.assert_called_once_with(test_data, bbox_type='posv')
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='bboxesv',
-        #     data=np.array(bboxes, dtype=np.float32),
-        #     dtype=np.float32,
-        #     fillvalue=-1
-        # )
 
     def test_process_object_fields(self, mocker, mock_detection_class):
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
@@ -628,7 +538,7 @@ class TestBoundingBoxvField:
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
-        #     field='bboxes',
+        #     field='bboxesv',
         #     data=np.array(dummy_boxes, dtype=np.float32),
         #     dtype=np.float32,
         #     fillvalue=-1

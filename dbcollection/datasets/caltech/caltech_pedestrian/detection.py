@@ -156,95 +156,11 @@ class Detection(BaseTaskNew):
         class_ids = ClassLabelField(**args).process(self.classes)
         image_filenames_ids = ImageFilenamesField(**args).process()
         bbox_ids = BoundingBoxField(**args).process()
-        bboxv_ids = self.process_bboxesv_metadata(data, set_name)
         bboxv_ids = BoundingBoxvField(**args).process()
         label_ids = []
         occlusion_ids = []
         object_id = []
         self.process_object_fields(set_name)
-
-    def get_annotation_objects_generator(self, data):
-        """Returns a generator for all object annotations of the data.
-
-        This method cycles all annotation objects for a set of partitions
-        plus videos in order and returns for each object its annotation and
-        two counters at specific points of the loops.
-
-        Since most annotations of this dataset require different parameters
-        at a common stage of the loop cycle(s), this generator allows to get
-        such information in a flexible way by yielding the common data for
-        all data fields.
-        """
-        img_counter = 0
-        obj_counter = 0
-        for partition in sorted(data):
-            for video in sorted(data[partition]):
-                annotation_filenames_video = data[partition][video]["annotations"]
-                for annotation_filename in sorted(annotation_filenames_video):
-                    annotation_data = self.load_annotation_file(annotation_filename)
-                    if any(annotation_data):
-                        for obj in annotation_data:
-                            if self.is_clean:
-                                if obj['pos'][2] >= 5 and obj['pos'][3] >= 5:
-                                    yield {
-                                        "obj": obj,
-                                        "image_counter": img_counter,
-                                        "obj_counter": obj_counter
-                                    }
-                                    obj_counter += 1
-                            else:
-                                yield {
-                                    "obj": obj,
-                                    "image_counter": img_counter,
-                                    "obj_counter": obj_counter
-                                }
-                                obj_counter += 1
-                    img_counter += 1
-
-    def get_bboxes_from_data(self, data, bbox_type):
-        """Returns a list of bounding boxes and a list
-        of ids for each row of 'object_ids' field."""
-        bbox, bbox_ids = [], []
-        annotations_generator = self.get_annotation_objects_generator(data)
-        for annotation in annotations_generator():
-            bbox.append(self.get_bbox_by_type(annotation["obj"], bbox_type))
-            bbox_ids.append(annotation['obj_counter'])
-        return bbox, bbox_ids
-
-    def get_bbox_by_type(self, obj, bbox_type):
-        if bbox_type == 'pos':
-            bbox = self.bbox_correct_format(obj['pos'])
-        else:
-            if isinstance(obj['posv'], list):
-                bbox = self.bbox_correct_format(obj['posv'])
-            else:
-                bbox = [0, 0, 0, 0]
-        return bbox
-
-    def bbox_correct_format(self, bbox):
-        """Converts the bounding box [x,y,wh,h] format to [x1,y1,x2,y2]."""
-        x1 = bbox[0]
-        y1 = bbox[1]
-        x2 = bbox[0] + bbox[2] - 1
-        y2 = bbox[1] + bbox[3] - 1
-        return [x1, y1, x2, y2]
-
-    def process_bboxesv_metadata(self, data, set_name):
-        """Processes and saves the annotation's bounding boxes (v) metadata to hdf5."""
-        if self.verbose:
-            print('> Processing the pedestrian bounding boxes metadata...')
-
-        bboxesv, bboxesv_ids = self.get_bboxes_from_data(data, bbox_type='posv')
-
-        self.save_field_to_hdf5(
-            set_name=set_name,
-            field='bboxesv',
-            data=np.array(bboxesv, dtype=np.float32),
-            dtype=np.float32,
-            fillvalue=-1
-        )
-
-        return bboxesv_ids
 
     def process_object_fields(self, set_name):
         """Processes and saves the 'object_fields' metadata to hdf5."""
@@ -589,7 +505,7 @@ class BoundingBoxvField(BoundingBoxBaseField):
     """Bounding boxesv' field metadata process/save class."""
 
     def process(self):
-        """Processes and saves the annotation's bounding boxes metadata to hdf5."""
+        """Processes and saves the annotation's bounding boxes (v) metadata to hdf5."""
         if self.verbose:
             print('> Processing the pedestrian bounding boxes (v) metadata...')
         bboxesv, bboxesv_ids = self.get_bboxes_from_data('posv')
