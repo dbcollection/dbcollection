@@ -210,7 +210,6 @@ class TestDetectionTask:
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
         mock_bboxv_field = mocker.patch.object(BoundingBoxvField, "process", return_value=dummy_ids)
-        mock_object_fields = mocker.patch.object(Detection, "process_object_fields")
         mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
 
         set_name = 'train'
@@ -220,23 +219,7 @@ class TestDetectionTask:
         mock_image_field.assert_called_once_with()
         mock_bbox_field.assert_called_once_with()
         mock_bboxv_field.assert_called_once_with()
-        mock_object_fields.assert_called_once_with(set_name)
         mock_objfields_field.assert_called_once_with()
-
-    def test_process_object_fields(self, mocker, mock_detection_class):
-        mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")
-
-        mock_detection_class.process_object_fields('train')
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_fields',
-        #     data=str2ascii(['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']),
-        #     dtype=np.uint8,
-        #     fillvalue=0
-        # )
 
 
 @pytest.fixture()

@@ -161,18 +161,6 @@ class Detection(BaseTaskNew):
         occlusion_ids = []
         object_id = []
         ObjectFieldNamesField(**args).process()
-        self.process_object_fields(set_name)
-
-    def process_object_fields(self, set_name):
-        """Processes and saves the 'object_fields' metadata to hdf5."""
-        object_fields = ['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']
-        self.save_field_to_hdf5(
-            set_name=set_name,
-            field='object_fields',
-            data=str2ascii(object_fields),
-            dtype=np.uint8,
-            fillvalue=0
-        )
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
