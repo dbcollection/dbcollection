@@ -519,6 +519,21 @@ class BoundingBoxvField(BoundingBoxBaseField):
         return bboxesv_ids
 
 
+class ObjectFieldNamesField(BaseField):
+    """Object field names' field metadata process/save class."""
+
+    def process(self):
+        """Processes and saves the classes metadata to hdf5."""
+        object_fields = ['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='object_fields',
+            data=str2ascii(object_fields),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+
 class Detection10x(Detection):
     """ Caltech Pedestrian detection (10x data) preprocessing functions """
 

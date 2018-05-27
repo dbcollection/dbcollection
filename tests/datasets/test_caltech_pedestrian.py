@@ -21,7 +21,8 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     BoundingBoxField,
     BoundingBoxvField,
     ClassLabelField,
-    ImageFilenamesField
+    ImageFilenamesField,
+    ObjectFieldNamesField
 )
 
 
@@ -542,4 +543,28 @@ class TestBoundingBoxvField:
         #     data=np.array(dummy_boxes, dtype=np.float32),
         #     dtype=np.float32,
         #     fillvalue=-1
+        # )
+
+
+@pytest.fixture()
+def mock_objfields_class(field_kwargs):
+    return ObjectFieldNamesField(**field_kwargs)
+
+
+class TestObjectFieldNamesField:
+    """Unit tests for the BoundingBoxvField class."""
+
+    def test_process(self, mocker, mock_objfields_class):
+        mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
+
+        mock_objfields_class.process()
+
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='object_fields',
+        #     data=str2ascii(['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']),
+        #     dtype=np.float8,
+        #     fillvalue=0
         # )
