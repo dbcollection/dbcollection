@@ -211,6 +211,7 @@ class TestDetectionTask:
         mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
         mock_bboxv_field = mocker.patch.object(BoundingBoxvField, "process", return_value=dummy_ids)
         mock_object_fields = mocker.patch.object(Detection, "process_object_fields")
+        mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
 
         set_name = 'train'
         mock_detection_class.process_set_metadata(test_data, set_name)
@@ -220,6 +221,7 @@ class TestDetectionTask:
         mock_bbox_field.assert_called_once_with()
         mock_bboxv_field.assert_called_once_with()
         mock_object_fields.assert_called_once_with(set_name)
+        mock_objfields_field.assert_called_once_with()
 
     def test_process_object_fields(self, mocker, mock_detection_class):
         mock_save_hdf5 = mocker.patch.object(Detection, "save_field_to_hdf5")

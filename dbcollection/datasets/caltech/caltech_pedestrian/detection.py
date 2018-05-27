@@ -160,6 +160,7 @@ class Detection(BaseTaskNew):
         label_ids = []
         occlusion_ids = []
         object_id = []
+        ObjectFieldNamesField(**args).process()
         self.process_object_fields(set_name)
 
     def process_object_fields(self, set_name):
