@@ -417,8 +417,9 @@ class ImageFilenamesField(BaseField):
         """Processes and saves the image filenames metadata to hdf5."""
         if self.verbose:
             print('> Processing the image filenames metadata...')
-        image_filenames, image_filenames_ids = self.get_image_filenames_from_data()
-        image_filenames_ids = self.get_image_filenames_obj_ids_from_data()
+        image_filenames_unique = self.get_image_filenames_from_data()
+        image_filenames_unique_ids = self.get_image_filenames_obj_ids_from_data()
+        image_filenames = [image_filenames_unique[id] for id in image_filenames_unique_ids]
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='image_filenames',
@@ -426,7 +427,14 @@ class ImageFilenamesField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
-        return image_filenames_ids
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='image_filenames_unique',
+            data=str2ascii(image_filenames_unique),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+        return list(range(len(image_filenames_unique_ids)))
 
     def get_image_filenames_from_data(self):
         """Returns a list of sorted image filenames for a sequence of partitions + video sets."""
