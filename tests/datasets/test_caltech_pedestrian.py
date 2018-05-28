@@ -404,10 +404,10 @@ class TestImageFilenamesField:
 
         img_ids = mock_imagefilename_class.process()
 
-        assert img_ids == [0, 0, 1, 1]
+        assert img_ids == list(range(4))
         mock_get_filenames.assert_called_once_with()
         mock_get_ids.assert_called_once_with()
-        assert mock_save_hdf5.called
+        assert mock_save_hdf5.call_count == 2
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
