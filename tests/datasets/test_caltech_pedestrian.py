@@ -208,9 +208,9 @@ class TestDetectionTask:
         }
 
     def test_process_set_metadata(self, mocker, mock_detection_class, test_data):
-        dummy_ids = [0, 0, 0, 1, 1, 1]
+        dummy_ids = list(range(6))
         mock_classes_field = mocker.patch.object(ClassLabelField, "process", return_value=dummy_ids)
-        mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
+        mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=(dummy_ids, [0, 0, 0, 1, 1, 1]))
         mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
         mock_bboxv_field = mocker.patch.object(BoundingBoxvField, "process", return_value=dummy_ids)
         mock_lblid_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
@@ -402,9 +402,10 @@ class TestImageFilenamesField:
         mock_get_ids = mocker.patch.object(ImageFilenamesField, "get_image_filenames_obj_ids_from_data", return_value=[0, 0, 1, 1])
         mock_save_hdf5 = mocker.patch.object(ImageFilenamesField, "save_field_to_hdf5")
 
-        img_ids = mock_imagefilename_class.process()
+        img_ids, img_ids_unique = mock_imagefilename_class.process()
 
         assert img_ids == list(range(4))
+        assert img_ids_unique == [0, 0, 1, 1]
         mock_get_filenames.assert_called_once_with()
         mock_get_ids.assert_called_once_with()
         assert mock_save_hdf5.call_count == 2

@@ -154,7 +154,7 @@ class Detection(BaseTaskNew):
         }
 
         class_ids = ClassLabelField(**args).process(self.classes)
-        image_filenames_ids = ImageFilenamesField(**args).process()
+        image_filenames_ids, image_filenames_unique_ids = ImageFilenamesField(**args).process()
         bbox_ids = BoundingBoxField(**args).process()
         bboxv_ids = BoundingBoxvField(**args).process()
         label_ids = LabelIdField(**args).process()
@@ -434,7 +434,7 @@ class ImageFilenamesField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
-        return list(range(len(image_filenames_unique_ids)))
+        return list(range(len(image_filenames_unique_ids))), image_filenames_unique_ids
 
     def get_image_filenames_from_data(self):
         """Returns a list of sorted image filenames for a sequence of partitions + video sets."""
