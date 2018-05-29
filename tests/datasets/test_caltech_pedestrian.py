@@ -25,7 +25,8 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     LabelIdField,
     ObjectFieldNamesField,
     ObjectIdsField,
-    OcclusionField
+    OcclusionField,
+    ImageFilenamesPerClassList
 )
 
 
@@ -208,7 +209,9 @@ class TestDetectionTask:
         }
 
     def test_process_set_metadata(self, mocker, mock_detection_class, test_data):
+        classes = ('person', 'person-fa', 'people', 'person?')
         dummy_ids = list(range(6))
+        dummy_object_ids = [[i, i, i, i, i, i] for i in range(6)]
         mock_classes_field = mocker.patch.object(ClassLabelField, "process", return_value=dummy_ids)
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=(dummy_ids, [0, 0, 0, 1, 1, 1]))
         mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
@@ -216,12 +219,13 @@ class TestDetectionTask:
         mock_lblid_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_occlusion_field = mocker.patch.object(OcclusionField, "process", return_value=dummy_ids)
         mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
-        mock_objids_field = mocker.patch.object(ObjectIdsField, "process")
+        mock_objids_field = mocker.patch.object(ObjectIdsField, "process", return_value=dummy_object_ids)
+        mock_img_per_class_list = mocker.patch.object(ImageFilenamesPerClassList, "process")
 
         set_name = 'train'
         mock_detection_class.process_set_metadata(test_data, set_name)
 
-        mock_classes_field.assert_called_once_with(('person', 'person-fa', 'people', 'person?'))
+        mock_classes_field.assert_called_once_with(classes)
         mock_image_field.assert_called_once_with()
         mock_bbox_field.assert_called_once_with()
         mock_bboxv_field.assert_called_once_with()
@@ -236,6 +240,7 @@ class TestDetectionTask:
             label_ids=dummy_ids,
             occlusion_ids=dummy_ids
         )
+        mock_img_per_class_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1], classes)
 
 
 @pytest.fixture()
@@ -681,7 +686,7 @@ class TestObjectIdsField:
         bboxv_ids = range(6)
         label_ids = range(6)
         occlusion_ids = range(6)
-        mock_objfids_class.process(
+        object_ids = mock_objfids_class.process(
             image_filenames_ids=image_filenames_ids,
             class_ids=class_ids,
             bbox_ids=bbox_ids,
@@ -690,6 +695,9 @@ class TestObjectIdsField:
             occlusion_ids=occlusion_ids
         )
 
+        expected_ids = [[image_filenames_ids[i], class_ids[i], bbox_ids[i],
+                         bboxv_ids[i], label_ids[i], occlusion_ids[i]] for i in range(6)]
+        assert object_ids == expected_ids
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
         # object_ids = [[image_filenames_ids[i], class_ids[i], bbox_ids[i],
@@ -702,3 +710,48 @@ class TestObjectIdsField:
         #     dtype=np.int32,
         #     fillvalue=-1
         # )
+
+
+@pytest.fixture()
+def mock_img_per_class_list(field_kwargs):
+    return ImageFilenamesPerClassList(**field_kwargs)
+
+
+class TestImageFilenamesPerClassList:
+    """Unit tests for the ImageFilenamesPerClassList class."""
+
+    def test_process(self, mocker, mock_img_per_class_list):
+        dummy_ids = [[0, 1], [2, 3], [4, 5]]
+        mock_get_ids = mocker.patch.object(ImageFilenamesPerClassList, "get_image_filename_ids_per_class", return_value=dummy_ids)
+        mock_save_hdf5 = mocker.patch.object(ImageFilenamesPerClassList, "save_field_to_hdf5")
+
+        object_ids = [[i, i, i, i] for i in range(6)]
+        image_unique_ids = [0, 0, 1, 1, 2, 2]
+        classes = ('person', 'person-fa', 'people', 'person?')
+        mock_img_per_class_list.process(object_ids, image_unique_ids, classes)
+
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='object_ids',
+        #     data=np.array(pad_list(list_image_filenames_per_class, val=-1), dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_image_filename_ids_per_class(self, mocker, mock_img_per_class_list):
+        object_ids = [[i, i, i, i] for i in range(6)]
+        object_ids = [
+            [0, 0, 1, 1],
+            [1, 0, 1, 1],
+            [2, 1, 1, 1],
+            [3, 1, 1, 1],
+            [4, 0, 1, 1],
+            [5, 2, 1, 1]
+        ]
+        image_unique_ids = [0, 0, 1, 1, 2, 2]
+        classes = ('person', 'person-fa', 'people', 'person?')
+        images_per_class_ids = mock_img_per_class_list.get_image_filename_ids_per_class(object_ids, image_unique_ids, classes)
+
+        assert images_per_class_ids == [[0, 2], [1], [2], []]

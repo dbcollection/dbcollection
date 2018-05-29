@@ -153,6 +153,7 @@ class Detection(BaseTaskNew):
             "verbose": self.verbose
         }
 
+        # Fields
         class_ids = ClassLabelField(**args).process(self.classes)
         image_filenames_ids, image_filenames_unique_ids = ImageFilenamesField(**args).process()
         bbox_ids = BoundingBoxField(**args).process()
@@ -160,7 +161,7 @@ class Detection(BaseTaskNew):
         label_ids = LabelIdField(**args).process()
         occlusion_ids = OcclusionField(**args).process()
         ObjectFieldNamesField(**args).process()
-        ObjectIdsField(**args).process(
+        object_ids = ObjectIdsField(**args).process(
             image_filenames_ids=image_filenames_ids,
             class_ids=class_ids,
             bbox_ids=bbox_ids,
@@ -168,6 +169,9 @@ class Detection(BaseTaskNew):
             label_ids=label_ids,
             occlusion_ids=occlusion_ids
         )
+
+        # Lists
+        ImageFilenamesPerClassList(**args).process(object_ids, image_filenames_unique_ids, self.classes)
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
@@ -615,6 +619,32 @@ class ObjectIdsField(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
+        return object_ids
+
+
+class ImageFilenamesPerClassList(BaseField):
+    """Images per class list metadata process/save class."""
+
+    def process(self, object_ids, image_unique_ids, classes):
+        """Processes and saves the list ids metadata to hdf5."""
+        image_filenames_per_class = self.get_image_filename_ids_per_class(object_ids, image_unique_ids, classes)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_image_filenames_per_class',
+            data=np.array(pad_list(image_filenames_per_class, val=-1), dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_image_filename_ids_per_class(self, object_ids, image_unique_ids, classes):
+        """Returns a list of lists of image filename ids per class id."""
+        images_per_class_ids = []
+        for i in range(len(classes)):
+            imgs_per_class = [image_unique_ids[j] for j, val in enumerate(object_ids) if val[1] == i]
+            imgs_per_class = list(set(imgs_per_class))  # get unique values
+            imgs_per_class.sort()
+            images_per_class_ids.append(imgs_per_class)
+        return images_per_class_ids
 
 
 class Detection10x(Detection):
