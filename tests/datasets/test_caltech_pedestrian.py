@@ -741,7 +741,6 @@ class TestImageFilenamesPerClassList:
         # )
 
     def test_get_image_filename_ids_per_class(self, mocker, mock_img_per_class_list):
-        object_ids = [[i, i, i, i] for i in range(6)]
         object_ids = [
             [0, 0, 1, 1],
             [1, 0, 1, 1],
