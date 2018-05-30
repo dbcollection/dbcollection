@@ -27,6 +27,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     ObjectIdsField,
     OcclusionField,
     BoundingBoxPerImageList,
+    BoundingBoxvPerImageList,
     ImageFilenamesPerClassList
 )
 
@@ -223,6 +224,7 @@ class TestDetectionTask:
         mock_objids_field = mocker.patch.object(ObjectIdsField, "process", return_value=dummy_object_ids)
         mock_img_per_class_list = mocker.patch.object(ImageFilenamesPerClassList, "process")
         mock_bbox_per_img_list = mocker.patch.object(BoundingBoxPerImageList, "process")
+        mock_bboxv_per_img_list = mocker.patch.object(BoundingBoxvPerImageList, "process")
 
         set_name = 'train'
         mock_detection_class.process_set_metadata(test_data, set_name)
@@ -244,6 +246,7 @@ class TestDetectionTask:
         )
         mock_img_per_class_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1], classes)
         mock_bbox_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
+        mock_bboxv_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
 
 
 @pytest.fixture()
@@ -797,4 +800,45 @@ class TestBoundingBoxPerImageList:
         ]
         image_unique_ids = [0, 0, 1, 1, 2, 2]
         bboxes_per_image = mock_bbox_per_img_list.get_bbox_ids_per_image(object_ids, image_unique_ids)
+        assert bboxes_per_image == [[0, 1], [2, 3], [4, 5]]
+
+
+@pytest.fixture()
+def mock_bboxv_per_img_list(field_kwargs):
+    return BoundingBoxvPerImageList(**field_kwargs)
+
+
+class TestBoundingBoxvPerImageList:
+    """Unit tests for the BoundingBoxvPerImageList class."""
+
+    def test_process(self, mocker, mock_bboxv_per_img_list):
+        dummy_ids = [[0, 1], [2, 3], [4, 5]]
+        mock_get_ids = mocker.patch.object(BoundingBoxvPerImageList, "get_bboxv_ids_per_image", return_value=dummy_ids)
+        mock_save_hdf5 = mocker.patch.object(BoundingBoxvPerImageList, "save_field_to_hdf5")
+
+        object_ids = [[i, i, i, i] for i in range(6)]
+        image_unique_ids = [0, 0, 1, 1, 2, 2]
+        mock_bboxv_per_img_list.process(object_ids, image_unique_ids)
+
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='list_boxes_per_image',
+        #     data=np.array(pad_list(list_image_filenames_per_class, val=-1), dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_bbox_ids_per_image(self, mocker, mock_bboxv_per_img_list):
+        object_ids = [
+            [0, 0, 0, 0],
+            [1, 0, 1, 1],
+            [2, 1, 2, 2],
+            [3, 1, 3, 3],
+            [4, 0, 4, 4],
+            [5, 2, 5, 5]
+        ]
+        image_unique_ids = [0, 0, 1, 1, 2, 2]
+        bboxes_per_image = mock_bboxv_per_img_list.get_bboxv_ids_per_image(object_ids, image_unique_ids)
         assert bboxes_per_image == [[0, 1], [2, 3], [4, 5]]

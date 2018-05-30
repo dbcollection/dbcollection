@@ -173,6 +173,7 @@ class Detection(BaseTaskNew):
         # Lists
         ImageFilenamesPerClassList(**args).process(object_ids, image_filenames_unique_ids, self.classes)
         BoundingBoxPerImageList(**args).process(object_ids, image_filenames_unique_ids)
+        BoundingBoxvPerImageList(**args).process(object_ids, image_filenames_unique_ids)
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
@@ -663,7 +664,7 @@ class BoundingBoxPerImageList(BaseField):
         )
 
     def get_bbox_ids_per_image(self, object_ids, image_unique_ids):
-        """Returns a list of lists of image filename ids per class id."""
+        """Returns a list of lists of bounding boxes ids per image id."""
         bboxes_per_image_ids = []
         unique_ids = list(set(image_unique_ids))
         for i, image_id in enumerate(unique_ids):
@@ -672,6 +673,32 @@ class BoundingBoxPerImageList(BaseField):
             bboxes_per_image.sort()
             bboxes_per_image_ids.append(bboxes_per_image)
         return bboxes_per_image_ids
+
+
+class BoundingBoxvPerImageList(BaseField):
+    """Bounding boxes (v) per image list metadata process/save class."""
+
+    def process(self, object_ids, image_unique_ids):
+        """Processes and saves the list ids metadata to hdf5."""
+        bboxesv_per_image = self.get_bboxv_ids_per_image(object_ids, image_unique_ids)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_boxesv_per_image',
+            data=np.array(pad_list(bboxesv_per_image, val=-1), dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_bboxv_ids_per_image(self, object_ids, image_unique_ids):
+        """Returns a list of lists of bounding boxes (v) ids per image id."""
+        bboxesv_per_image_ids = []
+        unique_ids = list(set(image_unique_ids))
+        for i, image_id in enumerate(unique_ids):
+            bboxesv_per_image = [obj[3] for j, obj in enumerate(object_ids) if image_unique_ids[obj[0]] == image_id]
+            bboxesv_per_image = list(set(bboxesv_per_image))  # get unique values
+            bboxesv_per_image.sort()
+            bboxesv_per_image_ids.append(bboxesv_per_image)
+        return bboxesv_per_image_ids
 
 
 class Detection10x(Detection):
