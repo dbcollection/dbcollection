@@ -174,6 +174,7 @@ class Detection(BaseTaskNew):
         ImageFilenamesPerClassList(**args).process(object_ids, image_filenames_unique_ids, self.classes)
         BoundingBoxPerImageList(**args).process(object_ids, image_filenames_unique_ids)
         BoundingBoxvPerImageList(**args).process(object_ids, image_filenames_unique_ids)
+        ObjectsPerImageList(**args).process(object_ids, image_filenames_unique_ids)
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
@@ -699,6 +700,32 @@ class BoundingBoxvPerImageList(BaseField):
             bboxesv_per_image.sort()
             bboxesv_per_image_ids.append(bboxesv_per_image)
         return bboxesv_per_image_ids
+
+
+class ObjectsPerImageList(BaseField):
+    """Objects per image list metadata process/save class."""
+
+    def process(self, object_ids, image_unique_ids):
+        """Processes and saves the list ids metadata to hdf5."""
+        object_ids_per_image = self.get_object_ids_per_image(object_ids, image_unique_ids)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_object_ids_per_image',
+            data=np.array(pad_list(object_ids_per_image, val=-1), dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_object_ids_per_image(self, object_ids, image_unique_ids):
+        """Returns a list of lists of object ids per image id."""
+        objects_per_image_ids = []
+        unique_ids = list(set(image_unique_ids))
+        for i, image_id in enumerate(unique_ids):
+            objects_per_image = [j for j, obj in enumerate(object_ids) if image_unique_ids[obj[0]] == image_id]
+            objects_per_image = list(set(objects_per_image))  # get unique values
+            objects_per_image.sort()
+            objects_per_image_ids.append(objects_per_image)
+        return objects_per_image_ids
 
 
 # -----------------------------------------------------------
