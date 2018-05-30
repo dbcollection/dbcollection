@@ -429,17 +429,17 @@ class TestClassLabelField:
         #     fillvalue=-1
         # )
 
-    def test_get_class_labels_ids(self, mocker, mock_classlabel_class, test_data_loaded):
+    def test_get_class_labels_ids(self, mocker, mock_classlabel_class):
         def dummy_generator():
             labels = ('person', 'person-fa', 'people', 'person?')
             for label in labels:
                 yield {"obj": {"lbl": label}}
-        mock_get_generator = mocker.patch.object(ClassLabelField, "get_annotation_objects_generator", return_value=dummy_generator)
+        mock_get_generator = mocker.patch.object(ClassLabelField, "get_annotation_objects_generator", side_effect=dummy_generator)
 
         classes = ('person', 'person-fa', 'people', 'person?')
         class_ids = mock_classlabel_class.get_class_labels_ids(classes)
 
-        mock_get_generator.assert_called_once_with(test_data_loaded)
+        mock_get_generator.assert_called_once_with()
         assert class_ids == list(range(4))
 
 
@@ -498,16 +498,16 @@ class TestBoundingBoxBaseField:
     """Unit tests for the BoundingBoxBaseField class."""
 
     @pytest.mark.parametrize('bbox_type', ['pos', 'posv'])
-    def test_get_bboxes_from_data(self, mocker, mock_bboxbase_class, test_data_loaded, bbox_type):
+    def test_get_bboxes_from_data(self, mocker, mock_bboxbase_class, bbox_type):
         def dummy_generator():
             for i in range(5):
                 yield {"obj": {"pos": [1, 1, 10, 10], "posv": [1, 1, 1, 1]}, "obj_counter": i}
-        mock_get_generator = mocker.patch.object(BoundingBoxBaseField, "get_annotation_objects_generator", return_value=dummy_generator)
+        mock_get_generator = mocker.patch.object(BoundingBoxBaseField, "get_annotation_objects_generator", side_effect=dummy_generator)
         mock_get_bbox = mocker.patch.object(BoundingBoxBaseField, "get_bbox_by_type", return_value=[1, 1, 1, 1])
 
         boxes, ids = mock_bboxbase_class.get_bboxes_from_data(bbox_type)
 
-        mock_get_generator.assert_called_once_with(test_data_loaded)
+        mock_get_generator.assert_called_once_with()
         assert mock_get_bbox.call_count == 5
         assert boxes == [[1, 1, 1, 1] for i in range(5)]
         assert ids == list(range(5))
@@ -630,17 +630,17 @@ class TestLabelIdField:
         #     fillvalue=-1
         # )
 
-    def test_get_label_ids(self, mocker, mock_lblid_class, test_data_loaded):
+    def test_get_label_ids(self, mocker, mock_lblid_class):
         def dummy_generator():
             for i in range(5):
                 yield {"obj": {"id": i}, "obj_counter": i}
-        mock_get_generator = mocker.patch.object(LabelIdField, "get_annotation_objects_generator", return_value=dummy_generator)
+        mock_get_generator = mocker.patch.object(LabelIdField, "get_annotation_objects_generator", side_effect=dummy_generator)
         mock_get_id = mocker.patch.object(LabelIdField, "get_id", return_value=10)
 
         labels, label_ids = mock_lblid_class.get_label_ids()
 
         assert labels == [10 for i in range(5)]
-        mock_get_generator.assert_called_once_with(test_data_loaded)
+        mock_get_generator.assert_called_once_with()
         assert label_ids == list(range(5))
 
     @pytest.mark.parametrize('obj', [{'id': None}, {'id': 1}, {'id': 'val'}])
@@ -681,16 +681,16 @@ class TestOcclusionField:
         #     fillvalue=-1
         # )
 
-    def test_get_label_ids(self, mocker, mock_occlusion_class, test_data_loaded):
+    def test_get_label_ids(self, mocker, mock_occlusion_class):
         def dummy_generator():
             for i in range(5):
                 yield {"obj": {"occl": 0}, "obj_counter": i}
-        mock_get_generator = mocker.patch.object(OcclusionField, "get_annotation_objects_generator", return_value=dummy_generator)
+        mock_get_generator = mocker.patch.object(OcclusionField, "get_annotation_objects_generator", side_effect=dummy_generator)
 
         occlusions, occlusion_ids = mock_occlusion_class.get_occlusion_ids()
 
         assert occlusions == [0 for i in range(5)]
-        mock_get_generator.assert_called_once_with(test_data_loaded)
+        mock_get_generator.assert_called_once_with()
         assert occlusion_ids == list(range(5))
 
 

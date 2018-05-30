@@ -303,8 +303,8 @@ class ClassLabelField(BaseField):
     def get_class_labels_ids(self, classes):
         """Returns a list of label ids for each row of 'object_ids' field."""
         class_ids = []
-        annotations_generator = self.get_annotation_objects_generator(self.data)
-        for annotation in annotations_generator():
+        annotations_generator = self.get_annotation_objects_generator()
+        for annotation in annotations_generator:
             class_ids.append(classes.index(annotation['obj']['lbl']))
         return class_ids
 
@@ -350,8 +350,8 @@ class ImageFilenamesField(BaseField):
         """Returns a list of image ids for each row of 'object_ids' field."""
         image_filenames_ids = []
         annotations_generator = self.get_annotation_objects_generator()
-        for annotation in annotations_generator():
-            image_filenames_ids.append(annotation['img_counter'])
+        for annotation in annotations_generator:
+            image_filenames_ids.append(annotation['image_counter'])
         return image_filenames_ids
 
 
@@ -362,8 +362,8 @@ class BoundingBoxBaseField(BaseField):
         """Returns a list of bounding boxes and a list
         of ids for each row of 'object_ids' field."""
         bbox, bbox_ids = [], []
-        annotations_generator = self.get_annotation_objects_generator(self.data)
-        for annotation in annotations_generator():
+        annotations_generator = self.get_annotation_objects_generator()
+        for annotation in annotations_generator:
             bbox.append(self.get_bbox_by_type(annotation["obj"], bbox_type))
             bbox_ids.append(annotation['obj_counter'])
         return bbox, bbox_ids
@@ -449,8 +449,8 @@ class LabelIdField(BaseField):
     def get_label_ids(self):
         """Returns a list of label ids for each row of 'object_ids' field."""
         labels, label_ids = [], []
-        annotations_generator = self.get_annotation_objects_generator(self.data)
-        for annotation in annotations_generator():
+        annotations_generator = self.get_annotation_objects_generator()
+        for annotation in annotations_generator:
             labels.append(self.get_id(annotation["obj"]))
             label_ids.append(annotation['obj_counter'])
         return labels, label_ids
@@ -485,8 +485,8 @@ class OcclusionField(BaseField):
     def get_occlusion_ids(self):
         """Returns a list of occlusion labels and ids for each row of 'object_ids' field."""
         occlusions, occlusion_ids = [], []
-        annotations_generator = self.get_annotation_objects_generator(self.data)
-        for annotation in annotations_generator():
+        annotations_generator = self.get_annotation_objects_generator()
+        for annotation in annotations_generator:
             occlusions.append(annotation["obj"]["occl"])
             occlusion_ids.append(annotation['obj_counter'])
         return occlusions, occlusion_ids
