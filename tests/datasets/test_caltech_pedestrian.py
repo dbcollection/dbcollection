@@ -23,6 +23,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     BoundingBoxvField,
     BoundingBoxvPerImageList,
     ClassLabelField,
+    DatasetLoader,
     ImageFilenamesField,
     ImageFilenamesPerClassList,
     LabelIdField,
@@ -253,6 +254,32 @@ class TestDetectionTask:
         mock_bboxv_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
         mock_object_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
         mock_object_per_class_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1], classes)
+
+
+@pytest.fixture()
+def mock_loader_class():
+    return DatasetLoader(
+        skip_step=30,
+        classes=('person', 'person-fa', 'people', 'person?'),
+        sets={
+            "train": ('set00', 'set01', 'set02', 'set03', 'set04', 'set05'),
+            "test": ('set06', 'set07', 'set08', 'set09', 'set10')
+        },
+        is_clean=False
+    )
+
+
+class TestDatasetLoader:
+    """Unit tests for the DatasetLoader class."""
+
+    def test_task_attributes(self, mocker, mock_loader_class):
+        assert mock_loader_class.skip_step == 30
+        assert mock_loader_class.classes == ('person', 'person-fa', 'people', 'person?')
+        assert mock_loader_class.sets == {
+            "train": ('set00', 'set01', 'set02', 'set03', 'set04', 'set05'),
+            "test": ('set06', 'set07', 'set08', 'set09', 'set10')
+        }
+        assert mock_loader_class.is_clean == False
 
 
 @pytest.fixture()
