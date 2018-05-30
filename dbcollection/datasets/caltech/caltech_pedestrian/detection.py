@@ -57,6 +57,8 @@ class Detection(BaseTaskNew):
         }
 
         # Fields
+        if self.verbose:
+            print('\n==> Setting up the data fields:')
         class_ids = ClassLabelField(**args).process(self.classes)
         image_filenames_ids, image_filenames_unique_ids = ImageFilenamesField(**args).process()
         bbox_ids = BoundingBoxField(**args).process()
@@ -74,6 +76,8 @@ class Detection(BaseTaskNew):
         )
 
         # Lists
+        if self.verbose:
+            print('\n==> Setting up ordered lists:')
         ImageFilenamesPerClassList(**args).process(object_ids, image_filenames_unique_ids, self.classes)
         BoundingBoxPerImageList(**args).process(object_ids, image_filenames_unique_ids)
         BoundingBoxvPerImageList(**args).process(object_ids, image_filenames_unique_ids)
@@ -283,7 +287,7 @@ class ClassLabelField(BaseField):
     def process(self, classes):
         """Processes and saves the classes metadata to hdf5."""
         if self.verbose:
-            print('> Processing the class labels metadata...')
+            print('> Processing the class labels metadata...', end="", flush=True)
         classes_ids = self.get_class_labels_ids(classes)
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -292,6 +296,8 @@ class ClassLabelField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
+        if self.verbose:
+            print('   Done!')
         return classes_ids
 
     def get_class_labels_ids(self, classes):
@@ -309,7 +315,7 @@ class ImageFilenamesField(BaseField):
     def process(self):
         """Processes and saves the image filenames metadata to hdf5."""
         if self.verbose:
-            print('> Processing the image filenames metadata...')
+            print('> Processing the image filenames metadata...', end="", flush=True)
         image_filenames_unique = self.get_image_filenames_from_data()
         image_filenames_unique_ids = self.get_image_filenames_obj_ids_from_data()
         image_filenames = [image_filenames_unique[id] for id in image_filenames_unique_ids]
@@ -327,6 +333,8 @@ class ImageFilenamesField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
+        if self.verbose:
+            print('   Done!')
         return list(range(len(image_filenames_unique_ids))), image_filenames_unique_ids
 
     def get_image_filenames_from_data(self):
@@ -385,7 +393,7 @@ class BoundingBoxField(BoundingBoxBaseField):
     def process(self):
         """Processes and saves the annotation's bounding boxes metadata to hdf5."""
         if self.verbose:
-            print('> Processing the pedestrian bounding boxes metadata...')
+            print('> Processing the pedestrian bounding boxes metadata...', end="", flush=True)
         bboxes, bboxes_ids = self.get_bboxes_from_data('pos')
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -394,6 +402,8 @@ class BoundingBoxField(BoundingBoxBaseField):
             dtype=np.float32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
         return bboxes_ids
 
 
@@ -403,7 +413,7 @@ class BoundingBoxvField(BoundingBoxBaseField):
     def process(self):
         """Processes and saves the annotation's bounding boxes (v) metadata to hdf5."""
         if self.verbose:
-            print('> Processing the pedestrian bounding boxes (v) metadata...')
+            print('> Processing the pedestrian bounding boxes (v) metadata...', end="", flush=True)
         bboxesv, bboxesv_ids = self.get_bboxes_from_data('posv')
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -412,6 +422,8 @@ class BoundingBoxvField(BoundingBoxBaseField):
             dtype=np.float32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
         return bboxesv_ids
 
 
@@ -421,7 +433,7 @@ class LabelIdField(BaseField):
     def process(self):
         """Processes and saves the annotation's label metadata to hdf5."""
         if self.verbose:
-            print('> Processing the pedestrian labels metadata...')
+            print('> Processing the pedestrian labels metadata...', end="", flush=True)
         labels, label_ids = self.get_label_ids()
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -430,6 +442,8 @@ class LabelIdField(BaseField):
             dtype=np.float32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
         return label_ids
 
     def get_label_ids(self):
@@ -455,7 +469,7 @@ class OcclusionField(BaseField):
     def process(self):
         """Processes and saves the annotation's occlusion metadata to hdf5."""
         if self.verbose:
-            print('> Processing the pedestrian occlusion metadata...')
+            print('> Processing the pedestrian occlusion metadata...', end="", flush=True)
         occlusions, occlusion_ids = self.get_occlusion_ids()
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -464,6 +478,8 @@ class OcclusionField(BaseField):
             dtype=np.float32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
         return occlusion_ids
 
     def get_occlusion_ids(self):
@@ -516,6 +532,8 @@ class ImageFilenamesPerClassList(BaseField):
 
     def process(self, object_ids, image_unique_ids, classes):
         """Processes and saves the list ids metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the image filenames per class list...', end="", flush=True)
         image_filenames_per_class = self.get_image_filename_ids_per_class(object_ids, image_unique_ids, classes)
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -524,6 +542,8 @@ class ImageFilenamesPerClassList(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
 
     def get_image_filename_ids_per_class(self, object_ids, image_unique_ids, classes):
         """Returns a list of lists of image filename ids per class id."""
@@ -541,6 +561,8 @@ class BoundingBoxPerImageList(BaseField):
 
     def process(self, object_ids, image_unique_ids):
         """Processes and saves the list ids metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the bounding boxes per image list...', end="", flush=True)
         bboxes_per_image = self.get_bbox_ids_per_image(object_ids, image_unique_ids)
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -549,6 +571,8 @@ class BoundingBoxPerImageList(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
 
     def get_bbox_ids_per_image(self, object_ids, image_unique_ids):
         """Returns a list of lists of bounding boxes ids per image id."""
@@ -567,6 +591,8 @@ class BoundingBoxvPerImageList(BaseField):
 
     def process(self, object_ids, image_unique_ids):
         """Processes and saves the list ids metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the bounding boxes (v) per image list...', end="", flush=True)
         bboxesv_per_image = self.get_bboxv_ids_per_image(object_ids, image_unique_ids)
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -575,6 +601,8 @@ class BoundingBoxvPerImageList(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
 
     def get_bboxv_ids_per_image(self, object_ids, image_unique_ids):
         """Returns a list of lists of bounding boxes (v) ids per image id."""
@@ -593,6 +621,8 @@ class ObjectsPerImageList(BaseField):
 
     def process(self, object_ids, image_unique_ids):
         """Processes and saves the list ids metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the objects per image list...', end="", flush=True)
         object_ids_per_image = self.get_object_ids_per_image(object_ids, image_unique_ids)
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -601,6 +631,8 @@ class ObjectsPerImageList(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
 
     def get_object_ids_per_image(self, object_ids, image_unique_ids):
         """Returns a list of lists of object ids per image id."""
@@ -619,6 +651,8 @@ class ObjectsPerClassList(BaseField):
 
     def process(self, object_ids, image_unique_ids, classes):
         """Processes and saves the list ids metadata to hdf5."""
+        if self.verbose:
+            print('> Processing the objects per class list...', end="", flush=True)
         objects_ids_per_class = self.get_object_ids_per_class(object_ids, image_unique_ids, classes)
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -627,6 +661,8 @@ class ObjectsPerClassList(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
+        if self.verbose:
+            print('   Done!')
 
     def get_object_ids_per_class(self, object_ids, image_unique_ids, classes):
         """Returns a list of lists of object ids per class id."""
