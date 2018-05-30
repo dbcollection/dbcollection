@@ -4,7 +4,14 @@ Caltech Pedestrian Dataset download/process functions.
 
 
 from dbcollection.datasets import BaseDatasetNew
-from .detection import Detection, Detection10x, Detection30x
+from .detection import (
+    Detection,
+    DetectionClean,
+    Detection10x,
+    Detection10xClean,
+    Detection30x,
+    Detection30xClean
+)
 
 url_path = 'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/'
 urls = (
@@ -24,8 +31,11 @@ urls = (
 keywords = ('image_processing', 'detection', 'pedestrian')
 tasks = {
     "detection": Detection,
+    "detection_clean": DetectionClean,
     "detection_10x": Detection10x,
+    "detection_10x_clean": Detection10xClean,
     "detection_30x": Detection30x,
+    "detection_30x_clean": Detection30xClean
 }
 default_task = 'detection'
 
