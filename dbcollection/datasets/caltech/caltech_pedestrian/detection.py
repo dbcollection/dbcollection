@@ -13,7 +13,6 @@ from dbcollection.datasets import BaseTaskNew
 from dbcollection.utils.file_load import load_json
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
-from dbcollection.utils.hdf5 import hdf5_write_data
 from dbcollection.utils.db.caltech_pedestrian_extractor.converter import extract_data
 
 
