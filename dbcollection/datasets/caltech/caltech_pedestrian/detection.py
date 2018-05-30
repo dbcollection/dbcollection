@@ -156,16 +156,16 @@ class DatasetLoader(object):
 
     def get_annotations_from_partition(self, path, partition):
         """Returns all image and annotation filenames (ordered) of a set partition from disk."""
-        partition_annotations = {}
+        image_filenames = {}
+        annotation_filenames = {}
         dirs = self.get_sorted_object_names_from_dir(os.path.join(path, partition))
         for video in dirs:
-            image_filenames = self.get_image_filenames_from_dir(path, partition, video)
-            annotation_filenames = self.get_annotation_filenames_from_dir(path, partition, video)
-            partition_annotations[video] = {
+            image_filenames[video] = self.get_image_filenames_from_dir(path, partition, video)
+            annotation_filenames[video] = self.get_annotation_filenames_from_dir(path, partition, video)
+        return {
                 "images": image_filenames,
                 "annotations": annotation_filenames
             }
-        return partition_annotations
 
     def get_sorted_object_names_from_dir(self, path):
         """Returns a sorted list containing the names of

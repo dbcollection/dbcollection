@@ -214,8 +214,14 @@ class TestDatasetLoader:
         assert mock_get_image_fnames.call_count  == 2
         assert mock_get_annotation_fnames.call_count  == 2
         assert partition_annotations == {
-            "V000": {"images":  ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']},
-            "V001": {"images":  ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']}
+            "images": {
+                "V000": ['image1.jpg', 'image2.jpg'],
+                "V001": ['image1.jpg', 'image2.jpg']
+            },
+            "annotations":{
+                "V000": ['annotation1.json', 'annotation2.json'],
+                "V001": ['annotation1.json', 'annotation2.json'],
+            }
         }
 
     def test_get_sorted_object_names_from_dir(self, mocker, mock_loader_class):
