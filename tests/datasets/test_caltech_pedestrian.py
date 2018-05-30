@@ -267,7 +267,8 @@ def mock_loader_class():
         },
         is_clean=False,
         data_path='/some/path/data',
-        cache_path='/some/path/cache'
+        cache_path='/some/path/cache',
+        verbose=True
     )
 
 
@@ -284,6 +285,7 @@ class TestDatasetLoader:
         assert mock_loader_class.is_clean == False
         assert mock_loader_class.data_path=='/some/path/data'
         assert mock_loader_class.cache_path=='/some/path/cache'
+        assert mock_loader_class.verbose==True
 
 
 @pytest.fixture()
