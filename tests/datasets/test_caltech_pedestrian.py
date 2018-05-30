@@ -265,7 +265,9 @@ def mock_loader_class():
             "train": ('set00', 'set01', 'set02', 'set03', 'set04', 'set05'),
             "test": ('set06', 'set07', 'set08', 'set09', 'set10')
         },
-        is_clean=False
+        is_clean=False,
+        data_path='/some/path/data',
+        cache_path='/some/path/cache'
     )
 
 
@@ -280,6 +282,8 @@ class TestDatasetLoader:
             "test": ('set06', 'set07', 'set08', 'set09', 'set10')
         }
         assert mock_loader_class.is_clean == False
+        assert mock_loader_class.data_path=='/some/path/data'
+        assert mock_loader_class.cache_path=='/some/path/cache'
 
 
 @pytest.fixture()

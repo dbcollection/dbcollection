@@ -33,8 +33,16 @@ class Detection(BaseTaskNew):
         """
         Fetches the train/test data.
         """
-        yield {"train": self.load_data_set(is_test=False)}
-        yield {"test": self.load_data_set(is_test=True)}
+        loader = DatasetLoader(
+            skip_step=self.skip_step,
+            classes=self.classes,
+            sets=self.sets,
+            is_clean=self.is_clean,
+            data_path=self.data_path,
+            cache_path=self.cache_path
+        )
+        yield {"train": loader.load_train_data()}
+        yield {"test": loader.load_test_data()}
 
     def load_data_set(self, is_test):
         """Fetches the train/test data."""
@@ -181,11 +189,13 @@ class Detection(BaseTaskNew):
 class DatasetLoader(object):
     """Annotation's data loader for the caltech's dataset (train/test)."""
 
-    def __init__(self, skip_step, classes, sets, is_clean):
+    def __init__(self, skip_step, classes, sets, is_clean, data_path, cache_path):
         self.skip_step = skip_step
         self.classes = classes
         self.sets = sets
         self.is_clean = is_clean
+        self.data_path = data_path
+        self.cache_path = cache_path
 
     def load_train_data(self):
         """Loads the train set annotation data from disk and returns
