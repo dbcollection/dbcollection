@@ -287,6 +287,138 @@ class TestDatasetLoader:
         assert mock_loader_class.cache_path=='/some/path/cache'
         assert mock_loader_class.verbose==True
 
+    def test_load_data_set(self, mocker, mock_loader_class):
+        dummy_images, dummy_annotations = ['image1.jpg', 'image2.jpg'], ['annot1.json', 'annot2.json']
+        dummy_annot_data = ['obj1', 'obj2']
+        mock_unpack_data = mocker.patch.object(DatasetLoader, "unpack_raw_data_files", return_value='/some/path/data/')
+        mock_get_partitions = mocker.patch.object(DatasetLoader, "get_set_partitions", return_value=('train', ('set00', 'set01')))
+        mock_get_annotations = mocker.patch.object(DatasetLoader, "get_annotations_data", return_value=(dummy_images, dummy_annotations))
+        mock_load_annotations = mocker.patch.object(DatasetLoader, "load_annotations", return_value=dummy_annot_data)
+
+        set_data = mock_loader_class.load_data_set(False)
+
+        mock_unpack_data.assert_called_once_with()
+        mock_get_partitions.assert_called_once_with(is_test=False)
+        mock_get_annotations.assert_called_once_with('train', ('set00', 'set01'), '/some/path/data/')
+        mock_load_annotations.assert_called_once_with(dummy_annotations)
+        assert sorted(list(set_data.keys())) == ["annotations", "image_filenames"]
+        assert set_data["image_filenames"] == dummy_images
+        assert set_data["annotations"] == dummy_annot_data
+
+    @pytest.mark.parametrize('is_test', [False, True])
+    def test_get_set_partitions(self, mocker, mock_loader_class, is_test):
+        set_name, partitions = mock_loader_class.get_set_partitions(is_test=is_test)
+
+        if is_test:
+            assert set_name == 'test'
+            assert partitions == ('set06', 'set07', 'set08', 'set09', 'set10')
+        else:
+            assert set_name == 'train'
+            assert partitions == ('set00', 'set01', 'set02', 'set03', 'set04', 'set05')
+
+    def test_get_annotations_data(self, mocker, mock_loader_class):
+        test_data = {"images": ['image1', 'image2'], "annotations": ['annotation1', 'annotation2']}
+        mock_get_annotations = mocker.patch.object(DatasetLoader, 'get_annotations_from_partition', return_value=test_data)
+
+        set_name = 'train'
+        partitions = ('set00', 'set01')
+        unpack_dir = os.path.join('some', 'path', 'to', 'extracted', 'data', 'dir')
+        image_filenames, annotation_filenames = mock_loader_class.get_annotations_data(set_name, partitions, unpack_dir)
+
+        assert mock_get_annotations.call_count == 2
+        assert image_filenames == {"set00": test_data['images'], "set01": test_data['images']}
+        assert annotation_filenames == {"set00": test_data['annotations'], "set01": test_data['annotations']}
+
+    def test_get_annotations_from_partition(self, mocker, mock_loader_class):
+        mock_get_dirs = mocker.patch.object(DatasetLoader, 'get_sorted_object_names_from_dir', return_value=('V000', 'V001'))
+        mock_get_image_fnames = mocker.patch.object(DatasetLoader, 'get_image_filenames_from_dir', return_value=['image1.jpg', 'image2.jpg'])
+        mock_get_annotation_fnames = mocker.patch.object(DatasetLoader, 'get_annotation_filenames_from_dir', return_value=['annotation1.json', 'annotation2.json'])
+
+        path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
+        partition = 'set00'
+        partition_annotations = mock_loader_class.get_annotations_from_partition(path, partition)
+
+        mock_get_dirs.assert_called_once_with(os.path.join(path, partition))
+        assert mock_get_image_fnames.call_count  == 2
+        assert mock_get_annotation_fnames.call_count  == 2
+        assert partition_annotations == {
+            "V000": {"images":  ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']},
+            "V001": {"images":  ['image1.jpg', 'image2.jpg'], "annotations": ['annotation1.json', 'annotation2.json']}
+        }
+
+    def test_get_sorted_object_names_from_dir(self, mocker, mock_loader_class):
+        mock_listdir = mocker.patch('os.listdir', return_value=['dir2', 'dir1', 'dir3'])
+
+        path = os.path.join('some', 'path', 'to', 'dir')
+        object_names = mock_loader_class.get_sorted_object_names_from_dir(path)
+
+        mock_listdir.assert_called_once_with(path)
+        assert object_names == ['dir1', 'dir2', 'dir3']
+
+    def test_get_image_filenames_from_dir(self, mocker, mock_loader_class):
+        mock_get_data = mocker.patch.object(DatasetLoader, 'get_sample_data_from_dir', return_value=['image1.jpg', 'image2.jpg'])
+
+        path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
+        partition = 'set00'
+        video = 'V000'
+        image_filenames = mock_loader_class.get_image_filenames_from_dir(path, partition, video)
+
+        mock_get_data.assert_called_once_with(path, partition, video, 'images')
+        assert image_filenames == ['image1.jpg', 'image2.jpg']
+
+    def test_get_sample_data_from_dir(self, mocker, mock_loader_class):
+        mock_get_filenames = mocker.patch.object(DatasetLoader, 'get_sorted_object_names_from_dir', return_value=['filename1', 'filename2'])
+        mock_get_sample = mocker.patch.object(DatasetLoader, 'get_sample_filenames', return_value=['filename1', 'filename2'])
+
+        path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
+        partition = 'set00'
+        video = 'V000'
+        type_data = 'images'
+        sample_filepaths = mock_loader_class.get_sample_data_from_dir(path, partition, video, type_data)
+
+        annot_path = os.path.join(mock_loader_class.data_path, 'extracted_data', partition, video, type_data)
+        filepaths = [os.path.join(annot_path, filename) for filename in ['filename1', 'filename2']]
+        mock_get_filenames.assert_called_once_with(os.path.join(path, partition, video, type_data))
+        mock_get_sample.assert_called_once_with(filepaths, mock_loader_class.skip_step)
+        assert sample_filepaths == ['filename1', 'filename2']
+
+    def test_get_sample_filenames(self, mocker, mock_loader_class):
+        filenames = ['filename1', 'filename2', 'filename3', 'filename4', 'filename5']
+        skip_step = 2
+
+        sample = mock_loader_class.get_sample_filenames(filenames, skip_step)
+
+        assert sample == ['filename2', 'filename4']
+
+    def test_get_annotation_filenames_from_dir(self, mocker, mock_loader_class):
+        mock_get_data = mocker.patch.object(DatasetLoader, 'get_sample_data_from_dir', return_value=['annotation1.json', 'annotation2.json'])
+
+        path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
+        partition = 'set00'
+        video = 'V000'
+        annotation_filenames = mock_loader_class.get_annotation_filenames_from_dir(path, partition, video)
+
+        mock_get_data.assert_called_once_with(path, partition, video, 'annotations')
+        assert annotation_filenames == ['annotation1.json', 'annotation2.json']
+
+    def test_load_annotations(self, mocker, mock_loader_class, test_data):
+        dummy_annotation = [{"pos": [0, 0, 0, 0]}, {"pos": [10, 10, 10, 10]}]
+        mock_load_annotation = mocker.patch.object(DatasetLoader, "load_annotation_file", return_value=dummy_annotation)
+
+        annotations = mock_loader_class.load_annotations(test_data)
+
+        assert mock_load_annotation.call_count== 8
+        assert annotations == {
+            "set00": {
+                "V000": [dummy_annotation, dummy_annotation],
+                "V001": [dummy_annotation, dummy_annotation]
+                },
+            "set01": {
+                    "V000": [dummy_annotation, dummy_annotation],
+                    "V001": [dummy_annotation, dummy_annotation]
+                },
+        }
+
 
 @pytest.fixture()
 def test_data_loaded():
