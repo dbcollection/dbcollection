@@ -701,6 +701,10 @@ class BoundingBoxvPerImageList(BaseField):
         return bboxesv_per_image_ids
 
 
+# -----------------------------------------------------------
+# Additional tasks
+# -----------------------------------------------------------
+
 class Detection10x(Detection):
     """ Caltech Pedestrian detection (10x data) preprocessing functions """
 
