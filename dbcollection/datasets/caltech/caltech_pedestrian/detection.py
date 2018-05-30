@@ -163,9 +163,9 @@ class DatasetLoader(object):
             image_filenames[video] = self.get_image_filenames_from_dir(path, partition, video)
             annotation_filenames[video] = self.get_annotation_filenames_from_dir(path, partition, video)
         return {
-                "images": image_filenames,
-                "annotations": annotation_filenames
-            }
+            "images": image_filenames,
+            "annotations": annotation_filenames
+        }
 
     def get_sorted_object_names_from_dir(self, path):
         """Returns a sorted list containing the names of
@@ -202,7 +202,7 @@ class DatasetLoader(object):
             annotations[partition] = {}
             for video in sorted(annotation_filenames[partition]):
                 annotations_video = []
-                for annotation_filename in sorted(annotation_filenames[partition][video]["annotations"]):
+                for annotation_filename in sorted(annotation_filenames[partition][video]):
                     annotation_data = self.load_annotation_file(annotation_filename)
                     annotations_video.append(annotation_data)
                 annotations[partition][video] = annotations_video

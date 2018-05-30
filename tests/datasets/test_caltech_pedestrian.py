@@ -486,8 +486,8 @@ class TestImageFilenamesField:
     def test_get_image_filenames_obj_ids_from_data(self, mocker, mock_imagefilename_class):
         def dummy_generator():
             for i in range(5):
-                yield {"img_counter": i}
-        mock_get_generator = mocker.patch.object(ImageFilenamesField, "get_annotation_objects_generator", return_value=dummy_generator)
+                yield {"image_counter": i}
+        mock_get_generator = mocker.patch.object(ImageFilenamesField, "get_annotation_objects_generator", side_effect=dummy_generator)
 
         ids = mock_imagefilename_class.get_image_filenames_obj_ids_from_data()
 
