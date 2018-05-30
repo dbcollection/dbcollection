@@ -643,15 +643,38 @@ class ObjectsPerClassList(BaseField):
 # Additional tasks
 # -----------------------------------------------------------
 
+class DetectionClean(Detection):
+    """Caltech Pedestrian detection (clean) preprocessing functions."""
+
+    filename_h5 = 'detection_clean'
+    is_clean = True  # If True, discards detection boxes smaller than 5px
+
+
 class Detection10x(Detection):
-    """ Caltech Pedestrian detection (10x data) preprocessing functions """
+    """Caltech Pedestrian detection (10x data) preprocessing functions """
 
     skip_step = 3
     filename_h5 = 'detection_10x'
 
 
+class Detection10xClean(Detection):
+    """Caltech Pedestrian detection (clean, 10x data) preprocessing functions """
+
+    skip_step = 3
+    filename_h5 = 'detection_10x_clean'
+    is_clean = True  # If True, discards detection boxes smaller than 5px
+
+
 class Detection30x(Detection):
-    """ Caltech Pedestrian detection (30x data) preprocessing functions """
+    """Caltech Pedestrian detection (30x data) preprocessing functions """
 
     skip_step = 1
     filename_h5 = 'detection_30x'
+
+
+class Detection30xClean(Detection):
+    """Caltech Pedestrian detection (clean, 30x data) preprocessing functions """
+
+    skip_step = 1
+    filename_h5 = 'detection_30x_clean'
+    is_clean = True  # If True, discards detection boxes smaller than 5px
