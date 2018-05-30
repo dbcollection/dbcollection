@@ -784,7 +784,7 @@ class TestBoundingBoxPerImageList:
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
         #     field='list_boxes_per_image',
-        #     data=np.array(pad_list(list_image_filenames_per_class, val=-1), dtype=np.int32),
+        #     data=np.array(pad_list(mock_get_ids, val=-1), dtype=np.int32),
         #     dtype=np.int32,
         #     fillvalue=-1
         # )
@@ -824,8 +824,8 @@ class TestBoundingBoxvPerImageList:
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
-        #     field='list_boxes_per_image',
-        #     data=np.array(pad_list(list_image_filenames_per_class, val=-1), dtype=np.int32),
+        #     field='list_boxesv_per_image',
+        #     data=np.array(pad_list(mock_get_ids, val=-1), dtype=np.int32),
         #     dtype=np.int32,
         #     fillvalue=-1
         # )
