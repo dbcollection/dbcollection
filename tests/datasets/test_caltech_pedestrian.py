@@ -19,17 +19,17 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     BaseField,
     BoundingBoxBaseField,
     BoundingBoxField,
+    BoundingBoxPerImageList,
     BoundingBoxvField,
+    BoundingBoxvPerImageList,
     ClassLabelField,
     ImageFilenamesField,
+    ImageFilenamesPerClassList,
     LabelIdField,
     ObjectFieldNamesField,
     ObjectIdsField,
-    OcclusionField,
-    BoundingBoxPerImageList,
-    BoundingBoxvPerImageList,
-    ImageFilenamesPerClassList,
     ObjectsPerImageList,
+    OcclusionField,
 )
 
 
