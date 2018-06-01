@@ -416,16 +416,19 @@ class TestClassLabelField:
     """Unit tests for the ClassLabelField class."""
 
     def test_process(self, mocker, mock_classlabel_class):
-        dummy_ids = [0, 1, 2, 3]
-        mock_get_class_ids = mocker.patch.object(ClassLabelField, "get_class_labels_ids", return_value=dummy_ids)
+        dummy_names = ['person', 'person-fa', 'person-fa', 'people', 'people', 'person?']
+        dummy_ids = [0, 1, 2, 3, 4, 5]
+        dummy_unique_ids = [0, 1, 1, 2, 2, 3]
+        mock_get_class_ids = mocker.patch.object(ClassLabelField, "get_class_labels_ids", return_value=(dummy_names, dummy_ids, dummy_unique_ids))
         mock_save_hdf5 = mocker.patch.object(ClassLabelField, "save_field_to_hdf5")
 
         classes = ('person', 'person-fa', 'people', 'person?')
-        class_ids = mock_classlabel_class.process(classes)
+        class_ids, class_unique_ids = mock_classlabel_class.process(classes)
 
         assert class_ids == dummy_ids
+        assert class_unique_ids == dummy_unique_ids
         mock_get_class_ids.assert_called_once_with(classes)
-        assert mock_save_hdf5.called
+        assert mock_save_hdf5.call_count == 2
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
@@ -437,16 +440,18 @@ class TestClassLabelField:
 
     def test_get_class_labels_ids(self, mocker, mock_classlabel_class):
         def dummy_generator():
-            labels = ('person', 'person-fa', 'people', 'person?')
-            for label in labels:
-                yield {"obj": {"lbl": label}}
+            labels = ('person', 'person', 'person-fa', 'person-fa', 'people', 'people', 'person?')
+            for i, label in enumerate(labels):
+                yield {"obj": {"lbl": label}, "obj_counter": i}
         mock_get_generator = mocker.patch.object(ClassLabelField, "get_annotation_objects_generator", side_effect=dummy_generator)
 
         classes = ('person', 'person-fa', 'people', 'person?')
-        class_ids = mock_classlabel_class.get_class_labels_ids(classes)
+        class_names, class_ids, class_unique_ids = mock_classlabel_class.get_class_labels_ids(classes)
 
         mock_get_generator.assert_called_once_with()
-        assert class_ids == list(range(4))
+        assert class_names == ['person', 'person', 'person-fa', 'person-fa', 'people', 'people', 'person?']
+        assert class_ids == list(range(7))
+        assert class_unique_ids == [0, 0, 1, 1, 2, 2, 3]
 
 
 @pytest.fixture()

@@ -286,27 +286,32 @@ class ClassLabelField(BaseField):
 
     def process(self, classes):
         """Processes and saves the classes metadata to hdf5."""
-        if self.verbose:
-            print('> Processing the class labels metadata...', end="", flush=True)
-        classes_ids = self.get_class_labels_ids(classes)
+        class_names, class_ids, class_unique_ids = self.get_class_labels_ids(classes)
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='classes',
+            data=str2ascii(class_names),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='classes_unique',
             data=str2ascii(classes),
             dtype=np.uint8,
             fillvalue=0
         )
-        if self.verbose:
-            print('   Done!')
-        return classes_ids
+        return class_ids, class_unique_ids
 
     def get_class_labels_ids(self, classes):
         """Returns a list of label ids for each row of 'object_ids' field."""
-        class_ids = []
+        class_names, class_ids, class_unique_ids = [], [], []
         annotations_generator = self.get_annotation_objects_generator()
         for annotation in annotations_generator:
-            class_ids.append(classes.index(annotation['obj']['lbl']))
-        return class_ids
+            class_ids.append(annotation['obj_counter'])
+            class_names.append(annotation['obj']['lbl'])
+            class_unique_ids.append(classes.index(annotation['obj']['lbl']))
+        return class_names, class_ids, class_unique_ids
 
 
 class ImageFilenamesField(BaseField):
