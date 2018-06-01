@@ -89,7 +89,7 @@ class TestDetectionTask:
         classes = ('person', 'person-fa', 'people', 'person?')
         dummy_ids = list(range(6))
         dummy_object_ids = [[i, i, i, i, i, i] for i in range(6)]
-        mock_classes_field = mocker.patch.object(ClassLabelField, "process", return_value=dummy_ids)
+        mock_classes_field = mocker.patch.object(ClassLabelField, "process", return_value=(dummy_ids, dummy_ids))
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=(dummy_ids, [0, 0, 0, 1, 1, 1]))
         mock_bbox_field = mocker.patch.object(BoundingBoxField, "process", return_value=dummy_ids)
         mock_bboxv_field = mocker.patch.object(BoundingBoxvField, "process", return_value=dummy_ids)
@@ -103,8 +103,7 @@ class TestDetectionTask:
         mock_object_per_img_list = mocker.patch.object(ObjectsPerImageList, "process")
         mock_object_per_class_list = mocker.patch.object(ObjectsPerClassList, "process")
 
-        set_name = 'train'
-        mock_detection_class.process_set_metadata(test_data, set_name)
+        mock_detection_class.process_set_metadata(test_data, 'train')
 
         mock_classes_field.assert_called_once_with(classes)
         mock_image_field.assert_called_once_with()
@@ -121,11 +120,11 @@ class TestDetectionTask:
             label_ids=dummy_ids,
             occlusion_ids=dummy_ids
         )
-        mock_img_per_class_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1], classes)
+        mock_img_per_class_list.assert_called_once_with([0, 0, 0, 1, 1, 1], dummy_ids)
         mock_bbox_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
         mock_bboxv_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
         mock_object_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
-        mock_object_per_class_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1], classes)
+        mock_object_per_class_list.assert_called_once_with(dummy_object_ids, dummy_ids)
 
 
 @pytest.fixture()
@@ -463,14 +462,18 @@ class TestImageFilenamesField:
     """Unit tests for the ImageFilenamesField class."""
 
     def test_process(self, mocker, mock_imagefilename_class):
-        mock_get_filenames = mocker.patch.object(ImageFilenamesField, "get_image_filenames_from_data", return_value=['image1.jpg', 'image2.jpg'])
-        mock_get_ids = mocker.patch.object(ImageFilenamesField, "get_image_filenames_obj_ids_from_data", return_value=[0, 0, 1, 1])
+        dummy_ids = list(range(6))
+        dummy_unique_ids = [0, 0, 0, 1, 1, 1]
+        dummy_filenames = ['image1.jpg', 'image1.jpg', 'image1.jpg', 'image2.jpg', 'image2.jpg', 'image2.jpg']
+        dummy_filenames_unique = ['image1.jpg', 'image2.jpg']
+        mock_get_filenames = mocker.patch.object(ImageFilenamesField, "get_image_filenames_from_data", return_value=dummy_filenames_unique)
+        mock_get_ids = mocker.patch.object(ImageFilenamesField, "get_image_filenames_obj_ids_from_data", return_value=dummy_unique_ids)
         mock_save_hdf5 = mocker.patch.object(ImageFilenamesField, "save_field_to_hdf5")
 
         img_ids, img_ids_unique = mock_imagefilename_class.process()
 
-        assert img_ids == list(range(4))
-        assert img_ids_unique == [0, 0, 1, 1]
+        assert img_ids == dummy_ids
+        assert img_ids_unique == dummy_unique_ids
         mock_get_filenames.assert_called_once_with()
         mock_get_ids.assert_called_once_with()
         assert mock_save_hdf5.call_count == 2
@@ -787,8 +790,7 @@ class TestImageFilenamesPerClassList:
 
         object_ids = [[i, i, i, i] for i in range(6)]
         image_unique_ids = [0, 0, 1, 1, 2, 2]
-        classes = ('person', 'person-fa', 'people', 'person?')
-        mock_img_per_class_list.process(object_ids, image_unique_ids, classes)
+        mock_img_per_class_list.process(object_ids, image_unique_ids)
 
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -801,19 +803,11 @@ class TestImageFilenamesPerClassList:
         # )
 
     def test_get_image_filename_ids_per_class(self, mocker, mock_img_per_class_list):
-        object_ids = [
-            [0, 0, 1, 1],
-            [1, 0, 1, 1],
-            [2, 1, 1, 1],
-            [3, 1, 1, 1],
-            [4, 0, 1, 1],
-            [5, 2, 1, 1]
-        ]
         image_unique_ids = [0, 0, 1, 1, 2, 2]
-        classes = ('person', 'person-fa', 'people', 'person?')
-        images_per_class_ids = mock_img_per_class_list.get_image_filename_ids_per_class(object_ids, image_unique_ids, classes)
+        class_unique_ids = [0, 0, 1, 1, 2, 2]
+        images_per_class_ids = mock_img_per_class_list.get_image_filename_ids_per_class(image_unique_ids, class_unique_ids)
 
-        assert images_per_class_ids == [[0, 2], [1], [2], []]
+        assert images_per_class_ids == [[0], [1], [2]]
 
 
 @pytest.fixture()
@@ -953,9 +947,8 @@ class TestObjectsPerClassList:
         mock_save_hdf5 = mocker.patch.object(ObjectsPerClassList, "save_field_to_hdf5")
 
         object_ids = [[i, i, i, i] for i in range(6)]
-        image_unique_ids = [0, 0, 1, 1, 2, 2]
-        classes = ('person', 'person-fa', 'people', 'person?')
-        mock_object_per_class_list.process(object_ids, image_unique_ids, classes)
+        class_unique_ids = [0, 0, 1, 1, 2, 2]
+        mock_object_per_class_list.process(object_ids, class_unique_ids)
 
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -969,15 +962,14 @@ class TestObjectsPerClassList:
 
     def test_get_object_ids_per_class(self, mocker, mock_object_per_class_list):
         object_ids = [
-            [0, 0, 1, 1],
-            [1, 0, 1, 1],
-            [2, 1, 1, 1],
-            [3, 1, 1, 1],
-            [4, 0, 1, 1],
-            [5, 2, 1, 1]
+            [0, 0, 0, 0],
+            [1, 1, 1, 1],
+            [2, 2, 2, 2],
+            [3, 3, 3, 3],
+            [4, 4, 4, 4],
+            [5, 5, 5, 5]
         ]
-        image_unique_ids = [0, 0, 1, 1, 2, 2]
-        classes = ('person', 'person-fa', 'people', 'person?')
-        objects_per_class_ids = mock_object_per_class_list.get_object_ids_per_class(object_ids, image_unique_ids, classes)
+        class_unique_ids = [0, 0, 1, 1, 2, 2]
+        objects_per_class_ids = mock_object_per_class_list.get_object_ids_per_class(object_ids, class_unique_ids)
 
-        assert objects_per_class_ids == [[0, 1, 4], [2, 3], [5], []]
+        assert objects_per_class_ids == [[0, 1], [2, 3], [4, 5]]
