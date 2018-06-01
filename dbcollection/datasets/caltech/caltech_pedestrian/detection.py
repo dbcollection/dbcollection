@@ -59,7 +59,7 @@ class Detection(BaseTaskNew):
         # Fields
         if self.verbose:
             print('\n==> Setting up the data fields:')
-        class_ids = ClassLabelField(**args).process(self.classes)
+        class_ids, classes_unique_ids = ClassLabelField(**args).process(self.classes)
         image_filenames_ids, image_filenames_unique_ids = ImageFilenamesField(**args).process()
         bbox_ids = BoundingBoxField(**args).process()
         bboxv_ids = BoundingBoxvField(**args).process()
@@ -78,11 +78,11 @@ class Detection(BaseTaskNew):
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
-        ImageFilenamesPerClassList(**args).process(object_ids, image_filenames_unique_ids, self.classes)
+        ImageFilenamesPerClassList(**args).process(image_filenames_unique_ids, classes_unique_ids)
         BoundingBoxPerImageList(**args).process(object_ids, image_filenames_unique_ids)
         BoundingBoxvPerImageList(**args).process(object_ids, image_filenames_unique_ids)
         ObjectsPerImageList(**args).process(object_ids, image_filenames_unique_ids)
-        ObjectsPerClassList(**args).process(object_ids, image_filenames_unique_ids, self.classes)
+        ObjectsPerClassList(**args).process(object_ids, classes_unique_ids)
 
 
 class DatasetLoader(object):
@@ -535,11 +535,9 @@ class ObjectIdsField(BaseField):
 class ImageFilenamesPerClassList(BaseField):
     """Images per class list metadata process/save class."""
 
-    def process(self, object_ids, image_unique_ids, classes):
+    def process(self, image_unique_ids, class_unique_ids):
         """Processes and saves the list ids metadata to hdf5."""
-        if self.verbose:
-            print('> Processing the image filenames per class list...', end="", flush=True)
-        image_filenames_per_class = self.get_image_filename_ids_per_class(object_ids, image_unique_ids, classes)
+        image_filenames_per_class = self.get_image_filename_ids_per_class(image_unique_ids, class_unique_ids)
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='list_image_filenames_per_class',
@@ -550,13 +548,13 @@ class ImageFilenamesPerClassList(BaseField):
         if self.verbose:
             print('   Done!')
 
-    def get_image_filename_ids_per_class(self, object_ids, image_unique_ids, classes):
+    def get_image_filename_ids_per_class(self, image_unique_ids, class_unique_ids):
         """Returns a list of lists of image filename ids per class id."""
         images_per_class_ids = []
+        classes = list(set(class_unique_ids))
         for i in range(len(classes)):
-            imgs_per_class = [image_unique_ids[j] for j, val in enumerate(object_ids) if val[1] == i]
-            imgs_per_class = list(set(imgs_per_class))  # get unique values
-            imgs_per_class.sort()
+            imgs_per_class = [image_unique_ids[j] for j, val in enumerate(class_unique_ids) if val == i]
+            imgs_per_class = sorted(list(set(imgs_per_class)))  # get unique values
             images_per_class_ids.append(imgs_per_class)
         return images_per_class_ids
 
@@ -654,11 +652,9 @@ class ObjectsPerImageList(BaseField):
 class ObjectsPerClassList(BaseField):
     """Objects per class list metadata process/save class."""
 
-    def process(self, object_ids, image_unique_ids, classes):
+    def process(self, object_ids, classes_unique_ids):
         """Processes and saves the list ids metadata to hdf5."""
-        if self.verbose:
-            print('> Processing the objects per class list...', end="", flush=True)
-        objects_ids_per_class = self.get_object_ids_per_class(object_ids, image_unique_ids, classes)
+        objects_ids_per_class = self.get_object_ids_per_class(object_ids, classes_unique_ids)
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='list_objects_ids_per_class',
@@ -666,16 +662,14 @@ class ObjectsPerClassList(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
-        if self.verbose:
-            print('   Done!')
 
-    def get_object_ids_per_class(self, object_ids, image_unique_ids, classes):
+    def get_object_ids_per_class(self, object_ids, class_unique_ids):
         """Returns a list of lists of object ids per class id."""
         objects_per_class_ids = []
+        classes = list(set(class_unique_ids))
         for i in range(len(classes)):
-            objects_per_class = [j for j, val in enumerate(object_ids) if val[1] == i]
-            objects_per_class = list(set(objects_per_class))  # get unique values
-            objects_per_class.sort()
+            objects_per_class = [j for j, val in enumerate(class_unique_ids) if val == i]
+            objects_per_class = sorted(list(set(objects_per_class)))  # get unique values
             objects_per_class_ids.append(objects_per_class)
         return objects_per_class_ids
 
