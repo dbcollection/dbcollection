@@ -12,6 +12,13 @@ import requests
 import patoolib
 import progressbar
 
+from dbcollection.core.exceptions import (
+    GoogleDriveIdDoesNotExist,
+    InvalidURLDownloadSource,
+    MD5HashNotEqual,
+    URLDoesNotExist,
+)
+
 
 def get_hash_value(fname):
     """Retrieve the checksum of a file.
