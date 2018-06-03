@@ -13,7 +13,7 @@ class URLDoesNotExist(Exception):
     pass
 
 
-class GoogleDriveIdDoesNotExist(Exception):
+class GoogleDriveFileIdDoesNotExist(Exception):
     """Google drive's file id does not exist."""
     pass
 
