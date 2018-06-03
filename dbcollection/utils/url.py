@@ -13,7 +13,7 @@ import patoolib
 import progressbar
 
 from dbcollection.core.exceptions import (
-    GoogleDriveIdDoesNotExist,
+    GoogleDriveFileIdDoesNotExist,
     InvalidURLDownloadSource,
     MD5HashNotEqual,
     URLDoesNotExist,
