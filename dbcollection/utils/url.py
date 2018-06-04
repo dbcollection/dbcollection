@@ -388,9 +388,11 @@ def check_if_url_files_exist(urls, save_dir):
 
     """
     for url in urls:
-        if not URL.exists_file(url, save_dir, verbose):
-            return False
+        filename = URL.get_url_filename(url)
+        filepath = os.path.join(save_dir, filename)
+        if os.path.exists(filepath):
     return True
+    return False
 
 
 def extract_archive_file(filename, save_dir):
@@ -561,6 +563,9 @@ class URL:
         except KeyError:
             return default
 
+    @classmethod
+    def get_url_filename(self, url):
+        pass
 
 class URLDownload:
     """Download an URL using the requests module."""
