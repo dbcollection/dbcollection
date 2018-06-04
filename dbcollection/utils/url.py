@@ -391,7 +391,7 @@ def check_if_url_files_exist(urls, save_dir):
         filename = URL.get_url_filename(url)
         filepath = os.path.join(save_dir, filename)
         if os.path.exists(filepath):
-    return True
+            return True
     return False
 
 
@@ -565,7 +565,23 @@ class URL:
 
     @classmethod
     def get_url_filename(self, url):
-        pass
+        """Checks if an url file already exists in a directory.
+
+        Parameters
+        ----------
+        url : str/dict
+            URL metadata.
+
+        Returns
+        -------
+        bool
+            True if a file exists for the input url.
+            Otherwise, returns False.
+
+        """
+        url_metadata = self.parse_url_metadata(url)
+        return url_metadata["filename"]
+
 
 class URLDownload:
     """Download an URL using the requests module."""
