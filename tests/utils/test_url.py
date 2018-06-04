@@ -210,3 +210,40 @@ class TestURL:
         mock_create_dir.assert_called_once_with(dummy_download_dir)
         mock_download.assert_called_once_with(dummy_metadata, dummy_filename, verbose)
         mock_md5_checksum.assert_called_once_with(dummy_filename, dummy_metadata['md5hash'])
+
+    def test_parse_url_metadata__string(self, mocker):
+        dummy_value = 'dummy_val'
+        mock_get_value = mocker.patch.object(URL, "get_value_from_key", return_value=dummy_value)
+
+        url = 'http://url1.zip'
+        url_metadata = URL().parse_url_metadata(url)
+
+        assert mock_get_value.call_count == 4
+        assert url_metadata == {
+            "url": url,
+            "md5hash": dummy_value,
+            "filename": dummy_value,
+            "extract_dir": dummy_value,
+            "method": dummy_value
+        }
+
+    def test_parse_url_metadata__dict(self, mocker):
+        dummy_value = 'dummy_val'
+        mock_get_value = mocker.patch.object(URL, "get_value_from_key", return_value=dummy_value)
+
+        url = {'url': 'http://url1.zip'}
+        url_metadata = URL().parse_url_metadata(url)
+
+        assert mock_get_value.call_count == 4
+        assert url_metadata == {
+            "url": url['url'],
+            "md5hash": dummy_value,
+            "filename": dummy_value,
+            "extract_dir": dummy_value,
+            "method": dummy_value
+        }
+
+    def test_parse_url_metadata__invalid_url_type(self, mocker):
+        with pytest.raises(AssertionError):
+            url = ['http://url1.zip']
+            url_metadata = URL().parse_url_metadata(url)
