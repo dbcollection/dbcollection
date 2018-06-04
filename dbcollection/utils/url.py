@@ -374,7 +374,6 @@ def download_extract_urls(urls, save_dir, extract_data=True, verbose=True):
         filename = URL.download(url, save_dir, verbose)
         if extract_data:
             extract_archive_file(filename, save_dir)
-    return True
 
 
 def check_if_urls_exist(urls, save_dir):
