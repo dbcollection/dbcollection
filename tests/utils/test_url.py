@@ -155,3 +155,18 @@ class TestURL:
         mock_exists_file.assert_called_once_with(url, save_dir)
         mock_download_url.assert_called_once_with(url, save_dir, True)
 
+    @pytest.mark.parametrize("file_exists", [True, False])
+    def test_exists_url_file(self, mocker, file_exists):
+        dummy_metadata = {'dummy': 'data'}
+        dummy_dir = os.path.join('some', 'path', 'to', 'data')
+        dummy_filename = os.path.join('some', 'path', 'to', 'data', 'file1.zip')
+        mock_get_metadata = mocker.patch.object(URL, "get_url_metadata_and_dir_paths", return_value=(dummy_metadata, dummy_dir, dummy_filename))
+        mock_exists = mocker.patch("os.path.exists", return_value=file_exists)
+
+        url = 'http://url1.zip'
+        save_dir = os.path.join('path', 'to', 'data', 'dir')
+        result = URL().exists_url_file(url, save_dir)
+
+        mock_get_metadata.assert_called_once_with(url, save_dir)
+        mock_exists.assert_called_once_with(dummy_filename)
+        assert result == file_exists
