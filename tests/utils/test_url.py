@@ -7,7 +7,7 @@ import os
 import pytest
 
 from dbcollection.utils.url import (
-    check_if_urls_exist,
+    check_if_url_files_exist,
     download_extract_urls,
     URL
 )
@@ -15,7 +15,7 @@ from dbcollection.utils.url import (
 
 def test_download_extract_urls__files_exist(mocker):
     mock_path_exists = mocker.patch("os.path.exists", return_value=True)
-    mock_check_urls = mocker.patch("dbcollection.utils.url.check_if_urls_exist", return_value=True)
+    mock_check_urls = mocker.patch("dbcollection.utils.url.check_if_url_files_exist", return_value=True)
     mock_makedirs = mocker.patch("os.makedirs")
     mock_download = mocker.patch.object(URL, "download")
     mock_extract_files = mocker.patch("dbcollection.utils.url.extract_archive_file")
@@ -31,7 +31,7 @@ def test_download_extract_urls__files_exist(mocker):
 
 def test_download_extract_urls__download_files_and_savedir_does_not_exist(mocker):
     mock_path_exists = mocker.patch("os.path.exists", return_value=False)
-    mock_check_urls = mocker.patch("dbcollection.utils.url.check_if_urls_exist")
+    mock_check_urls = mocker.patch("dbcollection.utils.url.check_if_url_files_exist")
     mock_makedirs = mocker.patch("os.makedirs")
     mock_download = mocker.patch.object(URL, "download", return_value='filename.zip')
     mock_extract_files = mocker.patch("dbcollection.utils.url.extract_archive_file")
@@ -49,7 +49,7 @@ def test_download_extract_urls__download_files_and_savedir_does_not_exist(mocker
 
 def test_download_extract_urls__download_files_and_savedir_exists(mocker):
     mock_path_exists = mocker.patch("os.path.exists", return_value=True)
-    mock_check_urls = mocker.patch("dbcollection.utils.url.check_if_urls_exist", return_value=False)
+    mock_check_urls = mocker.patch("dbcollection.utils.url.check_if_url_files_exist", return_value=False)
     mock_makedirs = mocker.patch("os.makedirs")
     mock_download = mocker.patch.object(URL, "download", return_value='filename.zip')
     mock_extract_files = mocker.patch("dbcollection.utils.url.extract_archive_file")
@@ -67,7 +67,7 @@ def test_download_extract_urls__download_files_and_savedir_exists(mocker):
 
 def test_download_extract_urls__download_files_and_savedir_does_not_exist_and_skip_extract_data(mocker):
     mock_path_exists = mocker.patch("os.path.exists", return_value=False)
-    mock_check_urls = mocker.patch("dbcollection.utils.url.check_if_urls_exist")
+    mock_check_urls = mocker.patch("dbcollection.utils.url.check_if_url_files_exist")
     mock_makedirs = mocker.patch("os.makedirs")
     mock_download = mocker.patch.object(URL, "download", return_value='filename.zip')
     mock_extract_files = mocker.patch("dbcollection.utils.url.extract_archive_file")

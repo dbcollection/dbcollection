@@ -365,7 +365,7 @@ def download_extract_urls(urls, save_dir, extract_data=True, verbose=True):
 
     """
     if os.path.exists(save_dir):
-        if check_if_urls_exist(urls, save_dir):
+        if check_if_url_files_exist(urls, save_dir):
             return True
     else:
         os.makedirs(save_dir)
@@ -376,7 +376,7 @@ def download_extract_urls(urls, save_dir, extract_data=True, verbose=True):
             extract_archive_file(filename, save_dir)
 
 
-def check_if_urls_exist(urls, save_dir):
+def check_if_url_files_exist(urls, save_dir):
     """Evaluates if all url filenames exist on disk.
 
     Parameters
