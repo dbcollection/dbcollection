@@ -465,12 +465,12 @@ class URL:
             Metadata with URL's path, md5hash, filename, extract dir and method type.
 
         """
-        assert isinstance(url, [str, dict]), 'Invalid url type: {}. Valid types: str, dict.'.format(type(url))
+        assert isinstance(url, (str, dict)), 'Invalid url type: {}. Valid types: str, dict.'.format(type(url))
 
-        try:
-            url_ = url['url']
-        except expression as identifier:
+        if isinstance(url, str):
             url_ = url
+        else:
+            url_ = url['url']
 
         return {
             "url": url_,
@@ -479,6 +479,13 @@ class URL:
             "extract_dir": self.get_value_from_key(url, key='extract_dir', default=''),
             "method": self.get_value_from_key(url, key='source', default='requests'),
         }
+
+    def get_value_from_key(self, dictionary, key, default=None):
+        """Returns the value of a field in a dictionary if it exists or a predefined value."""
+        try:
+            return dictionary[field]
+        except KeyError:
+            return default
 
     def download_url_to_file(self, url_metadata, filename, verbose=True):
         """Downloads a single url into a file.
@@ -567,13 +574,6 @@ class URL:
 
         """
         return hashlib.md5(open(fname, 'rb').read()).hexdigest()
-
-    def get_value_from_key(self, dictionary, key, default=None):
-        """Returns the value of a field in a dictionary if it exists or a predefined value."""
-        try:
-            return dictionary[field]
-        except KeyError:
-            return default
 
     @classmethod
     def get_url_filename(self, url, save_dir):
