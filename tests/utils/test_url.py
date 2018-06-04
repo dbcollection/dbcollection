@@ -170,3 +170,18 @@ class TestURL:
         mock_get_metadata.assert_called_once_with(url, save_dir)
         mock_exists.assert_called_once_with(dummy_filename)
         assert result == file_exists
+
+    def test_get_url_metadata_and_dir_paths(self, mocker):
+        dummy_extract_dir = os.path.join('some', 'dir', 'to', 'extract')
+        dummy_filename = 'filename1.zip'
+        dummy_metadata = {"extract_dir": dummy_extract_dir, "filename": dummy_filename}
+        mock_parse_url = mocker.patch.object(URL, "parse_url_metadata", return_value=dummy_metadata)
+
+        url = 'http://url1.zip'
+        save_dir = os.path.join('path', 'to', 'data', 'dir')
+        url_metadata, download_dir, filename = URL().get_url_metadata_and_dir_paths(url, save_dir)
+
+        mock_parse_url.assert_called_once_with(url)
+        assert url_metadata == dummy_metadata
+        assert download_dir == os.path.join(save_dir, dummy_extract_dir)
+        assert filename == os.path.join(save_dir, dummy_metadata["extract_dir"], dummy_metadata["filename"])
