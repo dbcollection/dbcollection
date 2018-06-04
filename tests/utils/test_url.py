@@ -117,3 +117,41 @@ def test_extract_archive_file(mocker):
     extract_archive_file(filename, save_dir)
 
     mock_patoolib.assert_called_once_with(filename, outdir=save_dir)
+    extract_archive_file(filename, save_dir)
+
+    mock_patoolib.assert_called_once_with(filename, outdir=save_dir)
+
+
+class TestURL:
+    """Unit tests for the URL class."""
+
+    def test_download__url_exists(self, mocker):
+        mock_exists_file = mocker.patch.object(URL, "exists_url_file", return_value=True)
+        mock_download_url = mocker.patch.object(URL, "download_url")
+
+        url = 'http://url1.zip'
+        save_dir = os.path.join('path', 'to', 'data', 'dir')
+        URL.download(
+            url=url,
+            save_dir=save_dir,
+            verbose=True
+        )
+
+        mock_exists_file.assert_called_once_with(url, save_dir)
+        assert not mock_download_url.called
+
+    def test_download__url_not_exists(self, mocker):
+        mock_exists_file = mocker.patch.object(URL, "exists_url_file", return_value=False)
+        mock_download_url = mocker.patch.object(URL, "download_url")
+
+        url = 'http://url1.zip'
+        save_dir = os.path.join('path', 'to', 'data', 'dir')
+        URL.download(
+            url=url,
+            save_dir=save_dir,
+            verbose=True
+        )
+
+        mock_exists_file.assert_called_once_with(url, save_dir)
+        mock_download_url.assert_called_once_with(url, save_dir, True)
+
