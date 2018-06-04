@@ -81,3 +81,29 @@ def test_download_extract_urls__download_files_and_savedir_does_not_exist_and_sk
     mock_makedirs.assert_called_once_with(save_dir)
     mock_download.assert_called_once_with(urls[0], save_dir, True)
     assert not mock_extract_files.called
+
+def test_check_if_url_files_exist__files_exist(mocker):
+    dummy_filename = 'some_filename.zip'
+    mock_get_filename = mocker.patch.object(URL, "get_url_filename", return_value=dummy_filename)
+    mock_exists = mocker.patch('os.path.exists', return_value=True)
+
+    urls = ['http://url1.zip', 'http://url.2zip']
+    save_dir = os.path.join('path', 'to', 'save', 'dir')
+    result = check_if_url_files_exist(urls, save_dir)
+
+    mock_get_filename.assert_called_once_with(urls[0])
+    mock_exists.assert_called_once_with(os.path.join(save_dir, dummy_filename))
+    assert result == True
+
+def test_check_if_url_files_exist__files_dont_exist(mocker):
+    dummy_filename = 'some_filename.zip'
+    mock_get_filename = mocker.patch.object(URL, "get_url_filename", return_value=dummy_filename)
+    mock_exists = mocker.patch('os.path.exists', return_value=False)
+
+    urls = ['http://url1.zip', 'http://url.2zip']
+    save_dir = os.path.join('path', 'to', 'save', 'dir')
+    result = check_if_url_files_exist(urls, save_dir)
+
+    assert mock_get_filename.call_count == 2
+    assert mock_exists.call_count == 2
+    assert result == False
