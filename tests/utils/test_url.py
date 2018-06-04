@@ -92,7 +92,7 @@ def test_check_if_url_files_exist__files_exist(mocker):
     save_dir = os.path.join('path', 'to', 'save', 'dir')
     result = check_if_url_files_exist(urls, save_dir)
 
-    mock_get_filename.assert_called_once_with(urls[0])
+    mock_get_filename.assert_called_once_with(urls[0], save_dir)
     mock_exists.assert_called_once_with(os.path.join(save_dir, dummy_filename))
     assert result == True
 
@@ -103,7 +103,10 @@ def test_check_if_url_files_exist__files_dont_exist(mocker):
 
     urls = ['http://url1.zip', 'http://url.2zip']
     save_dir = os.path.join('path', 'to', 'save', 'dir')
-    result = check_if_url_files_exist(urls, save_dir)
+    result = check_if_url_files_exist(
+        urls=urls,
+        save_dir=save_dir
+    )
 
     assert mock_get_filename.call_count == 2
     assert mock_exists.call_count == 2
@@ -114,9 +117,6 @@ def test_extract_archive_file(mocker):
 
     filename = 'some_filename.zip',
     save_dir = os.path.join('path', 'to', 'data', 'dir')
-    extract_archive_file(filename, save_dir)
-
-    mock_patoolib.assert_called_once_with(filename, outdir=save_dir)
     extract_archive_file(filename, save_dir)
 
     mock_patoolib.assert_called_once_with(filename, outdir=save_dir)
