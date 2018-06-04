@@ -9,6 +9,7 @@ import pytest
 from dbcollection.utils.url import (
     check_if_url_files_exist,
     download_extract_urls,
+    extract_archive_file,
     URL
 )
 
@@ -107,3 +108,12 @@ def test_check_if_url_files_exist__files_dont_exist(mocker):
     assert mock_get_filename.call_count == 2
     assert mock_exists.call_count == 2
     assert result == False
+
+def test_extract_archive_file(mocker):
+    mock_patoolib = mocker.patch('patoolib.extract_archive')
+
+    filename = 'some_filename.zip',
+    save_dir = os.path.join('path', 'to', 'data', 'dir')
+    extract_archive_file(filename, save_dir)
+
+    mock_patoolib.assert_called_once_with(filename, outdir=save_dir)
