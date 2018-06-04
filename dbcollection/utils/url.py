@@ -388,7 +388,7 @@ def check_if_url_files_exist(urls, save_dir):
 
     """
     for url in urls:
-        filename = URL.get_url_filename(url)
+        filename = URL.get_url_filename(url, save_dir)
         filepath = os.path.join(save_dir, filename)
         if os.path.exists(filepath):
             return True
@@ -445,11 +445,11 @@ class URL:
     def download_url(self, url, save_dir, verbose):
         """Downloads an url to a file."""
         url_metadata, download_dir, filename = self.get_url_metadata_and_dir_paths(url, save_dir)
-            if not os.path.exists(download_dir):
-                os.makedirs(download_dir)
+        if not os.path.exists(download_dir):
+            os.makedirs(download_dir)
         self.download_url_to_file(url_metadata, filename, verbose)
-            if url_metadata["md5hash"]:
-                self.md5_checksum(filename, url_metadata["md5hash"])
+        if url_metadata["md5hash"]:
+            self.md5_checksum(filename, url_metadata["md5hash"])
 
     def parse_url_metadata(self, url):
         """Returns the url, md5hash and dir strings from a tupple.
@@ -576,13 +576,15 @@ class URL:
             return default
 
     @classmethod
-    def get_url_filename(self, url):
+    def get_url_filename(self, url, save_dir):
         """Checks if an url file already exists in a directory.
 
         Parameters
         ----------
         url : str/dict
             URL metadata.
+        save_dir : str
+            Directory path where the file is supposed to be.
 
         Returns
         -------
@@ -591,8 +593,7 @@ class URL:
             Otherwise, returns False.
 
         """
-        url_metadata = self.parse_url_metadata(url)
-        return url_metadata["filename"]
+        return self.exists_url_file(url, save_dir)
 
 
 class URLDownload:
