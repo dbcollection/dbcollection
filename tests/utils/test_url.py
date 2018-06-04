@@ -185,3 +185,28 @@ class TestURL:
         assert url_metadata == dummy_metadata
         assert download_dir == os.path.join(save_dir, dummy_extract_dir)
         assert filename == os.path.join(save_dir, dummy_metadata["extract_dir"], dummy_metadata["filename"])
+
+    def test_download_url(self, mocker):
+        dummy_metadata = {'md5hash': 'dummy_hash'}
+        dummy_download_dir = os.path.join('some', 'path', 'to', 'data')
+        dummy_filename = os.path.join('some', 'path', 'to', 'data', 'file1.zip')
+        mock_get_metadata = mocker.patch.object(URL, "get_url_metadata_and_dir_paths", return_value=(dummy_metadata, dummy_download_dir, dummy_filename))
+        mock_exists = mocker.patch("os.path.exists", return_value=False)
+        mock_create_dir = mocker.patch("os.makedirs")
+        mock_download = mocker.patch.object(URL, "download_url_to_file")
+        mock_md5_checksum = mocker.patch.object(URL, "md5_checksum")
+
+        url = 'http://url1.zip'
+        save_dir = os.path.join('path', 'to', 'data', 'dir')
+        verbose=True
+        URL().download_url(
+            url=url,
+            save_dir=save_dir,
+            verbose=verbose
+        )
+
+        mock_get_metadata.assert_called_once_with(url, save_dir)
+        mock_exists.assert_called_once_with(dummy_download_dir)
+        mock_create_dir.assert_called_once_with(dummy_download_dir)
+        mock_download.assert_called_once_with(dummy_metadata, dummy_filename, verbose)
+        mock_md5_checksum.assert_called_once_with(dummy_filename, dummy_metadata['md5hash'])
