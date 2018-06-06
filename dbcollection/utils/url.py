@@ -521,7 +521,7 @@ class URL:
         shutil.move(tmpfile, filename)
 
     def create_temp_file(self, filename):
-        """Create a temporary file in filename's save directory.
+        """Create a temporary file in the input filename's save directory.
 
         Parameters
         ----------
@@ -534,7 +534,7 @@ class URL:
             File name + path of the temporary file.
 
         """
-        filename_dir = os.path.commonpath(filename)
+        filename_dir = os.path.dirname(filename)
         (fd, tmpfile) = tempfile.mkstemp(".tmp", prefix=filename, dir=filename_dir)
         os.close(fd)
         os.unlink(tmpfile)
