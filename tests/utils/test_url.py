@@ -354,4 +354,12 @@ class TestURL:
             md5hash = '87897asd98f74asd4fas6d4as8v46t'
             URL().md5_checksum(filename=filename, md5hash=md5hash)
 
+    def test_get_url_filename(self, mocker):
+        mock_exists = mocker.patch.object(URL, "exists_url_file", return_value=True)
 
+        url = 'http://dummy_url.html'
+        save_dir = os.path.join('some', 'dir')
+        response = URL.get_url_filename(url=url, save_dir=save_dir)
+
+        mock_exists.assert_called_once_with(url, save_dir)
+        assert response == True
