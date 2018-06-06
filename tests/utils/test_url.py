@@ -6,7 +6,11 @@ Test dbcollection utils.
 import os
 import pytest
 
-from dbcollection.core.exceptions import InvalidURLDownloadSource, MD5HashNotEqual
+from dbcollection.core.exceptions import (
+    InvalidURLDownloadSource,
+    MD5HashNotEqual,
+    URLDoesNotExist
+)
 from dbcollection.utils.url import (
     check_if_url_files_exist,
     download_extract_urls,
@@ -363,3 +367,29 @@ class TestURL:
 
         mock_exists.assert_called_once_with(url, save_dir)
         assert response == True
+
+
+class TestURLDownload:
+    """Unit tests for the URLDownload class."""
+
+    def test_download(self, mocker):
+        mock_exists_url = mocker.patch.object(URLDownload, "check_exists_url", return_value=True)
+        mock_download_url = mocker.patch.object(URLDownload, "download_url")
+
+        url='http://dummy_url.html',
+        filename=os.path.join('path', 'to', 'filename1.zip'),
+        verbose=False
+        URLDownload.download(url=url, filename=filename, verbose=verbose)
+
+        mock_exists_url.assert_called_once_with(url)
+        mock_download_url.assert_called_once_with(url, filename, verbose)
+
+    def test_download__raises_error(self, mocker):
+        mock_exists_url = mocker.patch.object(URLDownload, "check_exists_url", return_value=False)
+
+        with pytest.raises(URLDoesNotExist):
+            URLDownload.download(
+                url='http://dummy_url.html',
+                filename=os.path.join('path', 'to', 'filename1.zip'),
+                verbose=False
+            )
