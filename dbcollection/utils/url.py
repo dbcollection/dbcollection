@@ -483,7 +483,7 @@ class URL:
     def get_value_from_key(self, dictionary, key, default=None):
         """Returns the value of a field in a dictionary if it exists or a predefined value."""
         try:
-            return dictionary[field]
+            return dictionary[key]
         except KeyError:
             return default
 
