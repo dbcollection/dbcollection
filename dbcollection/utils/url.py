@@ -601,14 +601,14 @@ class URLDownload:
     """Download an URL using the requests module."""
 
     @classmethod
-    def download(self, url, fname, verbose=False):
-        """Downloads a file from an url.
+    def download(self, url, filename, verbose=False):
+        """Downloads an url data and stores it into a file.
 
         Parameters
         ----------
         url : str
             URL location.
-        fname : str
+        filename : str
             File name + path to store the downloaded data to disk.
         verbose : bool, optional
             Display progress bar
@@ -621,27 +621,7 @@ class URLDownload:
         """
         if not self.check_exists_url(url):
             raise URLDoesNotExist("Invalid url or does not exist: {}".format(url))
-
-        CHUNK_SIZE = 1024
-        with requests.get(url, stream=True) as r:
-            with open(fname, 'wb') as f:
-                if verbose:
-                    total_length = int(r.headers.get('content-length'))
-                    if total_length is None:
-                        f.write(r.content)
-                    else:
-                        progbar_length = int(total_length / CHUNK_SIZE)
-                        progbar = progressbar.ProgressBar(maxval=progbar_length).start()
-                        i = 0
-                        for data in r.iter_content(chunk_size=CHUNK_SIZE):
-                            if data:
-                                f.write(data)
-                                f.flush()
-                                progbar.update(i)
-                                i += 1
-                        progbar.finish()
-                else:
-                    f.write(r.content)
+        self.download_url(url, filename, verbose)
 
     def check_exists_url(self, url):
         """Check if an url exists.
@@ -659,6 +639,29 @@ class URLDownload:
         """
         request = requests.head(url, allow_redirects=False)
         return request.status_code == 200
+
+    def download_url(self, url, filename, verbose):
+        """Download an URL using the 'requests' module."""
+        CHUNK_SIZE = 1024
+        with requests.get(url, stream=True) as r:
+            with open(filename, 'wb') as f:
+                if verbose:
+                    total_length = int(r.headers.get('content-length'))
+                    if total_length is None:
+                        f.write(r.content)
+                    else:
+                        progbar_length = int(total_length / CHUNK_SIZE)
+                        progbar = progressbar.ProgressBar(maxval=progbar_length).start()
+                        i = 0
+                        for data in r.iter_content(chunk_size=CHUNK_SIZE):
+                            if data:
+                                f.write(data)
+                                f.flush()
+                                progbar.update(i)
+                                i += 1
+                        progbar.finish()
+                else:
+                    f.write(r.content)
 
 
 class URLDownloadGoogleDrive:
