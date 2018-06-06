@@ -415,3 +415,32 @@ class TestURLDownload:
 
         mock_requests.assert_called_once_with(url, allow_redirects=False)
         assert response == False
+
+
+class TestURLDownloadGoogleDrive:
+    """Unit tests for the URLDownloadGoogleDrive class."""
+
+    def test_download(self, mocker):
+        dummy_session = mocker.MagicMock()
+        dummy_token = 'some_token'
+        dummy_response = mocker.MagicMock()
+        dummy_session.get.return_value = dummy_response
+        mock_session = mocker.patch("requests.Session", return_value=dummy_session)
+        mock_get_token = mocker.patch.object(URLDownloadGoogleDrive, "get_confirmation_token", return_value=dummy_token)
+        mock_save_content = mocker.patch.object(URLDownloadGoogleDrive, "save_response_content")
+
+        file_id = '1254876894'
+        filename = os.path.join('path', 'to', 'file1.zip')
+        URLDownloadGoogleDrive.download(
+            file_id=file_id,
+            filename=filename
+        )
+
+        mock_session.assert_called_once_with()
+        mock_get_token.assert_called_once_with(dummy_session, file_id)
+        dummy_session.get.assert_called_once_with(
+            "https://docs.google.com/uc?export=download",
+            params={'id': file_id, 'confirm': dummy_token},
+            stream=True
+        )
+        mock_save_content.assert_called_once_with(dummy_response, filename)
