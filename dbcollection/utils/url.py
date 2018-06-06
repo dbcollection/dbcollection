@@ -556,16 +556,16 @@ class URL:
             MD5 hash checksum do not match.
 
         """
-        file_hash = self.get_hash_value(filename)
+        file_hash = self.get_file_hash(filename)
         if not file_hash == md5hash:
             raise MD5HashNotEqual("MD5 checksums do not match: {} != {}".format(md5hash, file_hash))
 
-    def get_hash_value(self, fname):
-        """Retrieve the checksum of a file.
+    def get_file_hash(self, filename):
+        """Retrieves the checksum of a file.
 
         Parameters
         ----------
-        fname : str
+        filename : str
             File name + path on disk.
 
         Returns
@@ -574,7 +574,7 @@ class URL:
             Checksum string.
 
         """
-        return hashlib.md5(open(fname, 'rb').read()).hexdigest()
+        return hashlib.md5(open(filename, 'rb').read()).hexdigest()
 
     @classmethod
     def get_url_filename(self, url, save_dir):

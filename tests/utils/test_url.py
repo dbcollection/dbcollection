@@ -337,7 +337,7 @@ class TestURL:
 
     def test_md5_checksum(self, mocker):
         dummy_hash = 'a5s6dea9s8rtqw1s1g45jk4s4dfg49'
-        mock_get_hash = mocker.patch.object(URL, "get_hash_value", return_value=dummy_hash)
+        mock_get_hash = mocker.patch.object(URL, "get_file_hash", return_value=dummy_hash)
 
         filename = os.path.join('some', 'path', 'to', 'filename1.zip')
         md5hash = 'a5s6dea9s8rtqw1s1g45jk4s4dfg49'
@@ -347,9 +347,11 @@ class TestURL:
 
     def test_md5_checksum__raises_error(self, mocker):
         dummy_hash = 'a5s6dea9s8rtqw1s1g45jk4s4dfg49'
-        mock_get_hash = mocker.patch.object(URL, "get_hash_value", return_value=dummy_hash)
+        mock_get_hash = mocker.patch.object(URL, "get_file_hash", return_value=dummy_hash)
 
         with pytest.raises(MD5HashNotEqual):
             filename = os.path.join('some', 'path', 'to', 'filename1.zip')
             md5hash = '87897asd98f74asd4fas6d4as8v46t'
             URL().md5_checksum(filename=filename, md5hash=md5hash)
+
+
