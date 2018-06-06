@@ -393,3 +393,25 @@ class TestURLDownload:
                 filename=os.path.join('path', 'to', 'filename1.zip'),
                 verbose=False
             )
+
+    def test_check_exists_url__success_200(self, mocker):
+        dummy_request = mocker.MagicMock()
+        dummy_request.status_code = 200
+        mock_requests = mocker.patch("requests.head", return_value=dummy_request)
+
+        url = 'http://dummy_url.html'
+        response = URLDownload().check_exists_url(url)
+
+        mock_requests.assert_called_once_with(url, allow_redirects=False)
+        assert response == True
+
+    def test_check_exists_url__failure(self, mocker):
+        dummy_request = mocker.MagicMock()
+        dummy_request.status_code = 300
+        mock_requests = mocker.patch("requests.head", return_value=dummy_request)
+
+        url = 'http://dummy_url.html'
+        response = URLDownload().check_exists_url(url)
+
+        mock_requests.assert_called_once_with(url, allow_redirects=False)
+        assert response == False
