@@ -7,6 +7,7 @@ import os
 import pytest
 
 from dbcollection.core.exceptions import (
+    GoogleDriveFileIdDoesNotExist,
     InvalidURLDownloadSource,
     MD5HashNotEqual,
     URLDoesNotExist
@@ -444,3 +445,36 @@ class TestURLDownloadGoogleDrive:
             stream=True
         )
         mock_save_content.assert_called_once_with(dummy_response, filename)
+
+    def test_get_confirmation_token(self, mocker):
+        dummy_response = mocker.MagicMock()
+        dummy_response.cookies = {"download_warning": 'dummy_token'}
+
+        session = mocker.MagicMock()
+        session.get.return_value = dummy_response
+        file_id = '123456789'
+        token = URLDownloadGoogleDrive().get_confirmation_token(
+            session=session,
+            file_id=file_id
+        )
+
+        assert token == 'dummy_token'
+        session.get.assert_called_once_with(
+            "https://docs.google.com/uc?export=download",
+            params={'id': file_id},
+            stream=True
+        )
+
+    def test_get_confirmation_token__raises_error(self, mocker):
+        dummy_response = mocker.MagicMock()
+        dummy_response.cookies = {"dummy_key": 'dummy_value'}
+
+        with pytest.raises(GoogleDriveFileIdDoesNotExist):
+            session = mocker.MagicMock()
+            session.get.return_value = dummy_response
+            file_id = '123456789'
+            token = URLDownloadGoogleDrive().get_confirmation_token(
+                session=session,
+                file_id=file_id
+            )
+
