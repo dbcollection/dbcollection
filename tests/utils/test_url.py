@@ -318,3 +318,19 @@ class TestURL:
                 filename='dummy_filename.zip',
                 verbose=True
             )
+
+    def test_create_temp_file(self, mocker):
+        dummy_file = mocker.MagicMock()
+        dummy_filename = "filename.tmp"
+        mock_create_file = mocker.patch("tempfile.mkstemp", return_value=(dummy_file, dummy_filename))
+        mock_close = mocker.patch("os.close")
+        mock_unlink = mocker.patch("os.unlink")
+
+        filename_dir = os.path.join('some', 'path', 'to', 'data')
+        filename = os.path.join(filename_dir, 'filename1.zip')
+        tmpfile = URL().create_temp_file(filename)
+
+        assert tmpfile == dummy_filename
+        mock_create_file.assert_called_once_with(".tmp", prefix=filename, dir=filename_dir)
+        mock_close.assert_called_once_with(dummy_file)
+        mock_unlink.assert_called_once_with(dummy_filename)
