@@ -509,10 +509,11 @@ class URL:
         tmpfile = self.create_temp_file(filename)
 
         # download the file
+        method = url_metadata['method']
         if method == 'requests':
-            URLDownload.download(url, filename=tmpfile, verbose=verbose)
+            URLDownload.download(url_metadata, filename=tmpfile, verbose=verbose)
         elif method == 'googledrive':
-            URLDownloadGoogleDrive.download(url, filename=tmpfile)
+            URLDownloadGoogleDrive.download(url_metadata, filename=tmpfile)
         else:
             raise InvalidURLDownloadSource('Invalid url source: {}'.format(method))
 
