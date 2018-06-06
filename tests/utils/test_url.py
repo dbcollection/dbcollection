@@ -6,7 +6,7 @@ Test dbcollection utils.
 import os
 import pytest
 
-from dbcollection.core.exceptions import InvalidURLDownloadSource
+from dbcollection.core.exceptions import InvalidURLDownloadSource, MD5HashNotEqual
 from dbcollection.utils.url import (
     check_if_url_files_exist,
     download_extract_urls,
@@ -334,3 +334,22 @@ class TestURL:
         mock_create_file.assert_called_once_with(".tmp", prefix=filename, dir=filename_dir)
         mock_close.assert_called_once_with(dummy_file)
         mock_unlink.assert_called_once_with(dummy_filename)
+
+    def test_md5_checksum(self, mocker):
+        dummy_hash = 'a5s6dea9s8rtqw1s1g45jk4s4dfg49'
+        mock_get_hash = mocker.patch.object(URL, "get_hash_value", return_value=dummy_hash)
+
+        filename = os.path.join('some', 'path', 'to', 'filename1.zip')
+        md5hash = 'a5s6dea9s8rtqw1s1g45jk4s4dfg49'
+        URL().md5_checksum(filename=filename, md5hash=md5hash)
+
+        mock_get_hash.assert_called_once_with(filename)
+
+    def test_md5_checksum__raises_error(self, mocker):
+        dummy_hash = 'a5s6dea9s8rtqw1s1g45jk4s4dfg49'
+        mock_get_hash = mocker.patch.object(URL, "get_hash_value", return_value=dummy_hash)
+
+        with pytest.raises(MD5HashNotEqual):
+            filename = os.path.join('some', 'path', 'to', 'filename1.zip')
+            md5hash = '87897asd98f74asd4fas6d4as8v46t'
+            URL().md5_checksum(filename=filename, md5hash=md5hash)
