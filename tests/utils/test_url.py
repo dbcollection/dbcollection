@@ -6,11 +6,14 @@ Test dbcollection utils.
 import os
 import pytest
 
+from dbcollection.core.exceptions import InvalidURLDownloadSource
 from dbcollection.utils.url import (
     check_if_url_files_exist,
     download_extract_urls,
     extract_archive_file,
-    URL
+    URL,
+    URLDownload,
+    URLDownloadGoogleDrive
 )
 
 
@@ -263,3 +266,55 @@ class TestURL:
         )
 
         assert value == 'default'
+
+    def test_download_url_to_file(self, mocker):
+        dummy_temp_file = 'dummy_file'
+        mock_temp_file = mocker.patch.object(URL, "create_temp_file", return_value=dummy_temp_file)
+        mock_download_url = mocker.patch.object(URLDownload, "download")
+        mock_download_googledrive = mocker.patch.object(URLDownloadGoogleDrive, "download")
+        mock_move = mocker.patch("shutil.move")
+
+        url_metadata = {"dummy": 'data', "method": 'requests'}
+        filename = 'dummy_filename.zip'
+        verbose = True
+        URL().download_url_to_file(
+            url_metadata=url_metadata,
+            filename=filename,
+            verbose=verbose
+        )
+
+        mock_temp_file.assert_called_once_with(filename)
+        mock_download_url.assert_called_once_with(url_metadata, filename=dummy_temp_file, verbose=verbose)
+        assert not mock_download_googledrive.called
+        mock_move.assert_called_once_with(dummy_temp_file, filename)
+
+    def test_download_url_to_file__via_googledrive(self, mocker):
+        dummy_temp_file = 'dummy_file'
+        mock_temp_file = mocker.patch.object(URL, "create_temp_file", return_value=dummy_temp_file)
+        mock_download_url = mocker.patch.object(URLDownload, "download")
+        mock_download_googledrive = mocker.patch.object(URLDownloadGoogleDrive, "download")
+        mock_move = mocker.patch("shutil.move")
+
+        url_metadata = {"dummy": 'data', "method": 'googledrive'}
+        filename = 'dummy_filename.zip'
+        verbose = True
+        URL().download_url_to_file(
+            url_metadata=url_metadata,
+            filename=filename,
+            verbose=verbose
+        )
+
+        mock_temp_file.assert_called_once_with(filename)
+        assert not mock_download_url.called
+        mock_download_googledrive.assert_called_once_with(url_metadata, filename=dummy_temp_file)
+        mock_move.assert_called_once_with(dummy_temp_file, filename)
+
+    def test_download_url_to_file__raises_exception(self, mocker):
+        dummy_temp_file = 'dummy_file'
+        mock_temp_file = mocker.patch.object(URL, "create_temp_file", return_value=dummy_temp_file)
+        with pytest.raises(InvalidURLDownloadSource):
+            URL().download_url_to_file(
+                url_metadata={"dummy": 'data', "method": 'invalid_method'},
+                filename='dummy_filename.zip',
+                verbose=True
+            )
