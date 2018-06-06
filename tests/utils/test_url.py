@@ -247,3 +247,19 @@ class TestURL:
         with pytest.raises(AssertionError):
             url = ['http://url1.zip']
             url_metadata = URL().parse_url_metadata(url)
+
+    def test_get_value_from_key__key_exists(self, mocker):
+        dictionary = {"url": 'http://dummy_url.html', "md5hash": 'dummy_hash'}
+        key = 'url'
+        value = URL().get_value_from_key(dictionary, key)
+
+        assert value == dictionary[key]
+
+    def test_get_value_from_key__key_doesnt_exist(self, mocker):
+        value = URL().get_value_from_key(
+            dictionary={"url": 'http://dummy_url.html', "md5hash": 'dummy_hash'},
+            key='filename',
+            default='default'
+        )
+
+        assert value == 'default'
