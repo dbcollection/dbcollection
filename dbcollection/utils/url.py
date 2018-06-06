@@ -686,7 +686,7 @@ class URLDownloadGoogleDrive:
         response = session.get(self.base_url, params={'id': file_id, 'confirm': token}, stream=True)
         self.save_response_content(response, filename)
 
-    def get_confirmation_token(self, session, params):
+    def get_confirmation_token(self, session, file_id):
         """Returns a confirmation token.
 
         Parameters
