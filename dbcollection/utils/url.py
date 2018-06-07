@@ -307,7 +307,7 @@ class URLDownload:
             Returns True if the url request returns a 200 status code.
 
         """
-        request = requests.head(url, allow_redirects=False)
+        request = requests.head(url, allow_redirects=True)
         return request.status_code == 200
 
     def download_url(self, url, filename, verbose):
