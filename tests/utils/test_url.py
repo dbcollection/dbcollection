@@ -100,7 +100,7 @@ def test_check_if_url_files_exist__files_exist(mocker):
     save_dir = os.path.join('path', 'to', 'save', 'dir')
     result = check_if_url_files_exist(urls, save_dir)
 
-    mock_get_filename.assert_called_once_with(urls[0], save_dir)
+    mock_get_filename.assert_called_once_with(urls[0])
     mock_exists.assert_called_once_with(os.path.join(save_dir, dummy_filename))
     assert result == True
 
@@ -360,14 +360,16 @@ class TestURL:
             URL().md5_checksum(filename=filename, md5hash=md5hash)
 
     def test_get_url_filename(self, mocker):
-        mock_exists = mocker.patch.object(URL, "exists_url_file", return_value=True)
+        dummy_extract_dir = os.path.join('some', 'dir', 'to', 'extract')
+        dummy_filename = 'filename1.zip'
+        dummy_metadata = {"extract_dir": dummy_extract_dir, "filename": dummy_filename}
+        mock_parse_url = mocker.patch.object(URL, "parse_url_metadata", return_value=dummy_metadata)
 
-        url = 'http://dummy_url.html'
-        save_dir = os.path.join('some', 'dir')
-        response = URL.get_url_filename(url=url, save_dir=save_dir)
+        url = 'http://filename1.zip'
+        filename = URL.get_url_filename(url=url)
 
-        mock_exists.assert_called_once_with(url, save_dir)
-        assert response == True
+        mock_parse_url.assert_called_once_with(url)
+        assert filename == dummy_filename
 
 
 class TestURLDownload:
