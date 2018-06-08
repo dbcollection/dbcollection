@@ -117,13 +117,14 @@ class URL:
         return url_metadata, download_dir, filename
 
     def download_url(self, url, save_dir, verbose):
-        """Downloads an url to a file."""
+        """Downloads an url to a file and returns its path in disk."""
         url_metadata, download_dir, filename = self.get_url_metadata_and_dir_paths(url, save_dir)
         if not os.path.exists(download_dir):
             os.makedirs(download_dir)
         self.download_url_to_file(url_metadata, filename, verbose)
         if url_metadata["md5hash"]:
             self.md5_checksum(filename, url_metadata["md5hash"])
+        return filename
 
     def parse_url_metadata(self, url):
         """Returns the url, md5hash and dir strings from a tupple.
