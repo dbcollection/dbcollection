@@ -134,34 +134,44 @@ class TestURL:
     """Unit tests for the URL class."""
 
     def test_download__url_exists(self, mocker):
+        dummy_metadata = {'md5hash': 'dummy_hash'}
+        dummy_download_dir = os.path.join('some', 'path', 'to', 'data')
+        dummy_filename = os.path.join(dummy_download_dir, 'file1.zip')
         mock_exists_file = mocker.patch.object(URL, "exists_url_file", return_value=True)
+        mock_get_metadata = mocker.patch.object(URL, "get_url_metadata_and_dir_paths", return_value=(dummy_metadata, dummy_download_dir, dummy_filename))
         mock_download_url = mocker.patch.object(URL, "download_url")
 
         url = 'http://url1.zip'
         save_dir = os.path.join('path', 'to', 'data', 'dir')
-        URL.download(
+        filename = URL.download(
             url=url,
             save_dir=save_dir,
             verbose=True
         )
 
         mock_exists_file.assert_called_once_with(url, save_dir)
+        mock_get_metadata.assert_called_once_with(url, save_dir)
         assert not mock_download_url.called
+        assert filename == dummy_filename
 
     def test_download__url_not_exists(self, mocker):
+        dummy_filename = os.path.join('some', 'path', 'to', 'data', 'file1.zip')
         mock_exists_file = mocker.patch.object(URL, "exists_url_file", return_value=False)
-        mock_download_url = mocker.patch.object(URL, "download_url")
+        mock_get_metadata = mocker.patch.object(URL, "get_url_metadata_and_dir_paths")
+        mock_download_url = mocker.patch.object(URL, "download_url", return_value=dummy_filename)
 
         url = 'http://url1.zip'
         save_dir = os.path.join('path', 'to', 'data', 'dir')
-        URL.download(
+        filename = URL.download(
             url=url,
             save_dir=save_dir,
             verbose=True
         )
 
         mock_exists_file.assert_called_once_with(url, save_dir)
+        assert not mock_get_metadata.called
         mock_download_url.assert_called_once_with(url, save_dir, True)
+        assert filename == dummy_filename
 
     @pytest.mark.parametrize("file_exists", [True, False])
     def test_exists_url_file(self, mocker, file_exists):
@@ -405,7 +415,7 @@ class TestURLDownload:
         url = 'http://dummy_url.html'
         response = URLDownload().check_exists_url(url)
 
-        mock_requests.assert_called_once_with(url, allow_redirects=False)
+        mock_requests.assert_called_once_with(url, allow_redirects=True)
         assert response == True
 
     def test_check_exists_url__failure(self, mocker):
@@ -416,7 +426,7 @@ class TestURLDownload:
         url = 'http://dummy_url.html'
         response = URLDownload().check_exists_url(url)
 
-        mock_requests.assert_called_once_with(url, allow_redirects=False)
+        mock_requests.assert_called_once_with(url, allow_redirects=True)
         assert response == False
 
 

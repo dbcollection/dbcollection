@@ -97,11 +97,13 @@ class URL:
             Display messages + progress bar on screen when downloading the file.
 
         """
-        if self.exists_url_file(url, save_dir):
+        if URL().exists_url_file(url, save_dir):
             if verbose:
-                print('File already exists, skip downloading this url.')
+                print('File already exists in disk, skip downloading this url.')
+            _, _, filename = self.get_url_metadata_and_dir_paths(url, save_dir)
         else:
-            self.download_url(url, save_dir, verbose)
+            filename = URL().download_url(url, save_dir, verbose)
+        return filename
 
     def exists_url_file(self, url, save_dir):
         """Checks if an url file already exists in a directory."""
