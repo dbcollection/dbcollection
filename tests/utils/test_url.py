@@ -445,7 +445,7 @@ class TestURLDownloadGoogleDrive:
 
         file_id = '1254876894'
         filename = os.path.join('path', 'to', 'file1.zip')
-        URLDownloadGoogleDrive.download(
+        URLDownloadGoogleDrive().download(
             file_id=file_id,
             filename=filename
         )

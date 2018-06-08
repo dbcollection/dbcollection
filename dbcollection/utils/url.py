@@ -342,7 +342,6 @@ class URLDownloadGoogleDrive:
 
     base_url = "https://docs.google.com/uc?export=download"
 
-    @classmethod
     def download(self, file_id, filename):
         """Download a single url from google drive into a file.
 
