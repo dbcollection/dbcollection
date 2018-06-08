@@ -163,7 +163,7 @@ class URL:
             return default
 
     def download_url_to_file(self, url_metadata, filename, verbose=True):
-        """Downloads a single url into a file.
+        """Downloads a single url to a file.
 
         Parameters
         ----------
@@ -185,10 +185,11 @@ class URL:
 
         # download the file
         method = url_metadata['method']
+        url = url_metadata['url']
         if method == 'requests':
-            URLDownload.download(url_metadata, filename=tmpfile, verbose=verbose)
+            URLDownload().download(url, filename=tmpfile, verbose=verbose)
         elif method == 'googledrive':
-            URLDownloadGoogleDrive.download(url_metadata, filename=tmpfile)
+            URLDownloadGoogleDrive().download(url, filename=tmpfile)
         else:
             raise InvalidURLDownloadSource('Invalid url source: {}'.format(method))
 
