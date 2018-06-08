@@ -393,7 +393,7 @@ class TestURLDownload:
         url='http://dummy_url.html',
         filename=os.path.join('path', 'to', 'filename1.zip'),
         verbose=False
-        URLDownload.download(url=url, filename=filename, verbose=verbose)
+        URLDownload().download(url=url, filename=filename, verbose=verbose)
 
         mock_exists_url.assert_called_once_with(url)
         mock_download_url.assert_called_once_with(url, filename, verbose)
@@ -402,7 +402,7 @@ class TestURLDownload:
         mock_exists_url = mocker.patch.object(URLDownload, "check_exists_url", return_value=False)
 
         with pytest.raises(URLDoesNotExist):
-            URLDownload.download(
+            URLDownload().download(
                 url='http://dummy_url.html',
                 filename=os.path.join('path', 'to', 'filename1.zip'),
                 verbose=False

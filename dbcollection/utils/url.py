@@ -274,7 +274,6 @@ class URL:
 class URLDownload:
     """Download an URL using the requests module."""
 
-    @classmethod
     def download(self, url, filename, verbose=False):
         """Downloads an url data and stores it into a file.
 
