@@ -261,9 +261,9 @@ class CacheDataManager:
             List of tasks.
 
         """
-        assert name, "Must input a valid dataset name."
-        assert data_dir, "Must input a valid data directory."
-        assert tasks is not None, "Must input a valid tasks."
+        assert isinstance(name, str), "Must input a valid dataset name."
+        assert isinstance(data_dir, str), "Must input a valid data directory."
+        assert isinstance(tasks, dict), "Must input a valid tasks."
 
         new_data = {
             "data_dir": data_dir,
@@ -408,9 +408,9 @@ class CacheManagerDataset:
             List of tasks.
 
         """
-        assert name, "Must input a valid dataset name."
-        assert data_dir, "Must input a valid directory (data_dir)."
-        assert tasks is not None, "Must input a valid tasks."
+        assert isinstance(name, str), "Must input a valid dataset name."
+        assert isinstance(data_dir, str), "Must input a valid directory (data_dir)."
+        assert isinstance(tasks, dict), "Must input a valid tasks."
 
         self.manager.add_data(name, data_dir, tasks)
 
