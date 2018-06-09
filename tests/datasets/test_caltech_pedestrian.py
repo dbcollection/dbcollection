@@ -36,11 +36,6 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
 
 
 @pytest.fixture()
-def mock_detection_class():
-    return Detection(data_path='/some/path/data', cache_path='/some/path/cache')
-
-
-@pytest.fixture()
 def test_data():
     return {
         "set00": {
@@ -56,6 +51,11 @@ def test_data():
 
 class TestDetectionTask:
     """Unit tests for the caltech pedestrian Detection task."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_detection_class():
+        return Detection(data_path='/some/path/data', cache_path='/some/path/cache')
 
     def test_task_attributes(self, mocker, mock_detection_class):
         assert mock_detection_class.filename_h5 == 'detection'
@@ -127,24 +127,24 @@ class TestDetectionTask:
         mock_object_per_class_list.assert_called_once_with(dummy_object_ids, dummy_ids)
 
 
-@pytest.fixture()
-def mock_loader_class():
-    return DatasetLoader(
-        skip_step=30,
-        classes=('person', 'person-fa', 'people', 'person?'),
-        sets={
-            "train": ('set00', 'set01', 'set02', 'set03', 'set04', 'set05'),
-            "test": ('set06', 'set07', 'set08', 'set09', 'set10')
-        },
-        is_clean=False,
-        data_path='/some/path/data',
-        cache_path='/some/path/cache',
-        verbose=True
-    )
-
-
 class TestDatasetLoader:
     """Unit tests for the DatasetLoader class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_loader_class():
+        return DatasetLoader(
+            skip_step=30,
+            classes=('person', 'person-fa', 'people', 'person?'),
+            sets={
+                "train": ('set00', 'set01', 'set02', 'set03', 'set04', 'set05'),
+                "test": ('set06', 'set07', 'set08', 'set09', 'set10')
+            },
+            is_clean=False,
+            data_path='/some/path/data',
+            cache_path='/some/path/cache',
+            verbose=True
+        )
 
     def test_task_attributes(self, mocker, mock_loader_class):
         assert mock_loader_class.skip_step == 30
@@ -334,13 +334,14 @@ def field_kwargs(test_data_loaded):
     }
 
 
-@pytest.fixture()
-def mock_base_class(field_kwargs):
-    return BaseField(**field_kwargs)
-
 
 class TestBaseField:
     """Unit tests for the BaseField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_base_class(field_kwargs):
+        return BaseField(**field_kwargs)
 
     def test_init(self, mocker):
         data = ['some', 'data']
@@ -406,13 +407,13 @@ class TestBaseField:
         )
 
 
-@pytest.fixture()
-def mock_classlabel_class(field_kwargs):
-    return ClassLabelField(**field_kwargs)
-
-
 class TestClassLabelField:
     """Unit tests for the ClassLabelField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_classlabel_class(field_kwargs):
+        return ClassLabelField(**field_kwargs)
 
     def test_process(self, mocker, mock_classlabel_class):
         dummy_names = ['person', 'person-fa', 'person-fa', 'people', 'people', 'person?']
@@ -453,13 +454,13 @@ class TestClassLabelField:
         assert class_unique_ids == [0, 0, 1, 1, 2, 2, 3]
 
 
-@pytest.fixture()
-def mock_imagefilename_class(field_kwargs):
-    return ImageFilenamesField(**field_kwargs)
-
-
 class TestImageFilenamesField:
     """Unit tests for the ImageFilenamesField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_imagefilename_class(field_kwargs):
+        return ImageFilenamesField(**field_kwargs)
 
     def test_process(self, mocker, mock_imagefilename_class):
         dummy_ids = list(range(6))
@@ -503,13 +504,13 @@ class TestImageFilenamesField:
         assert ids == list(range(5))
 
 
-@pytest.fixture()
-def mock_bboxbase_class(field_kwargs):
-    return BoundingBoxBaseField(**field_kwargs)
-
-
 class TestBoundingBoxBaseField:
     """Unit tests for the BoundingBoxBaseField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_bboxbase_class(field_kwargs):
+        return BoundingBoxBaseField(**field_kwargs)
 
     @pytest.mark.parametrize('bbox_type', ['pos', 'posv'])
     def test_get_bboxes_from_data(self, mocker, mock_bboxbase_class, bbox_type):
@@ -558,13 +559,13 @@ class TestBoundingBoxBaseField:
         assert result_bbox == bbox_converted
 
 
-@pytest.fixture()
-def mock_bbox_class(field_kwargs):
-    return BoundingBoxField(**field_kwargs)
-
-
 class TestBoundingBoxField:
     """Unit tests for the BoundingBoxField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_bbox_class(field_kwargs):
+        return BoundingBoxField(**field_kwargs)
 
     def test_process(self, mocker, mock_bbox_class):
         dummy_boxes = []
@@ -587,13 +588,13 @@ class TestBoundingBoxField:
         # )
 
 
-@pytest.fixture()
-def mock_bboxv_class(field_kwargs):
-    return BoundingBoxvField(**field_kwargs)
-
-
 class TestBoundingBoxvField:
     """Unit tests for the BoundingBoxvField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_bboxv_class(field_kwargs):
+        return BoundingBoxvField(**field_kwargs)
 
     def test_process(self, mocker, mock_bboxv_class):
         dummy_boxes = []
@@ -616,13 +617,13 @@ class TestBoundingBoxvField:
         # )
 
 
-@pytest.fixture()
-def mock_lblid_class(field_kwargs):
-    return LabelIdField(**field_kwargs)
-
-
 class TestLabelIdField:
     """Unit tests for the LabelIdField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_lblid_class(field_kwargs):
+        return LabelIdField(**field_kwargs)
 
     def test_process(self, mocker, mock_lblid_class):
         dummy_labels = []
@@ -667,13 +668,13 @@ class TestLabelIdField:
             assert result == 0
 
 
-@pytest.fixture()
-def mock_occlusion_class(field_kwargs):
-    return OcclusionField(**field_kwargs)
-
-
 class TestOcclusionField:
     """Unit tests for the OcclusionField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_occlusion_class(field_kwargs):
+        return OcclusionField(**field_kwargs)
 
     def test_process(self, mocker, mock_occlusion_class):
         dummy_occlusions = []
@@ -708,13 +709,13 @@ class TestOcclusionField:
         assert occlusion_ids == list(range(5))
 
 
-@pytest.fixture()
-def mock_objfields_class(field_kwargs):
-    return ObjectFieldNamesField(**field_kwargs)
-
-
 class TestObjectFieldNamesField:
     """Unit tests for the ObjectFieldNamesField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_objfields_class(field_kwargs):
+        return ObjectFieldNamesField(**field_kwargs)
 
     def test_process(self, mocker, mock_objfields_class):
         mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
@@ -732,13 +733,13 @@ class TestObjectFieldNamesField:
         # )
 
 
-@pytest.fixture()
-def mock_objfids_class(field_kwargs):
-    return ObjectIdsField(**field_kwargs)
-
-
 class TestObjectIdsField:
     """Unit tests for the ObjectIdsField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_objfids_class(field_kwargs):
+        return ObjectIdsField(**field_kwargs)
 
     def test_process(self, mocker, mock_objfids_class):
         mock_save_hdf5 = mocker.patch.object(ObjectIdsField, "save_field_to_hdf5")
@@ -775,13 +776,13 @@ class TestObjectIdsField:
         # )
 
 
-@pytest.fixture()
-def mock_img_per_class_list(field_kwargs):
-    return ImageFilenamesPerClassList(**field_kwargs)
-
-
 class TestImageFilenamesPerClassList:
     """Unit tests for the ImageFilenamesPerClassList class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_img_per_class_list(field_kwargs):
+        return ImageFilenamesPerClassList(**field_kwargs)
 
     def test_process(self, mocker, mock_img_per_class_list):
         dummy_ids = [[0, 1], [2, 3], [4, 5]]
@@ -810,13 +811,13 @@ class TestImageFilenamesPerClassList:
         assert images_per_class_ids == [[0], [1], [2]]
 
 
-@pytest.fixture()
-def mock_bbox_per_img_list(field_kwargs):
-    return BoundingBoxPerImageList(**field_kwargs)
-
-
 class TestBoundingBoxPerImageList:
     """Unit tests for the BoundingBoxPerImageList class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_bbox_per_img_list(field_kwargs):
+        return BoundingBoxPerImageList(**field_kwargs)
 
     def test_process(self, mocker, mock_bbox_per_img_list):
         dummy_ids = [[0, 1], [2, 3], [4, 5]]
@@ -851,13 +852,13 @@ class TestBoundingBoxPerImageList:
         assert bboxes_per_image == [[0, 1], [2, 3], [4, 5]]
 
 
-@pytest.fixture()
-def mock_bboxv_per_img_list(field_kwargs):
-    return BoundingBoxvPerImageList(**field_kwargs)
-
-
 class TestBoundingBoxvPerImageList:
     """Unit tests for the BoundingBoxvPerImageList class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_bboxv_per_img_list(field_kwargs):
+        return BoundingBoxvPerImageList(**field_kwargs)
 
     def test_process(self, mocker, mock_bboxv_per_img_list):
         dummy_ids = [[0, 1], [2, 3], [4, 5]]
@@ -892,13 +893,13 @@ class TestBoundingBoxvPerImageList:
         assert bboxes_per_image == [[0, 1], [2, 3], [4, 5]]
 
 
-@pytest.fixture()
-def mock_object_per_img_list(field_kwargs):
-    return ObjectsPerImageList(**field_kwargs)
-
-
 class TestObjectsPerImageList:
     """Unit tests for the ObjectsPerImageList class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_object_per_img_list(field_kwargs):
+        return ObjectsPerImageList(**field_kwargs)
 
     def test_process(self, mocker, mock_object_per_img_list):
         dummy_ids = [[0, 1], [2, 3], [4, 5]]
@@ -933,13 +934,13 @@ class TestObjectsPerImageList:
         assert objects_per_image == [[0, 1], [2, 3], [4, 5]]
 
 
-@pytest.fixture()
-def mock_object_per_class_list(field_kwargs):
-    return ObjectsPerClassList(**field_kwargs)
-
-
 class TestObjectsPerClassList:
     """Unit tests for the ObjectsPerClassList class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_object_per_class_list(field_kwargs):
+        return ObjectsPerClassList(**field_kwargs)
 
     def test_process(self, mocker, mock_object_per_class_list):
         dummy_ids = [[0, 1], [2, 3], [4, 5]]
