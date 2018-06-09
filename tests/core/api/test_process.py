@@ -146,12 +146,12 @@ class TestClassProcessAPI:
         assert result == {}
 
     def test_get_dataset_data_dir_path(self, mocker, process_api_cls):
-        mock_get_metadata = mocker.patch.object(ProcessAPI, "get_dataset_metadata_from_cache", return_value={'data_dir': '/some/dir/path'})
+        mock_get_metadata = mocker.patch.object(ProcessAPI, "get_dataset_metadata_from_cache", return_value={'data_dir': os.path.join('some', 'dir', 'path')})
 
         result = process_api_cls.get_dataset_data_dir_path()
 
         assert mock_get_metadata.called
-        assert result == '/some/dir/path/some_dataset'
+        assert result == os.path.join('some', 'dir', 'path', 'some_dataset')
 
     @pytest.mark.parametrize("task", ['', 'default', 'classification', 'recognition', 'another_task'])
     def test_parse_task_name(self, mocker, process_api_cls, task):
