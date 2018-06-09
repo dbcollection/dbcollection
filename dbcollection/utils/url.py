@@ -155,11 +155,13 @@ class URL:
             "method": self.get_value_from_key(url, key='source', default='requests'),
         }
 
-    def get_value_from_key(self, dictionary, key, default=None):
+    def get_value_from_key(self, input, key, default=None):
         """Returns the value of a field in a dictionary if it exists or a predefined value."""
         try:
-            return dictionary[key]
+            return input[key]
         except KeyError:
+            return default
+        except TypeError:
             return default
 
     def download_url_to_file(self, url_metadata, filename, verbose=True):
