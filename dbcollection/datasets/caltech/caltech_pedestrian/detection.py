@@ -86,6 +86,10 @@ class Detection(BaseTaskNew):
         ObjectsPerClassList(**args).process(object_ids, classes_unique_ids)
 
 
+# -----------------------------------------------------------
+# Data load / set up
+# -----------------------------------------------------------
+
 class DatasetLoader(object):
     """Annotation's data loader for the caltech's dataset (train/test)."""
 
@@ -213,6 +217,10 @@ class DatasetLoader(object):
         """Loads the annotation's file data from disk."""
         return load_json(path)
 
+
+# -----------------------------------------------------------
+# Metadata fields
+# -----------------------------------------------------------
 
 class BaseField(object):
     """Base class for the dataset's data fields processor."""
@@ -519,6 +527,10 @@ class ObjectIdsField(BaseField):
         )
         return object_ids
 
+
+# -----------------------------------------------------------
+# Metadata lists
+# -----------------------------------------------------------
 
 class ImageFilenamesPerClassList(BaseField):
     """Images per class list metadata process/save class."""
