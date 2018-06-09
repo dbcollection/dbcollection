@@ -12,7 +12,7 @@ import os
 import h5py
 
 from dbcollection.utils.hdf5 import HDF5Manager
-from dbcollection.utils.url import download_extract_all
+from dbcollection.utils.url import download_extract_urls
 
 
 class BaseDataset(object):
@@ -83,7 +83,12 @@ class BaseDataset(object):
 
         """
         # download + extract data and remove temporary files
-        download_extract_all(self.urls, self.data_path, self.extract_data, self.verbose)
+        download_extract_urls(
+            urls=self.urls,
+            save_dir=self.data_path,
+            extract_data=self.extract_data,
+            verbose=self.verbose
+        )
 
         return self.keywords
 
@@ -198,8 +203,8 @@ class BaseDatasetNew(object):
 
     def __init__(self, data_path, cache_path, extract_data=True, verbose=True):
         """Initialize class."""
-        assert data_path, "Must insert a valid data path"
-        assert cache_path, "Must insert a valid cache path"
+        assert isinstance(data_path, str), "Must insert a valid data path"
+        assert isinstance(cache_path, str), "Must insert a valid cache path"
         self.data_path = data_path
         self.cache_path = cache_path
         self.extract_data = extract_data
@@ -214,10 +219,12 @@ class BaseDatasetNew(object):
             A list of keywords.
 
         """
-        download_extract_all(urls=self.urls,
-                             dir_save=self.data_path,
-                             extract_data=self.extract_data,
-                             verbose=self.verbose)
+        download_extract_urls(
+            urls=self.urls,
+            save_dir=self.data_path,
+            extract_data=self.extract_data,
+            verbose=self.verbose
+        )
 
     def process(self, task='default'):
         """Processes the metadata of a task.

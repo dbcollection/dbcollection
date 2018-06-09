@@ -82,7 +82,7 @@ class TestBaseDatasetNew:
             BaseDatasetNew('/path/to/data', '/path/to/cache', False, False, 'extra_field')
 
     def test_download(self, mocker, mock_dataset_class):
-        mock_download_extract = mocker.patch("dbcollection.datasets.download_extract_all")
+        mock_download_extract = mocker.patch("dbcollection.datasets.download_extract_urls")
 
         mock_dataset_class.download()
 

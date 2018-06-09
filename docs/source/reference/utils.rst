@@ -7,17 +7,15 @@ utils
 
 .. _utils_reference_url:
 
-Url download
+URL download
 ------------
 .. automodule:: dbcollection.utils.url
-.. autofunction:: check_url_exists
-.. autofunction:: download_extract_all
-.. autofunction:: download_url
-.. autofunction:: download_url_requests
-.. autofunction:: download_url_google_drive
-.. autofunction:: get_hash_value
-.. autofunction:: md5_checksum
-.. autofunction:: parse_url
+.. autofunction:: check_if_url_files_exist
+.. autofunction:: download_extract_urls
+.. autofunction:: extract_archive_file
+.. autoclass:: URL
+.. autoclass:: URLDownload
+.. autoclass:: URLDownloadGoogleDrive
 
 
 File loading
