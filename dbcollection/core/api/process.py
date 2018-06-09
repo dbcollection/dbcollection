@@ -150,7 +150,10 @@ class ProcessAPI(object):
 
     def get_dataset_data_dir_path(self):
         dataset_metadata = self.get_dataset_metadata_from_cache()
-        return dataset_metadata['data_dir']
+        data_dir = dataset_metadata['data_dir']
+        if not self.name == os.path.basename(data_dir):
+            data_dir = os.path.join(data_dir, self.name)
+        return data_dir
 
     def get_dataset_metadata_from_cache(self):
         return self.cache_manager.dataset.get(self.name)

@@ -151,7 +151,7 @@ class TestClassProcessAPI:
         result = process_api_cls.get_dataset_data_dir_path()
 
         assert mock_get_metadata.called
-        assert result == '/some/dir/path'
+        assert result == '/some/dir/path/some_dataset'
 
     @pytest.mark.parametrize("task", ['', 'default', 'classification', 'recognition', 'another_task'])
     def test_parse_task_name(self, mocker, process_api_cls, task):
