@@ -231,41 +231,61 @@ class TestURL:
         assert filename == dummy_filename
 
     def test_parse_url_metadata__string(self, mocker):
-        dummy_value = 'dummy_val'
-        mock_get_value = mocker.patch.object(URL, "get_value_from_key", return_value=dummy_value)
-
         url = 'http://url1.zip'
         url_metadata = URL().parse_url_metadata(url)
 
-        assert mock_get_value.call_count == 4
         assert url_metadata == {
             "url": url,
-            "md5hash": dummy_value,
-            "filename": dummy_value,
-            "extract_dir": dummy_value,
-            "method": dummy_value
+            "md5hash": None,
+            "filename": 'url1.zip',
+            "extract_dir": '',
+            "method": 'requests'
         }
 
     def test_parse_url_metadata__dict(self, mocker):
-        dummy_value = 'dummy_val'
-        mock_get_value = mocker.patch.object(URL, "get_value_from_key", return_value=dummy_value)
-
-        url = {'url': 'http://url1.zip'}
+        url = {
+            "url": 'http://url1.zip',
+            "md5hash": '123456798',
+            "save_name": 'file_a87is9.zip',
+            "extract_dir": os.path.join('some','extract', 'path')
+        }
         url_metadata = URL().parse_url_metadata(url)
 
-        assert mock_get_value.call_count == 4
         assert url_metadata == {
             "url": url['url'],
-            "md5hash": dummy_value,
-            "filename": dummy_value,
-            "extract_dir": dummy_value,
-            "method": dummy_value
+            "md5hash": url['md5hash'],
+            "filename": url['save_name'],
+            "extract_dir": url['extract_dir'],
+            "method": 'requests'
+        }
+
+    def test_parse_url_metadata__googledrive(self, mocker):
+        url = {
+            "url": '134728318290',
+            "save_name": 'file_gdrive.zip',
+            "extract_dir": os.path.join('some','extract', 'path'),
+            "source": 'googledrive'
+        }
+        url_metadata = URL().parse_url_metadata(url)
+        assert url_metadata == {
+            "url": url['url'],
+            "md5hash": None,
+            "filename": url['save_name'],
+            "extract_dir": url['extract_dir'],
+            "method": 'googledrive'
         }
 
     def test_parse_url_metadata__invalid_url_type(self, mocker):
         with pytest.raises(AssertionError):
             url = ['http://url1.zip']
             url_metadata = URL().parse_url_metadata(url)
+
+    def test_get_value_from_key__string_input(self, mocker):
+        input = 'http://dummy_url'
+        key = 'url'
+        value = URL().get_value_from_key(input, key, default='default_val')
+
+        assert value == 'default_val'
 
     def test_get_value_from_key__key_exists(self, mocker):
         dictionary = {"url": 'http://dummy_url.html', "md5hash": 'dummy_hash'}
@@ -276,7 +296,7 @@ class TestURL:
 
     def test_get_value_from_key__key_doesnt_exist(self, mocker):
         value = URL().get_value_from_key(
-            dictionary={"url": 'http://dummy_url.html', "md5hash": 'dummy_hash'},
+            input={"url": 'http://dummy_url.html', "md5hash": 'dummy_hash'},
             key='filename',
             default='default'
         )
