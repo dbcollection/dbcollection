@@ -131,9 +131,13 @@ class DownloadAPI(object):
         return MetadataConstructor(name)
 
     def get_download_data_dir(self):
-        if not any(self.data_dir):
-            self.data_dir = self.get_download_data_dir_from_cache()
-        return self.data_dir
+        if self.data_dir:
+            data_dir = self.data_dir
+        else:
+            data_dir = self.get_download_data_dir_from_cache()
+        if not self.name == os.path.basename(data_dir):
+            data_dir = os.path.join(data_dir, self.name)
+        return data_dir
 
     def get_download_data_dir_from_cache(self):
         """Create a dir path from the cache information for this dataset."""

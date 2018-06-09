@@ -153,7 +153,7 @@ class TestClassDownloadAPI:
         result = download_api_cls.get_download_data_dir()
 
         assert not mock_get_dir.called
-        assert result == '/valid/dir/path'
+        assert result == '/valid/dir/path/mnist'
 
     def test_get_download_data_dir__data_dir_empty(self, mocker, download_api_cls):
         mock_get_dir = mocker.patch.object(DownloadAPI, "get_download_data_dir_from_cache", return_value='/some/cache/dir')
@@ -162,7 +162,7 @@ class TestClassDownloadAPI:
         result = download_api_cls.get_download_data_dir()
 
         assert mock_get_dir.called
-        assert result == '/some/cache/dir'
+        assert result == '/some/cache/dir/mnist'
 
     def get_download_data_dir_from_cache(self, mocker, download_api_cls):
         mock_get_dir = mocker.patch.object(DownloadAPI, "get_cache_download_dir_path", return_value='/download/dir/path')
