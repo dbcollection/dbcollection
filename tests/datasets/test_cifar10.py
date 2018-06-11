@@ -9,7 +9,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from dbcollection.datasets.cifar.cifar10 import Classification
+from dbcollection.datasets.cifar.cifar10.classification import Classification, DatasetAnnotationLoader
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
@@ -174,4 +174,36 @@ class TestClassificationTask:
 
 class TestDatasetAnnotationLoader:
     """Unit tests for the DatasetAnnotationLoader class."""
-    pass
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_loader_class():
+        return DatasetAnnotationLoader(
+            data_files = [
+                "batches.meta",
+                "data_batch_1",
+                "data_batch_2",
+                "data_batch_3",
+                "data_batch_4",
+                "data_batch_5",
+                "test_batch"
+            ],
+            data_path='/some/path/data',
+            cache_path='/some/path/cache',
+            verbose=True
+        )
+
+    def test_task_attributes(self, mocker, mock_loader_class):
+        assert mock_loader_class.data_files == [
+            "batches.meta",
+            "data_batch_1",
+            "data_batch_2",
+            "data_batch_3",
+            "data_batch_4",
+            "data_batch_5",
+            "test_batch"
+        ]
+        assert mock_loader_class.data_path=='/some/path/data'
+        assert mock_loader_class.cache_path=='/some/path/cache'
+        assert mock_loader_class.verbose==True
+
