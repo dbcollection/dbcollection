@@ -226,21 +226,17 @@ class TestDatasetAnnotationLoader:
         assert data == dummy_data
 
     def test_load_data_set(self, mocker, mock_loader_class):
-        mock_load_annotations = mocker.patch.object(Classification, "load_data_annotations", return_value=('data', 'labels', {"label_names": 'some_class'}))
-        mock_get_object_list = mocker.patch.object(Classification, "get_object_list", return_value=list(range(10)))
-        mock_get_list = mocker.patch.object(Classification, "get_images_per_class", return_value=list(range(5)))
+        dummy_images = np.random.rand(10,3,32,32)
+        dummy_labels = np.array(range(10))
+        dummy_class_names = ['dummy_name']*10
+        mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_data_annotations", return_value=(dummy_images, dummy_labels, dummy_class_names))
 
-        set_data = mock_classification_class.load_data_set(False)
+        set_data = mock_loader_class.load_data_set(False)
 
         mock_load_annotations.assert_called_once_with(False)
-        mock_get_object_list.assert_called_once_with('data', 'labels')
-        mock_get_list.assert_called_once_with('labels')
-        assert_array_equal(set_data['object_fields'], str2ascii(['images', 'classes']))
-        assert_array_equal(set_data['classes'], str2ascii(['some_class']))
-        assert set_data['images'] == 'data'
-        assert set_data['labels'] == 'labels'
-        assert set_data['object_ids'] == list(range(10))
-        assert set_data['list_images_per_class'] == list(range(5))
+        assert set_data['classes'] == dummy_class_names
+        assert_array_equal(set_data['images'], dummy_images)
+        assert_array_equal(set_data['labels'], dummy_labels)
 
     @pytest.mark.parametrize('is_test', [False, True])
     def test_load_data_annotations_for_train_set(self, mocker, mock_loader_class, is_test):

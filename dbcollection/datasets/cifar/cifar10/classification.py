@@ -175,17 +175,10 @@ class DatasetAnnotationLoader:
         """Fetches the train/test data."""
         assert isinstance(is_test, bool), "Must input a valid boolean input."
         images, labels, class_names = self.load_data_annotations(is_test)
-
-        object_list = self.get_object_list(images, labels)
-        images_per_class = self.get_images_per_class(labels)
-
         return {
-            "object_fields": str2ascii(['images', 'classes']),
-            "classes": str2ascii(class_names['label_names']),
+            "classes": class_names,
             "images": images,
-            "labels": labels,
-            "object_ids": object_list,
-            "list_images_per_class": images_per_class
+            "labels": labels
         }
 
     def load_data_annotations(self, is_test):
