@@ -14,7 +14,7 @@ from dbcollection.utils.pad import pad_list
 
 
 class Classification(BaseTaskNew):
-    """ Cifar10 Classification preprocessing functions """
+    """Cifar10 Classification preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'classification'
@@ -47,7 +47,7 @@ class Classification(BaseTaskNew):
 
         return {
             "object_fields": str2ascii(['images', 'classes']),
-            "class_name": str2ascii(class_names['label_names']),
+            "classes": str2ascii(class_names['label_names']),
             "images": images,
             "labels": labels,
             "object_ids": object_list,
