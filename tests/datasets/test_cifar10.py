@@ -224,3 +224,100 @@ class TestDatasetAnnotationLoader:
 
         mock_load_data.assert_called_once_with(is_test=True)
         assert data == dummy_data
+
+    def test_load_data_set(self, mocker, mock_loader_class):
+        mock_load_annotations = mocker.patch.object(Classification, "load_data_annotations", return_value=('data', 'labels', {"label_names": 'some_class'}))
+        mock_get_object_list = mocker.patch.object(Classification, "get_object_list", return_value=list(range(10)))
+        mock_get_list = mocker.patch.object(Classification, "get_images_per_class", return_value=list(range(5)))
+
+        set_data = mock_classification_class.load_data_set(False)
+
+        mock_load_annotations.assert_called_once_with(False)
+        mock_get_object_list.assert_called_once_with('data', 'labels')
+        mock_get_list.assert_called_once_with('labels')
+        assert_array_equal(set_data['object_fields'], str2ascii(['images', 'classes']))
+        assert_array_equal(set_data['classes'], str2ascii(['some_class']))
+        assert set_data['images'] == 'data'
+        assert set_data['labels'] == 'labels'
+        assert set_data['object_ids'] == list(range(10))
+        assert set_data['list_images_per_class'] == list(range(5))
+
+    @pytest.mark.parametrize('is_test', [False, True])
+    def test_load_data_annotations_for_train_set(self, mocker, mock_loader_class, is_test):
+        random_data = np.random.rand(20,3,32,32)
+        mock_get_names = mocker.patch.object(DatasetAnnotationLoader, "get_class_names", return_value=['some', 'class', 'names'])
+        mock_get_data_test = mocker.patch.object(DatasetAnnotationLoader, "get_data_test", return_value=(random_data, np.array(range(10))))
+        mock_get_data_train = mocker.patch.object(DatasetAnnotationLoader, "get_data_train", return_value=(random_data, np.array(range(10))))
+
+        data_path = os.path.join(mock_loader_class.data_path, 'cifar-10-batches-py')
+        data, labels, class_names = mock_loader_class.load_data_annotations(is_test=is_test)
+
+        mock_get_names.assert_called_once_with(data_path)
+        if is_test:
+            mock_get_data_test.assert_called_once_with(data_path)
+            assert not mock_get_data_train.called
+        else:
+            assert not mock_get_data_test.called
+            mock_get_data_train.assert_called_once_with(data_path)
+        assert_array_equal(data, np.transpose(random_data, (0, 2, 3, 1)))
+        assert_array_equal(labels, np.array(range(10)))
+        assert class_names == ['some', 'class', 'names']
+
+    def test_get_class_names(self, mocker, mock_loader_class):
+        mock_load_annot_file = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_file", return_value='dummy_data')
+
+        path = mock_loader_class.data_path
+        result = mock_loader_class.get_class_names(path)
+
+        filename = os.path.join(path, "batches.meta")
+        mock_load_annot_file.assert_called_once_with(filename)
+        assert result == 'dummy_data'
+
+    def test_get_data_train(self, mocker, mock_loader_class):
+        test_data = {
+            "data": np.random.rand(10, 3*32*32),
+            "labels": np.random.randint(0, 9, (10,))
+        }
+        test_data_concat = np.concatenate(
+            (test_data['data'], test_data['data'], test_data['data'], test_data['data'], test_data['data']),
+            axis=0
+        )
+        output_data = test_data_concat.reshape(50,3,32,32)
+        mock_load_annot_file = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_file", return_value=test_data)
+        mock_reshape_array = mocker.patch.object(DatasetAnnotationLoader, "reshape_array", return_value=output_data)
+
+        path = mock_loader_class.data_path
+        data, labels = mock_loader_class.get_data_train(path)
+
+        assert mock_load_annot_file.called
+        assert mock_load_annot_file.call_count == 5
+        assert mock_reshape_array.called
+        assert_array_equal(data, output_data)
+        assert_array_equal(labels, np.concatenate(
+            (test_data['labels'], test_data['labels'], test_data['labels'], test_data['labels'], test_data['labels']),
+            axis=0)
+        )
+
+    def test_reshape_array(self, mocker, mock_loader_class):
+        data = np.random.rand(20, 3*32*32)
+
+        result = mock_loader_class.reshape_array(data, 20)
+
+        assert_array_equal(result, data.reshape(20, 3, 32, 32))
+
+    def test_get_data_test(self, mocker, mock_loader_class):
+        test_data = {
+            "data": np.random.rand(10, 3*32*32),
+            "labels": np.random.randint(0, 9, (10,))
+        }
+        mock_load_annot_file = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_file", return_value=test_data)
+        mock_reshape_array = mocker.patch.object(DatasetAnnotationLoader, "reshape_array", return_value=test_data['data'].reshape(10, 3, 32, 32))
+
+        path = mock_loader_class.data_path
+        data, labels = mock_loader_class.get_data_test(path)
+
+        mock_load_annot_file.assert_called_once_with(os.path.join(path, 'test_batch'))
+        mock_reshape_array.assert_called_once_with(test_data['data'], 10000)
+        assert_array_equal(data, test_data['data'].reshape((10, 3, 32, 32)))
+        assert_array_equal(labels, test_data['labels'])
+
