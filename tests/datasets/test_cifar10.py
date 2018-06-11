@@ -13,13 +13,13 @@ from dbcollection.datasets.cifar.cifar10.classification import Classification, D
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
-@pytest.fixture()
-def mock_classification_class():
-    return Classification(data_path='/some/path/data', cache_path='/some/path/cache')
-
-
 class TestClassificationTask:
     """Unit tests for the cifar10 Classification task."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_classification_class():
+        return Classification(data_path='/some/path/data', cache_path='/some/path/cache')
 
     def test_task_attributes(self, mocker, mock_classification_class):
         assert mock_classification_class.filename_h5 == 'classification'
