@@ -34,6 +34,12 @@ class Classification(BaseTaskNew):
         """
         Loads data from annotation files.
         """
+        loader = DatasetAnnotationLoader(
+            data_files=self.data_files,
+            data_path=self.data_path,
+            cache_path=self.cache_path,
+            verbose=self.verbose
+        )
         yield {"train": self.load_data_set(is_test=False)}
         yield {"test": self.load_data_set(is_test=True)}
 
@@ -149,8 +155,11 @@ class Classification(BaseTaskNew):
 class DatasetAnnotationLoader:
     """Annotation's data loader for the cifar10 dataset (train/test)."""
 
-    def __init__(self):
-        pass
+    def __init__(self, data_files, data_path, cache_path, verbose):
+        self.data_files = data_files
+        self.data_path = data_path
+        self.cache_path = cache_path
+        self.verbose = verbose
 
     def load_train_data(self):
         """Loads the train set annotation data from disk
