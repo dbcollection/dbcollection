@@ -146,6 +146,23 @@ class Classification(BaseTaskNew):
 # Data load / set up
 # -----------------------------------------------------------
 
+class DatasetAnnotationLoader:
+    """Annotation's data loader for the cifar10 dataset (train/test)."""
+
+    def __init__(self):
+        pass
+
+    def load_train_data(self):
+        """Loads the train set annotation data from disk
+        and returns it as a dictionary."""
+        pass
+
+    def load_test_data(self):
+        """Loads the test set annotation data from disk
+        and returns it as a dictionary."""
+        pass
+
+
 # -----------------------------------------------------------
 # Metadata fields
 # -----------------------------------------------------------
