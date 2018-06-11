@@ -57,7 +57,7 @@ class TestClassificationTask:
         mock_get_object_list.assert_called_once_with('data', 'labels')
         mock_get_list.assert_called_once_with('labels')
         assert_array_equal(set_data['object_fields'], str2ascii(['images', 'classes']))
-        assert_array_equal(set_data['class_name'], str2ascii(['some_class']))
+        assert_array_equal(set_data['classes'], str2ascii(['some_class']))
         assert set_data['images'] == 'data'
         assert set_data['labels'] == 'labels'
         assert set_data['object_ids'] == list(range(10))
