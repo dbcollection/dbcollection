@@ -170,3 +170,8 @@ class TestClassificationTask:
 
         assert mock_save_hdf5.called
         assert mock_save_hdf5.call_count == 6
+
+
+class TestDatasetAnnotationLoader:
+    """Unit tests for the DatasetAnnotationLoader class."""
+    pass
