@@ -215,3 +215,12 @@ class TestDatasetAnnotationLoader:
 
         mock_load_data.assert_called_once_with(is_test=False)
         assert data == dummy_data
+
+    def test_load_test_data(self, mocker, mock_loader_class):
+        dummy_data = {"dummy": 'data'}
+        mock_load_data = mocker.patch.object(DatasetAnnotationLoader, 'load_data_set', return_value=dummy_data)
+
+        data = mock_loader_class.load_test_data()
+
+        mock_load_data.assert_called_once_with(is_test=True)
+        assert data == dummy_data
