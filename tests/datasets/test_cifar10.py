@@ -9,8 +9,13 @@ import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from dbcollection.datasets.cifar.cifar10.classification import Classification, DatasetAnnotationLoader
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.datasets.cifar.cifar10.classification import (
+    Classification,
+    DatasetAnnotationLoader,
+    BaseField,
+    ClassLabelField
+)
 
 
 class TestClassificationTask:
@@ -166,11 +171,13 @@ class TestClassificationTask:
 
     def test_process_set_metadata(self, mocker, mock_classification_class):
         mock_save_hdf5 = mocker.patch.object(Classification, "save_field_to_hdf5")
+        mock_class_field = mocker.patch.object(ClassLabelField, "process")
 
         data = {"classes": 1, "images": 1, "labels": 1,
                 "object_fields": 1, "object_ids": 1, "list_images_per_class": 1}
         mock_classification_class.process_set_metadata(data, 'train')
 
+        mock_class_field.assert_called_once_with()
         assert mock_save_hdf5.called
         assert mock_save_hdf5.call_count == 6
 
@@ -320,3 +327,99 @@ class TestDatasetAnnotationLoader:
         assert_array_equal(data, test_data['data'].reshape((10, 3, 32, 32)))
         assert_array_equal(labels, test_data['labels'])
 
+
+@pytest.fixture()
+def test_data_loaded():
+    classes = ['airplane']*10
+    images = np.random.rand(10,3,32,32)
+    labels = np.array(range(10))
+    return {
+            "classes": classes,
+            "images": images,
+            "labels": labels
+        }
+
+
+@pytest.fixture()
+def field_kwargs(test_data_loaded):
+    return {
+        "data": test_data_loaded,
+        "set_name": 'train',
+        "hdf5_manager": {'dummy': 'object'},
+        "verbose": True
+    }
+
+class TestBaseField:
+    """Unit tests for the BaseField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_base_class(field_kwargs):
+        return BaseField(**field_kwargs)
+
+    def test_init(self, mocker):
+        data = ['some', 'data']
+        set_name = 'train'
+        hdf5_manager = {'dummy': 'object'}
+        verbose = True
+
+        base_field = BaseField(data, set_name, hdf5_manager, verbose)
+
+        assert base_field.data == data
+        assert base_field.set_name == set_name
+        assert base_field.hdf5_manager == hdf5_manager
+        assert base_field.verbose == verbose
+
+    def test_save_field_to_hdf5(self, mocker, mock_base_class):
+        mock_manager = mocker.MagicMock()
+
+        set_name = 'test'
+        field = 'dummy_field'
+        data = np.random.rand(2,2)
+        args = {"dtype" : np.uint8, "chunks": True}
+
+        mock_base_class.hdf5_manager = mock_manager
+        mock_base_class.save_field_to_hdf5(
+            set_name=set_name,
+            field=field,
+            data=data,
+            **args
+        )
+
+        mock_manager.add_field_to_group.assert_called_once_with(
+            group=set_name,
+            field=field,
+            data=data,
+            **args
+        )
+
+class TestClassLabelField:
+    """Unit tests for the ClassLabelField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_classlabel_class(field_kwargs):
+        return ClassLabelField(**field_kwargs)
+
+    def test_process(self, mocker, mock_classlabel_class):
+        dummy_names = ['car']*10
+        mock_get_class = mocker.patch.object(ClassLabelField, "get_class_names", return_value=dummy_names)
+        mock_save_hdf5 = mocker.patch.object(ClassLabelField, "save_field_to_hdf5")
+
+        mock_classlabel_class.process()
+
+        mock_get_class.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='classes',
+        #     data=str2ascii(dummy_names),
+        #     dtype=np.uint8,
+        #     fillvalue=-1
+        # )
+
+    def test_get_class_names(self, mocker, mock_classlabel_class, test_data_loaded):
+        class_names = mock_classlabel_class.get_class_names()
+
+        assert class_names == test_data_loaded['classes']
