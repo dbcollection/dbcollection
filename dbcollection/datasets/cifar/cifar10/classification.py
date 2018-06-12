@@ -40,8 +40,8 @@ class Classification(BaseTaskNew):
             cache_path=self.cache_path,
             verbose=self.verbose
         )
-        yield {"train": self.load_data_set(is_test=False)}
-        yield {"test": self.load_data_set(is_test=True)}
+        yield {"train": loader.load_train_data()}
+        yield {"test": loader.load_test_data()}
 
     def load_data_set(self, is_test):
         """Fetches the train/test data."""
