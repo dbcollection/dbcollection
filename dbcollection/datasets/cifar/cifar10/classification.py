@@ -147,6 +147,7 @@ class Classification(BaseTaskNew):
             print('\n==> Setting up the data fields:')
         ClassLabelField(**args).process()
         image_ids = ImageField(**args).process()
+        label_ids = LabelIdField(**args).process()
 
         self.save_field_to_hdf5(set_name, 'classes', data["classes"],
                                 dtype=np.uint8, fillvalue=0)
@@ -299,16 +300,17 @@ class ClassLabelField(BaseField):
         )
 
     def get_class_names(self):
-        """Returns a list of label ids for each row of 'object_ids' field."""
+        """Returns a list of class names."""
         return self.data['classes']
 
 
 class ImageField(BaseField):
     """Images' data field process/save class."""
 
+
     @display_message_processing('images')
     def process(self):
-        """Processes and saves the classes metadata to hdf5."""
+        """Processes and saves the images metadata to hdf5."""
         images, image_ids = self.get_images()
         self.save_field_to_hdf5(
             set_name=self.set_name,
@@ -320,10 +322,36 @@ class ImageField(BaseField):
         return image_ids
 
     def get_images(self):
-        """Returns a list of label ids for each row of 'object_ids' field."""
+        """Returns a np.ndarray of images and a list
+        of image ids for each row of 'object_ids' field."""
         images = self.data['images']
         image_ids = list(range(len(images)))
         return images, image_ids
+
+
+class LabelIdField(BaseField):
+    """Label id field metadata process/save class."""
+
+    @display_message_processing('labels')
+    def process(self):
+        """Processes and saves the labels metadata to hdf5."""
+        labels, label_ids = self.get_labels()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='labels',
+            data=labels,
+            dtype=np.uint8,
+            fillvalue=0
+        )
+        return label_ids
+
+    def get_labels(self):
+        """Returns a np.ndarray of labels and a list
+        of label ids for each row of 'object_ids' field."""
+        labels = self.data['labels']
+        label_ids = list(range(len(labels)))
+        return labels, label_ids
+
 
 # -----------------------------------------------------------
 # Metadata lists
