@@ -151,6 +151,11 @@ class Classification(BaseTaskNew):
         ObjectFieldNamesField(**args).process()
         ObjectIdsField(**args).process(image_ids, label_ids)
 
+        # Lists
+        if self.verbose:
+            print('\n==> Setting up ordered lists:')
+        ImagesPerClassList(**args).process()
+
         self.save_field_to_hdf5(set_name, 'classes', data["classes"],
                                 dtype=np.uint8, fillvalue=0)
         self.save_field_to_hdf5(set_name, 'images', data["images"],
@@ -383,9 +388,39 @@ class ObjectIdsField(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
-        return object_ids
 
 
 # -----------------------------------------------------------
 # Metadata lists
 # -----------------------------------------------------------
+
+class ImagesPerClassList(BaseField):
+    """Images per class list metadata process/save class."""
+
+    @display_message_processing('images per class list')
+    def process(self):
+        """Processes and saves the list ids metadata to hdf5."""
+        images_per_class = self.get_image_ids_per_class()
+        images_per_class_array = self.convert_list_to_array(images_per_class)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_images_per_class',
+            data=images_per_class_array,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_image_ids_per_class(self):
+        """Returns a list of lists of image filename ids per class id."""
+        images_per_class = []
+        labels = self.data['labels']
+        unique_labels = np.unique(labels)
+        for label in unique_labels:
+            images_idx = np.where(labels == label)[0].tolist()
+            images_per_class.append(images_idx)
+        return images_per_class
+
+    def convert_list_to_array(self, list_ids):
+        """Pads a list of listsand converts it into a numpy.ndarray."""
+        padded_list = pad_list(list_ids, val=-1)
+        return np.array(padded_list, dtype=np.int32)
