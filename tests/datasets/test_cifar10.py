@@ -14,7 +14,6 @@ from dbcollection.utils.pad import pad_list
 from dbcollection.datasets.cifar.cifar10.classification import (
     Classification,
     DatasetAnnotationLoader,
-    BaseField,
     ClassLabelField,
     ImageField,
     LabelIdField,
@@ -230,49 +229,6 @@ def field_kwargs(test_data_loaded):
         "verbose": True
     }
 
-class TestBaseField:
-    """Unit tests for the BaseField class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_base_class(field_kwargs):
-        return BaseField(**field_kwargs)
-
-    def test_init(self, mocker):
-        data = ['some', 'data']
-        set_name = 'train'
-        hdf5_manager = {'dummy': 'object'}
-        verbose = True
-
-        base_field = BaseField(data, set_name, hdf5_manager, verbose)
-
-        assert base_field.data == data
-        assert base_field.set_name == set_name
-        assert base_field.hdf5_manager == hdf5_manager
-        assert base_field.verbose == verbose
-
-    def test_save_field_to_hdf5(self, mocker, mock_base_class):
-        mock_manager = mocker.MagicMock()
-
-        set_name = 'test'
-        field = 'dummy_field'
-        data = np.random.rand(2,2)
-        args = {"dtype" : np.uint8, "chunks": True}
-
-        mock_base_class.hdf5_manager = mock_manager
-        mock_base_class.save_field_to_hdf5(
-            set_name=set_name,
-            field=field,
-            data=data,
-            **args
-        )
-
-        mock_manager.add_field_to_group.assert_called_once_with(
-            group=set_name,
-            field=field,
-            data=data,
-            **args
-        )
 
 class TestClassLabelField:
     """Unit tests for the ClassLabelField class."""
