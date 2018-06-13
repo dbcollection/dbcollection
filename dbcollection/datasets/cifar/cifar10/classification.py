@@ -214,7 +214,6 @@ class ClassLabelField(BaseField):
 class ImageField(BaseField):
     """Images' data field process/save class."""
 
-
     @display_message_processing('images')
     def process(self):
         """Processes and saves the images metadata to hdf5."""
