@@ -44,7 +44,6 @@ class TestClassificationTask:
 
     def test_process_set_metadata(self, mocker, mock_classification_class):
         dummy_ids = [0, 1, 2, 3, 4, 5]
-        mock_save_hdf5 = mocker.patch.object(Classification, "save_field_to_hdf5")
         mock_class_field = mocker.patch.object(ClassLabelField, "process")
         mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
         mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
@@ -62,8 +61,6 @@ class TestClassificationTask:
         mock_objfield_field.assert_called_once_with()
         mock_objids_field.assert_called_once_with(dummy_ids, dummy_ids)
         mock_images_per_class_list.assert_called_once_with()
-        assert mock_save_hdf5.called
-        assert mock_save_hdf5.call_count == 6
 
 
 class TestDatasetAnnotationLoader:
