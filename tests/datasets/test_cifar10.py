@@ -17,7 +17,8 @@ from dbcollection.datasets.cifar.cifar10.classification import (
     ClassLabelField,
     ImageField,
     LabelIdField,
-    ObjectFieldNamesField
+    ObjectFieldNamesField,
+    ObjectIdsField
 )
 
 
@@ -173,12 +174,14 @@ class TestClassificationTask:
         assert_array_equal(images_per_class, expected)
 
     def test_process_set_metadata(self, mocker, mock_classification_class):
-        dummy_ids = list(range(10))
+        dummy_ids = [0, 1, 2, 3, 4, 5]
+        dummy_object_ids = [[0, 0], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5]]
         mock_save_hdf5 = mocker.patch.object(Classification, "save_field_to_hdf5")
         mock_class_field = mocker.patch.object(ClassLabelField, "process")
         mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
         mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_objfield_field = mocker.patch.object(ObjectFieldNamesField, "process")
+        mock_objids_field = mocker.patch.object(ObjectIdsField, "process", return_value=dummy_object_ids)
 
         data = {"classes": 1, "images": 1, "labels": 1,
                 "object_fields": 1, "object_ids": 1, "list_images_per_class": 1}
@@ -188,6 +191,7 @@ class TestClassificationTask:
         mock_image_field.assert_called_once_with()
         mock_label_field.assert_called_once_with()
         mock_objfield_field.assert_called_once_with()
+        mock_objids_field.assert_called_once_with(dummy_ids, dummy_ids)
         assert mock_save_hdf5.called
         assert mock_save_hdf5.call_count == 6
 
@@ -527,3 +531,36 @@ class TestObjectFieldNamesField:
         #     dtype=np.uint8,
         #     fillvalue=0
         # )
+
+class TestObjectIdsField:
+    """Unit tests for the ObjectIdsField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_objfids_class(field_kwargs):
+        return ObjectIdsField(**field_kwargs)
+
+    def test_process(self, mocker, mock_objfids_class):
+        mock_save_hdf5 = mocker.patch.object(ObjectIdsField, "save_field_to_hdf5")
+
+        image_ids = [0, 1, 2, 3, 4, 5]
+        label_ids = [1, 5, 9, 8, 3, 5]
+        object_ids = mock_objfids_class.process(
+            image_ids=image_ids,
+            label_ids=label_ids
+        )
+
+        assert object_ids == [[0, 1], [1, 5], [2, 9], [3, 8], [4, 3], [5, 5]]
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # object_ids = [[image_filenames_ids[i], class_ids[i], bbox_ids[i],
+        #               bboxv_ids[i], label_ids[i], occlusion_ids[i]]
+        #               for i in range(len(bbox_ids))]
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='object_ids',
+        #     data=np.array(object_ids, dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
