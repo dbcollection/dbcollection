@@ -69,19 +69,6 @@ class Classification(BaseTaskNew):
             print('\n==> Setting up ordered lists:')
         ImagesPerClassList(**args).process()
 
-        self.save_field_to_hdf5(set_name, 'classes', data["classes"],
-                                dtype=np.uint8, fillvalue=0)
-        self.save_field_to_hdf5(set_name, 'images', data["images"],
-                                dtype=np.uint8, fillvalue=-1)
-        self.save_field_to_hdf5(set_name, 'labels', data["labels"],
-                                dtype=np.uint8, fillvalue=0)
-        self.save_field_to_hdf5(set_name, 'object_fields', data["object_fields"],
-                                dtype=np.uint8, fillvalue=0)
-        self.save_field_to_hdf5(set_name, 'object_ids', data["object_ids"],
-                                dtype=np.int32, fillvalue=-1)
-        self.save_field_to_hdf5(set_name, 'list_images_per_class', data["list_images_per_class"],
-                                dtype=np.int32, fillvalue=-1)
-
 
 # -----------------------------------------------------------
 # Data load / set up
