@@ -7,7 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTaskNew
+from dbcollection.datasets import BaseTaskNew, BaseField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -160,36 +160,6 @@ class DatasetAnnotationLoader:
 # -----------------------------------------------------------
 # Metadata fields
 # -----------------------------------------------------------
-
-class BaseField(object):
-    """Base class for the dataset's data fields processor."""
-
-    def __init__(self, data, set_name, hdf5_manager, verbose):
-        self.data = data
-        self.set_name = set_name
-        self.hdf5_manager = hdf5_manager
-        self.verbose = verbose
-
-    def save_field_to_hdf5(self, set_name, field, data, **kwargs):
-        """Saves data of a field into the HDF% metadata file.
-
-        Parameters
-        ----------
-        set_name: str
-            Name of the set split.
-        field : str
-            Name of the data field.
-        data : np.ndarray
-            Numpy ndarray of the field's data.
-
-        """
-        self.hdf5_manager.add_field_to_group(
-            group=set_name,
-            field=field,
-            data=data,
-            **kwargs
-        )
-
 
 class ClassLabelField(BaseField):
     """Class label names' field metadata process/save class."""
