@@ -7,7 +7,11 @@ import os
 import pytest
 import numpy as np
 
-from dbcollection.datasets import BaseDatasetNew, BaseTaskNew
+from dbcollection.datasets import (
+    BaseDatasetNew,
+    BaseTaskNew,
+    BaseField
+)
 
 
 @pytest.fixture()
@@ -283,3 +287,76 @@ class TestBaseTaskNew:
         mock_task_class.teardown_hdf5_manager()
 
         mock_add_field.close.assert_called_once_with()
+
+
+class TestBaseField:
+    """Unit tests for the BaseField class."""
+
+    def test_init(self, mocker):
+        args = {
+            "data": ['some', 'data'],
+            "set_name": 'train',
+            "hdf5_manager": {'dummy': 'object'},
+            "verbose": True
+        }
+
+        base_field = BaseField(**args)
+
+        assert base_field.data == args["data"]
+        assert base_field.set_name == args["set_name"]
+        assert base_field.hdf5_manager == args["hdf5_manager"]
+        assert base_field.verbose == args["verbose"]
+
+    def test_save_field_to_hdf5(self, mocker):
+        mock_hdf5_manager = mocker.Mock()
+
+        args = {
+            "data": ['some', 'data'],
+            "set_name": 'train',
+            "hdf5_manager": mock_hdf5_manager,
+            "verbose": True
+        }
+        base_field = BaseField(**args)
+
+        group = 'train'
+        field = 'fieldA'
+        data = np.array(range(10))
+        base_field.save_field_to_hdf5(group, field, data)
+
+        mock_hdf5_manager.add_field_to_group.assert_called_once_with(
+            group='train',
+            field='fieldA',
+            data=data
+        )
+
+    def test_save_field_to_hdf5_all_args(self, mocker):
+        mock_hdf5_manager = mocker.Mock()
+
+        args = {
+            "data": ['some', 'data'],
+            "set_name": 'train',
+            "hdf5_manager": mock_hdf5_manager,
+            "verbose": True
+        }
+        base_field = BaseField(**args)
+
+        base_field.save_field_to_hdf5(
+            set_name='train',
+            field='fieldA',
+            data= [0, 1, 2, 3, 4, 5],
+            dtype=np.uint8,
+            fillvalue=0,
+            chunks=True,
+            compression="gzip",
+            compression_opts=4)
+
+        mock_hdf5_manager.add_field_to_group.assert_called_once_with(
+            group='train',
+            field='fieldA',
+            data=[0, 1, 2, 3, 4, 5],
+            dtype=np.uint8,
+            fillvalue=0,
+            chunks=True,
+            compression="gzip",
+            compression_opts=4
+        )
