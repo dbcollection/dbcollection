@@ -15,7 +15,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 
 
 class Classification(BaseTaskNew):
-    """ Cifar100 Classification preprocessing functions """
+    """Cifar100 Classification preprocessing functions."""
 
     # metadata filename
     filename_h5 = 'classification'
