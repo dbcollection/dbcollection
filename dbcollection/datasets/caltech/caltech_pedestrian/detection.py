@@ -8,8 +8,7 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTaskNew
-
+from dbcollection.datasets import BaseTaskNew, BaseField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_json
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -222,15 +221,8 @@ class DatasetAnnotationLoader(object):
 # Metadata fields
 # -----------------------------------------------------------
 
-class BaseField(object):
-    """Base class for the dataset's data fields processor."""
-
-    def __init__(self, data, set_name, is_clean, hdf5_manager, verbose):
-        self.data = data
-        self.set_name = set_name
-        self.is_clean = is_clean
-        self.hdf5_manager = hdf5_manager
-        self.verbose = verbose
+class BaseFieldCustom(BaseField):
+    """Custom Base class for the dataset's data fields processor."""
 
     def get_annotation_objects_generator(self):
         """Returns a generator for all object annotations of the data.
@@ -269,28 +261,8 @@ class BaseField(object):
                                 obj_counter += 1
                     img_counter += 1
 
-    def save_field_to_hdf5(self, set_name, field, data, **kwargs):
-        """Saves data of a field into the HDF% metadata file.
 
-        Parameters
-        ----------
-        set_name: str
-            Name of the set split.
-        field : str
-            Name of the data field.
-        data : np.ndarray
-            Numpy ndarray of the field's data.
-
-        """
-        self.hdf5_manager.add_field_to_group(
-            group=set_name,
-            field=field,
-            data=data,
-            **kwargs
-        )
-
-
-class ClassLabelField(BaseField):
+class ClassLabelField(BaseFieldCustom):
     """Class label names' field metadata process/save class."""
 
     @display_message_processing('class labels')
@@ -324,7 +296,7 @@ class ClassLabelField(BaseField):
         return class_names, class_ids, class_unique_ids
 
 
-class ImageFilenamesField(BaseField):
+class ImageFilenamesField(BaseFieldCustom):
     """Image filenames' field metadata process/save class."""
 
     @display_message_processing('image filenames')
@@ -368,7 +340,7 @@ class ImageFilenamesField(BaseField):
         return image_filenames_ids
 
 
-class BoundingBoxBaseField(BaseField):
+class BoundingBoxBaseField(BaseFieldCustom):
     """Base class for parsing bounding box annotations."""
 
     def get_bboxes_from_data(self, bbox_type):
@@ -434,7 +406,7 @@ class BoundingBoxvField(BoundingBoxBaseField):
         return bboxesv_ids
 
 
-class LabelIdField(BaseField):
+class LabelIdField(BaseFieldCustom):
     """Label id field metadata process/save class."""
 
     @display_message_processing('labels')
@@ -467,7 +439,7 @@ class LabelIdField(BaseField):
             return 0
 
 
-class OcclusionField(BaseField):
+class OcclusionField(BaseFieldCustom):
     """Occlusion field metadata process/save class."""
 
     @display_message_processing('occlusion')
