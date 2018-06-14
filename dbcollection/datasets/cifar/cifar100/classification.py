@@ -7,8 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTaskNew
-
+from dbcollection.datasets import BaseTaskNew, BaseField
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
