@@ -23,7 +23,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     BoundingBoxvField,
     BoundingBoxvPerImageList,
     ClassLabelField,
-    DatasetLoader,
+    DatasetAnnotationLoader,
     ImageFilenamesField,
     ImageFilenamesPerClassList,
     LabelIdField,
@@ -68,8 +68,8 @@ class TestDetectionTask:
 
     def test_load_data(self, mocker, mock_detection_class):
         dummy_data = ['some_data']
-        mock_load_train = mocker.patch.object(DatasetLoader, "load_train_data", return_value=dummy_data)
-        mock_load_test = mocker.patch.object(DatasetLoader, "load_test_data", return_value=dummy_data)
+        mock_load_train = mocker.patch.object(DatasetAnnotationLoader, "load_train_data", return_value=dummy_data)
+        mock_load_test = mocker.patch.object(DatasetAnnotationLoader, "load_test_data", return_value=dummy_data)
 
         load_data_generator = mock_detection_class.load_data()
 
@@ -127,13 +127,13 @@ class TestDetectionTask:
         mock_object_per_class_list.assert_called_once_with(dummy_object_ids, dummy_ids)
 
 
-class TestDatasetLoader:
-    """Unit tests for the DatasetLoader class."""
+class TestDatasetAnnotationLoader:
+    """Unit tests for the DatasetAnnotationLoader class."""
 
     @staticmethod
     @pytest.fixture()
     def mock_loader_class():
-        return DatasetLoader(
+        return DatasetAnnotationLoader(
             skip_step=30,
             classes=('person', 'person-fa', 'people', 'person?'),
             sets={
@@ -161,10 +161,10 @@ class TestDatasetLoader:
     def test_load_data_set(self, mocker, mock_loader_class):
         dummy_images, dummy_annotations = ['image1.jpg', 'image2.jpg'], ['annot1.json', 'annot2.json']
         dummy_annot_data = ['obj1', 'obj2']
-        mock_unpack_data = mocker.patch.object(DatasetLoader, "unpack_raw_data_files", return_value='/some/path/data/')
-        mock_get_partitions = mocker.patch.object(DatasetLoader, "get_set_partitions", return_value=('train', ('set00', 'set01')))
-        mock_get_annotations = mocker.patch.object(DatasetLoader, "get_annotations_data", return_value=(dummy_images, dummy_annotations))
-        mock_load_annotations = mocker.patch.object(DatasetLoader, "load_annotations", return_value=dummy_annot_data)
+        mock_unpack_data = mocker.patch.object(DatasetAnnotationLoader, "unpack_raw_data_files", return_value='/some/path/data/')
+        mock_get_partitions = mocker.patch.object(DatasetAnnotationLoader, "get_set_partitions", return_value=('train', ('set00', 'set01')))
+        mock_get_annotations = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_data", return_value=(dummy_images, dummy_annotations))
+        mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_annotations", return_value=dummy_annot_data)
 
         set_data = mock_loader_class.load_data_set(False)
 
@@ -189,7 +189,7 @@ class TestDatasetLoader:
 
     def test_get_annotations_data(self, mocker, mock_loader_class):
         test_data = {"images": ['image1', 'image2'], "annotations": ['annotation1', 'annotation2']}
-        mock_get_annotations = mocker.patch.object(DatasetLoader, 'get_annotations_from_partition', return_value=test_data)
+        mock_get_annotations = mocker.patch.object(DatasetAnnotationLoader, 'get_annotations_from_partition', return_value=test_data)
 
         set_name = 'train'
         partitions = ('set00', 'set01')
@@ -201,9 +201,9 @@ class TestDatasetLoader:
         assert annotation_filenames == {"set00": test_data['annotations'], "set01": test_data['annotations']}
 
     def test_get_annotations_from_partition(self, mocker, mock_loader_class):
-        mock_get_dirs = mocker.patch.object(DatasetLoader, 'get_sorted_object_names_from_dir', return_value=('V000', 'V001'))
-        mock_get_image_fnames = mocker.patch.object(DatasetLoader, 'get_image_filenames_from_dir', return_value=['image1.jpg', 'image2.jpg'])
-        mock_get_annotation_fnames = mocker.patch.object(DatasetLoader, 'get_annotation_filenames_from_dir', return_value=['annotation1.json', 'annotation2.json'])
+        mock_get_dirs = mocker.patch.object(DatasetAnnotationLoader, 'get_sorted_object_names_from_dir', return_value=('V000', 'V001'))
+        mock_get_image_fnames = mocker.patch.object(DatasetAnnotationLoader, 'get_image_filenames_from_dir', return_value=['image1.jpg', 'image2.jpg'])
+        mock_get_annotation_fnames = mocker.patch.object(DatasetAnnotationLoader, 'get_annotation_filenames_from_dir', return_value=['annotation1.json', 'annotation2.json'])
 
         path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
         partition = 'set00'
@@ -233,7 +233,7 @@ class TestDatasetLoader:
         assert object_names == ['dir1', 'dir2', 'dir3']
 
     def test_get_image_filenames_from_dir(self, mocker, mock_loader_class):
-        mock_get_data = mocker.patch.object(DatasetLoader, 'get_sample_data_from_dir', return_value=['image1.jpg', 'image2.jpg'])
+        mock_get_data = mocker.patch.object(DatasetAnnotationLoader, 'get_sample_data_from_dir', return_value=['image1.jpg', 'image2.jpg'])
 
         path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
         partition = 'set00'
@@ -244,8 +244,8 @@ class TestDatasetLoader:
         assert image_filenames == ['image1.jpg', 'image2.jpg']
 
     def test_get_sample_data_from_dir(self, mocker, mock_loader_class):
-        mock_get_filenames = mocker.patch.object(DatasetLoader, 'get_sorted_object_names_from_dir', return_value=['filename1', 'filename2'])
-        mock_get_sample = mocker.patch.object(DatasetLoader, 'get_sample_filenames', return_value=['filename1', 'filename2'])
+        mock_get_filenames = mocker.patch.object(DatasetAnnotationLoader, 'get_sorted_object_names_from_dir', return_value=['filename1', 'filename2'])
+        mock_get_sample = mocker.patch.object(DatasetAnnotationLoader, 'get_sample_filenames', return_value=['filename1', 'filename2'])
 
         path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
         partition = 'set00'
@@ -268,7 +268,7 @@ class TestDatasetLoader:
         assert sample == ['filename2', 'filename4']
 
     def test_get_annotation_filenames_from_dir(self, mocker, mock_loader_class):
-        mock_get_data = mocker.patch.object(DatasetLoader, 'get_sample_data_from_dir', return_value=['annotation1.json', 'annotation2.json'])
+        mock_get_data = mocker.patch.object(DatasetAnnotationLoader, 'get_sample_data_from_dir', return_value=['annotation1.json', 'annotation2.json'])
 
         path = os.path.join('some', 'path', 'to', 'extracted', 'data', 'set')
         partition = 'set00'
@@ -280,7 +280,7 @@ class TestDatasetLoader:
 
     def test_load_annotations(self, mocker, mock_loader_class, test_data):
         dummy_annotation = [{"pos": [0, 0, 0, 0]}, {"pos": [10, 10, 10, 10]}]
-        mock_load_annotation = mocker.patch.object(DatasetLoader, "load_annotation_file", return_value=dummy_annotation)
+        mock_load_annotation = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_file", return_value=dummy_annotation)
 
         annotations = mock_loader_class.load_annotations(test_data)
 
@@ -332,7 +332,6 @@ def field_kwargs(test_data_loaded):
         "hdf5_manager": {'dummy': 'object'},
         "verbose": True
     }
-
 
 
 class TestBaseField:

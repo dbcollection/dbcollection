@@ -33,7 +33,7 @@ class Detection(BaseTaskNew):
         """
         Fetches the train/test data.
         """
-        loader = DatasetLoader(
+        loader = DatasetAnnotationLoader(
             skip_step=self.skip_step,
             classes=self.classes,
             sets=self.sets,
@@ -90,8 +90,8 @@ class Detection(BaseTaskNew):
 # Data load / set up
 # -----------------------------------------------------------
 
-class DatasetLoader(object):
-    """Annotation's data loader for the caltech's dataset (train/test)."""
+class DatasetAnnotationLoader(object):
+    """Annotation data loader for the caltech dataset (train/test)."""
 
     def __init__(self, skip_step, classes, sets, is_clean, data_path, cache_path, verbose):
         self.skip_step = skip_step
