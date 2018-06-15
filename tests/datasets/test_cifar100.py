@@ -28,7 +28,10 @@ from dbcollection.datasets.cifar.cifar100.classification import (
 
 @pytest.fixture()
 def mock_classification_class():
-    return Classification(data_path='/some/path/data', cache_path='/some/path/cache')
+    return Classification(
+        data_path='/some/path/data',
+        cache_path='/some/path/cache'
+    )
 
 
 @pytest.fixture()
