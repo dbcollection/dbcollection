@@ -78,8 +78,16 @@ class Classification(BaseTaskNew):
         """
         Fetches the train/test data.
         """
-        yield {"train": self.load_data_set(is_test=False)}
-        yield {"test": self.load_data_set(is_test=True)}
+        loader = DatasetAnnotationLoader(
+            finer_classes=self.finer_classes,
+            coarse_classes=self.coarse_classes,
+            data_files=self.data_files,
+            data_path=self.data_path,
+            cache_path=self.cache_path,
+            verbose=self.verbose
+        )
+        yield {"train": loader.load_train_data()}
+        yield {"test": loader.load_test_data()}
 
     def load_data_set(self, is_test):
         """Fetches the train/test data."""
