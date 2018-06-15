@@ -184,7 +184,9 @@ class Classification(BaseTaskNew):
 class DatasetAnnotationLoader:
     """Annotation's data loader for the cifar10 dataset (train/test)."""
 
-    def __init__(self, data_files, data_path, cache_path, verbose):
+    def __init__(self, finer_classes, coarse_classes, data_files, data_path, cache_path, verbose):
+        self.finer_classes = finer_classes
+        self.coarse_classes = coarse_classes
         self.data_files = data_files
         self.data_path = data_path
         self.cache_path = cache_path
@@ -204,21 +206,12 @@ class DatasetAnnotationLoader:
         """Fetches the train/test data."""
         assert isinstance(is_test, bool), "Must input a valid boolean input."
         images, labels, coarse_labels = self.load_data_annotations(is_test)
-
-        object_list = self.get_object_list(images, labels, coarse_labels)
-        images_per_class = self.get_images_per_class(labels)
-        images_per_superclass = self.get_images_per_class(coarse_labels)
-
         return {
             "images": images,
-            "classes": str2ascii(self.finer_classes),
-            "coarse_classes": str2ascii(self.coarse_classes),
+            "classes":self.finer_classes,
+            "coarse_classes": self.coarse_classes,
             "labels": labels,
-            "coarse_labels": coarse_labels,
-            "object_fields": str2ascii(['images', 'classes', 'superclasses']),
-            "object_ids": object_list,
-            "list_images_per_class": images_per_class,
-            "list_images_per_superclass": images_per_superclass
+            "coarse_labels": coarse_labels
         }
 
     def load_data_annotations(self, is_test):
