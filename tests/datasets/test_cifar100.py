@@ -205,11 +205,12 @@ class TestClassificationTask:
 class TestDatasetAnnotationLoader:
     """Unit tests for the DatasetAnnotationLoader class."""
 
-
     @staticmethod
     @pytest.fixture()
     def mock_loader_class():
         return DatasetAnnotationLoader(
+            finer_classes=['beaver', 'dolphin', 'otter', 'seal', 'whale'],
+            coarse_classes=['aquatic mammals', 'fish', 'flowers'],
             data_files = [
                 "meta",
                 "train",
@@ -247,3 +248,68 @@ class TestDatasetAnnotationLoader:
 
         mock_load_data.assert_called_once_with(is_test=True)
         assert data == dummy_data
+
+    def test_load_data_set(self, mocker, mock_loader_class):
+        mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_data_annotations", return_value=('images', 'labels', 'coarse_labels'))
+
+        set_data = mock_loader_class.load_data_set(False)
+
+        mock_load_annotations.assert_called_once_with(False)
+        assert set_data['classes'] == mock_loader_class.finer_classes
+        assert set_data['coarse_classes'] == mock_loader_class.coarse_classes
+        assert set_data['images'] == 'images'
+        assert set_data['labels'] == 'labels'
+
+    @pytest.mark.parametrize('is_test', [False, True])
+    def test_load_data_annotations(self, mocker, mock_loader_class, is_test):
+        mock_get_data_test = mocker.patch.object(DatasetAnnotationLoader, "get_data_test", return_value='test')
+        mock_get_data_train = mocker.patch.object(DatasetAnnotationLoader, "get_data_train", return_value='train')
+
+        annotations = mock_loader_class.load_data_annotations(is_test=is_test)
+
+        data_path = os.path.join('/some/path/data', 'cifar-100-python')
+        if is_test:
+            mock_get_data_test.assert_called_once_with(data_path)
+            mock_get_data_train.assert_not_called()
+            assert annotations == 'test'
+        else:
+            mock_get_data_test.assert_not_called()
+            mock_get_data_train.assert_called_once_with(data_path)
+            assert annotations == 'train'
+
+    def test_get_data_test(self, mocker, mock_loader_class):
+        mock_load_file = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_file", return_value='annotations')
+        mock_parse_data = mocker.patch.object(DatasetAnnotationLoader, "parse_data_annotations", return_value='dummy_data')
+
+        data_path = os.path.join('/some/path/data', 'cifar-100-python')
+        data = mock_loader_class.get_data_test(data_path)
+
+        mock_load_file.assert_called_once_with(os.path.join(data_path, 'test'))
+        mock_parse_data.assert_called_once_with('annotations', 10000)
+        assert data == 'dummy_data'
+
+    def test_parse_data_annotations(self, mocker, mock_loader_class):
+        images = np.random.random((10, 3072))
+        annotations = {
+            "data": images,
+            "fine_labels": range(10),
+            "coarse_labels": range(5)
+        }
+
+        data, labels, coarse_labels = mock_loader_class.parse_data_annotations(annotations, 10)
+
+        expected_images = np.transpose(images.reshape(10, 3, 32, 32), (0, 2, 3, 1))
+        assert_array_equal(data, expected_images)
+        assert_array_equal(labels, np.array(range(10), dtype=np.uint8))
+        assert_array_equal(coarse_labels, np.array(range(5), dtype=np.uint8))
+
+    def test_get_data_train(self, mocker, mock_loader_class):
+        mock_load_file = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_file", return_value='annotations')
+        mock_parse_data = mocker.patch.object(DatasetAnnotationLoader, "parse_data_annotations", return_value='dummy_data')
+
+        data_path = os.path.join('/some/path/data', 'cifar-100-python')
+        data = mock_loader_class.get_data_train(data_path)
+
+        mock_load_file.assert_called_once_with(os.path.join(data_path, 'train'))
+        mock_parse_data.assert_called_once_with('annotations', 50000)
+        assert data == 'dummy_data'
