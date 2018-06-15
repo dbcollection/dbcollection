@@ -149,7 +149,7 @@ class DatasetAnnotationLoader:
         images, labels, coarse_labels = self.load_data_annotations(is_test)
         return {
             "images": images,
-            "classes":self.finer_classes,
+            "classes": self.finer_classes,
             "coarse_classes": self.coarse_classes,
             "labels": labels,
             "coarse_labels": coarse_labels
