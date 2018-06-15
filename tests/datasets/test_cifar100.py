@@ -13,7 +13,8 @@ from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.datasets.cifar.cifar100.classification import (
     Classification,
     DatasetAnnotationLoader,
-    ClassLabelField
+    ClassLabelField,
+    CoarseClassLabelField
 )
 
 
@@ -195,12 +196,14 @@ class TestClassificationTask:
     def test_process_set_metadata(self, mocker, mock_classification_class):
         mock_save_hdf5 = mocker.patch.object(Classification, "save_field_to_hdf5")
         mock_class_field = mocker.patch.object(ClassLabelField, "process")
+        mock_coarseclass_field = mocker.patch.object(CoarseClassLabelField, "process")
 
         data = {"classes": 1, "coarse_classes": 1, "images": 1, "labels": 1, "coarse_labels": 1,
                 "object_fields": 1, "object_ids": 1, "list_images_per_class": 1, "list_images_per_superclass": 1}
         mock_classification_class.process_set_metadata(data, 'train')
 
         mock_class_field.assert_called_once_with()
+        mock_coarseclass_field.assert_called_once_with()
         assert mock_save_hdf5.called
         assert mock_save_hdf5.call_count == 9
 
@@ -387,3 +390,35 @@ class TestClassLabelField:
         class_names = mock_classlabel_class.get_class_names()
 
         assert class_names == test_data_loaded['classes']
+
+
+class TestCoarseClassLabelField:
+    """Unit tests for the CoarseClassLabelField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_coarseclasslabel_class(field_kwargs):
+        return CoarseClassLabelField(**field_kwargs)
+
+    def test_process(self, mocker, mock_coarseclasslabel_class):
+        dummy_names = ['fish']*10
+        mock_get_class = mocker.patch.object(CoarseClassLabelField, "get_class_names", return_value=dummy_names)
+        mock_save_hdf5 = mocker.patch.object(CoarseClassLabelField, "save_field_to_hdf5")
+
+        mock_coarseclasslabel_class.process()
+
+        mock_get_class.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='coarse_classes',
+        #     data=str2ascii(dummy_names),
+        #     dtype=np.uint8,
+        #     fillvalue=-1
+        # )
+
+    def test_get_class_names(self, mocker, mock_coarseclasslabel_class, test_data_loaded):
+        class_names = mock_coarseclasslabel_class.get_class_names()
+
+        assert class_names == test_data_loaded['coarse_classes']
