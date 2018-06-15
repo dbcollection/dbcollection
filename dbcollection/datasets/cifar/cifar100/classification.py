@@ -169,7 +169,7 @@ class Classification(BaseTaskNew):
         if self.verbose:
             print('\n==> Setting up the data fields:')
         ClassLabelField(**args).process()
-
+        CoarseClassLabelField(**args).process()
 
 
 
@@ -287,6 +287,25 @@ class ClassLabelField(BaseField):
         """Returns a list of class names."""
         return self.data['classes']
 
+
+class CoarseClassLabelField(BaseField):
+    """Coarse class label names' field metadata process/save class."""
+
+    @display_message_processing('coarse class labels')
+    def process(self):
+        """Processes and saves the coarse_classes metadata to hdf5."""
+        class_names = self.get_class_names()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='coarse_classes',
+            data=str2ascii(class_names),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+    def get_class_names(self):
+        """Returns a list of coarse class names."""
+        return self.data['coarse_classes']
 
 
 # -----------------------------------------------------------
