@@ -297,7 +297,7 @@ class CoarseClassLabelField(BaseField):
         class_names = self.get_class_names()
         self.save_field_to_hdf5(
             set_name=self.set_name,
-            field='coarse_classes',
+            field='superclasses',
             data=str2ascii(class_names),
             dtype=np.uint8,
             fillvalue=0

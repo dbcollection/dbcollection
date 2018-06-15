@@ -412,7 +412,7 @@ class TestCoarseClassLabelField:
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
-        #     field='coarse_classes',
+        #     field='superclasses',
         #     data=str2ascii(dummy_names),
         #     dtype=np.uint8,
         #     fillvalue=-1
