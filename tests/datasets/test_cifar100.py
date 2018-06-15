@@ -14,7 +14,8 @@ from dbcollection.datasets.cifar.cifar100.classification import (
     Classification,
     DatasetAnnotationLoader,
     ClassLabelField,
-    CoarseClassLabelField
+    CoarseClassLabelField,
+    ImageField
 )
 
 
@@ -194,9 +195,11 @@ class TestClassificationTask:
         assert_array_equal(images_per_class, expected)
 
     def test_process_set_metadata(self, mocker, mock_classification_class):
+        dummy_ids = [0, 1, 2, 3, 4, 5]
         mock_save_hdf5 = mocker.patch.object(Classification, "save_field_to_hdf5")
         mock_class_field = mocker.patch.object(ClassLabelField, "process")
         mock_coarseclass_field = mocker.patch.object(CoarseClassLabelField, "process")
+        mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
 
         data = {"classes": 1, "coarse_classes": 1, "images": 1, "labels": 1, "coarse_labels": 1,
                 "object_fields": 1, "object_ids": 1, "list_images_per_class": 1, "list_images_per_superclass": 1}
@@ -204,6 +207,7 @@ class TestClassificationTask:
 
         mock_class_field.assert_called_once_with()
         mock_coarseclass_field.assert_called_once_with()
+        mock_image_field.assert_called_once_with()
         assert mock_save_hdf5.called
         assert mock_save_hdf5.call_count == 9
 
@@ -422,3 +426,38 @@ class TestCoarseClassLabelField:
         class_names = mock_coarseclasslabel_class.get_class_names()
 
         assert class_names == test_data_loaded['coarse_classes']
+
+
+class TestImageField:
+    """Unit tests for the ImageField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_image_class(field_kwargs):
+        return ImageField(**field_kwargs)
+
+    def test_process(self, mocker, mock_image_class):
+        dummy_images = np.random.rand(5,3, 32, 32)
+        dummy_ids = list(range(5))
+        mock_get_images = mocker.patch.object(ImageField, "get_images", return_value=(dummy_images, dummy_ids))
+        mock_save_hdf5 = mocker.patch.object(ImageField, "save_field_to_hdf5")
+
+        image_ids = mock_image_class.process()
+
+        assert image_ids == dummy_ids
+        mock_get_images.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='images',
+        #     data=dummy_images,
+        #     dtype=np.uint8,
+        #     fillvalue=-1
+        # )
+
+    def test_get_images(self, mocker, mock_image_class, test_data_loaded):
+        images, image_ids = mock_image_class.get_images()
+
+        assert_array_equal(images, test_data_loaded['images'])
+        assert image_ids == list(range(len(images)))
