@@ -17,7 +17,8 @@ from dbcollection.datasets.cifar.cifar100.classification import (
     SuperClassLabelField,
     ImageField,
     LabelIdField,
-    SuperLabelIdField
+    SuperLabelIdField,
+    ObjectFieldNamesField
 )
 
 
@@ -204,6 +205,7 @@ class TestClassificationTask:
         mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
         mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_superlabel_field = mocker.patch.object(SuperLabelIdField, "process", return_value=dummy_ids)
+        mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
 
         data = {"classes": 1, "coarse_classes": 1, "images": 1, "labels": 1, "coarse_labels": 1,
                 "object_fields": 1, "object_ids": 1, "list_images_per_class": 1, "list_images_per_superclass": 1}
@@ -214,6 +216,7 @@ class TestClassificationTask:
         mock_image_field.assert_called_once_with()
         mock_label_field.assert_called_once_with()
         mock_superlabel_field.assert_called_once_with()
+        mock_objfields_field.assert_called_once_with()
         assert mock_save_hdf5.called
         assert mock_save_hdf5.call_count == 9
 
@@ -537,3 +540,27 @@ class TestSuperLabelIdField:
 
         assert_array_equal(super_labels, test_data_loaded['coarse_labels'])
         assert super_label_ids == list(range(len(super_labels)))
+
+
+class TestObjectFieldNamesField:
+    """Unit tests for the ObjectFieldNamesField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_objfields_class(field_kwargs):
+        return ObjectFieldNamesField(**field_kwargs)
+
+    def test_process(self, mocker, mock_objfields_class):
+        mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
+
+        mock_objfields_class.process()
+
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='object_fields',
+        #     data=str2ascii(['images', 'labels', 'superlabels']),
+        #     dtype=np.uint8,
+        #     fillvalue=0
+        # )
