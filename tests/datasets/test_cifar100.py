@@ -14,7 +14,7 @@ from dbcollection.datasets.cifar.cifar100.classification import (
     Classification,
     DatasetAnnotationLoader,
     ClassLabelField,
-    CoarseClassLabelField,
+    SuperClassLabelField,
     ImageField,
     LabelIdField
 )
@@ -199,7 +199,7 @@ class TestClassificationTask:
         dummy_ids = [0, 1, 2, 3, 4, 5]
         mock_save_hdf5 = mocker.patch.object(Classification, "save_field_to_hdf5")
         mock_class_field = mocker.patch.object(ClassLabelField, "process")
-        mock_coarseclass_field = mocker.patch.object(CoarseClassLabelField, "process")
+        mock_coarseclass_field = mocker.patch.object(SuperClassLabelField, "process")
         mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
         mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
 
@@ -399,18 +399,18 @@ class TestClassLabelField:
         assert class_names == test_data_loaded['classes']
 
 
-class TestCoarseClassLabelField:
-    """Unit tests for the CoarseClassLabelField class."""
+class TestSuperClassLabelField:
+    """Unit tests for the SuperClassLabelField class."""
 
     @staticmethod
     @pytest.fixture()
     def mock_coarseclasslabel_class(field_kwargs):
-        return CoarseClassLabelField(**field_kwargs)
+        return SuperClassLabelField(**field_kwargs)
 
     def test_process(self, mocker, mock_coarseclasslabel_class):
         dummy_names = ['fish']*10
-        mock_get_class = mocker.patch.object(CoarseClassLabelField, "get_class_names", return_value=dummy_names)
-        mock_save_hdf5 = mocker.patch.object(CoarseClassLabelField, "save_field_to_hdf5")
+        mock_get_class = mocker.patch.object(SuperClassLabelField, "get_class_names", return_value=dummy_names)
+        mock_save_hdf5 = mocker.patch.object(SuperClassLabelField, "save_field_to_hdf5")
 
         mock_coarseclasslabel_class.process()
 
