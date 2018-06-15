@@ -181,6 +181,98 @@ class Classification(BaseTaskNew):
 # Data load / set up
 # -----------------------------------------------------------
 
+class DatasetAnnotationLoader:
+    """Annotation's data loader for the cifar10 dataset (train/test)."""
+
+    def __init__(self, data_files, data_path, cache_path, verbose):
+        self.data_files = data_files
+        self.data_path = data_path
+        self.cache_path = cache_path
+        self.verbose = verbose
+
+    def load_train_data(self):
+        """Loads the train set annotation data from disk
+        and returns it as a dictionary."""
+        return self.load_data_set(is_test=False)
+
+    def load_test_data(self):
+        """Loads the test set annotation data from disk
+        and returns it as a dictionary."""
+        return self.load_data_set(is_test=True)
+
+    def load_data_set(self, is_test):
+        """Fetches the train/test data."""
+        assert isinstance(is_test, bool), "Must input a valid boolean input."
+        images, labels, coarse_labels = self.load_data_annotations(is_test)
+
+        object_list = self.get_object_list(images, labels, coarse_labels)
+        images_per_class = self.get_images_per_class(labels)
+        images_per_superclass = self.get_images_per_class(coarse_labels)
+
+        return {
+            "images": images,
+            "classes": str2ascii(self.finer_classes),
+            "coarse_classes": str2ascii(self.coarse_classes),
+            "labels": labels,
+            "coarse_labels": coarse_labels,
+            "object_fields": str2ascii(['images', 'classes', 'superclasses']),
+            "object_ids": object_list,
+            "list_images_per_class": images_per_class,
+            "list_images_per_superclass": images_per_superclass
+        }
+
+    def load_data_annotations(self, is_test):
+        """Loads the data from the annotations' files."""
+        assert isinstance(is_test, bool), "Must input a valid boolean input."
+        data_path = os.path.join(self.data_path, 'cifar-100-python')
+        if is_test:
+            return self.get_data_test(data_path)
+        else:
+            return self.get_data_train(data_path)
+
+    def get_data_test(self, path):
+        """Loads the test data annotations from disk."""
+        assert path, "Must input a valid path."
+        annotations = self.load_annotation_file(os.path.join(path, self.data_files[2]))
+        return self.parse_data_annotations(annotations, 10000)
+
+    def load_annotation_file(self, path):
+        """Reads the data from annotation file from disk."""
+        return load_pickle(path)
+
+    def parse_data_annotations(self, annotations, size_data):
+        """Parses the annotations' data."""
+        data = annotations['data'].reshape(size_data, 3, 32, 32)
+        data = np.transpose(data, (0, 2, 3, 1))  # NxHxWxC
+        labels = np.array(annotations['fine_labels'], dtype=np.uint8)
+        coarse_labels = np.array(annotations['coarse_labels'], dtype=np.uint8)
+        return data, labels, coarse_labels
+
+    def get_data_train(self, path):
+        """Loads the train data annotations from disk."""
+        assert path, "Must input a valid path."
+        annotations = self.load_annotation_file(os.path.join(path, self.data_files[1]))
+        return self.parse_data_annotations(annotations, 50000)
+
+    def get_object_list(self, data, fine_labels, coarse_labels):
+        """Groups the data + labels to a list of indexes."""
+        object_id = np.ndarray((data.shape[0], 3), dtype=int)
+        for i in range(data.shape[0]):
+            object_id[i][0] = i
+            object_id[i][1] = fine_labels[i]
+            object_id[i][2] = coarse_labels[i]
+        return object_id
+
+    def get_images_per_class(self, labels):
+        """Returns a list of image indexes per class."""
+        images_per_class = []
+        unique_labels = np.unique(labels)
+        for label in unique_labels:
+            images_idx = np.where(labels == label)[0].tolist()
+            images_per_class.append(images_idx)
+        return np.array(pad_list(images_per_class, -1), dtype=np.int32)
+
+
 # -----------------------------------------------------------
 # Metadata fields
 # -----------------------------------------------------------
