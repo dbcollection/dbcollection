@@ -254,24 +254,6 @@ class DatasetAnnotationLoader:
         annotations = self.load_annotation_file(os.path.join(path, self.data_files[1]))
         return self.parse_data_annotations(annotations, 50000)
 
-    def get_object_list(self, data, fine_labels, coarse_labels):
-        """Groups the data + labels to a list of indexes."""
-        object_id = np.ndarray((data.shape[0], 3), dtype=int)
-        for i in range(data.shape[0]):
-            object_id[i][0] = i
-            object_id[i][1] = fine_labels[i]
-            object_id[i][2] = coarse_labels[i]
-        return object_id
-
-    def get_images_per_class(self, labels):
-        """Returns a list of image indexes per class."""
-        images_per_class = []
-        unique_labels = np.unique(labels)
-        for label in unique_labels:
-            images_idx = np.where(labels == label)[0].tolist()
-            images_per_class.append(images_idx)
-        return np.array(pad_list(images_per_class, -1), dtype=np.int32)
-
 
 # -----------------------------------------------------------
 # Metadata fields
