@@ -8,6 +8,7 @@ import os
 import numpy as np
 
 from dbcollection.datasets import BaseTaskNew, BaseField
+from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
@@ -157,6 +158,21 @@ class Classification(BaseTaskNew):
         """
         Saves the metadata of a set.
         """
+        args = {
+            "data": data,
+            "set_name": set_name,
+            "hdf5_manager": self.hdf5_manager,
+            "verbose": self.verbose
+        }
+
+        # Fields
+        if self.verbose:
+            print('\n==> Setting up the data fields:')
+        ClassLabelField(**args).process()
+
+
+
+
         self.save_field_to_hdf5(set_name, 'images', data["images"],
                                 dtype=np.uint8, fillvalue=-1)
         self.save_field_to_hdf5(set_name, 'classes', data["classes"],
@@ -251,6 +267,27 @@ class DatasetAnnotationLoader:
 # -----------------------------------------------------------
 # Metadata fields
 # -----------------------------------------------------------
+
+class ClassLabelField(BaseField):
+    """Class label names' field metadata process/save class."""
+
+    @display_message_processing('class labels')
+    def process(self):
+        """Processes and saves the classes metadata to hdf5."""
+        class_names = self.get_class_names()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='classes',
+            data=str2ascii(class_names),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+    def get_class_names(self):
+        """Returns a list of class names."""
+        return self.data['classes']
+
+
 
 # -----------------------------------------------------------
 # Metadata lists
