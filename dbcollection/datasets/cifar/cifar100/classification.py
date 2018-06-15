@@ -173,6 +173,7 @@ class Classification(BaseTaskNew):
         image_ids = ImageField(**args).process()
         label_ids = LabelIdField(**args).process()
         super_label_ids = SuperLabelIdField(**args).process()
+        ObjectFieldNamesField(**args).process()
 
 
         self.save_field_to_hdf5(set_name, 'images', data["images"],
@@ -380,6 +381,20 @@ class SuperLabelIdField(BaseField):
         super_labels = self.data['coarse_labels']
         super_label_ids = list(range(len(super_labels)))
         return super_labels, super_label_ids
+
+
+class ObjectFieldNamesField(BaseField):
+    """Object field names metadata process/save class."""
+
+    def process(self):
+        """Processes and saves the labels metadata to hdf5."""
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='object_fields',
+            data=str2ascii(['images', 'labels', 'superlabels']),
+            dtype=np.uint8,
+            fillvalue=0
+        )
 
 
 # -----------------------------------------------------------
