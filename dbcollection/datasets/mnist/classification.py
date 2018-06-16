@@ -155,26 +155,14 @@ class DatasetAnnotationLoader:
         images = images.reshape(size_set, 28, 28)
         return images, labels
 
-
-
-
-        data_path = os.path.join(self.data_path, 'cifar-10-batches-py')
-        class_names = self.get_class_names(data_path)
-        if is_test:
-            data, labels = self.get_data_test(data_path)
-        else:
-            data, labels = self.get_data_train(data_path)
-        data = np.transpose(data, (0, 2, 3, 1))  # NxHxWxC
-        return data, labels, class_names
-
-    def get_train_data(self):
-        """Loads the data of the train set."""
-        fname_train_imgs = os.path.join(self.data_path, 'train-images.idx3-ubyte')
-        fname_train_lbls = os.path.join(self.data_path, 'train-labels.idx1-ubyte')
-        train_images = self.load_images_numpy(fname_train_imgs)
-        train_labels = self.load_labels_numpy(fname_train_lbls)
-        size_train = 60000
-        return train_images, train_labels, size_train
+    def get_data_test(self):
+        """Loads the annotation's data of the test set."""
+        filename_test_images = os.path.join(self.data_path, 't10k-images.idx3-ubyte')
+        filename_test_labels = os.path.join(self.data_path, 't10k-labels.idx1-ubyte')
+        test_images = self.load_images_numpy(filename_test_images)
+        test_labels = self.load_labels_numpy(filename_test_labels)
+        size_test = 10000
+        return test_images, test_labels, size_test
 
     def load_images_numpy(self, fname):
         """Load images from file as numpy array."""
@@ -190,14 +178,14 @@ class DatasetAnnotationLoader:
             data = np.fromfile(f, dtype=np.int8)
         return data
 
-    def get_test_data(self):
-        """Loads the data of the test set."""
-        fname_test_imgs = os.path.join(self.data_path, 't10k-images.idx3-ubyte')
-        fname_test_lbls = os.path.join(self.data_path, 't10k-labels.idx1-ubyte')
-        test_images = self.load_images_numpy(fname_test_imgs)
-        test_labels = self.load_labels_numpy(fname_test_lbls)
-        size_test = 10000
-        return test_images, test_labels, size_test
+    def get_data_train(self):
+        """Loads the annotation's data of the train set."""
+        fname_train_imgs = os.path.join(self.data_path, 'train-images.idx3-ubyte')
+        fname_train_lbls = os.path.join(self.data_path, 'train-labels.idx1-ubyte')
+        train_images = self.load_images_numpy(fname_train_imgs)
+        train_labels = self.load_labels_numpy(fname_train_lbls)
+        size_train = 60000
+        return train_images, train_labels, size_train
 
 
 # -----------------------------------------------------------
