@@ -107,6 +107,7 @@ class Classification(BaseTaskNew):
         if self.verbose:
             print('\n==> Setting up the data fields:')
         ClassLabelField(**args).process()
+        image_ids = ImageField(**args).process()
 
 
         self.save_field_to_hdf5(set_name, 'classes', data["classes"],
@@ -223,6 +224,30 @@ class ClassLabelField(BaseField):
     def get_class_names(self):
         """Returns a list of class names."""
         return self.data['classes']
+
+
+class ImageField(BaseField):
+    """Images' data field process/save class."""
+
+    @display_message_processing('images')
+    def process(self):
+        """Processes and saves the images metadata to hdf5."""
+        images, image_ids = self.get_images()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='images',
+            data=images,
+            dtype=np.uint8,
+            fillvalue=-1
+        )
+        return image_ids
+
+    def get_images(self):
+        """Returns a np.ndarray of images and a list
+        of image ids for each row of 'object_ids' field."""
+        images = self.data['images']
+        image_ids = list(range(len(images)))
+        return images, image_ids
 
 
 # -----------------------------------------------------------
