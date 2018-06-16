@@ -197,3 +197,17 @@ class TestDatasetAnnotationLoader:
         assert_array_equal(test_images, dummy_images)
         assert_array_equal(test_labels, dummy_labels)
         assert size_test == 10000
+
+    def test_get_data_train(self, mocker, mock_loader_class):
+        dummy_images = np.zeros((5,28*28))
+        dummy_labels = np.random.randint(0,9,5)
+        mock_load_images = mocker.patch.object(DatasetAnnotationLoader, "load_images_numpy", return_value=dummy_images)
+        mock_load_labels = mocker.patch.object(DatasetAnnotationLoader, "load_labels_numpy", return_value=dummy_labels)
+
+        train_images, train_labels, size_train = mock_loader_class.get_data_train()
+
+        mock_load_images.assert_called_once_with(os.path.join('/some/path/data', 'train-images.idx3-ubyte'))
+        mock_load_labels.assert_called_once_with(os.path.join('/some/path/data', 'train-labels.idx1-ubyte'))
+        assert_array_equal(train_images, dummy_images)
+        assert_array_equal(train_labels, dummy_labels)
+        assert size_train == 60000
