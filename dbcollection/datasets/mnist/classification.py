@@ -138,18 +138,11 @@ class DatasetAnnotationLoader:
         Fetches the train/test data.
         """
         assert isinstance(is_test, bool), "Must input a valid boolean input."
-        images, labels, size_set = self.load_data_annotations(is_test)
-        data = images.reshape(size_set, 28, 28)
-        object_list = np.array([[i, labels[i]] for i in range(size_set)])
-        classes = str2ascii(self.classes)
-
+        images, labels = self.load_data_annotations(is_test)
         return {
-            "classes": classes,
-            "images": data,
-            "labels": labels,
-            "object_fields": str2ascii(['images', 'labels']),
-            "object_ids": object_list,
-            "list_images_per_class": self.get_list_images_per_class(labels)
+            "classes": self.classes,
+            "images": images,
+            "labels": labels
         }
 
     def load_data_annotations(self, is_test):
