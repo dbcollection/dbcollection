@@ -149,10 +149,11 @@ class DatasetAnnotationLoader:
         """Loads the data from the annotations' files."""
         assert isinstance(is_test, bool), "Must input a valid boolean input."
         if is_test:
-            images, labels, size_set = self.get_test_data()
+            images, labels, size_set = self.get_data_test()
         else:
-            images, labels, size_set = self.get_train_data()
-        data = images.reshape(size_set, 28, 28)
+            images, labels, size_set = self.get_data_train()
+        images = images.reshape(size_set, 28, 28)
+        return images, labels
 
 
 
