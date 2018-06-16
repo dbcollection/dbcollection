@@ -123,7 +123,7 @@ class TestDatasetAnnotationLoader:
     @pytest.fixture()
     def mock_loader_class():
         return DatasetAnnotationLoader(
-            classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+            classes=['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
             data_path='/some/path/data',
             cache_path='/some/path/cache',
             verbose=True
@@ -152,3 +152,15 @@ class TestDatasetAnnotationLoader:
 
         mock_load_data.assert_called_once_with(is_test=True)
         assert data == dummy_data
+
+    def test_load_data_set(self, mocker, mock_loader_class):
+        dummy_images = np.random.rand(10,28,28)
+        dummy_labels = np.random.randint(0, 9, 10)
+        mock_load_data = mocker.patch.object(DatasetAnnotationLoader, "load_data_annotations", return_value=(dummy_images, dummy_labels))
+
+        set_data = mock_loader_class.load_data_set(is_test=True)
+
+        mock_load_data.assert_called_once_with(True)
+        assert set_data['classes'] == ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        assert_array_equal(set_data['images'], dummy_images)
+        assert_array_equal(set_data['labels'], dummy_labels)
