@@ -9,8 +9,11 @@ import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from dbcollection.datasets.mnist import Classification
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.datasets.mnist.classification import (
+    Classification,
+    DatasetAnnotationLoader
+)
 
 
 @pytest.fixture()
@@ -111,3 +114,23 @@ class TestClassificationTask:
 
         assert mock_save_hdf5.called
         assert mock_save_hdf5.call_count == 6
+
+
+class TestDatasetAnnotationLoader:
+    """Unit tests for the DatasetAnnotationLoader class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_loader_class():
+        return DatasetAnnotationLoader(
+            classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+            data_path='/some/path/data',
+            cache_path='/some/path/cache',
+            verbose=True
+        )
+
+    def test_task_attributes(self, mocker, mock_loader_class):
+        assert mock_loader_class.classes == ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+        assert mock_loader_class.data_path == '/some/path/data'
+        assert mock_loader_class.cache_path == '/some/path/cache'
+        assert mock_loader_class.verbose == True
