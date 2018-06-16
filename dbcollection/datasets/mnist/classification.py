@@ -7,7 +7,8 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTaskNew
+from dbcollection.datasets import BaseTaskNew, BaseField
+from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 
@@ -112,6 +113,98 @@ class Classification(BaseTaskNew):
 # -----------------------------------------------------------
 # Data load / set up
 # -----------------------------------------------------------
+
+class DatasetAnnotationLoader:
+    """Annotation's data loader for the cifar10 dataset (train/test)."""
+
+    def __init__(self, classes, data_path, cache_path, verbose):
+        self.classes = classes
+        self.data_path = data_path
+        self.cache_path = cache_path
+        self.verbose = verbose
+
+    def load_train_data(self):
+        """Loads the train set annotation data from disk
+        and returns it as a dictionary."""
+        return self.load_data_set(is_test=False)
+
+    def load_test_data(self):
+        """Loads the test set annotation data from disk
+        and returns it as a dictionary."""
+        return self.load_data_set(is_test=True)
+
+    def load_data_set(self, is_test):
+        """
+        Fetches the train/test data.
+        """
+        assert isinstance(is_test, bool), "Must input a valid boolean input."
+        images, labels, size_set = self.load_data_annotations(is_test)
+        data = images.reshape(size_set, 28, 28)
+        object_list = np.array([[i, labels[i]] for i in range(size_set)])
+        classes = str2ascii(self.classes)
+
+        return {
+            "classes": classes,
+            "images": data,
+            "labels": labels,
+            "object_fields": str2ascii(['images', 'labels']),
+            "object_ids": object_list,
+            "list_images_per_class": self.get_list_images_per_class(labels)
+        }
+
+    def load_data_annotations(self, is_test):
+        """Loads the data from the annotations' files."""
+        assert isinstance(is_test, bool), "Must input a valid boolean input."
+        if is_test:
+            images, labels, size_set = self.get_test_data()
+        else:
+            images, labels, size_set = self.get_train_data()
+        data = images.reshape(size_set, 28, 28)
+
+
+
+
+        data_path = os.path.join(self.data_path, 'cifar-10-batches-py')
+        class_names = self.get_class_names(data_path)
+        if is_test:
+            data, labels = self.get_data_test(data_path)
+        else:
+            data, labels = self.get_data_train(data_path)
+        data = np.transpose(data, (0, 2, 3, 1))  # NxHxWxC
+        return data, labels, class_names
+
+    def get_train_data(self):
+        """Loads the data of the train set."""
+        fname_train_imgs = os.path.join(self.data_path, 'train-images.idx3-ubyte')
+        fname_train_lbls = os.path.join(self.data_path, 'train-labels.idx1-ubyte')
+        train_images = self.load_images_numpy(fname_train_imgs)
+        train_labels = self.load_labels_numpy(fname_train_lbls)
+        size_train = 60000
+        return train_images, train_labels, size_train
+
+    def load_images_numpy(self, fname):
+        """Load images from file as numpy array."""
+        with open(fname, 'rb') as f:
+            annotations = f.read(16)
+            data = np.fromfile(f, dtype=np.int8)
+        return data
+
+    def load_labels_numpy(self, fname):
+        """Load labels from file as numpy array."""
+        with open(fname, 'rb') as f:
+            annotations = f.read(8)
+            data = np.fromfile(f, dtype=np.int8)
+        return data
+
+    def get_test_data(self):
+        """Loads the data of the test set."""
+        fname_test_imgs = os.path.join(self.data_path, 't10k-images.idx3-ubyte')
+        fname_test_lbls = os.path.join(self.data_path, 't10k-labels.idx1-ubyte')
+        test_images = self.load_images_numpy(fname_test_imgs)
+        test_labels = self.load_labels_numpy(fname_test_lbls)
+        size_test = 10000
+        return test_images, test_labels, size_test
+
 
 # -----------------------------------------------------------
 # Metadata fields
