@@ -164,3 +164,22 @@ class TestDatasetAnnotationLoader:
         assert set_data['classes'] == ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
         assert_array_equal(set_data['images'], dummy_images)
         assert_array_equal(set_data['labels'], dummy_labels)
+
+    @pytest.mark.parametrize('is_test', [False, True])
+    def test_load_data_annotations(self, mocker, mock_loader_class, is_test):
+        dummy_images = np.random.rand(10*28*28)
+        dummy_labels = np.random.randint(0,9,10)
+        dummy_set_size = 10
+        mock_get_data_test = mocker.patch.object(DatasetAnnotationLoader, "get_data_test", return_value=(dummy_images, dummy_labels, dummy_set_size))
+        mock_get_data_train = mocker.patch.object(DatasetAnnotationLoader, "get_data_train", return_value=(dummy_images, dummy_labels, dummy_set_size))
+
+        images, labels = mock_loader_class.load_data_annotations(is_test=is_test)
+
+        if is_test:
+            mock_get_data_test.assert_called_once_with()
+            mock_get_data_train.assert_not_called()
+        else:
+            mock_get_data_test.assert_not_called()
+            mock_get_data_train.assert_called_once_with()
+        assert_array_equal(images, dummy_images.reshape(dummy_set_size, 28, 28))
+        assert_array_equal(labels, dummy_labels)
