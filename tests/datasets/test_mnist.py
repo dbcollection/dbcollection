@@ -183,3 +183,17 @@ class TestDatasetAnnotationLoader:
             mock_get_data_train.assert_called_once_with()
         assert_array_equal(images, dummy_images.reshape(dummy_set_size, 28, 28))
         assert_array_equal(labels, dummy_labels)
+
+    def test_get_data_test(self, mocker, mock_loader_class):
+        dummy_images = np.zeros((5,28*28))
+        dummy_labels = np.random.randint(0,9,5)
+        mock_load_images = mocker.patch.object(DatasetAnnotationLoader, "load_images_numpy", return_value=dummy_images)
+        mock_load_labels = mocker.patch.object(DatasetAnnotationLoader, "load_labels_numpy", return_value=dummy_labels)
+
+        test_images, test_labels, size_test = mock_loader_class.get_data_test()
+
+        mock_load_images.assert_called_once_with(os.path.join('/some/path/data', 't10k-images.idx3-ubyte'))
+        mock_load_labels.assert_called_once_with(os.path.join('/some/path/data', 't10k-labels.idx1-ubyte'))
+        assert_array_equal(test_images, dummy_images)
+        assert_array_equal(test_labels, dummy_labels)
+        assert size_test == 10000
