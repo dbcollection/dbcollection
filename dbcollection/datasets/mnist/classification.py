@@ -110,6 +110,7 @@ class Classification(BaseTaskNew):
         image_ids = ImageField(**args).process()
         label_ids = LabelIdField(**args).process()
         ObjectFieldNamesField(**args).process()
+        ObjectIdsField(**args).process(image_ids, label_ids)
 
 
         self.save_field_to_hdf5(set_name, 'classes', data["classes"],
@@ -289,6 +290,21 @@ class ObjectFieldNamesField(BaseField):
             fillvalue=0
         )
 
+
+class ObjectIdsField(BaseField):
+    """Object ids' field metadata process/save class."""
+
+    def process(self, image_ids, label_ids):
+        """Processes and saves the object ids metadata to hdf5."""
+        # images, labels
+        object_ids = [[image_ids[i], label_ids[i]] for i, _ in enumerate(label_ids)]
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='object_ids',
+            data=np.array(object_ids, dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
 
 # -----------------------------------------------------------
 # Metadata lists
