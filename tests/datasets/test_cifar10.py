@@ -41,6 +41,25 @@ class TestClassificationTask:
                                                         "data_batch_5",
                                                         "test_batch"]
 
+    def test_load_data(self, mocker, mock_classification_class):
+        dummy_data = ['some_data']
+        mock_load_train = mocker.patch.object(DatasetAnnotationLoader, "load_train_data", return_value=dummy_data)
+        mock_load_test = mocker.patch.object(DatasetAnnotationLoader, "load_test_data", return_value=dummy_data)
+
+        load_data_generator = mock_classification_class.load_data()
+
+        if sys.version[0] == '3':
+            train_data = load_data_generator.__next__()
+            test_data = load_data_generator.__next__()
+        else:
+            train_data = load_data_generator.next()
+            test_data = load_data_generator.next()
+
+        mock_load_train.assert_called_once_with()
+        mock_load_test.assert_called_once_with()
+        assert train_data == {"train": ['some_data']}
+        assert test_data == {"test": ['some_data']}
+
     def test_process_set_metadata(self, mocker, mock_classification_class):
         dummy_ids = [0, 1, 2, 3, 4, 5]
         mock_class_field = mocker.patch.object(ClassLabelField, "process")
@@ -350,10 +369,11 @@ class TestObjectFieldNamesField:
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
         #     field='object_fields',
-        #     data=str2ascii(['images', 'classes']),
+        #     data=str2ascii(['images', 'labels']),
         #     dtype=np.uint8,
         #     fillvalue=0
         # )
+
 
 class TestObjectIdsField:
     """Unit tests for the ObjectIdsField class."""
