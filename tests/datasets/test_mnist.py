@@ -10,6 +10,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.utils.pad import pad_list
 from dbcollection.datasets.mnist.classification import (
     Classification,
     DatasetAnnotationLoader,
@@ -17,7 +18,8 @@ from dbcollection.datasets.mnist.classification import (
     ImageField,
     LabelIdField,
     ObjectFieldNamesField,
-    ObjectIdsField
+    ObjectIdsField,
+    ImagesPerClassList
 )
 
 
@@ -118,6 +120,7 @@ class TestClassificationTask:
         mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_objfield_field = mocker.patch.object(ObjectFieldNamesField, "process")
         mock_objids_field = mocker.patch.object(ObjectIdsField, "process")
+        mock_images_per_class_list = mocker.patch.object(ImagesPerClassList, "process")
 
         data = {"classes": 1, "images": 1, "labels": 1,
                 "object_fields": 1, "object_ids": 1, "list_images_per_class": 1}
@@ -128,6 +131,7 @@ class TestClassificationTask:
         mock_label_field.assert_called_once_with()
         mock_objfield_field.assert_called_once_with()
         mock_objids_field.assert_called_once_with(dummy_ids, dummy_ids)
+        mock_images_per_class_list.assert_called_once_with()
         assert mock_save_hdf5.called
         assert mock_save_hdf5.call_count == 6
 
@@ -404,3 +408,47 @@ class TestObjectIdsField:
         #     dtype=np.int32,
         #     fillvalue=-1
         # )
+
+  # )
+
+
+class TestImagesPerClassList:
+    """Unit tests for the ImagesPerClassList class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_img_per_class_list(field_kwargs):
+        return ImagesPerClassList(**field_kwargs)
+
+    def test_process(self, mocker, mock_img_per_class_list):
+        dummy_ids = [[0], [2, 3], [4, 5]]
+        dummy_array = np.array([[0, -1], [2, 3], [4, 5]])
+        mock_get_ids = mocker.patch.object(ImagesPerClassList, "get_image_ids_per_class", return_value=dummy_ids)
+        mock_convert_array = mocker.patch.object(ImagesPerClassList, "convert_list_to_array", return_value=dummy_array)
+        mock_save_hdf5 = mocker.patch.object(ImagesPerClassList, "save_field_to_hdf5")
+
+        mock_img_per_class_list.process()
+
+        mock_get_ids.assert_called_once_with()
+        mock_convert_array.assert_called_once_with(dummy_ids)
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='list_images_per_class',
+        #     data=dummy_array,
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_image_ids_per_class(self, mocker, mock_img_per_class_list):
+        images_per_class_ids = mock_img_per_class_list.get_image_ids_per_class()
+
+        assert images_per_class_ids == [[0], [1], [2], [3], [4], [5], [6], [7], [8], [9]]
+
+    def test_convert_list_to_array(self, mocker, mock_img_per_class_list):
+        list_ids = [[0], [2, 3], [4, 5, 6]]
+        images_per_class_array = mock_img_per_class_list.convert_list_to_array(list_ids)
+
+        expected = np.array(pad_list([[0, -1, -1], [2, 3, -1], [4, 5, 6]], -1), dtype=np.int32)
+        assert_array_equal(images_per_class_array, expected)
