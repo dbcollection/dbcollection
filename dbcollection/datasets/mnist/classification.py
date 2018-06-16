@@ -25,8 +25,14 @@ class Classification(BaseTaskNew):
         """
         Loads data from annotation files.
         """
-        yield {"train": self.load_data_set(is_test=False)}
-        yield {"test": self.load_data_set(is_test=True)}
+        loader = DatasetAnnotationLoader(
+            classes=self.classes,
+            data_path=self.data_path,
+            cache_path=self.cache_path,
+            verbose=self.verbose
+        )
+        yield {"train": loader.load_train_data()}
+        yield {"test": loader.load_test_data()}
 
     def load_data_set(self, is_test):
         """
@@ -309,6 +315,7 @@ class ObjectIdsField(BaseField):
             dtype=np.int32,
             fillvalue=-1
         )
+
 
 # -----------------------------------------------------------
 # Metadata lists
