@@ -236,50 +236,6 @@ class TestBaseTaskNew:
 
         assert mock_process_metadata.called
 
-    def test_hdf5_create_group(self, mocker, mock_task_class):
-        pass  # Todo
-
-    def test_save_field_to_hdf5(self, mocker, mock_task_class):
-        mock_add_field = mocker.Mock()
-        mock_task_class.hdf5_manager = mock_add_field
-
-        group = 'train'
-        field = 'fieldA'
-        data = np.array(range(10))
-        mock_task_class.save_field_to_hdf5(group, field, data)
-
-        mock_add_field.add_field_to_group.assert_called_once_with(
-            group='train',
-            field='fieldA',
-            data=data
-        )
-
-    def test_save_field_to_hdf5_all_args(self, mocker, mock_task_class):
-        mock_add_field = mocker.Mock()
-        mock_task_class.hdf5_manager = mock_add_field
-
-        data = np.array(range(10))
-        mock_task_class.save_field_to_hdf5(
-            set_name='train',
-            field='fieldA',
-            data=data,
-            dtype=np.uint8,
-            fillvalue=0,
-            chunks=True,
-            compression="gzip",
-            compression_opts=4)
-
-        mock_add_field.add_field_to_group.assert_called_once_with(
-            group='train',
-            field='fieldA',
-            data=data,
-            dtype=np.uint8,
-            fillvalue=0,
-            chunks=True,
-            compression="gzip",
-            compression_opts=4
-        )
-
     def test_teardown_hdf5_manager(self, mocker, mock_task_class):
         mock_add_field = mocker.Mock()
         mock_task_class.hdf5_manager = mock_add_field

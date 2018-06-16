@@ -531,26 +531,6 @@ class BaseTaskNew(object):
         """
         pass
 
-    def save_field_to_hdf5(self, set_name, field, data, **kwargs):
-        """Saves data of a field into the HDF% metadata file.
-
-        Parameters
-        ----------
-        set_name: str
-            Name of the set split.
-        field : str
-            Name of the data field.
-        data : np.ndarray
-            Numpy ndarray of the field's data.
-
-        """
-        self.hdf5_manager.add_field_to_group(
-            group=set_name,
-            field=field,
-            data=data,
-            **kwargs
-        )
-
     def teardown_hdf5_manager(self):
         """Sets up the MetadataManager object to manage the metadata save process to disk."""
         self.hdf5_manager.close()
