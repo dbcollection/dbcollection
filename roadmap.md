@@ -4,7 +4,9 @@ This page lists the vision for this project and the roadmap of what needs to be 
 
 ## Vision of the project
 
-TODO: describe the vision / goals for the project in terms of functionality and audience.
+1. Implement the most popular datasets for computer vision.
+2. Add datasets for text and audio processing
+3. Have a simple API for retrieving data from local / remote (cloud) storage.
 
 ### Python
 
@@ -15,7 +17,7 @@ Things that would be nice to have:
 - Create a converter to convert a set or entire dataset in order to be able to work with sklearn in a seamless way
 - Some methods from MS COCO so that the api is not needed anymore
 - Wrappers for Java, Julia, R, Ruby, Scala (these seem enough for now, maybe one day even C/C++)
-- Quarterly versioning scheme (bump the version at fixed periods of time)
+- Quicker versioning scheme (bump the version at fixed periods of time)
 
 Things that **definitely** should have:
 
@@ -39,7 +41,10 @@ Things that should **NOT** have:
 
 ## Roadmap 2018
 
+- Add unit tests for the package
+- Restructure the data to column-based format (for compatability with pandas' DataFrames)
+- Refactor all datasets (for easier testing and better maintainability)
 - Complete the Matlab wrapper and bring it to feature parity with the python package;
 - Complete the Lua/Torch7 wrapper and bring it to feature parity with the python package;
 - Improve the documentation for users;
-- Create tutorials on how to use the packaged along with the most popular toolsfor data science / machine-learning like pandas, sklearn or tensorflow/pytorch;
+- Create tutorials on how to use the packaged along with the most popular toolsfor data science / machine-learning like pandas, sklearn or keras/tensorflow/pytorch;
