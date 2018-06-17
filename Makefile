@@ -90,4 +90,5 @@ urls_check:
 
 .PHONY: deploy
 deploy:
-	python conda-recipe/deploy.py
+	python setup.py sdist upload
+	python setup.py bdist_wheel upload

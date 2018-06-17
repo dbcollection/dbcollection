@@ -4,7 +4,7 @@ dbcollection
 |Join the chat at https://gitter.im/dbcollection/dbcollection|
 
 |Build Status| |CircleCI| |Build status| |codecov| |License: MIT|
-|Documentation Status| |PyPI version| |Anaconda-Server Badge|
+|Documentation Status| |PyPI version|
 
 **dbcollection** is a library for downloading/parsing/managing datasets via simple methods.
 It was built from the ground up to be cross-platform (**Windows**, **Linux**, **MacOS**) and
@@ -61,15 +61,6 @@ simply do the following command:
 ::
 
     $ pip install dbcollection
-
-From Conda
-~~~~~~~~~~
-
-You can also install ``dbcollection`` via anaconda:
-
-::
-
-    $ conda install -c farrajota dbcollection
 
 From source
 ~~~~~~~~~~~
@@ -210,8 +201,6 @@ License
    :target: http://dbcollection.readthedocs.io/en/latest/?badge=latest
 .. |PyPI version| image:: https://badge.fury.io/py/dbcollection.svg
    :target: https://badge.fury.io/py/dbcollection
-.. |Anaconda-Server Badge| image:: https://anaconda.org/farrajota/dbcollection/badges/version.svg
-   :target: https://anaconda.org/farrajota/dbcollection
 
 .. _Read The Docs: http://dbcollection.readthedocs.io/en/latest/
 .. _How to Contribute: https://github.com/dbcollection/dbcollection/blob/master/docs/source/contributing/how_to_contribute.rst

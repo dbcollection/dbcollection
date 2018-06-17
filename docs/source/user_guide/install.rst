@@ -5,7 +5,7 @@ Install guide
 =============
 
 Installing ``dbcollection`` is quite simple. You can do it in several ways, but we advise users to
-install this package via ``pip`` or ``conda``. If you want the latest features or bug fixes then you can
+install this package via ``pip``. If you want the latest features or bug fixes then you can
 install this package from the source.
 
 This package is available for **Windows**, **Linux** and **MacOs**, and **Python** ``>=2.7`` and ``>=3.5`` are
@@ -23,18 +23,6 @@ Installing ``dbcollection`` using pip is simple. For that purpose, simply do the
 $ pip install dbcollection
 
 This will install the latest version of the ``dbcollection`` package on your system.
-
-
-Install dbcollection via conda
-==============================
-
-You can also install ``dbcollection`` via anaconda::
-
-$ conda install -c farrajota dbcollection
-
-.. warning::
-
-    Only Conda packages with Python >= 2.7 and >=3.5 are officially supported for Linux/MacOS/Windows.
 
 
 Install dbcollection from source
