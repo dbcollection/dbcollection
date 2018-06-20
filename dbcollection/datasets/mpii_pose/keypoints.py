@@ -476,6 +476,49 @@ class Keypoints(BaseTask):
 # Data load / set up
 # -----------------------------------------------------------
 
+class DatasetAnnotationLoader:
+    """Annotation's data loader for the cifar10 dataset (train/test)."""
+
+    def __init__(self, keypoints_labels, is_full, data_path, cache_path, verbose):
+        self.keypoints_labels = keypoints_labels
+        self.is_full = is_full
+        self.data_path = data_path
+        self.cache_path = cache_path
+        self.verbose = verbose
+
+    def load_train_data(self):
+        """Loads the train set annotation data from disk
+        and returns it as a dictionary."""
+        pass
+
+    def load_trainval_data(self):
+        """Loads the train+val set annotation data from disk
+        and returns it as a dictionary.
+
+        This validation set is a split of the training set
+        of the MPII Human Pose dataset. It is a custom
+        split not available in the original dataset but
+        it is crafted for use in validation tasks.
+        """
+        pass
+
+    def load_val_data(self):
+        """Loads the val set annotation data from disk
+        and returns it as a dictionary.
+
+        This validation set is a split of the training set
+        of the MPII Human Pose dataset. It is a custom
+        split not available in the original dataset but
+        it is crafted for use in validation tasks.
+        """
+        pass
+
+    def load_test_data(self):
+        """Loads the test set annotation data from disk
+        and returns it as a dictionary."""
+        pass
+
+
 # -----------------------------------------------------------
 # Metadata fields
 # -----------------------------------------------------------
