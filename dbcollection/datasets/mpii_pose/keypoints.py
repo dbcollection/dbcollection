@@ -8,7 +8,7 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTask
+from dbcollection.datasets import BaseTask, BaseField
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_matlab
@@ -474,6 +474,22 @@ class Keypoints(BaseTask):
                             np.array(pad_list(list_keypoints_per_image, -1), dtype=np.int32),
                             fillvalue=-1)
 
+
+# -----------------------------------------------------------
+# Data load / set up
+# -----------------------------------------------------------
+
+# -----------------------------------------------------------
+# Metadata fields
+# -----------------------------------------------------------
+
+# -----------------------------------------------------------
+# Metadata lists
+# -----------------------------------------------------------
+
+# -----------------------------------------------------------
+# Additional tasks
+# -----------------------------------------------------------
 
 class KeypointsFull(Keypoints):
     """MPII Keypoints (FULL original annotations) task class."""
