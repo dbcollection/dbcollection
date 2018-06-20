@@ -18,11 +18,8 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 class Keypoints(BaseTask):
     """MPII Keypoints preprocessing functions."""
 
-    # metadata filename
     filename_h5 = 'keypoint'
-
     is_full = False
-
     keypoints_labels = [
         'right ankle',  # -- 1
         'right knee',  # -- 2
@@ -498,9 +495,3 @@ class KeypointsFull(Keypoints):
     filename_h5 = 'keypoint_full'
 
     is_full = True
-
-    def add_data_to_source(self, hdf5_handler, data, set_name):
-        """
-        Dummy method
-        """
-        # do nothing
