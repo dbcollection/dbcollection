@@ -9,7 +9,7 @@ import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from dbcollection.datasets.mpii_pose.keypoints import Keypoints
+from dbcollection.datasets.mpii_pose.keypoints import Keypoints, DatasetAnnotationLoader
 
 
 class TestKeypointsTask:
@@ -46,4 +46,55 @@ class TestKeypointsTask:
 class TestDatasetAnnotationLoader:
     """Unit tests for DatasetAnnotationLoader class."""
 
-    pass
+    @staticmethod
+    @pytest.fixture()
+    def mock_loader_class():
+        return DatasetAnnotationLoader(
+            keypoints_labels=[
+                'right ankle',
+                'right knee',
+                'right hip',
+                'left hip',
+                'left knee',
+                'left ankle',
+                'pelvis',
+                'thorax',
+                'upper neck',
+                'head top',
+                'right wrist',
+                'right elbow',
+                'right shoulder',
+                'left shoulder',
+                'left elbow',
+                'left wrist'
+            ],
+            is_full=False,
+            data_path='/some/path/data',
+            cache_path='/some/path/cache',
+            verbose=True
+        )
+
+    def test_task_attributes(self, mocker, mock_loader_class):
+        assert mock_loader_class.keypoints_labels == [
+            'right ankle',
+            'right knee',
+            'right hip',
+            'left hip',
+            'left knee',
+            'left ankle',
+            'pelvis',
+            'thorax',
+            'upper neck',
+            'head top',
+            'right wrist',
+            'right elbow',
+            'right shoulder',
+            'left shoulder',
+            'left elbow',
+            'left wrist'
+        ]
+        assert mock_loader_class.is_full == False
+        assert mock_loader_class.data_path=='/some/path/data'
+        assert mock_loader_class.cache_path=='/some/path/cache'
+        assert mock_loader_class.verbose==True
+
