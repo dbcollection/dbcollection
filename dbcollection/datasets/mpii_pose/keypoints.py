@@ -518,6 +518,207 @@ class DatasetAnnotationLoader:
         and returns it as a dictionary."""
         pass
 
+    def load_annotations(self):
+        """
+        Load annotations from file and split them to train and test sets.
+        """
+        annot_filepath = os.path.join(
+            self.data_path, 'mpii_human_pose_v1_u12_2', 'mpii_human_pose_v1_u12_1.mat')
+
+        if self.verbose:
+            print('\n> Loading annotations file: {}'.format(annot_filepath))
+
+        # load annotations file
+        annotations = load_matlab(annot_filepath)
+
+        # total number of files
+        nfiles = len(annotations["RELEASE"][0][0][3])
+
+        # progressbar
+        if self.verbose:
+            print('\n> Parsing data from the annotations...')
+            prgbar = progressbar.ProgressBar(max_value=nfiles)
+
+        data = {
+            "train": [],
+            "test": []
+        }
+
+        # cycle all files
+        for ifile in range(nfiles):
+            if annotations['RELEASE'][0][0][1][0][ifile] == 0:
+                set_name = 'test'
+            else:
+                set_name = 'train'
+
+            # single person
+            single_person = [0]
+            if any(annotations['RELEASE'][0][0][3][ifile][0]):
+                for i in range(len(annotations['RELEASE'][0][0][3][ifile][0])):
+                    single_person.append(int(annotations['RELEASE'][0][0][3][ifile][0][i][0]))
+
+            # activity/action id
+            act = {"cat_name": '', "act_name": '', "act_id": -1}
+            if any(annotations['RELEASE'][0][0][4][ifile][0][0]):
+                act = {
+                    "cat_name": str(annotations['RELEASE'][0][0][4][ifile][0][0][0]),
+                    "act_name": str(annotations['RELEASE'][0][0][4][ifile][0][1][0]),
+                    "act_id": int(annotations['RELEASE'][0][0][4][ifile][0][2][0][0])
+                }
+
+            # image annots
+            image_filename = os.path.join(self.data_path, 'images', str(
+                annotations['RELEASE'][0][0][0][0][ifile][0][0][0][0][0]))
+
+            if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
+                frame_sec = int(annotations['RELEASE'][0][0][0][0][ifile][2][0][0])
+                video_idx = int(annotations['RELEASE'][0][0][0][0][ifile][3][0][0])
+            else:
+                frame_sec, video_idx = -1, -1
+
+            # properties field names ('scale', 'objpos', ...)
+            try:
+                pnames = annotations['RELEASE'][0][0][0][0][ifile][1][0].dtype.names
+            except IndexError:
+                data[set_name].append({
+                    "image_filename": image_filename,
+                    "frame_sec": frame_sec,
+                    "video_idx": video_idx,
+                    "poses_annotations": [],
+                    "activity": act,
+                    "single_person": single_person
+                })
+                continue  # skip rest
+
+            # parse keypoints
+            poses_annots = []
+            if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
+                for i in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0])):
+                    try:
+                        keypoints = [[0, 0, 0]] * 16  # [x, y, is_visible]
+                        annot = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0]
+                        vnames = annot.dtype.names
+                        for j in range(len(annot)):
+                            x = float(annot[j][vnames.index('x')][0][0])
+                            y = float(annot[j][vnames.index('y')][0][0])
+                            idx = int(annot[j][vnames.index('id')][0][0])
+
+                            try:
+                                is_visible = int(annot[j][vnames.index('is_visible')][0])
+                            except (ValueError, IndexError):
+                                is_visible = -1
+
+                            try:
+                                keypoints[idx] = [x, y, is_visible]
+                            except IndexError as k:
+                                if set_name == 'test' or self.is_full:
+                                    print('Error: ', str(k))
+                                    keypoints[idx] = [0, 0, 0]
+                                else:
+                                    continue  # skip this annotation
+                    except (AttributeError, IndexError):
+                        keypoints = [[0, 0, 0]] * 16  # [x, y, is_visible]
+
+                    try:
+                        x1 = float(annotations['RELEASE'][0][0][0][0][ifile]
+                                   [1][0][i][pnames.index('x1')][0][0])
+                        y1 = float(annotations['RELEASE'][0][0][0][0][ifile]
+                                   [1][0][i][pnames.index('y1')][0][0])
+                        x2 = float(annotations['RELEASE'][0][0][0][0][ifile]
+                                   [1][0][i][pnames.index('x2')][0][0])
+                        y2 = float(annotations['RELEASE'][0][0][0][0][ifile]
+                                   [1][0][i][pnames.index('y2')][0][0])
+                    except ValueError:
+                        if set_name == 'test' or self.is_full:
+                            x1, y1, x2, y2 = -1, -1, -1, -1
+                        else:
+                            continue  # skip this annotation
+
+                    try:
+                        annot_ptr = annotations['RELEASE'][0][0][0][0][ifile][1][0]
+                        objnames = annot_ptr[i][pnames.index('objpos')][0].dtype.names
+                        # objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i]
+                        # [pnames.index('objpos')][0].dtype.names
+                        scale = float(annotations['RELEASE'][0][0][0][0]
+                                      [ifile][1][0][i][pnames.index('scale')][0][0])
+                        objpos = {
+                            "x": float(annotations['RELEASE'][0][0][0][0]
+                                       [ifile][1][0][i][pnames.index('objpos')][0][0]
+                                       [objnames.index('x')][0][0]),
+                            "y": float(annotations['RELEASE'][0][0][0][0]
+                                       [ifile][1][0][i][pnames.index('objpos')][0][0]
+                                       [objnames.index('y')][0][0])
+                        }
+                    except (ValueError, IndexError):
+                        if set_name == 'test' or self.is_full:
+                            scale = -1
+                            objpos = {"x": -1, "y": -1}
+                        else:
+                            continue  # skip this annotation
+
+                    poses_annots.append({
+                        "x1": x1,
+                        "y1": y1,
+                        "x2": x2,
+                        "y2": y2,
+                        "keypoints": keypoints,
+                        "scale": scale,
+                        "objpos": objpos
+                    })
+            else:
+                if set_name == 'test' or self.is_full:
+                    for i in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0])):
+                        try:
+                            annot_ptr = annotations['RELEASE'][0][0][0][0][ifile][1][0]
+                            objnames = annot_ptr[i][pnames.index('objpos')][0].dtype.names
+                            # objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i]
+                            # [pnames.index('objpos')][0].dtype.names
+                            scale = float(annotations['RELEASE'][0][0][0][0]
+                                          [ifile][1][0][i][pnames.index('scale')][0][0])
+                            objpos = {
+                                "x": float(annotations['RELEASE'][0][0][0][0]
+                                           [ifile][1][0][i][pnames.index('objpos')][0][0]
+                                           [objnames.index('x')][0][0]),
+                                "y": float(annotations['RELEASE'][0][0][0][0]
+                                           [ifile][1][0][i][pnames.index('objpos')][0][0]
+                                           [objnames.index('y')][0][0])
+                            }
+                        except (IndexError, ValueError, AttributeError):
+                            scale = -1
+                            objpos = {"x": -1, "y": -1}
+
+                        poses_annots.append({
+                            "scale": scale,
+                            "objpos": objpos
+                        })
+                else:
+                    continue  # skip this annotation
+
+            # add fields to data
+            data[set_name].append({
+                "image_filename": image_filename,
+                "frame_sec": frame_sec,
+                "video_idx": video_idx,
+                "poses_annotations": poses_annots,
+                "activity": act,
+                "single_person": single_person
+            })
+
+            # update progressbar
+            if self.verbose:
+                prgbar.update(ifile)
+
+        # update progressbar
+        if self.verbose:
+            prgbar.finish()
+
+        # fetch video ids
+        videonames = []
+        for ivideo in range(len(annotations['RELEASE'][0][0][5][0])):
+            videonames.append(str(annotations['RELEASE'][0][0][5][0][ivideo][0]))
+
+        return data, videonames
+
 
 # -----------------------------------------------------------
 # Metadata fields
@@ -536,5 +737,4 @@ class KeypointsFull(Keypoints):
 
     # metadata filename
     filename_h5 = 'keypoint_full'
-
     is_full = True
