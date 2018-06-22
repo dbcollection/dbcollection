@@ -523,7 +523,7 @@ class DatasetAnnotationLoader:
     def load_annotations_set(self, is_test):
         """Loads the annotation's data for the train + test splits."""
         annotations = self.load_annotation_data_from_disk()
-        nfiles = self.get_total_files(annotations)
+        nfiles = self.get_num_files(annotations)
         return {
             "image_filenames": self.get_image_filenames(annotations, nfiles, is_test),
             "frame_sec": self.get_frame_sec(annotations, nfiles, is_test),
@@ -545,7 +545,7 @@ class DatasetAnnotationLoader:
         """Loads the data of the annotation file."""
         return load_matlab(filename)
 
-    def get_total_files(self, annotations):
+    def get_num_files(self, annotations):
         """Returns the total number of files available in the dataset."""
         return len(annotations["RELEASE"][0][0][3])
 
