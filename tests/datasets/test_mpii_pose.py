@@ -229,3 +229,7 @@ class TestDatasetAnnotationLoader:
 
         assert result == False
 
+    def test_get_filename_from_annotation_id(self, mocker, mock_loader_class):
+        filename = mock_loader_class.get_filename_from_annotation_id({"RELEASE": [[[[[0, [[[[['filename1']]]]]]]]]]}, 1)
+
+        assert filename == 'filename1'
