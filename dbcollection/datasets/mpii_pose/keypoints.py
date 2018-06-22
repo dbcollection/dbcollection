@@ -515,7 +515,7 @@ class DatasetAnnotationLoader:
         annotations = self.load_annotations_set(is_test=False)
         return self.filter_annotations_by_ids(annotations, image_ids)
 
-    def load_test_data(self, set_name):
+    def load_test_data(self):
         """Loads the test set annotation data from disk
         and returns it as a dictionary."""
         return self.load_annotations_set(is_test=True)
