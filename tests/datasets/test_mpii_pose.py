@@ -297,3 +297,39 @@ class TestDatasetAnnotationLoader:
         )
 
         assert frame_sec == -1
+
+    def test_get_video_indexes__only_one_file(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+        mock_get_video = mocker.patch.object(DatasetAnnotationLoader, "get_video_idx_from_annotation_id", return_value=15)
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        frame_sec = mock_loader_class.get_video_indexes(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        mock_get_video.assert_called_once_with(annotations, 0)
+        assert frame_sec == [15]
+
+    def test_get_video_indexes__multiple_file(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+        mock_get_video = mocker.patch.object(DatasetAnnotationLoader, "get_video_idx_from_annotation_id", return_value=15)
+
+        annotations = {"RELEASE": []}
+        num_files = 10
+        frame_sec = mock_loader_class.get_video_indexes(annotations, num_files, True)
+
+        assert mock_is_test.call_count == 10
+        assert mock_get_video.call_count == 10
+        assert frame_sec == [15]*10
+
+    def test_get_video_indexes__returns_empty_list(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=False)
+        mock_get_video = mocker.patch.object(DatasetAnnotationLoader, "get_video_idx_from_annotation_id", return_value=15)
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        frame_sec = mock_loader_class.get_video_indexes(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        assert not mock_get_video.called
+        assert frame_sec == []
