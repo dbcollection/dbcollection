@@ -596,7 +596,7 @@ class DatasetAnnotationLoader:
 
     def get_video_idx_from_annotation_id(self, annotations, ifile):
         if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
-            int(annotations['RELEASE'][0][0][0][0][ifile][3][0][0])
+            return int(annotations['RELEASE'][0][0][0][0][ifile][3][0][0])
         else:
             return -1
 
