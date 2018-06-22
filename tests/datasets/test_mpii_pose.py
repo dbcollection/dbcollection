@@ -333,3 +333,19 @@ class TestDatasetAnnotationLoader:
         mock_is_test.assert_called_once_with(annotations, 0)
         assert not mock_get_video.called
         assert frame_sec == []
+
+    def test_get_video_idx_from_annotation_id(self, mocker, mock_loader_class):
+        video_idx = mock_loader_class.get_video_idx_from_annotation_id(
+            annotations={"RELEASE": [[[[[[], [[], [], [], [[200]]]]]]]]},
+            ifile=1
+        )
+
+        assert video_idx == 200
+
+    def test_get_video_idx_from_annotation_id__empty_video(self, mocker, mock_loader_class):
+        video_idx = mock_loader_class.get_video_idx_from_annotation_id(
+            annotations={"RELEASE": [[[[[[], [[], [], [], [[]]]]]]]]},
+            ifile=1
+        )
+
+        assert video_idx == -1
