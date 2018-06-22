@@ -533,7 +533,7 @@ class DatasetAnnotationLoader:
             "single_person": self.get_single_persons(annotations, nfiles, is_test)
         }
 
-    def load_annotations_from_disk(self):
+    def load_annotation_data_from_disk(self):
         """Loads the annotation's data from the data file."""
         annotation_filename = os.path.join(self.data_path,
                                            'mpii_human_pose_v1_u12_2',
