@@ -152,7 +152,7 @@ class TestDatasetAnnotationLoader:
         dummy_activities = [0, 1, 0, 2, 3]
         dummy_single = [1,1,1,0,1]
         mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_data_from_disk", return_value=dummy_annotations)
-        mock_get_total_files = mocker.patch.object(DatasetAnnotationLoader, "get_total_files", return_value=dummy_nfiles)
+        mock_get_total_files = mocker.patch.object(DatasetAnnotationLoader, "get_num_files", return_value=dummy_nfiles)
         mock_get_filenames = mocker.patch.object(DatasetAnnotationLoader, "get_image_filenames", return_value=dummy_filenames)
         mock_get_frame_sec = mocker.patch.object(DatasetAnnotationLoader, "get_frame_sec", return_value=dummy_framesec)
         mock_get_video_idx = mocker.patch.object(DatasetAnnotationLoader, "get_video_indexes", return_value=dummy_videos)
@@ -188,3 +188,9 @@ class TestDatasetAnnotationLoader:
         filename = os.path.join(mock_loader_class.data_path, 'mpii_human_pose_v1_u12_2', 'mpii_human_pose_v1_u12_1.mat')
         mock_load_file.assert_called_once_with(filename)
         assert annotations == dummy_annotations
+
+    def test_get_num_files(self, mocker, mock_loader_class):
+        annotations = {"RELEASE": [[[[], [], [], list(range(10))]]]}
+        num_files = mock_loader_class.get_num_files(annotations)
+
+        assert num_files == 10
