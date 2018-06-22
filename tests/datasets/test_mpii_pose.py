@@ -179,3 +179,12 @@ class TestDatasetAnnotationLoader:
             "single_person": dummy_single
         }
 
+    def test_load_annotation_data_from_disk(self, mocker, mock_loader_class):
+        dummy_annotations = {"dummy": 'data'}
+        mock_load_file = mocker.patch.object(DatasetAnnotationLoader, "load_file", return_value=dummy_annotations)
+
+        annotations = mock_loader_class.load_annotation_data_from_disk()
+
+        filename = os.path.join(mock_loader_class.data_path, 'mpii_human_pose_v1_u12_2', 'mpii_human_pose_v1_u12_1.mat')
+        mock_load_file.assert_called_once_with(filename)
+        assert annotations == dummy_annotations
