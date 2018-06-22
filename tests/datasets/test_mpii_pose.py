@@ -219,6 +219,18 @@ class TestDatasetAnnotationLoader:
         assert mock_get_filename.call_count == 10
         assert image_filenames == [os.path.join('images', 'filename1')]*10
 
+    def test_get_image_filenames__returns_empty_list(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=False)
+        mock_get_filename = mocker.patch.object(DatasetAnnotationLoader, "get_filename_from_annotation_id", return_value='filename1')
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        image_filenames = mock_loader_class.get_image_filenames(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        assert not mock_get_filename.called
+        assert image_filenames == []
+
     def test_is_test_annotation__returns_true(self, mocker, mock_loader_class):
         result = mock_loader_class.is_test_annotation({"RELEASE": [[['', [[0, 0, 1]]]]]}, 1)
 
