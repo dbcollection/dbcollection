@@ -119,3 +119,16 @@ class TestDatasetAnnotationLoader:
         assert annotations == dummy_data_filtered
         mock_load_annotations.assert_called_once_with(is_test=False)
         mock_filter_annotations.assert_called_once_with(dummy_data, dummy_image_ids)
+
+    def test_load_val_data(self, mocker, mock_loader_class):
+        dummy_data = {"dummy": 'data'}
+        dummy_image_ids = [9,67,133,65]
+        dummy_data_filtered = {"dummy": 'filtered'}
+        mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_annotations_set", return_value=dummy_data)
+        mock_filter_annotations = mocker.patch.object(DatasetAnnotationLoader, "filter_annotations_by_ids", return_value=dummy_data_filtered)
+
+        annotations = mock_loader_class.load_val_data(dummy_image_ids)
+
+        assert annotations == dummy_data_filtered
+        mock_load_annotations.assert_called_once_with(is_test=False)
+        mock_filter_annotations.assert_called_once_with(dummy_data, dummy_image_ids)
