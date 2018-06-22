@@ -538,8 +538,12 @@ class DatasetAnnotationLoader:
         annotation_filename = os.path.join(self.data_path,
                                            'mpii_human_pose_v1_u12_2',
                                            'mpii_human_pose_v1_u12_1.mat')
-        annotations = load_matlab(annotation_filename)
+        annotations = self.load_file(annotation_filename)
         return annotations
+
+    def load_file(self, filename):
+        """Loads the data of the annotation file."""
+        return load_matlab(filename)
 
     def get_total_files(self, annotations):
         """Returns the total number of files available in the dataset."""
