@@ -245,3 +245,39 @@ class TestDatasetAnnotationLoader:
         filename = mock_loader_class.get_filename_from_annotation_id({"RELEASE": [[[[[0, [[[[['filename1']]]]]]]]]]}, 1)
 
         assert filename == 'filename1'
+
+    def test_get_frame_sec__only_one_file(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+        mock_get_frame = mocker.patch.object(DatasetAnnotationLoader, "get_frame_sec_from_annotation_id", return_value=0)
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        frame_sec = mock_loader_class.get_frame_sec(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        mock_get_frame.assert_called_once_with(annotations, 0)
+        assert frame_sec == [0]
+
+    def test_get_frame_sec__multiple_file(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+        mock_get_frame = mocker.patch.object(DatasetAnnotationLoader, "get_frame_sec_from_annotation_id", return_value=0)
+
+        annotations = {"RELEASE": []}
+        num_files = 10
+        frame_sec = mock_loader_class.get_frame_sec(annotations, num_files, True)
+
+        assert mock_is_test.call_count == 10
+        assert mock_get_frame.call_count == 10
+        assert frame_sec == [0]*10
+
+    def test_get_frame_sec__returns_empty_list(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=False)
+        mock_get_frame = mocker.patch.object(DatasetAnnotationLoader, "get_frame_sec_from_annotation_id", return_value=0)
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        frame_sec = mock_loader_class.get_frame_sec(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        assert not mock_get_frame.called
+        assert frame_sec == []
