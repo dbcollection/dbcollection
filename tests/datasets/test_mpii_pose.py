@@ -141,3 +141,41 @@ class TestDatasetAnnotationLoader:
 
         assert annotations == dummy_data
         mock_load_annotations.assert_called_once_with(is_test=True)
+
+    def test_load_annotations_set(self, mocker, mock_loader_class):
+        dummy_annotations = {"dummy": 'data'}
+        dummy_nfiles = 10
+        dummy_filenames = ['filename1', 'filename2', 'filename2', 'filename3', 'filename3']
+        dummy_framesec = [141,20,13,74,6]
+        dummy_videos = [6,20,1,1, 4]
+        dummy_poses = [[0, 1], [0, 1], [0, 1], [0, 1], [0, 1]]
+        dummy_activities = [0, 1, 0, 2, 3]
+        dummy_single = [1,1,1,0,1]
+        mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_data_from_disk", return_value=dummy_annotations)
+        mock_get_total_files = mocker.patch.object(DatasetAnnotationLoader, "get_total_files", return_value=dummy_nfiles)
+        mock_get_filenames = mocker.patch.object(DatasetAnnotationLoader, "get_image_filenames", return_value=dummy_filenames)
+        mock_get_frame_sec = mocker.patch.object(DatasetAnnotationLoader, "get_frame_sec", return_value=dummy_framesec)
+        mock_get_video_idx = mocker.patch.object(DatasetAnnotationLoader, "get_video_indexes", return_value=dummy_videos)
+        mock_get_pose = mocker.patch.object(DatasetAnnotationLoader, "get_pose_annotations", return_value=dummy_poses)
+        mock_get_activity = mocker.patch.object(DatasetAnnotationLoader, "get_activities", return_value=dummy_activities)
+        mock_get_single = mocker.patch.object(DatasetAnnotationLoader, "get_single_persons", return_value=dummy_single)
+
+        annotations = mock_loader_class.load_annotations_set(is_test=True)
+
+        mock_load_annotations.assert_called_once_with()
+        mock_get_total_files.assert_called_once_with(dummy_annotations)
+        mock_get_filenames.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
+        mock_get_frame_sec.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
+        mock_get_video_idx.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
+        mock_get_pose.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
+        mock_get_activity.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
+        mock_get_single.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
+        assert annotations == {
+            "image_filenames": dummy_filenames,
+            "frame_sec": dummy_framesec,
+            "video_idx": dummy_videos,
+            "pose_annotations": dummy_poses,
+            "activity": dummy_activities,
+            "single_person": dummy_single
+        }
+
