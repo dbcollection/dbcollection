@@ -98,11 +98,11 @@ class TestDatasetAnnotationLoader:
         assert mock_loader_class.cache_path=='/some/path/cache'
         assert mock_loader_class.verbose==True
 
-    def test_load_train_data(self, mocker, mock_loader_class):
+    def test_load_trainval_data(self, mocker, mock_loader_class):
         dummy_data = {"dummy": 'data'}
         mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_annotations_set", return_value=dummy_data)
 
-        annotations = mock_loader_class.load_train_data()
+        annotations = mock_loader_class.load_trainval_data()
 
-        mock_load_annotations.assert_called_once_with(is_test=False)
         assert annotations == dummy_data
+        mock_load_annotations.assert_called_once_with(is_test=False)
