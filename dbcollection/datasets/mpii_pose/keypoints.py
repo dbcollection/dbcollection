@@ -486,12 +486,12 @@ class DatasetAnnotationLoader:
         self.cache_path = cache_path
         self.verbose = verbose
 
-    def load_train_data(self):
+    def load_trainval_data(self):
         """Loads the train set annotation data from disk
         and returns it as a dictionary."""
         return self.load_annotations_set(is_test=False)
 
-    def load_trainval_data(self, image_ids):
+    def load_train_data(self, image_ids):
         """Loads the train+val set annotation data from disk
         and returns it as a dictionary.
 
@@ -575,6 +575,11 @@ class DatasetAnnotationLoader:
         single person from the annotation's data for a set split."""
         pass
 
+    def filter_annotations_by_ids(self, annotations, image_ids):
+        """Returns a subset of the annotations w.r.t. a list of image indices."""
+        pass
+
+    def tmp_body(self):
         for ifile in range(nfiles):
             if annotations['RELEASE'][0][0][1][0][ifile] == 0:
                 set_name = 'test'
