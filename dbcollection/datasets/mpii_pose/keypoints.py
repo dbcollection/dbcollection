@@ -568,10 +568,21 @@ class DatasetAnnotationLoader:
         """Return the image file name for an id."""
         return str(annotations['RELEASE'][0][0][0][0][ifile][0][0][0][0][0])
 
-    def get_frame_sec(self, annotations, annotation_size, is_test):
+    def get_frame_sec(self, annotations, num_files, is_test):
         """Returns the image's frame position (seconds) from the
         annotation's data for a set split."""
-        pass
+        frame_sec = []
+        for ifile in range(num_files):
+            if is_test == self.is_test_annotation(annotations, ifile):
+                frame_sec_ = self.get_frame_sec_from_annotation_id(annotations, ifile)
+                frame_sec.append(frame_sec_)
+        return frame_sec
+
+    def get_frame_sec_from_annotation_id(self, annotations, ifile):
+        if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
+            return int(annotations['RELEASE'][0][0][0][0][ifile][2][0][0])
+        else:
+            return -1
 
     def get_video_indexes(self, annotations, annotation_size, is_test):
         """Returns the image's video identifier from the annotation's
