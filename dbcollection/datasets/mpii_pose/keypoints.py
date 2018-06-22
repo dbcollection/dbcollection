@@ -549,10 +549,24 @@ class DatasetAnnotationLoader:
         """Returns the total number of files available in the dataset."""
         return len(annotations["RELEASE"][0][0][3])
 
-    def get_image_filenames(self, annotations, annotation_size, is_test):
+    def get_image_filenames(self, annotations, num_files, is_test):
         """Returns the image filenames from the annotation's data for a
         set split."""
-        pass
+        image_filenames = []
+        for ifile in range(num_files):
+            if is_test == self.is_test_annotation(annotations, ifile):
+                filename = self.get_filename_from_annotation_id(annotations, ifile)
+                image_filenames.append(os.path.join('images', filename))
+        return image_filenames
+
+    def is_test_annotation(self, annotations, ifile):
+        """Returns True if the annotation belongs to the test set.
+        Otherwise, returns False."""
+        return annotations['RELEASE'][0][0][1][0][ifile] == 0
+
+    def get_filename_from_annotation_id(self, annotations, ifile):
+        """Return the image file name for an id."""
+        return str(annotations['RELEASE'][0][0][0][0][ifile][0][0][0][0][0])
 
     def get_frame_sec(self, annotations, annotation_size, is_test):
         """Returns the image's frame position (seconds) from the
