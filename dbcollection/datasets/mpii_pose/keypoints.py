@@ -584,10 +584,21 @@ class DatasetAnnotationLoader:
         else:
             return -1
 
-    def get_video_indexes(self, annotations, annotation_size, is_test):
+    def get_video_indexes(self, annotations, num_files, is_test):
         """Returns the image's video identifier from the annotation's
         data for a set split."""
-        pass
+        video_indexes = []
+        for ifile in range(num_files):
+            if is_test == self.is_test_annotation(annotations, ifile):
+                video_idx = self.get_video_idx_from_annotation_id(annotations, ifile)
+                video_indexes.append(video_idx)
+        return video_indexes
+
+    def get_video_idx_from_annotation_id(self, annotations, ifile):
+        if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
+            int(annotations['RELEASE'][0][0][0][0][ifile][3][0][0])
+        else:
+            return -1
 
     def get_pose_annotations(self, annotations, annotation_size, is_test):
         """Returns the poses annotations of individual persons from the
