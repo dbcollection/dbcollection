@@ -132,3 +132,12 @@ class TestDatasetAnnotationLoader:
         assert annotations == dummy_data_filtered
         mock_load_annotations.assert_called_once_with(is_test=False)
         mock_filter_annotations.assert_called_once_with(dummy_data, dummy_image_ids)
+
+    def test_load_test_data(self, mocker, mock_loader_class):
+        dummy_data = {"dummy": 'data'}
+        mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_annotations_set", return_value=dummy_data)
+
+        annotations = mock_loader_class.load_test_data()
+
+        assert annotations == dummy_data
+        mock_load_annotations.assert_called_once_with(is_test=True)
