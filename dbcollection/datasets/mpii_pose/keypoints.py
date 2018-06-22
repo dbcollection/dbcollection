@@ -489,9 +489,9 @@ class DatasetAnnotationLoader:
     def load_train_data(self):
         """Loads the train set annotation data from disk
         and returns it as a dictionary."""
-        pass
+        return self.load_annotations_set(is_test=False)
 
-    def load_trainval_data(self):
+    def load_trainval_data(self, image_ids):
         """Loads the train+val set annotation data from disk
         and returns it as a dictionary.
 
@@ -500,9 +500,10 @@ class DatasetAnnotationLoader:
         split not available in the original dataset but
         it is crafted for use in validation tasks.
         """
-        pass
+        annotations = self.load_annotations_set(is_test=False)
+        return self.filter_annotations_by_ids(annotations, image_ids)
 
-    def load_val_data(self):
+    def load_val_data(self, image_ids):
         """Loads the val set annotation data from disk
         and returns it as a dictionary.
 
@@ -511,40 +512,69 @@ class DatasetAnnotationLoader:
         split not available in the original dataset but
         it is crafted for use in validation tasks.
         """
-        pass
+        annotations = self.load_annotations_set(is_test=False)
+        return self.filter_annotations_by_ids(annotations, image_ids)
 
-    def load_test_data(self):
+    def load_test_data(self, set_name):
         """Loads the test set annotation data from disk
         and returns it as a dictionary."""
-        pass
+        return self.load_annotations_set(is_test=True)
 
-    def load_annotations(self):
-        """
-        Load annotations from file and split them to train and test sets.
-        """
-        annot_filepath = os.path.join(
-            self.data_path, 'mpii_human_pose_v1_u12_2', 'mpii_human_pose_v1_u12_1.mat')
-
-        if self.verbose:
-            print('\n> Loading annotations file: {}'.format(annot_filepath))
-
-        # load annotations file
-        annotations = load_matlab(annot_filepath)
-
-        # total number of files
-        nfiles = len(annotations["RELEASE"][0][0][3])
-
-        # progressbar
-        if self.verbose:
-            print('\n> Parsing data from the annotations...')
-            prgbar = progressbar.ProgressBar(max_value=nfiles)
-
-        data = {
-            "train": [],
-            "test": []
+    def load_annotations_set(self, is_test):
+        """Loads the annotation's data for the train + test splits."""
+        annotations = self.load_annotation_data_from_disk()
+        nfiles = self.get_total_files(annotations)
+        return {
+            "image_filenames": self.get_image_filenames(annotations, nfiles, is_test),
+            "frame_sec": self.get_frame_sec(annotations, nfiles, is_test),
+            "video_idx": self.get_video_indexes(annotations, nfiles, is_test),
+            "pose_annotations": self.get_pose_annotations(annotations, nfiles, is_test),
+            "activity": self.get_activities(annotations, nfiles, is_test),
+            "single_person": self.get_single_persons(annotations, nfiles, is_test)
         }
 
-        # cycle all files
+    def load_annotations_from_disk(self):
+        """Loads the annotation's data from the data file."""
+        annotation_filename = os.path.join(self.data_path,
+                                           'mpii_human_pose_v1_u12_2',
+                                           'mpii_human_pose_v1_u12_1.mat')
+        annotations = load_matlab(annotation_filename)
+        return annotations
+
+    def get_total_files(self, annotations):
+        """Returns the total number of files available in the dataset."""
+        return len(annotations["RELEASE"][0][0][3])
+
+    def get_image_filenames(self, annotations, annotation_size, is_test):
+        """Returns the image filenames from the annotation's data for a
+        set split."""
+        pass
+
+    def get_frame_sec(self, annotations, annotation_size, is_test):
+        """Returns the image's frame position (seconds) from the
+        annotation's data for a set split."""
+        pass
+
+    def get_video_indexes(self, annotations, annotation_size, is_test):
+        """Returns the image's video identifier from the annotation's
+        data for a set split."""
+        pass
+
+    def get_pose_annotations(self, annotations, annotation_size, is_test):
+        """Returns the poses annotations of individual persons from the
+        annotation's data for a set split."""
+        pass
+
+    def get_activities(self, annotations, annotation_size, is_test):
+        """Returns the video's activities from the annotation's data
+        for a set split."""
+        pass
+
+    def get_single_persons(self, annotations, annotation_size, is_test):
+        """Returns a list of 0 and 1s indicating the presence of a
+        single person from the annotation's data for a set split."""
+        pass
+
         for ifile in range(nfiles):
             if annotations['RELEASE'][0][0][1][0][ifile] == 0:
                 set_name = 'test'
@@ -718,6 +748,8 @@ class DatasetAnnotationLoader:
             videonames.append(str(annotations['RELEASE'][0][0][5][0][ivideo][0]))
 
         return data, videonames
+
+
 
 
 # -----------------------------------------------------------
