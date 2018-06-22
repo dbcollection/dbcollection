@@ -281,3 +281,19 @@ class TestDatasetAnnotationLoader:
         mock_is_test.assert_called_once_with(annotations, 0)
         assert not mock_get_frame.called
         assert frame_sec == []
+
+    def test_get_frame_sec_from_annotation_id(self, mocker, mock_loader_class):
+        frame_sec = mock_loader_class.get_frame_sec_from_annotation_id(
+            annotations={"RELEASE": [[[[[[], [[], [], [[100]], [[1]]]]]]]]},
+            ifile=1
+        )
+
+        assert frame_sec == 100
+
+    def test_get_frame_sec_from_annotation_id__empty_frame_sec(self, mocker, mock_loader_class):
+        frame_sec = mock_loader_class.get_frame_sec_from_annotation_id(
+            annotations={"RELEASE": [[[[[[], [[], [], [[100]], [[]]]]]]]]},
+            ifile=1
+        )
+
+        assert frame_sec == -1
