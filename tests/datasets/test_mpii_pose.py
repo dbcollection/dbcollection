@@ -287,20 +287,33 @@ class TestDatasetAnnotationLoader:
         assert frame_sec == []
 
     def test_get_frame_sec_from_annotation_id(self, mocker, mock_loader_class):
-        frame_sec = mock_loader_class.get_frame_sec_from_annotation_id(
-            annotations={"RELEASE": [[[[[[], [[], [], [[100]], [[1]]]]]]]]},
-            ifile=1
-        )
+        dummy_annotations_list = ['dummy', 'values']
+        mock_get_annotations_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=dummy_annotations_list)
 
+        annotations = {"RELEASE": [[[[[[], [[], [], [[100]], [[1]]]]]]]]}
+        ifile = 1
+        frame_sec = mock_loader_class.get_frame_sec_from_annotation_id(annotations, ifile)
+
+        mock_get_annotations_list.assert_called_once_with(annotations, ifile)
         assert frame_sec == 100
 
     def test_get_frame_sec_from_annotation_id__empty_frame_sec(self, mocker, mock_loader_class):
-        frame_sec = mock_loader_class.get_frame_sec_from_annotation_id(
-            annotations={"RELEASE": [[[[[[], [[], [], [[100]], [[]]]]]]]]},
+        mock_get_annotations_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=[])
+
+        annotations = {"RELEASE": [[[[[[], [[], [], [[100]], [[]]]]]]]]}
+        ifile = 1
+        frame_sec = mock_loader_class.get_frame_sec_from_annotation_id(annotations, ifile)
+
+        mock_get_annotations_list.assert_called_once_with(annotations, ifile)
+        assert frame_sec == -1
+
+    def test_get_annotations_list_by_image_id(self, mocker, mock_loader_class):
+        annotations_list = mock_loader_class.get_annotations_list_by_image_id(
+            annotations={"RELEASE": [[[[[[], [[], [], [], [[1, 2, 3, 4, 5]]]]]]]]},
             ifile=1
         )
 
-        assert frame_sec == -1
+        assert annotations_list == [1, 2, 3, 4, 5]
 
     def test_get_video_indexes__only_one_file(self, mocker, mock_loader_class):
         mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)

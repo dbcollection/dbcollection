@@ -582,10 +582,14 @@ class DatasetAnnotationLoader:
         return frame_sec
 
     def get_frame_sec_from_annotation_id(self, annotations, ifile):
-        if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
+        if any(self.get_annotations_list_by_image_id(annotations, ifile)):
             return int(annotations['RELEASE'][0][0][0][0][ifile][2][0][0])
         else:
             return -1
+
+    def get_annotations_list_by_image_id(self, annotations, ifile):
+        """.Returns a list of annotations for a given image id."""
+        return annotations['RELEASE'][0][0][0][0][ifile][3][0]
 
     def get_video_indexes(self, annotations, num_files, is_test):
         """Returns the image's video identifier from the annotation's
