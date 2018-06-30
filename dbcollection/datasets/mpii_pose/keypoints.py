@@ -603,10 +603,16 @@ class DatasetAnnotationLoader:
         else:
             return -1
 
-    def get_pose_annotations(self, annotations, annotation_size, is_test):
+    def get_pose_annotations(self, annotations, num_files, is_test):
         """Returns the poses annotations of individual persons from the
         annotation's data for a set split."""
-        pass
+        poses_annotations = []
+        for ifile in range(num_files):
+            if is_test == self.is_test_annotation(annotations, ifile):
+                poses = self.get_poses_from_annotation_id(annotations, ifile, is_test)
+                if any(poses):
+                    poses_annotations.append(poses)
+        return poses_annotations
 
     def get_activities(self, annotations, annotation_size, is_test):
         """Returns the video's activities from the annotation's data
