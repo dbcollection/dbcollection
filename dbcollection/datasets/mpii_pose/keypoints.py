@@ -504,7 +504,7 @@ class DatasetAnnotationLoader:
         annotations = self.load_annotations_set(is_test=False)
         return self.filter_annotations_by_ids(annotations, train_images_ids)
 
-    def load_val_data(self, image_ids):
+    def load_val_data(self):
         """Loads the val set annotation data from disk
         and returns it as a dictionary.
 
@@ -513,8 +513,9 @@ class DatasetAnnotationLoader:
         split not available in the original dataset but
         it is crafted for use in validation tasks.
         """
+        from .train_val_ids import val_images_ids
         annotations = self.load_annotations_set(is_test=False)
-        return self.filter_annotations_by_ids(annotations, image_ids)
+        return self.filter_annotations_by_ids(annotations, val_images_ids)
 
     def load_test_data(self):
         """Loads the test set annotation data from disk
