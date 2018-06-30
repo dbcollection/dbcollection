@@ -352,19 +352,23 @@ class TestDatasetAnnotationLoader:
         assert frame_sec == []
 
     def test_get_video_idx_from_annotation_id(self, mocker, mock_loader_class):
-        video_idx = mock_loader_class.get_video_idx_from_annotation_id(
-            annotations={"RELEASE": [[[[[[], [[], [], [], [[200]]]]]]]]},
-            ifile=1
-        )
+        mock_get_annotations_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=[200])
 
+        annotations = {"RELEASE": [[[[[[], [[], [], [], [[200]]]]]]]]},
+        ifile = 1
+        video_idx = mock_loader_class.get_video_idx_from_annotation_id(annotations, ifile)
+
+        mock_get_annotations_list.assert_called_once_with(annotations, ifile)
         assert video_idx == 200
 
     def test_get_video_idx_from_annotation_id__empty_video(self, mocker, mock_loader_class):
-        video_idx = mock_loader_class.get_video_idx_from_annotation_id(
-            annotations={"RELEASE": [[[[[[], [[], [], [], [[]]]]]]]]},
-            ifile=1
-        )
+        mock_get_annotations_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=[])
 
+        annotations = {"RELEASE": [[[[[[], [[], [], [], [[]]]]]]]]}
+        ifile = 1
+        video_idx = mock_loader_class.get_video_idx_from_annotation_id(annotations, ifile)
+
+        mock_get_annotations_list.assert_called_once_with(annotations, ifile)
         assert video_idx == -1
 
     def test_get_pose_annotations__only_one_file(self, mocker, mock_loader_class):

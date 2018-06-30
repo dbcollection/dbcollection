@@ -602,8 +602,9 @@ class DatasetAnnotationLoader:
         return video_indexes
 
     def get_video_idx_from_annotation_id(self, annotations, ifile):
-        if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
-            return int(annotations['RELEASE'][0][0][0][0][ifile][3][0][0])
+        annotations_image = self.get_annotations_list_by_image_id(annotations, ifile)
+        if any(annotations_image):
+            return int(annotations_image[0])
         else:
             return -1
 
