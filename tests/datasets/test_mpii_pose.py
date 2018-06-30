@@ -353,3 +353,52 @@ class TestDatasetAnnotationLoader:
         )
 
         assert video_idx == -1
+
+    def test_get_pose_annotations__only_one_file(self, mocker, mock_loader_class):
+        dummy_poses = [{
+            "keypoints": [[1, 1, 1]]*16,
+            "head_bbox": (1,1, 10, 20),
+            "scale": 2.0,
+            "objpos": (20, 30)
+        }]
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+        mock_get_poses = mocker.patch.object(DatasetAnnotationLoader, "get_poses_from_annotation_id", return_value=dummy_poses)
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        poses_annotations = mock_loader_class.get_pose_annotations(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        mock_get_poses.assert_called_once_with(annotations, 0, True)
+        assert poses_annotations == [dummy_poses]
+
+    def test_get_pose_annotations__multiple_file(self, mocker, mock_loader_class):
+        dummy_poses = [{
+            "keypoints": [[1, 1, 1]]*16,
+            "head_bbox": (1,1, 10, 20),
+            "scale": 2.0,
+            "objpos": (20, 30)
+        }]
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+        mock_get_poses = mocker.patch.object(DatasetAnnotationLoader, "get_poses_from_annotation_id", return_value=dummy_poses)
+
+        annotations = {"RELEASE": []}
+        num_files = 10
+        poses_annotations = mock_loader_class.get_pose_annotations(annotations, num_files, True)
+
+        assert mock_is_test.call_count == 10
+        assert mock_get_poses.call_count == 10
+        assert poses_annotations == [dummy_poses]*10
+
+    def test_get_pose_annotations__returns_empty_list(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+        mock_get_poses = mocker.patch.object(DatasetAnnotationLoader, "get_poses_from_annotation_id", return_value=[])
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        poses_annotations = mock_loader_class.get_pose_annotations(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        mock_get_poses.assert_called_once_with(annotations, 0, True)
+        assert poses_annotations == []
+
