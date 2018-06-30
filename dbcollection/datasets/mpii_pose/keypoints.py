@@ -532,7 +532,8 @@ class DatasetAnnotationLoader:
             "video_idx": self.get_video_indexes(annotations, nfiles, is_test),
             "pose_annotations": self.get_pose_annotations(annotations, nfiles, is_test),
             "activity": self.get_activities(annotations, nfiles, is_test),
-            "single_person": self.get_single_persons(annotations, nfiles, is_test)
+            "single_person": self.get_single_persons(annotations, nfiles, is_test),
+            "video_names": self.get_video_names(annotations)
         }
 
     def load_annotation_data_from_disk(self):

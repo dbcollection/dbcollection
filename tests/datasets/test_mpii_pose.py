@@ -151,6 +151,7 @@ class TestDatasetAnnotationLoader:
         dummy_poses = [[0, 1], [0, 1], [0, 1], [0, 1], [0, 1]]
         dummy_activities = [0, 1, 0, 2, 3]
         dummy_single = [1,1,1,0,1]
+        dummy_video_names = ['video1', 'video2', 'video3']
         mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_data_from_disk", return_value=dummy_annotations)
         mock_get_total_files = mocker.patch.object(DatasetAnnotationLoader, "get_num_files", return_value=dummy_nfiles)
         mock_get_filenames = mocker.patch.object(DatasetAnnotationLoader, "get_image_filenames", return_value=dummy_filenames)
@@ -159,6 +160,7 @@ class TestDatasetAnnotationLoader:
         mock_get_pose = mocker.patch.object(DatasetAnnotationLoader, "get_pose_annotations", return_value=dummy_poses)
         mock_get_activity = mocker.patch.object(DatasetAnnotationLoader, "get_activities", return_value=dummy_activities)
         mock_get_single = mocker.patch.object(DatasetAnnotationLoader, "get_single_persons", return_value=dummy_single)
+        mock_get_video_names = mocker.patch.object(DatasetAnnotationLoader, "get_video_names", return_value=dummy_video_names)
 
         annotations = mock_loader_class.load_annotations_set(is_test=True)
 
@@ -170,13 +172,15 @@ class TestDatasetAnnotationLoader:
         mock_get_pose.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_activity.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_single.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
+        mock_get_video_names.assert_called_once_with(dummy_annotations)
         assert annotations == {
             "image_filenames": dummy_filenames,
             "frame_sec": dummy_framesec,
             "video_idx": dummy_videos,
             "pose_annotations": dummy_poses,
             "activity": dummy_activities,
-            "single_person": dummy_single
+            "single_person": dummy_single,
+            "video_names": dummy_video_names
         }
 
     def test_load_annotation_data_from_disk(self, mocker, mock_loader_class):
