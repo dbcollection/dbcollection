@@ -530,3 +530,12 @@ class TestDatasetAnnotationLoader:
 
         mock_get_annotation.assert_called_once_with(annotations, ifile)
         assert pnames == []
+
+    def test_get_annotation_by_file_id(self, mocker, mock_loader_class):
+        dummy_annotations = ["dummy", "data"]
+        annot_ptr = mock_loader_class.get_annotation_by_file_id(
+            annotations = {"RELEASE": [[[[[0, [0, [dummy_annotations]]]]]]]},# [[[[], [[], [dummy_annotations]]]]]},
+            ifile = 1
+        )
+
+        assert annot_ptr == dummy_annotations
