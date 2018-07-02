@@ -619,26 +619,17 @@ class DatasetAnnotationLoader:
                     poses_annotations.append(poses)
         return poses_annotations
 
-    def get_activities(self, annotations, annotation_size, is_test):
-        """Returns the video's activities from the annotation's data
-        for a set split."""
-        pass
-
-    def get_single_persons(self, annotations, annotation_size, is_test):
-        """Returns a list of 0 and 1s indicating the presence of a
-        single person from the annotation's data for a set split."""
-        pass
-
-    def filter_annotations_by_ids(self, annotations, image_ids):
-        """Returns a subset of the annotations w.r.t. a list of image indices."""
-        pass
-
-    def tmp_body(self):
-        for ifile in range(nfiles):
-            if annotations['RELEASE'][0][0][1][0][ifile] == 0:
-                set_name = 'test'
+    def get_poses_from_annotation_id(self, annotations, ifile, is_test):
+        """Returns the pose(s) annotations for an image file."""
+        poses = []
+        pnames = self.get_pose_annotation_names(annotations, ifile)
+        if any(pnames):
+            if any(self.get_annotations_list_by_image_id(annotations, ifile)):
+                poses = self.get_full_pose_annotations(annotations, ifile, pnames)
             else:
-                set_name = 'train'
+                if is_test or self.is_full:
+                    poses = self.get_partial_poses_annotations(annotations, ifile, pnames)
+        return poses
 
             # single person
             single_person = [0]
