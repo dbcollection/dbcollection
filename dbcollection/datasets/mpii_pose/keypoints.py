@@ -639,14 +639,8 @@ class DatasetAnnotationLoader:
         except IndexError:
             return []
 
-            # activity/action id
-            act = {"cat_name": '', "act_name": '', "act_id": -1}
-            if any(annotations['RELEASE'][0][0][4][ifile][0][0]):
-                act = {
-                    "cat_name": str(annotations['RELEASE'][0][0][4][ifile][0][0][0]),
-                    "act_name": str(annotations['RELEASE'][0][0][4][ifile][0][1][0]),
-                    "act_id": int(annotations['RELEASE'][0][0][4][ifile][0][2][0][0])
-                }
+    def get_annotation_by_file_id(self, annotations, ifile):
+        return annotations['RELEASE'][0][0][0][0][ifile][1][0]
 
             # image annots
             image_filename = os.path.join(self.data_path, 'images', str(
