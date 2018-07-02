@@ -631,11 +631,13 @@ class DatasetAnnotationLoader:
                     poses = self.get_partial_poses_annotations(annotations, ifile, pnames)
         return poses
 
-            # single person
-            single_person = [0]
-            if any(annotations['RELEASE'][0][0][3][ifile][0]):
-                for i in range(len(annotations['RELEASE'][0][0][3][ifile][0])):
-                    single_person.append(int(annotations['RELEASE'][0][0][3][ifile][0][i][0]))
+    def get_pose_annotation_names(self, annotations, ifile):
+        """Returns the annotation variable (table) names that categorize the annotated data."""
+        try:
+            annot_ptr = self.get_annotation_by_file_id(annotations, ifile)
+            return annot_ptr.dtype.names
+        except IndexError:
+            return []
 
             # activity/action id
             act = {"cat_name": '', "act_name": '', "act_id": -1}
