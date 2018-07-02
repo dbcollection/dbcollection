@@ -419,3 +419,90 @@ class TestDatasetAnnotationLoader:
         mock_get_poses.assert_called_once_with(annotations, 0, True)
         assert poses_annotations == []
 
+    def test_get_poses_from_annotation_id__returns_empty_list(self, mocker, mock_loader_class):
+        mock_get_names = mocker.patch.object(DatasetAnnotationLoader, "get_pose_annotation_names", return_value=[])
+        mock_get_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=[])
+        mock_get_poses_full = mocker.patch.object(DatasetAnnotationLoader, "get_full_pose_annotations", return_value=[])
+        mock_get_poses_partial = mocker.patch.object(DatasetAnnotationLoader, "get_partial_poses_annotations", return_value=[])
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        poses = mock_loader_class.get_poses_from_annotation_id(annotations, ifile, True)
+
+        mock_get_names.assert_called_once_with(annotations, ifile)
+        assert not mock_get_list.called
+        assert not mock_get_poses_full.called
+        assert not mock_get_poses_partial.called
+        assert poses == []
+
+    def test_get_poses_from_annotation_id__returns_full_poses(self, mocker, mock_loader_class):
+        dummy_pnames = {"dummy": 'data'}
+        dummy_poses = [{"pose1": 'data'}, {"pose2": 'data'}]
+        mock_get_names = mocker.patch.object(DatasetAnnotationLoader, "get_pose_annotation_names", return_value=dummy_pnames)
+        mock_get_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=['dummy', 'values'])
+        mock_get_poses_full = mocker.patch.object(DatasetAnnotationLoader, "get_full_pose_annotations", return_value=dummy_poses)
+        mock_get_poses_partial = mocker.patch.object(DatasetAnnotationLoader, "get_partial_poses_annotations", return_value=[])
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        poses = mock_loader_class.get_poses_from_annotation_id(annotations, ifile, True)
+
+        mock_get_names.assert_called_once_with(annotations, ifile)
+        mock_get_list.assert_called_once_with(annotations, ifile)
+        mock_get_poses_full.assert_called_once_with(annotations, ifile, dummy_pnames)
+        assert not mock_get_poses_partial.called
+        assert poses == dummy_poses
+
+    def test_get_poses_from_annotation_id__returns_partial_poses(self, mocker, mock_loader_class):
+        dummy_pnames = {"dummy": 'data'}
+        dummy_poses = [{"pose1": 'data'}, {"pose2": 'data'}]
+        mock_get_names = mocker.patch.object(DatasetAnnotationLoader, "get_pose_annotation_names", return_value=dummy_pnames)
+        mock_get_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=[])
+        mock_get_poses_full = mocker.patch.object(DatasetAnnotationLoader, "get_full_pose_annotations", return_value=[])
+        mock_get_poses_partial = mocker.patch.object(DatasetAnnotationLoader, "get_partial_poses_annotations", return_value=dummy_poses)
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        poses = mock_loader_class.get_poses_from_annotation_id(annotations, ifile, True)
+
+        mock_get_names.assert_called_once_with(annotations, ifile)
+        mock_get_list.assert_called_once_with(annotations, ifile)
+        assert not mock_get_poses_full.called
+        mock_get_poses_partial.assert_called_once_with(annotations, ifile, dummy_pnames)
+        assert poses == dummy_poses
+
+    def test_get_poses_from_annotation_id__returns_partial_poses_for_full_task(self, mocker, mock_loader_class):
+        dummy_pnames = {"dummy": 'data'}
+        dummy_poses = [{"pose1": 'data'}, {"pose2": 'data'}]
+        mock_get_names = mocker.patch.object(DatasetAnnotationLoader, "get_pose_annotation_names", return_value=dummy_pnames)
+        mock_get_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=[])
+        mock_get_poses_full = mocker.patch.object(DatasetAnnotationLoader, "get_full_pose_annotations", return_value=[])
+        mock_get_poses_partial = mocker.patch.object(DatasetAnnotationLoader, "get_partial_poses_annotations", return_value=dummy_poses)
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        mock_loader_class.is_full = True
+        poses = mock_loader_class.get_poses_from_annotation_id(annotations, ifile, False)
+
+        mock_get_names.assert_called_once_with(annotations, ifile)
+        mock_get_list.assert_called_once_with(annotations, ifile)
+        assert not mock_get_poses_full.called
+        mock_get_poses_partial.assert_called_once_with(annotations, ifile, dummy_pnames)
+        assert poses == dummy_poses
+
+    def test_get_poses_from_annotation_id__returns_empty_list_for_train_set(self, mocker, mock_loader_class):
+        dummy_pnames = {"dummy": 'data'}
+        mock_get_names = mocker.patch.object(DatasetAnnotationLoader, "get_pose_annotation_names", return_value=dummy_pnames)
+        mock_get_list = mocker.patch.object(DatasetAnnotationLoader, "get_annotations_list_by_image_id", return_value=[])
+        mock_get_poses_full = mocker.patch.object(DatasetAnnotationLoader, "get_full_pose_annotations", return_value=[])
+        mock_get_poses_partial = mocker.patch.object(DatasetAnnotationLoader, "get_partial_poses_annotations", return_value=[])
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        poses = mock_loader_class.get_poses_from_annotation_id(annotations, ifile, False)
+
+        mock_get_names.assert_called_once_with(annotations, ifile)
+        mock_get_list.assert_called_once_with(annotations, ifile)
+        assert not mock_get_poses_full.called
+        assert not mock_get_poses_partial.called
+        assert poses == []
