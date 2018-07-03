@@ -539,3 +539,80 @@ class TestDatasetAnnotationLoader:
         )
 
         assert annot_ptr == dummy_annotations
+
+    def test_get_full_pose_annotations__empty_list(self, mocker, mock_loader_class):
+        mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_annotation_by_file_id", return_value=[])
+        mock_get_keypoints = mocker.patch.object(DatasetAnnotationLoader, "get_keypoints")
+        mock_get_head_bbox = mocker.patch.object(DatasetAnnotationLoader, "get_head_coordinates")
+        mock_get_scale = mocker.patch.object(DatasetAnnotationLoader, "get_person_scale")
+        mock_get_objpos = mocker.patch.object(DatasetAnnotationLoader, "get_person_center_coordinates")
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        pnames = ['dummy_name1', 'dummy_name2']
+        poses_annotations = mock_loader_class.get_full_pose_annotations(annotations, ifile, pnames)
+
+        mock_get_annotation.assert_called_once_with(annotations, ifile)
+        assert not mock_get_keypoints.called
+        assert not mock_get_head_bbox.called
+        assert not mock_get_scale.called
+        assert not mock_get_objpos.called
+        assert poses_annotations == []
+
+    def test_get_full_pose_annotations__single_annotation(self, mocker, mock_loader_class):
+        dummy_annotation = [0]
+        dummy_keypoints = [[0, 0, 0]] * 16
+        dummy_head_bbox = [1,1, 50, 50]
+        dummy_scale = [3.10]
+        dummy_objpos = {"x": 10.0, "y": 10.0}
+        mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_annotation_by_file_id", return_value=dummy_annotation)
+        mock_get_keypoints = mocker.patch.object(DatasetAnnotationLoader, "get_keypoints", return_value=dummy_keypoints)
+        mock_get_head_bbox = mocker.patch.object(DatasetAnnotationLoader, "get_head_coordinates", return_value=dummy_head_bbox)
+        mock_get_scale = mocker.patch.object(DatasetAnnotationLoader, "get_person_scale", return_value=dummy_scale)
+        mock_get_objpos = mocker.patch.object(DatasetAnnotationLoader, "get_person_center_coordinates", return_value=dummy_objpos)
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        pnames = ['dummy_name1', 'dummy_name2']
+        poses_annotations = mock_loader_class.get_full_pose_annotations(annotations, ifile, pnames)
+
+        mock_get_annotation.assert_called_once_with(annotations, ifile)
+        mock_get_keypoints.assert_called_once_with(dummy_annotation, 0)
+        mock_get_head_bbox.assert_called_once_with(dummy_annotation, 0, pnames)
+        mock_get_scale.assert_called_once_with(dummy_annotation, 0, pnames)
+        mock_get_objpos.assert_called_once_with(dummy_annotation, 0, pnames)
+        assert poses_annotations == [{
+            "keypoints": dummy_keypoints,
+            "head_bbox": dummy_head_bbox,
+            "scale": dummy_scale,
+            "objpos": dummy_objpos
+        }]
+
+    def test_get_full_pose_annotations__multiple_annotations(self, mocker, mock_loader_class):
+        dummy_annotation = [['dummy_annot']]*5
+        dummy_keypoints = [[0, 0, 0]] * 16
+        dummy_head_bbox = [1,1, 50, 50]
+        dummy_scale = [3.10]
+        dummy_objpos = {"x": 10.0, "y": 10.0}
+        mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_annotation_by_file_id", return_value=dummy_annotation)
+        mock_get_keypoints = mocker.patch.object(DatasetAnnotationLoader, "get_keypoints", return_value=dummy_keypoints)
+        mock_get_head_bbox = mocker.patch.object(DatasetAnnotationLoader, "get_head_coordinates", return_value=dummy_head_bbox)
+        mock_get_scale = mocker.patch.object(DatasetAnnotationLoader, "get_person_scale", return_value=dummy_scale)
+        mock_get_objpos = mocker.patch.object(DatasetAnnotationLoader, "get_person_center_coordinates", return_value=dummy_objpos)
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        pnames = ['dummy_name1', 'dummy_name2']
+        poses_annotations = mock_loader_class.get_full_pose_annotations(annotations, ifile, pnames)
+
+        mock_get_annotation.assert_called_once_with(annotations, ifile)
+        assert mock_get_keypoints.call_count == 5
+        assert mock_get_head_bbox.call_count == 5
+        assert mock_get_scale.call_count == 5
+        assert mock_get_objpos.call_count == 5
+        assert poses_annotations == [{
+            "keypoints": dummy_keypoints,
+            "head_bbox": dummy_head_bbox,
+            "scale": dummy_scale,
+            "objpos": dummy_objpos
+        }]*5
