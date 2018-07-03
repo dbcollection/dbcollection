@@ -642,160 +642,168 @@ class DatasetAnnotationLoader:
     def get_annotation_by_file_id(self, annotations, ifile):
         return annotations['RELEASE'][0][0][0][0][ifile][1][0]
 
-            # image annots
-            image_filename = os.path.join(self.data_path, 'images', str(
-                annotations['RELEASE'][0][0][0][0][ifile][0][0][0][0][0]))
-
-            if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
-                frame_sec = int(annotations['RELEASE'][0][0][0][0][ifile][2][0][0])
-                video_idx = int(annotations['RELEASE'][0][0][0][0][ifile][3][0][0])
-            else:
-                frame_sec, video_idx = -1, -1
-
-            # properties field names ('scale', 'objpos', ...)
-            try:
-                pnames = annotations['RELEASE'][0][0][0][0][ifile][1][0].dtype.names
-            except IndexError:
-                data[set_name].append({
-                    "image_filename": image_filename,
-                    "frame_sec": frame_sec,
-                    "video_idx": video_idx,
-                    "poses_annotations": [],
-                    "activity": act,
-                    "single_person": single_person
-                })
-                continue  # skip rest
-
-            # parse keypoints
-            poses_annots = []
-            if any(annotations['RELEASE'][0][0][0][0][ifile][3][0]):
-                for i in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0])):
-                    try:
-                        keypoints = [[0, 0, 0]] * 16  # [x, y, is_visible]
-                        annot = annotations['RELEASE'][0][0][0][0][ifile][1][0][i][4][0][0][0][0]
-                        vnames = annot.dtype.names
-                        for j in range(len(annot)):
-                            x = float(annot[j][vnames.index('x')][0][0])
-                            y = float(annot[j][vnames.index('y')][0][0])
-                            idx = int(annot[j][vnames.index('id')][0][0])
-
-                            try:
-                                is_visible = int(annot[j][vnames.index('is_visible')][0])
-                            except (ValueError, IndexError):
-                                is_visible = -1
-
-                            try:
-                                keypoints[idx] = [x, y, is_visible]
-                            except IndexError as k:
-                                if set_name == 'test' or self.is_full:
-                                    print('Error: ', str(k))
-                                    keypoints[idx] = [0, 0, 0]
-                                else:
-                                    continue  # skip this annotation
-                    except (AttributeError, IndexError):
-                        keypoints = [[0, 0, 0]] * 16  # [x, y, is_visible]
-
-                    try:
-                        x1 = float(annotations['RELEASE'][0][0][0][0][ifile]
-                                   [1][0][i][pnames.index('x1')][0][0])
-                        y1 = float(annotations['RELEASE'][0][0][0][0][ifile]
-                                   [1][0][i][pnames.index('y1')][0][0])
-                        x2 = float(annotations['RELEASE'][0][0][0][0][ifile]
-                                   [1][0][i][pnames.index('x2')][0][0])
-                        y2 = float(annotations['RELEASE'][0][0][0][0][ifile]
-                                   [1][0][i][pnames.index('y2')][0][0])
-                    except ValueError:
-                        if set_name == 'test' or self.is_full:
-                            x1, y1, x2, y2 = -1, -1, -1, -1
-                        else:
-                            continue  # skip this annotation
-
-                    try:
-                        annot_ptr = annotations['RELEASE'][0][0][0][0][ifile][1][0]
-                        objnames = annot_ptr[i][pnames.index('objpos')][0].dtype.names
-                        # objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i]
-                        # [pnames.index('objpos')][0].dtype.names
-                        scale = float(annotations['RELEASE'][0][0][0][0]
-                                      [ifile][1][0][i][pnames.index('scale')][0][0])
-                        objpos = {
-                            "x": float(annotations['RELEASE'][0][0][0][0]
-                                       [ifile][1][0][i][pnames.index('objpos')][0][0]
-                                       [objnames.index('x')][0][0]),
-                            "y": float(annotations['RELEASE'][0][0][0][0]
-                                       [ifile][1][0][i][pnames.index('objpos')][0][0]
-                                       [objnames.index('y')][0][0])
-                        }
-                    except (ValueError, IndexError):
-                        if set_name == 'test' or self.is_full:
-                            scale = -1
-                            objpos = {"x": -1, "y": -1}
-                        else:
-                            continue  # skip this annotation
-
-                    poses_annots.append({
-                        "x1": x1,
-                        "y1": y1,
-                        "x2": x2,
-                        "y2": y2,
-                        "keypoints": keypoints,
-                        "scale": scale,
-                        "objpos": objpos
-                    })
-            else:
-                if set_name == 'test' or self.is_full:
-                    for i in range(len(annotations['RELEASE'][0][0][0][0][ifile][1][0])):
-                        try:
-                            annot_ptr = annotations['RELEASE'][0][0][0][0][ifile][1][0]
-                            objnames = annot_ptr[i][pnames.index('objpos')][0].dtype.names
-                            # objnames = annotations['RELEASE'][0][0][0][0][ifile][1][0][i]
-                            # [pnames.index('objpos')][0].dtype.names
-                            scale = float(annotations['RELEASE'][0][0][0][0]
-                                          [ifile][1][0][i][pnames.index('scale')][0][0])
-                            objpos = {
-                                "x": float(annotations['RELEASE'][0][0][0][0]
-                                           [ifile][1][0][i][pnames.index('objpos')][0][0]
-                                           [objnames.index('x')][0][0]),
-                                "y": float(annotations['RELEASE'][0][0][0][0]
-                                           [ifile][1][0][i][pnames.index('objpos')][0][0]
-                                           [objnames.index('y')][0][0])
-                            }
-                        except (IndexError, ValueError, AttributeError):
-                            scale = -1
-                            objpos = {"x": -1, "y": -1}
-
-                        poses_annots.append({
-                            "scale": scale,
-                            "objpos": objpos
-                        })
-                else:
-                    continue  # skip this annotation
-
-            # add fields to data
-            data[set_name].append({
-                "image_filename": image_filename,
-                "frame_sec": frame_sec,
-                "video_idx": video_idx,
-                "poses_annotations": poses_annots,
-                "activity": act,
-                "single_person": single_person
+    def get_full_pose_annotations(self, annotations, ifile, pnames):
+        """Returns the full pose's annotations (head bbox, body joints keypoints,
+        center coordinates and scale) for a single file of all person detections."""
+        poses_annotations = []
+        annotations_file = self.get_annotation_by_file_id(annotations, ifile)
+        for i in range(len(annotations_file)):
+            keypoints = self.get_keypoints(annotations_file, i)
+            head_bbox = self.get_head_coordinates(annotations_file, i, pnames)
+            scale = self.get_person_scale(annotations_file, i, pnames)
+            objpos = self.get_person_center_coordinates(annotations_file, i, pnames)
+            poses_annotations.append({
+                "keypoints": keypoints,
+                "head_bbox": head_bbox,
+                "scale": scale,
+                "objpos": objpos
             })
+        return poses_annotations
 
-            # update progressbar
-            if self.verbose:
-                prgbar.update(ifile)
+    def get_keypoints(self, annotations_file, ipose):
+        """Returns the keypoints annotations for a single person detection."""
+        keypoints = [[0, 0, 0]] * 16  # [x, y, is_visible]
+        keypoints_annotations = self.get_keypoint_annotations(annotations_file, ipose)
+        if any(keypoints_annotations):
+            vnames = keypoints_annotations.dtype.names
+            for i in range(len(keypoints_annotations)):
+                x = float(keypoints_annotations[i][vnames.index('x')][0][0])
+                y = float(keypoints_annotations[i][vnames.index('y')][0][0])
+                idx = int(keypoints_annotations[i][vnames.index('id')][0][0])
+                try:
+                    is_visible = int(keypoints_annotations[i][vnames.index('is_visible')][0])
+                except (ValueError, IndexError):
+                    is_visible = -1
+                keypoints[idx] = [x, y, is_visible]
+        return keypoints
 
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
+    def get_keypoint_annotations(self, annotations_file, ipose):
+        """Returns the keypoint's annotations (x,y,id and is_visible)
+        for a single pose detection from the annotations data."""
+        try:
+            return annotations_file[ipose][4][0][0][0][0]
+        except (AttributeError, IndexError):
+            return []
 
-        # fetch video ids
+    def get_head_coordinates(self, annotations_file, ipose, pnames):
+        """Returns the head bounding box coordinates of a person detection."""
+        try:
+            x1 = float(annotations_file[ipose][pnames.index('x1')][0][0])
+            y1 = float(annotations_file[ipose][pnames.index('y1')][0][0])
+            x2 = float(annotations_file[ipose][pnames.index('x2')][0][0])
+            y2 = float(annotations_file[ipose][pnames.index('y2')][0][0])
+        except ValueError:
+            x1, y1, x2, y2 = -1.0, -1.0, -1.0, -1.0
+        return x1, y1, x2, y2
+
+    def get_person_scale(self, annotations_file, ipose, pnames):
+        """Returns the scale of a person detection."""
+        try:
+            scale = annotations_file[ipose][pnames.index('scale')][0][0]
+        except (ValueError, IndexError):
+            scale = -1
+        return float(scale)
+
+    def get_person_center_coordinates(self, annotations_file, ipose, pnames):
+        """Returns the center coordinates of a person dection."""
+        try:
+            objnames = annotations_file[ipose][pnames.index('objpos')][0].dtype.names
+            center_x = annotations_file[ipose][pnames.index('objpos')][0][0][objnames.index('x')][0][0]
+            center_y = annotations_file[ipose][pnames.index('objpos')][0][0][objnames.index('y')][0][0]
+        except (ValueError, IndexError):
+            center_x, center_y = -1, -1
+        return {"x": float(center_x), "y": float(center_y)}
+
+    def get_partial_poses_annotations(self, annotations, ifile, pnames):
+        """Returns partial poses' annotations (center coordinates and scale)
+        for a single file of all person detections."""
+        poses_annotations = []
+        annotations_file = self.get_annotation_by_file_id(annotations, ifile)
+        for i in range(len(annotations_file)):
+            scale = self.get_person_scale(annotations_file, i, pnames)
+            objpos = self.get_person_center_coordinates(annotations_file, i, pnames)
+            poses_annotations.append({
+                "scale": scale,
+                "objpos": objpos
+            })
+        return poses_annotations
+
+    def get_activities(self, annotations, annotation_size, is_test):
+        """Returns the video's activities from the annotation's data
+        for a set split."""
+        activities = []
+        for ifile in range(num_files):
+            category_name, activity_name, activity_id = '', '', -1
+            if any(self.get_activity_annotation_of_file(annotations, ifile)):
+                category_name = self.get_category_name(annotations, ifile)
+                activity_name = self.get_activity_name(annotations, ifile)
+                activity_id = self.get_activity_id(annotations, ifile)
+            activities.append({
+                "category_name": str(category_name),
+                "activity_name": str(activity_name),
+                "activity_id": int(activity_id)
+            })
+        return activities
+
+    def get_activity_annotation_of_file(self, annotations, ifile):
+        """Returns the activity annotations of an image file."""
+        return annotations['RELEASE'][0][0][4][ifile][0][0]
+
+    def get_category_name(self, annotations, ifile):
+        """Returns the category name of the activity of an image file."""
+        return annotations['RELEASE'][0][0][4][ifile][0][0][0]
+
+    def get_activity_name(self, annotations, ifile):
+        """Returns the activity name of the activity of an image file."""
+        return annotations['RELEASE'][0][0][4][ifile][0][1][0]
+
+    def get_activity_id(self, annotations, ifile):
+        """Returns the activity id of the activity of an image file."""
+        return annotations['RELEASE'][0][0][4][ifile][0][2][0][0]
+
+    def get_single_persons(self, annotations, annotation_size, is_test):
+        """Returns a list of 0 and 1s indicating the presence of a
+        single person from the annotation's data for a set split."""
+        single_person = []
+        for ifile in range(num_files):
+            single_person_ = self.get_single_persons_by_file(annotations, ifile)
+            single_person.append(single_person_)
+        return single_person
+
+    def get_single_persons_by_file(self, annotations, ifile):
+        """Returns a list of single persons (0s and 1s) of an image file."""
+        annotation_single_person = self.get_single_person_annotations_for_file(annotations, ifile)
+        if any(annotation_single_person):
+            single_person = []
+            for i in range(len(annotation_single_person)):
+                is_single = int(annotation_single_person[i][0])
+                single_person_.append(is_single)
+        else:
+            single_person = [-1]
+        return single_person
+
+    def get_single_person_annotations_for_file(self, annotations, ifile):
+        """Returns the single person annotations of an image file."""
+        return annotations['RELEASE'][0][0][3][ifile][0]
+
+    def get_video_names(self, annotations):
+        """Returns the video names of the dataset."""
         videonames = []
-        for ivideo in range(len(annotations['RELEASE'][0][0][5][0])):
-            videonames.append(str(annotations['RELEASE'][0][0][5][0][ivideo][0]))
+        annotations_videos = self.get_video_annotations(annotations)
+        for ivideo in range(len(annotations_videos)):
+            video_name = str(annotations_videos[ivideo][0])
+            videonames.append(video_name)
 
-        return data, videonames
+    def get_video_annotations(self, annotations):
+        """Returns the video names annotations."""
+        return annotations['RELEASE'][0][0][5][0]
 
-
+    def filter_annotations_by_ids(self, annotations, image_ids):
+        """Returns a subset of the annotations w.r.t. a list of image indices."""
+        annotations_subset = []
+        for ifile in image_ids:
+            annotations_subset.append(annotations[ifile])
+        return annotations_subset
 
 
 # -----------------------------------------------------------
