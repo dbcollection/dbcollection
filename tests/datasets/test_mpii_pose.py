@@ -643,3 +643,17 @@ class TestDatasetAnnotationLoader:
         mock_get_keypoints.assert_called_once_with(annotations_file, ipose)
         assert keypoints[1] == [1.0, 1.0, -1]
         assert len(keypoints) == 16
+
+    def test_get_keypoint_annotations__returns_empty(self, mocker, mock_loader_class):
+        keypoint_annotations = mock_loader_class.get_keypoint_annotations(
+            annotations_file=[[], [[], [], [], [], [[[[['dummy', 'data']]]]]]],
+            ipose=0
+        )
+        assert keypoint_annotations == []
+
+    def test_get_keypoint_annotations__returns_value(self, mocker, mock_loader_class):
+        keypoint_annotations = mock_loader_class.get_keypoint_annotations(
+            annotations_file=[[], [[], [], [], [], [[[[['dummy', 'data']]]]]]],
+            ipose=1
+        )
+        assert keypoint_annotations == ['dummy', 'data']
