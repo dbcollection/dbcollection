@@ -616,3 +616,30 @@ class TestDatasetAnnotationLoader:
             "scale": dummy_scale,
             "objpos": dummy_objpos
         }]*5
+
+    def test_get_keypoints__returns_default_value(self, mocker, mock_loader_class):
+        mock_get_keypoints = mocker.patch.object(DatasetAnnotationLoader, "get_keypoint_annotations", return_value=[])
+
+        annotations_file = {"dummy": 'data'}
+        ipose = 1
+        keypoints = mock_loader_class.get_keypoints(annotations_file, ipose)
+
+        mock_get_keypoints.assert_called_once_with(annotations_file, ipose)
+        assert keypoints == [[0, 0, 0]] * 16
+
+    def test_get_keypoints__returns_parsed_keypoint(self, mocker, mock_loader_class):
+        vnames = ['x', 'y', 'id']
+        dummy_keypoints_annotations = mocker.MagicMock()
+        dummy_keypoints_annotations.dtype.names = vnames
+        dummy_keypoints_annotations.__len__.return_value = 1
+        dummy_keypoints_annotations[0][0][0].__getitem__.return_value = 1
+        dummy_keypoints_annotations.__iter__ = mocker.MagicMock()
+        mock_get_keypoints = mocker.patch.object(DatasetAnnotationLoader, "get_keypoint_annotations", return_value=dummy_keypoints_annotations)
+
+        annotations_file = {"dummy": 'data'}
+        ipose = 1
+        keypoints = mock_loader_class.get_keypoints(annotations_file, ipose)
+
+        mock_get_keypoints.assert_called_once_with(annotations_file, ipose)
+        assert keypoints[1] == [1.0, 1.0, -1]
+        assert len(keypoints) == 16
