@@ -657,3 +657,19 @@ class TestDatasetAnnotationLoader:
             ipose=1
         )
         assert keypoint_annotations == ['dummy', 'data']
+
+    def test_get_head_coordinates__returns_default(self, mocker, mock_loader_class):
+        head_coordinates = mock_loader_class.get_head_coordinates(
+            annotations_file=[[], [[[1]], [[2]], [[3]], [[4]]]],
+            ipose=1,
+            pnames=[]
+        )
+        assert head_coordinates == (-1.0, -1.0, -1.0, -1.0)
+
+    def test_get_head_coordinates__returns_coords(self, mocker, mock_loader_class):
+        head_coordinates = mock_loader_class.get_head_coordinates(
+            annotations_file=[[], [[[1]], [[2]], [[3]], [[4]]]],
+            ipose=1,
+            pnames=['x1', 'y1', 'x2', 'y2']
+        )
+        assert head_coordinates == (1.0, 2.0, 3.0, 4.0)
