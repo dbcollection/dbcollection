@@ -688,13 +688,13 @@ class DatasetAnnotationLoader:
     def get_head_coordinates(self, annotations_file, ipose, pnames):
         """Returns the head bounding box coordinates of a person detection."""
         try:
-            x1 = float(annotations_file[ipose][pnames.index('x1')][0][0])
-            y1 = float(annotations_file[ipose][pnames.index('y1')][0][0])
-            x2 = float(annotations_file[ipose][pnames.index('x2')][0][0])
-            y2 = float(annotations_file[ipose][pnames.index('y2')][0][0])
+            x1 = annotations_file[ipose][pnames.index('x1')][0][0]
+            y1 = annotations_file[ipose][pnames.index('y1')][0][0]
+            x2 = annotations_file[ipose][pnames.index('x2')][0][0]
+            y2 = annotations_file[ipose][pnames.index('y2')][0][0]
         except ValueError:
-            x1, y1, x2, y2 = -1.0, -1.0, -1.0, -1.0
-        return x1, y1, x2, y2
+            x1, y1, x2, y2 = -1, -1, -1, -1
+        return float(x1), float(y1), float(x2), float(y2)
 
     def get_person_scale(self, annotations_file, ipose, pnames):
         """Returns the scale of a person detection."""
