@@ -673,3 +673,19 @@ class TestDatasetAnnotationLoader:
             pnames=['x1', 'y1', 'x2', 'y2']
         )
         assert head_coordinates == (1.0, 2.0, 3.0, 4.0)
+
+    def test_get_person_scale__return_default(self, mocker, mock_loader_class):
+        scale = mock_loader_class.get_person_scale(
+            annotations_file=[[], [[[1]], [[2]], [[3]], [[4]], [[3.5]]]],
+            ipose=0,
+            pnames=['x1', 'y1', 'x2', 'y2']
+        )
+        assert scale == -1.0
+
+    def test_get_person_scale__return_person_scale(self, mocker, mock_loader_class):
+        scale = mock_loader_class.get_person_scale(
+            annotations_file=[[], [[[1]], [[2]], [[3]], [[4]], [[3.5]]]],
+            ipose=1,
+            pnames=['x1', 'y1', 'x2', 'y2', 'scale']
+        )
+        assert scale == 3.5
