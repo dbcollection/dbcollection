@@ -689,3 +689,19 @@ class TestDatasetAnnotationLoader:
             pnames=['x1', 'y1', 'x2', 'y2', 'scale']
         )
         assert scale == 3.5
+
+    def test_get_person_center_coordinates__return_default(self, mocker, mock_loader_class):
+        objpos = mock_loader_class.get_person_center_coordinates(
+            annotations_file=[[], [[[1]], [[2]], [[3]], [[4]]]],
+            ipose=0,
+            pnames=['x1', 'y1', 'x2', 'y2', 'scale', 'objpos']
+        )
+        assert objpos == {"x": -1.0, "y": -1.0}
+
+    def test_get_person_center_coordinates__return_position_coordinates(self, mocker, mock_loader_class):
+        objpos = mock_loader_class.get_person_center_coordinates(
+            annotations_file=mocker.MagicMock(),
+            ipose=1,
+            pnames=['x1', 'y1', 'x2', 'y2', 'scale', 'objpos']
+        )
+        assert not objpos == {"x": -1.0, "y": -1.0}
