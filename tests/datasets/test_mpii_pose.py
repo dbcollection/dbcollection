@@ -908,3 +908,9 @@ class TestDatasetAnnotationLoader:
 
         mock_get_video_annotations.assert_called_once_with(annotations)
         assert video_names == ['video1', 'video2', 'video3']
+
+    def test_get_video_annotations(self, mocker, mock_loader_class):
+        video_annotations = mock_loader_class.get_video_annotations(
+            annotations={"RELEASE": [[[[], [], [], [], [], [[['video1'], ['video2'], ['video3']]]]]]},
+        )
+        assert video_annotations == [['video1'], ['video2'], ['video3']]
