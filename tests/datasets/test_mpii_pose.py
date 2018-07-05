@@ -891,3 +891,10 @@ class TestDatasetAnnotationLoader:
 
         mock_get_single_annotation.assert_called_once_with(annotations, ifile)
         assert single_person == [1, -1, 1]
+
+    def test_get_single_person_annotations_for_file(self, mocker, mock_loader_class):
+        single_person_annotation = mock_loader_class.get_single_person_annotations_for_file(
+            annotations={"RELEASE": [[[[], [], [], [[], [['person1', 'person2']]]]]]},
+            ifile=1
+        )
+        assert single_person_annotation == ['person1', 'person2']
