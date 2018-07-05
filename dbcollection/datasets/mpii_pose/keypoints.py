@@ -532,7 +532,7 @@ class DatasetAnnotationLoader:
             "video_idx": self.get_video_indexes(annotations, nfiles, is_test),
             "pose_annotations": self.get_pose_annotations(annotations, nfiles, is_test),
             "activity": self.get_activities(annotations, nfiles, is_test),
-            "single_person": self.get_single_persons(annotations, nfiles, is_test),
+            "single_person": self.get_single_persons(annotations, nfiles),
             "video_names": self.get_video_names(annotations)
         }
 
@@ -761,11 +761,11 @@ class DatasetAnnotationLoader:
         """Returns the activity id of the activity of an image file."""
         return annotations['RELEASE'][0][0][4][ifile][0][2][0][0]
 
-    def get_single_persons(self, annotations, annotation_size, is_test):
+    def get_single_persons(self, annotations, annotation_size):
         """Returns a list of 0 and 1s indicating the presence of a
         single person from the annotation's data for a set split."""
         single_person = []
-        for ifile in range(num_files):
+        for ifile in range(annotation_size):
             single_person_ = self.get_single_persons_by_file(annotations, ifile)
             single_person.append(single_person_)
         return single_person

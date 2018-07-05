@@ -171,7 +171,7 @@ class TestDatasetAnnotationLoader:
         mock_get_video_idx.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_pose.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_activity.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
-        mock_get_single.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
+        mock_get_single.assert_called_once_with(dummy_annotations, dummy_nfiles)
         mock_get_video_names.assert_called_once_with(dummy_annotations)
         assert annotations == {
             "image_filenames": dummy_filenames,
@@ -850,3 +850,23 @@ class TestDatasetAnnotationLoader:
             ifile=1
         )
         assert activity_id == 12345
+
+    def test_get_single_persons__returns_single_person(self, mocker, mock_loader_class):
+        mock_get_single_person = mocker.patch.object(DatasetAnnotationLoader, "get_single_persons_by_file", return_value={"dummy": 'data'})
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        single_person = mock_loader_class.get_single_persons(annotations, num_files)
+
+        mock_get_single_person.assert_called_once_with(annotations, 0)
+        assert single_person == [{"dummy": 'data'}]
+
+    def test_get_single_persons__returns_multiple_persons(self, mocker, mock_loader_class):
+        mock_get_single_person = mocker.patch.object(DatasetAnnotationLoader, "get_single_persons_by_file", return_value={"dummy": 'data'})
+
+        annotations = {"RELEASE": []}
+        num_files = 5
+        single_person = mock_loader_class.get_single_persons(annotations, num_files)
+
+        assert mock_get_single_person.call_count == 5
+        assert single_person == [{"dummy": 'data'}]*5
