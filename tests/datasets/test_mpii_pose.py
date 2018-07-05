@@ -762,3 +762,63 @@ class TestDatasetAnnotationLoader:
             "scale": dummy_scale,
             "objpos": dummy_objpos
         }]*5
+
+    def test_get_activities__returns_default(self, mocker, mock_loader_class):
+        mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_activity_annotation_of_file", return_value=[])
+        mock_get_category_name = mocker.patch.object(DatasetAnnotationLoader, "get_category_name")
+        mock_get_activity_name = mocker.patch.object(DatasetAnnotationLoader, "get_activity_name")
+        mock_get_activity_id = mocker.patch.object(DatasetAnnotationLoader, "get_activity_id")
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        activities = mock_loader_class.get_activities(annotations, num_files, True)
+
+        mock_get_annotation.assert_called_once_with(annotations, 0)
+        assert not mock_get_category_name.called
+        assert not mock_get_activity_name.called
+        assert not mock_get_activity_id.called
+        assert activities == [{
+            "category_name": '',
+            "activity_name": '',
+            "activity_id": -1
+        }]
+
+    def test_get_activities__returns_single_activity(self, mocker, mock_loader_class):
+        mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_activity_annotation_of_file", return_value=[1])
+        mock_get_category_name = mocker.patch.object(DatasetAnnotationLoader, "get_category_name", return_value='category1')
+        mock_get_activity_name = mocker.patch.object(DatasetAnnotationLoader, "get_activity_name", return_value='activity1')
+        mock_get_activity_id = mocker.patch.object(DatasetAnnotationLoader, "get_activity_id", return_value=1)
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        activities = mock_loader_class.get_activities(annotations, num_files, True)
+
+        mock_get_annotation.assert_called_once_with(annotations, 0)
+        mock_get_category_name.assert_called_once_with(annotations, 0)
+        mock_get_activity_name.assert_called_once_with(annotations, 0)
+        mock_get_activity_id.assert_called_once_with(annotations, 0)
+        assert activities == [{
+            "category_name": 'category1',
+            "activity_name": 'activity1',
+            "activity_id": 1
+        }]
+
+    def test_get_activities__returns_multiple_activities(self, mocker, mock_loader_class):
+        mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_activity_annotation_of_file", return_value=[1])
+        mock_get_category_name = mocker.patch.object(DatasetAnnotationLoader, "get_category_name", return_value='category1')
+        mock_get_activity_name = mocker.patch.object(DatasetAnnotationLoader, "get_activity_name", return_value='activity1')
+        mock_get_activity_id = mocker.patch.object(DatasetAnnotationLoader, "get_activity_id", return_value=1)
+
+        annotations = {"RELEASE": []}
+        num_files = 5
+        activities = mock_loader_class.get_activities(annotations, num_files, True)
+
+        assert mock_get_annotation.call_count == 5
+        assert mock_get_category_name.call_count == 5
+        assert mock_get_activity_name.call_count == 5
+        assert mock_get_activity_id.call_count == 5
+        assert activities == [{
+            "category_name": 'category1',
+            "activity_name": 'activity1',
+            "activity_id": 1
+        }]*5

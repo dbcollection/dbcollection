@@ -732,7 +732,7 @@ class DatasetAnnotationLoader:
         """Returns the video's activities from the annotation's data
         for a set split."""
         activities = []
-        for ifile in range(num_files):
+        for ifile in range(annotation_size):
             category_name, activity_name, activity_id = '', '', -1
             if any(self.get_activity_annotation_of_file(annotations, ifile)):
                 category_name = self.get_category_name(annotations, ifile)
