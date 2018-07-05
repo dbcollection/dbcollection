@@ -836,3 +836,10 @@ class TestDatasetAnnotationLoader:
             ifile=1
         )
         assert category_name == 'category1'
+
+    def test_get_activity_name(self, mocker, mock_loader_class):
+        activity_name = mock_loader_class.get_activity_name(
+            annotations={"RELEASE": [[[[], [], [], [], [[], [[[], ['activity1']]]]]]]},
+            ifile=1
+        )
+        assert activity_name == 'activity1'
