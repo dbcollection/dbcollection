@@ -914,3 +914,24 @@ class TestDatasetAnnotationLoader:
             annotations={"RELEASE": [[[[], [], [], [], [], [[['video1'], ['video2'], ['video3']]]]]]},
         )
         assert video_annotations == [['video1'], ['video2'], ['video3']]
+
+    def test_filter_annotations_by_ids__returns_empty_list(self, mocker, mock_loader_class):
+        annotations_subset = mock_loader_class.filter_annotations_by_ids(
+            annotations=[0, 2, 4, 6, 8, 10],
+            image_ids=[]
+        )
+        assert annotations_subset == []
+
+    def test_filter_annotations_by_ids__returns_full_list(self, mocker, mock_loader_class):
+        annotations_subset = mock_loader_class.filter_annotations_by_ids(
+            annotations=[0, 2, 4, 6, 8, 10],
+            image_ids=list(range(6))
+        )
+        assert annotations_subset == [0, 2, 4, 6, 8, 10]
+
+    def test_filter_annotations_by_ids__returns_filtered_list(self, mocker, mock_loader_class):
+        annotations_subset = mock_loader_class.filter_annotations_by_ids(
+            annotations=[0, 2, 4, 6, 8, 10],
+            image_ids=[2, 3, 5]
+        )
+        assert annotations_subset == [4, 6, 10]
