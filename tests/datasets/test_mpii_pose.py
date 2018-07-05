@@ -822,3 +822,10 @@ class TestDatasetAnnotationLoader:
             "activity_name": 'activity1',
             "activity_id": 1
         }]*5
+
+    def test_get_activity_annotation_of_file(self, mocker, mock_loader_class):
+        activity_annotation = mock_loader_class.get_activity_annotation_of_file(
+            annotations={"RELEASE": [[[[], [], [], [], [[], [[100]]]]]]},
+            ifile=1
+        )
+        assert activity_annotation == 100
