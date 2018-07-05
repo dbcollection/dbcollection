@@ -777,7 +777,7 @@ class DatasetAnnotationLoader:
             single_person = []
             for i in range(len(annotation_single_person)):
                 is_single = int(annotation_single_person[i][0])
-                single_person_.append(is_single)
+                single_person.append(is_single)
         else:
             single_person = [-1]
         return single_person

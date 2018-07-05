@@ -870,3 +870,24 @@ class TestDatasetAnnotationLoader:
 
         assert mock_get_single_person.call_count == 5
         assert single_person == [{"dummy": 'data'}]*5
+
+    def test_get_single_persons_by_file__returns_default(self, mocker, mock_loader_class):
+        mock_get_single_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_single_person_annotations_for_file", return_value=[])
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        single_person = mock_loader_class.get_single_persons_by_file(annotations, ifile)
+
+        mock_get_single_annotation.assert_called_once_with(annotations, ifile)
+        assert single_person == [-1]
+
+    def test_get_single_persons_by_file__returns_is_person(self, mocker, mock_loader_class):
+        dummy_single_annotations = [[1], [-1], [1]]
+        mock_get_single_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_single_person_annotations_for_file", return_value=dummy_single_annotations)
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        single_person = mock_loader_class.get_single_persons_by_file(annotations, ifile)
+
+        mock_get_single_annotation.assert_called_once_with(annotations, ifile)
+        assert single_person == [1, -1, 1]
