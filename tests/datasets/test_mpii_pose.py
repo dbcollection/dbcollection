@@ -843,3 +843,10 @@ class TestDatasetAnnotationLoader:
             ifile=1
         )
         assert activity_name == 'activity1'
+
+    def test_get_activity_id(self, mocker, mock_loader_class):
+        activity_id = mock_loader_class.get_activity_id(
+            annotations={"RELEASE": [[[[], [], [], [], [[], [[[], [] ,[[12345]]]]]]]]},
+            ifile=1
+        )
+        assert activity_id == 12345
