@@ -788,11 +788,12 @@ class DatasetAnnotationLoader:
 
     def get_video_names(self, annotations):
         """Returns the video names of the dataset."""
-        videonames = []
+        video_names = []
         annotations_videos = self.get_video_annotations(annotations)
         for ivideo in range(len(annotations_videos)):
             video_name = str(annotations_videos[ivideo][0])
-            videonames.append(video_name)
+            video_names.append(video_name)
+        return video_names
 
     def get_video_annotations(self, annotations):
         """Returns the video names annotations."""

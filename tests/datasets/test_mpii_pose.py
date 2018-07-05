@@ -898,3 +898,13 @@ class TestDatasetAnnotationLoader:
             ifile=1
         )
         assert single_person_annotation == ['person1', 'person2']
+
+    def test_get_video_names(self, mocker, mock_loader_class):
+        dummy_video_annotations = [['video1'], ['video2'], ['video3']]
+        mock_get_video_annotations = mocker.patch.object(DatasetAnnotationLoader, "get_video_annotations", return_value=dummy_video_annotations)
+
+        annotations = {"RELEASE": []}
+        video_names = mock_loader_class.get_video_names(annotations)
+
+        mock_get_video_annotations.assert_called_once_with(annotations)
+        assert video_names == ['video1', 'video2', 'video3']
