@@ -244,14 +244,17 @@ class Keypoints(BaseTask):
         """
         Load data of the dataset (create a generator).
         """
-        # load annotations
-        annotations, videonames = self.load_annotations()
-
-        for set_name in annotations:
-            if self.verbose:
-                print('\n> Loading data files for the set: ' + set_name)
-
-            yield {set_name: [annotations[set_name], videonames]}
+        loader = DatasetAnnotationLoader(
+            is_full=self.is_full,
+            keypoints_labels=self.keypoints_labels,
+            data_path=self.data_path,
+            cache_path=self.cache_path,
+            verbose=self.verbose
+        )
+        yield {"trainval": loader.load_trainval_data()}
+        yield {"train": loader.load_train_data()}
+        yield {"val": loader.load_val_data()}
+        yield {"test": loader.load_test_data()}
 
     def add_data_to_source(self, hdf5_handler, data, set_name):
         """
