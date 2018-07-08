@@ -256,63 +256,6 @@ class Keypoints(BaseTask):
         yield {"val": loader.load_val_data()}
         yield {"test": loader.load_test_data()}
 
-    def add_data_to_source(self, hdf5_handler, data, set_name):
-        """
-        Store classes + filenames as a nested tree.
-        """
-        # split list
-        data_, videonames = data
-
-        if self.verbose:
-            print('> Adding data to source group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data_))
-
-        hdf5_handler["videonames"] = str2ascii(videonames)
-        hdf5_handler["keypoint_names"] = str2ascii(self.keypoints_labels)
-
-        for i, annot in enumerate(data_):
-            file_grp = hdf5_handler.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(annot["image_filename"])
-            file_grp['frame_sec'] = np.array(annot["frame_sec"], dtype=np.int32)
-            file_grp['video_idx'] = np.array(annot["video_idx"], dtype=np.int32)
-            file_grp['single_person_id'] = np.array(annot["single_person"], dtype=np.uint8)
-
-            activity_grp = file_grp.create_group("activity")
-            activity_grp['category_name'] = str2ascii(annot["activity"]["cat_name"])
-            activity_grp['activity_name'] = str2ascii(annot["activity"]["act_name"])
-            activity_grp['activity_id'] = np.array(annot["activity"]["act_id"], dtype=np.int32)
-
-            if any(annot["poses_annotations"]):
-                pose_annot_grp = file_grp.create_group("pose_annotations")
-                for j in range(len(annot["poses_annotations"])):
-                    pose_grp = pose_annot_grp.create_group(str(j))
-                    pose_grp["scale"] = np.array(
-                        annot["poses_annotations"][j]["scale"], dtype=np.float)
-                    pose_grp["objpos/x"] = np.array(annot["poses_annotations"]
-                                                    [j]["objpos"]["x"], dtype=np.float)
-                    pose_grp["objpos/y"] = np.array(annot["poses_annotations"]
-                                                    [j]["objpos"]["y"], dtype=np.float)
-
-                    if "x1" in annot["poses_annotations"][j]:
-                        pose_grp["x1"] = np.array(annot["poses_annotations"]
-                                                  [j]["x1"], dtype=np.float)
-                        pose_grp["y1"] = np.array(annot["poses_annotations"]
-                                                  [j]["y1"], dtype=np.float)
-                        pose_grp["x2"] = np.array(annot["poses_annotations"]
-                                                  [j]["x2"], dtype=np.float)
-                        pose_grp["y2"] = np.array(annot["poses_annotations"]
-                                                  [j]["y2"], dtype=np.float)
-                        pose_grp["keypoints"] = np.array(
-                            annot["poses_annotations"][j]["keypoints"], dtype=np.float)
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
-
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
