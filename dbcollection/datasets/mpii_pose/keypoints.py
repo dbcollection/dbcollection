@@ -256,6 +256,12 @@ class Keypoints(BaseTask):
         yield {"val": loader.load_val_data()}
         yield {"test": loader.load_test_data()}
 
+    def process_set_metadata(self, data, set_name):
+        """
+        Saves the metadata of a set.
+        """
+        pass
+
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
         Add data of a set to the default group.
