@@ -8,14 +8,14 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTask, BaseField
+from dbcollection.datasets import BaseTaskNew, BaseField
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_matlab
 from dbcollection.utils.hdf5 import hdf5_write_data
 
 
-class Keypoints(BaseTask):
+class Keypoints(BaseTaskNew):
     """MPII Keypoints preprocessing functions."""
 
     filename_h5 = 'keypoint'
