@@ -9,7 +9,12 @@ import pytest
 import numpy as np
 from numpy.testing import assert_array_equal
 
-from dbcollection.datasets.mpii_pose.keypoints import Keypoints, DatasetAnnotationLoader
+from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.datasets.mpii_pose.keypoints import (
+    Keypoints,
+    DatasetAnnotationLoader,
+    ImageFilenamesField
+)
 
 
 class TestKeypointsTask:
@@ -70,6 +75,24 @@ class TestKeypointsTask:
         assert val_data == {"val": ['val_data']}
         assert test_data == {"test": ['test_data']}
 
+    def test_process_set_metadata(self, mocker, mock_keypoints_class):
+        dummy_ids = [0, 1, 2, 3, 4, 5]
+        mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
+
+        mock_keypoints_class.process_set_metadata(
+            data={
+                "image_filenames": 1,
+                "frame_sec": 1,
+                "video_idx": 1,
+                "pose_annotations": 1,
+                "activity": 1,
+                "single_person": 1,
+                "video_names": 1
+            },
+            set_name='train'
+        )
+
+        mock_image_field.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -964,3 +987,82 @@ class TestDatasetAnnotationLoader:
             image_ids=[2, 3, 5]
         )
         assert annotations_subset == [4, 6, 10]
+
+
+@pytest.fixture()
+def test_data_loaded():
+    image_filenames = ['image1.jpg', 'image2.jpg', 'image3.jpg']
+    frame_sec = [102, 11, 32]
+    video_idx = [2, 1, 1]
+    pose_annotations = [[[[[1, 1, 1]]*16], [[[0, 0, 0]]*16]], [[[0, 0, 0]]*16], [[[0, 0, 0]]*16]]
+    activity = [
+        {"category_name": 'category1', "activity_name": 'activity1', "activity_id": 0},
+        {"category_name": 'category2', "activity_name": 'activity2', "activity_id": 1},
+        {"category_name": 'category2', "activity_name": 'activity3', "activity_id": 2}
+    ]
+    single_person = [0, 1, 0]
+    video_names = ['video2', 'video1', 'video1']
+    return {
+        "image_filenames": image_filenames,
+        "frame_sec": frame_sec,
+        "video_idx": video_idx,
+        "pose_annotations": pose_annotations,
+        "activity": activity,
+        "single_person": single_person,
+        "video_names": video_names
+    }
+
+
+@pytest.fixture()
+def field_kwargs(test_data_loaded):
+    return {
+        "is_full": False,
+        "data": test_data_loaded,
+        "set_name": 'train',
+        "hdf5_manager": {'dummy': 'object'},
+        "verbose": True
+    }
+
+
+class TestImageFilenamesField:
+    """Unit tests for the ImageFilenamesField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_image_filenames_class(field_kwargs):
+        return ImageFilenamesField(**field_kwargs)
+
+    def test_process(self, mocker, mock_image_filenames_class):
+        mock_get_images = mocker.patch.object(ImageFilenamesField, "get_image_filenames", return_value=(['image1.jpg', 'image2.jpg', 'image3.jpg'], [0, 1, 2]))
+        mock_save_hdf5 = mocker.patch.object(ImageFilenamesField, "save_field_to_hdf5")
+
+        image_filenames_ids = mock_image_filenames_class.process()
+
+        assert image_filenames_ids == [0, 1, 2]
+        mock_get_images.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='image_filenames',
+        #     data=str2ascii(['image1.jpg', 'image2.jpg', 'image3.jpg']),
+        #     dtype=np.uint8,
+        #     fillvalue=0
+        # )
+
+    def get_image_filenames(self, mocker, mock_image_filenames_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(ImageFilenamesField, "get_image_filenames_annotations", return_value=['image1', 'image2'])
+        mock_get_pose_annotations = mocker.patch.object(ImageFilenamesField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy', 'dummy']])
+
+        image_filenames, image_filename_ids = mock_image_filenames_class.get_image_filenames()
+
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
+        assert image_filenames == ['image1', 'image2', 'image2', 'imag2']
+        assert image_filename_ids == [0, 1, 1, 1]
+
+    def test_get_image_filenames_annotations(self, mocker, mock_image_filenames_class, test_data_loaded):
+        assert mock_image_filenames_class.get_image_filenames_annotations() == test_data_loaded['image_filenames']
+
+    def test_get_pose_annotations(self, mocker, mock_image_filenames_class, test_data_loaded):
+        assert mock_image_filenames_class.get_pose_annotations() == test_data_loaded['pose_annotations']
