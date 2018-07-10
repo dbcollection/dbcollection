@@ -9,6 +9,7 @@ import numpy as np
 import progressbar
 
 from dbcollection.datasets import BaseTaskNew, BaseField
+from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_matlab
@@ -59,7 +60,23 @@ class Keypoints(BaseTaskNew):
         """
         Saves the metadata of a set.
         """
-        pass
+        args = {
+            "is_full": self.is_full,
+            "data": data,
+            "set_name": set_name,
+            "hdf5_manager": self.hdf5_manager,
+            "verbose": self.verbose
+        }
+
+        # Fields
+        if self.verbose:
+            print('\n==> Setting up the data fields:')
+        image_ids = ImageFilenamesField(**args).process()
+
+        # Lists
+        if self.verbose:
+            print('\n==> Setting up ordered lists:')
+
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
         """
@@ -561,6 +578,46 @@ class DatasetAnnotationLoader:
 # -----------------------------------------------------------
 # Metadata fields
 # -----------------------------------------------------------
+
+class ImageFilenamesField(BaseField):
+    """Image filenames' field metadata process/save class."""
+
+    @display_message_processing('image filenames')
+    def process(self):
+        """Processes and saves the image filenames metadata to hdf5."""
+        image_filenames, image_filename_ids = self.get_image_filenames()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='image_filenames',
+            data=str2ascii(image_filenames),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+        return image_filename_ids
+
+    def get_image_filenames(self):
+        """Returns a list of image filenames and ids."""
+        image_filenames = []
+        image_filenames_ids = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        for i, image_filename in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            if any(image_pose_annotations):
+                for j, _ in enumerate(image_pose_annotations):
+                    image_filenames.append(image_filename)
+                    image_filenames_ids.append(i)
+            else:
+                image_filenames.append(image_filename)
+                image_filenames_ids.append(i)
+        return image_filenames, image_filenames_ids
+
+    def get_image_filenames_annotations(self):
+        return self.data['image_filenames']
+
+    def get_pose_annotations(self):
+        return self.data['pose_annotations']
+
 
 # -----------------------------------------------------------
 # Metadata lists
