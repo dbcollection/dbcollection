@@ -1083,7 +1083,7 @@ class TestScalesField:
         return ScalesField(**field_kwargs)
 
     def test_process(self, mocker, mock_scales_class):
-        mock_get_scales = mocker.patch.object(ScalesField, "get_scales", return_value=([[12.5, 25.0], [11.0, 31.0], [25.0, 25.0]]))
+        mock_get_scales = mocker.patch.object(ScalesField, "get_scales", return_value=[1.0, 3.1, 2.0])
         mock_save_hdf5 = mocker.patch.object(ScalesField, "save_field_to_hdf5")
 
         mock_scales_class.process()
@@ -1094,12 +1094,12 @@ class TestScalesField:
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
         #     field='scales',
-        #     data=np.array(scales, dtype=np.float32),
+        #     data=np.array([1.0, 3.1, 2.0], dtype=np.float32),
         #     dtype=np.float32,
         #     fillvalue=0
         # )
 
-    def get_scales(self, mocker, mock_scales_class, test_data_loaded):
+    def test_get_scales(self, mocker, mock_scales_class, test_data_loaded):
         mock_get_image_annotations = mocker.patch.object(ScalesField, "get_image_filenames_annotations", return_value=['image1', 'image2'])
         mock_get_pose_annotations = mocker.patch.object(ScalesField, "get_pose_annotations", return_value=[[{"scale": 1.0}], [{"scale": 2.0}, {"scale": 1.5}]])
 
@@ -1111,9 +1111,6 @@ class TestScalesField:
 
     def test_get_image_filenames_annotations(self, mocker, mock_scales_class, test_data_loaded):
         assert mock_scales_class.get_image_filenames_annotations() == test_data_loaded['image_filenames']
-
-    def test_get_pose_annotations(self, mocker, mock_scales_class, test_data_loaded):
-        assert mock_scales_class.get_pose_annotations() == test_data_loaded['pose_annotations']
 
     def test_get_pose_annotations(self, mocker, mock_scales_class, test_data_loaded):
         assert mock_scales_class.get_pose_annotations() == test_data_loaded['pose_annotations']
