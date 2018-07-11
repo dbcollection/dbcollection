@@ -72,6 +72,7 @@ class Keypoints(BaseTaskNew):
         if self.verbose:
             print('\n==> Setting up the data fields:')
         image_ids = ImageFilenamesField(**args).process()
+        ScalesField(**args).process()
 
         # Lists
         if self.verbose:
@@ -611,6 +612,39 @@ class ImageFilenamesField(BaseField):
                 image_filenames.append(image_filename)
                 image_filenames_ids.append(i)
         return image_filenames, image_filenames_ids
+
+    def get_image_filenames_annotations(self):
+        return self.data['image_filenames']
+
+    def get_pose_annotations(self):
+        return self.data['pose_annotations']
+
+
+class ScalesField(BaseField):
+    """Person's scale field metadata process/save class."""
+
+    @display_message_processing('scale')
+    def process(self):
+        """Processes and saves the person's scale metadata to hdf5."""
+        scales = self.get_scales()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='scales',
+            data=np.array(scales, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=0
+        )
+
+    def get_scales(self):
+        """Returns a list of person's scale."""
+        scales = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                scales.append(pose['scale'])
+        return scales
 
     def get_image_filenames_annotations(self):
         return self.data['image_filenames']
