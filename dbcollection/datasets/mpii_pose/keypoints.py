@@ -74,7 +74,8 @@ class Keypoints(BaseTaskNew):
         image_ids = ImageFilenamesField(**args).process()
         ScalesField(**args).process()
         ObjposField(**args).process()
-        VideoNamesField(**args).process([])
+        video_ids = VideoIdsField(**args).process()
+        VideoNamesField(**args).process(video_ids)
 
         # Lists
         if self.verbose:
@@ -591,6 +592,9 @@ class CustomBaseField(BaseField):
     def get_pose_annotations(self):
         return self.data['pose_annotations']
 
+    def get_video_idx_annotations(self):
+        return self.data['video_idx']
+
     def get_video_names_annotations(self):
         return self.data['video_names']
 
@@ -677,6 +681,35 @@ class ObjposField(CustomBaseField):
             for _, pose in enumerate(image_pose_annotations):
                 objpos.append([pose['objpos']['x'], pose['objpos']['y']])
         return objpos
+
+
+class VideoIdsField(CustomBaseField):
+    """Video ids field metadata process/save class."""
+
+    @display_message_processing('video ids')
+    def process(self):
+        """Processes and saves the video ids metadata to hdf5."""
+        video_ids = self.get_video_ids()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='video_ids',
+            data=np.array(video_ids, dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+        return video_ids
+
+    def get_video_ids(self):
+        """Returns a list of video ids."""
+        video_ids = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        video_idx = self.get_video_idx_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                video_ids.append(video_idx[i])
+        return video_ids
 
 
 class VideoNamesField(CustomBaseField):
