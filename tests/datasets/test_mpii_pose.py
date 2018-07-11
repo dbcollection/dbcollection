@@ -14,7 +14,8 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     Keypoints,
     DatasetAnnotationLoader,
     ImageFilenamesField,
-    ScalesField
+    ScalesField,
+    ObjposField
 )
 
 
@@ -80,6 +81,7 @@ class TestKeypointsTask:
         dummy_ids = [0, 1, 2, 3, 4, 5]
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_scale_field = mocker.patch.object(ScalesField, "process")
+        mock_objpos_field = mocker.patch.object(ObjposField, "process")
 
         mock_keypoints_class.process_set_metadata(
             data={
@@ -96,6 +98,7 @@ class TestKeypointsTask:
 
         mock_image_field.assert_called_once_with()
         mock_scale_field.assert_called_once_with()
+        mock_objpos_field.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -1111,3 +1114,48 @@ class TestScalesField:
 
     def test_get_pose_annotations(self, mocker, mock_scales_class, test_data_loaded):
         assert mock_scales_class.get_pose_annotations() == test_data_loaded['pose_annotations']
+
+    def test_get_pose_annotations(self, mocker, mock_scales_class, test_data_loaded):
+        assert mock_scales_class.get_pose_annotations() == test_data_loaded['pose_annotations']
+
+
+class TestObjposField:
+    """Unit tests for the ObjposField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_objpos_class(field_kwargs):
+        return ObjposField(**field_kwargs)
+
+    def test_process(self, mocker, mock_objpos_class):
+        mock_get_objpos = mocker.patch.object(ObjposField, "get_objpos", return_value=[[12.5, 25.0], [11.0, 31.0], [25.0, 25.0]])
+        mock_save_hdf5 = mocker.patch.object(ObjposField, "save_field_to_hdf5")
+
+        mock_objpos_class.process()
+
+        mock_get_objpos.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='objpos',
+        #     data=np.array([[12.5, 25.0], [11.0, 31.0], [25.0, 25.0]], dtype=np.float32),
+        #     dtype=np.float32,
+        #     fillvalue=0
+        # )
+
+    def test_get_objpos(self, mocker, mock_objpos_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(ObjposField, "get_image_filenames_annotations", return_value=['image1', 'image2'])
+        mock_get_pose_annotations = mocker.patch.object(ObjposField, "get_pose_annotations", return_value=[[{"objpos": {"x": 11.0, "y":15.0}}], [{"objpos": {"x": 10.0, "y":10.0}}, {"objpos": {"x": 20.0, "y":20.0}}]])
+
+        objpos = mock_objpos_class.get_objpos()
+
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
+        assert objpos == [[11.0, 15.0], [10.0, 10.0], [20.0, 20.0]]
+
+    def test_get_image_filenames_annotations(self, mocker, mock_objpos_class, test_data_loaded):
+        assert mock_objpos_class.get_image_filenames_annotations() == test_data_loaded['image_filenames']
+
+    def test_get_pose_annotations(self, mocker, mock_objpos_class, test_data_loaded):
+        assert mock_objpos_class.get_pose_annotations() == test_data_loaded['pose_annotations']
