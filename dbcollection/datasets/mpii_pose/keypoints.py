@@ -604,11 +604,7 @@ class ImageFilenamesField(BaseField):
         pose_annotations = self.get_pose_annotations()
         for i, image_filename in enumerate(image_fnames):
             image_pose_annotations = pose_annotations[i]
-            if any(image_pose_annotations):
-                for j, _ in enumerate(image_pose_annotations):
-                    image_filenames.append(image_filename)
-                    image_filenames_ids.append(i)
-            else:
+            for j, _ in enumerate(image_pose_annotations):
                 image_filenames.append(image_filename)
                 image_filenames_ids.append(i)
         return image_filenames, image_filenames_ids
