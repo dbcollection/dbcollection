@@ -73,6 +73,7 @@ class Keypoints(BaseTaskNew):
             print('\n==> Setting up the data fields:')
         image_ids = ImageFilenamesField(**args).process()
         ScalesField(**args).process()
+        ObjposField(**args).process()
 
         # Lists
         if self.verbose:
@@ -641,6 +642,39 @@ class ScalesField(BaseField):
             for _, pose in enumerate(image_pose_annotations):
                 scales.append(pose['scale'])
         return scales
+
+    def get_image_filenames_annotations(self):
+        return self.data['image_filenames']
+
+    def get_pose_annotations(self):
+        return self.data['pose_annotations']
+
+
+class ObjposField(BaseField):
+    """Person's position field metadata process/save class."""
+
+    @display_message_processing('objpos')
+    def process(self):
+        """Processes and saves the person's position metadata to hdf5."""
+        objpos = self.get_objpos()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='objpos',
+            data=np.array(objpos, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=0
+        )
+
+    def get_objpos(self):
+        """Returns a list of person's position."""
+        objpos = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                objpos.append([pose['objpos']['x'], pose['objpos']['y']])
+        return objpos
 
     def get_image_filenames_annotations(self):
         return self.data['image_filenames']
