@@ -17,6 +17,7 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     ImageFilenamesField,
     ScalesField,
     ObjposField,
+    VideoIdsField,
     VideoNamesField
 )
 
@@ -84,6 +85,7 @@ class TestKeypointsTask:
         mock_image_field = mocker.patch.object(ImageFilenamesField, "process", return_value=dummy_ids)
         mock_scale_field = mocker.patch.object(ScalesField, "process")
         mock_objpos_field = mocker.patch.object(ObjposField, "process")
+        mock_videoidx_field = mocker.patch.object(VideoIdsField, "process", return_value=dummy_ids)
         mock_videonames_field = mocker.patch.object(VideoNamesField, "process")
 
         mock_keypoints_class.process_set_metadata(
@@ -102,7 +104,8 @@ class TestKeypointsTask:
         mock_image_field.assert_called_once_with()
         mock_scale_field.assert_called_once_with()
         mock_objpos_field.assert_called_once_with()
-        mock_videonames_field.assert_called_once_with([])
+        mock_videoidx_field.assert_called_once_with()
+        mock_videonames_field.assert_called_once_with(dummy_ids)
 
 
 class TestDatasetAnnotationLoader:
@@ -1160,6 +1163,45 @@ class TestObjposField:
         mock_get_image_annotations.assert_called_once_with()
         mock_get_pose_annotations.assert_called_once_with()
         assert objpos == [[11.0, 15.0], [10.0, 10.0], [20.0, 20.0]]
+
+
+class TestVideoIdsField:
+    """Unit tests for the VideoIdsField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_videoidx_class(field_kwargs):
+        return VideoIdsField(**field_kwargs)
+
+    def test_process(self, mocker, mock_videoidx_class):
+        mock_get_video_ids = mocker.patch.object(VideoIdsField, "get_video_ids", return_value=[0, 1, 1, 2])
+        mock_save_hdf5 = mocker.patch.object(VideoIdsField, "save_field_to_hdf5")
+
+        video_ids = mock_videoidx_class.process()
+
+        mock_get_video_ids.assert_called_once_with()
+        assert video_ids == [0, 1, 1, 2]
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='video_ids',
+        #     data=np.array([0, 1, 1, 2], dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_video_ids(self, mocker, mock_videoidx_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(VideoIdsField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(VideoIdsField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy'], ['dummy']])
+        mock_get_video_annotations = mocker.patch.object(VideoIdsField, "get_video_idx_annotations", return_value=[0, 1, 2])
+
+        video_ids = mock_videoidx_class.get_video_ids()
+
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
+        mock_get_video_annotations.assert_called_once_with()
+        assert video_ids == [0, 1, 1, 2]
 
 
 class TestVideoNamesField:
