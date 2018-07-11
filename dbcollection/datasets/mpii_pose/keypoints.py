@@ -581,7 +581,17 @@ class DatasetAnnotationLoader:
 # Metadata fields
 # -----------------------------------------------------------
 
-class ImageFilenamesField(BaseField):
+class CustomBaseField(BaseField):
+    """Custom BaseField with common methods for some fields."""
+
+    def get_image_filenames_annotations(self):
+        return self.data['image_filenames']
+
+    def get_pose_annotations(self):
+        return self.data['pose_annotations']
+
+
+class ImageFilenamesField(CustomBaseField):
     """Image filenames' field metadata process/save class."""
 
     @display_message_processing('image filenames')
@@ -610,14 +620,8 @@ class ImageFilenamesField(BaseField):
                 image_filenames_ids.append(i)
         return image_filenames, image_filenames_ids
 
-    def get_image_filenames_annotations(self):
-        return self.data['image_filenames']
 
-    def get_pose_annotations(self):
-        return self.data['pose_annotations']
-
-
-class ScalesField(BaseField):
+class ScalesField(CustomBaseField):
     """Person's scale field metadata process/save class."""
 
     @display_message_processing('scale')
@@ -643,14 +647,8 @@ class ScalesField(BaseField):
                 scales.append(pose['scale'])
         return scales
 
-    def get_image_filenames_annotations(self):
-        return self.data['image_filenames']
 
-    def get_pose_annotations(self):
-        return self.data['pose_annotations']
-
-
-class ObjposField(BaseField):
+class ObjposField(CustomBaseField):
     """Person's position field metadata process/save class."""
 
     @display_message_processing('objpos')
@@ -675,12 +673,6 @@ class ObjposField(BaseField):
             for _, pose in enumerate(image_pose_annotations):
                 objpos.append([pose['objpos']['x'], pose['objpos']['y']])
         return objpos
-
-    def get_image_filenames_annotations(self):
-        return self.data['image_filenames']
-
-    def get_pose_annotations(self):
-        return self.data['pose_annotations']
 
 
 # -----------------------------------------------------------

@@ -13,6 +13,7 @@ from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.datasets.mpii_pose.keypoints import (
     Keypoints,
     DatasetAnnotationLoader,
+    CustomBaseField,
     ImageFilenamesField,
     ScalesField,
     ObjposField
@@ -1030,6 +1031,21 @@ def field_kwargs(test_data_loaded):
     }
 
 
+class TestCustomBaseField:
+    """Unit tests for the CustomBaseField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_custom_basefield__class(field_kwargs):
+        return CustomBaseField(**field_kwargs)
+
+    def test_get_image_filenames_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
+        assert mock_custom_basefield__class.get_image_filenames_annotations() == test_data_loaded['image_filenames']
+
+    def test_get_pose_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
+        assert mock_custom_basefield__class.get_pose_annotations() == test_data_loaded['pose_annotations']
+
+
 class TestImageFilenamesField:
     """Unit tests for the ImageFilenamesField class."""
 
@@ -1067,12 +1083,6 @@ class TestImageFilenamesField:
         assert image_filenames == ['image1', 'image2', 'image2', 'imag2']
         assert image_filename_ids == [0, 1, 1, 1]
 
-    def test_get_image_filenames_annotations(self, mocker, mock_image_filenames_class, test_data_loaded):
-        assert mock_image_filenames_class.get_image_filenames_annotations() == test_data_loaded['image_filenames']
-
-    def test_get_pose_annotations(self, mocker, mock_image_filenames_class, test_data_loaded):
-        assert mock_image_filenames_class.get_pose_annotations() == test_data_loaded['pose_annotations']
-
 
 class TestScalesField:
     """Unit tests for the ScalesField class."""
@@ -1109,12 +1119,6 @@ class TestScalesField:
         mock_get_pose_annotations.assert_called_once_with()
         assert scales == [1.0, 2.0, 1.5]
 
-    def test_get_image_filenames_annotations(self, mocker, mock_scales_class, test_data_loaded):
-        assert mock_scales_class.get_image_filenames_annotations() == test_data_loaded['image_filenames']
-
-    def test_get_pose_annotations(self, mocker, mock_scales_class, test_data_loaded):
-        assert mock_scales_class.get_pose_annotations() == test_data_loaded['pose_annotations']
-
 
 class TestObjposField:
     """Unit tests for the ObjposField class."""
@@ -1150,9 +1154,3 @@ class TestObjposField:
         mock_get_image_annotations.assert_called_once_with()
         mock_get_pose_annotations.assert_called_once_with()
         assert objpos == [[11.0, 15.0], [10.0, 10.0], [20.0, 20.0]]
-
-    def test_get_image_filenames_annotations(self, mocker, mock_objpos_class, test_data_loaded):
-        assert mock_objpos_class.get_image_filenames_annotations() == test_data_loaded['image_filenames']
-
-    def test_get_pose_annotations(self, mocker, mock_objpos_class, test_data_loaded):
-        assert mock_objpos_class.get_pose_annotations() == test_data_loaded['pose_annotations']
