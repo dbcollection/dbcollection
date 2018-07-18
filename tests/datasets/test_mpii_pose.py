@@ -20,7 +20,8 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     ObjposField,
     VideoIdsField,
     VideoNamesField,
-    FrameSecField
+    FrameSecField,
+    KeypointLabelsField
 )
 
 
@@ -90,6 +91,7 @@ class TestKeypointsTask:
         mock_videoidx_field = mocker.patch.object(VideoIdsField, "process", return_value=dummy_ids)
         mock_videonames_field = mocker.patch.object(VideoNamesField, "process")
         mock_frame_sec_field = mocker.patch.object(FrameSecField, "process")
+        mock_keypointlbls_field = mocker.patch.object(KeypointLabelsField, "process")
 
         mock_keypoints_class.process_set_metadata(
             data={
@@ -110,6 +112,7 @@ class TestKeypointsTask:
         mock_videoidx_field.assert_called_once_with()
         mock_videonames_field.assert_called_once_with(dummy_ids)
         mock_frame_sec_field.assert_called_once_with()
+        mock_keypointlbls_field.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -1270,7 +1273,7 @@ class TestFrameSecField:
         #     fillvalue=-1
         # )
 
-    def test_get_video_names(self, mocker, mock_frame_sec_class, test_data_loaded):
+    def test_get_frame_sec(self, mocker, mock_frame_sec_class, test_data_loaded):
         mock_get_image_annotations = mocker.patch.object(FrameSecField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
         mock_get_pose_annotations = mocker.patch.object(FrameSecField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy'], ['dummy']])
         mock_get_frame_annotations = mocker.patch.object(FrameSecField, "get_frame_sec_annotations", return_value=[0, 1, 2, 3])
@@ -1281,3 +1284,50 @@ class TestFrameSecField:
         mock_get_pose_annotations.assert_called_once_with()
         mock_get_frame_annotations.assert_called_once_with()
         assert frame_sec == [0, 1, 1, 2]
+
+
+class TestKeypointLabelsField:
+    """Unit tests for the KeypointLabelsField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_kplbls_class(field_kwargs):
+        return KeypointLabelsField(**field_kwargs)
+
+    def test_process(self, mocker, mock_kplbls_class):
+        mock_get_kp_lbls = mocker.patch.object(KeypointLabelsField, "get_keypoint_labels", return_value=['right ankle', 'right knee', 'right hip'])
+        mock_save_hdf5 = mocker.patch.object(KeypointLabelsField, "save_field_to_hdf5")
+
+        mock_kplbls_class.process()
+
+        mock_get_kp_lbls.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='keypoint_labels',
+        #     data=str2ascii(['right ankle', 'right knee', 'right hip']),
+        #     dtype=np.uint8,
+        #     fillvalue=0
+        # )
+
+    def test_get_keypoint_labels(self, mocker, mock_kplbls_class, test_data_loaded):
+        keypoints_labels = mock_kplbls_class.get_keypoint_labels()
+        assert keypoints_labels == [
+            'right ankle',  # -- 1
+            'right knee',  # -- 2
+            'right hip',  # -- 3
+            'left hip',  # -- 4
+            'left knee',  # -- 5
+            'left ankle',  # -- 6
+            'pelvis',  # -- 7
+            'thorax',  # -- 8
+            'upper neck',  # -- 9
+            'head top',  # -- 10
+            'right wrist',  # -- 11
+            'right elbow',  # -- 12
+            'right shoulder',  # -- 13
+            'left shoulder',  # -- 14
+            'left elbow',  # -- 15
+            'left wrist'  # -- 16
+        ]
