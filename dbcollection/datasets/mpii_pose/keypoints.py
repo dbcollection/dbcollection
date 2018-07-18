@@ -77,6 +77,7 @@ class Keypoints(BaseTaskNew):
         video_ids = VideoIdsField(**args).process()
         VideoNamesField(**args).process(video_ids)
         FrameSecField(**args).process()
+        KeypointLabelsField(**args).process()
 
         # Lists
         if self.verbose:
@@ -766,6 +767,44 @@ class FrameSecField(CustomBaseField):
             for _, pose in enumerate(image_pose_annotations):
                 frame_sec.append(frame_sec_annotations[i])
         return frame_sec
+
+
+class KeypointLabelsField(CustomBaseField):
+    """Keypoint names field metadata process/save class."""
+
+    @display_message_processing('keypoint_labels')
+    def process(self):
+        """Processes and saves the keypoint labels metadata to hdf5."""
+        keypoint_labels = self.get_keypoint_labels()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='keypoint_labels',
+            data=str2ascii(keypoint_labels),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+    def get_keypoint_labels(self):
+        """Returns a list of keypoint names."""
+        keypoints_labels = [
+            'right ankle',  # -- 1
+            'right knee',  # -- 2
+            'right hip',  # -- 3
+            'left hip',  # -- 4
+            'left knee',  # -- 5
+            'left ankle',  # -- 6
+            'pelvis',  # -- 7
+            'thorax',  # -- 8
+            'upper neck',  # -- 9
+            'head top',  # -- 10
+            'right wrist',  # -- 11
+            'right elbow',  # -- 12
+            'right shoulder',  # -- 13
+            'left shoulder',  # -- 14
+            'left elbow',  # -- 15
+            'left wrist'  # -- 16
+        ]
+        return keypoints_labels
 
 
 # -----------------------------------------------------------
