@@ -1,5 +1,6 @@
 """
-Test the base classes for managing datasets and tasks.
+Test the base classes for managing datasets and tasks
+for the MPII Human Pose Dataset.
 """
 
 
@@ -18,7 +19,8 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     ScalesField,
     ObjposField,
     VideoIdsField,
-    VideoNamesField
+    VideoNamesField,
+    FrameSecField
 )
 
 
@@ -87,6 +89,7 @@ class TestKeypointsTask:
         mock_objpos_field = mocker.patch.object(ObjposField, "process")
         mock_videoidx_field = mocker.patch.object(VideoIdsField, "process", return_value=dummy_ids)
         mock_videonames_field = mocker.patch.object(VideoNamesField, "process")
+        mock_frame_sec_field = mocker.patch.object(FrameSecField, "process")
 
         mock_keypoints_class.process_set_metadata(
             data={
@@ -106,6 +109,7 @@ class TestKeypointsTask:
         mock_objpos_field.assert_called_once_with()
         mock_videoidx_field.assert_called_once_with()
         mock_videonames_field.assert_called_once_with(dummy_ids)
+        mock_frame_sec_field.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -1054,6 +1058,9 @@ class TestCustomBaseField:
     def test_get_pose_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
         assert mock_custom_basefield__class.get_video_names_annotations() == test_data_loaded['video_names']
 
+    def test_get_frame_sec_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
+        assert mock_custom_basefield__class.get_frame_sec_annotations() == test_data_loaded['frame_sec']
+
 
 class TestImageFilenamesField:
     """Unit tests for the ImageFilenamesField class."""
@@ -1229,10 +1236,48 @@ class TestVideoNamesField:
         #     fillvalue=0
         # )
 
-    def get_video_names(self, mocker, mock_videonames_class, test_data_loaded):
-        mock_get_video_annotations = mocker.patch.object(VideoNamesField, "get_image_filenames_annotations", return_value=['video1', 'video2', 'video3'])
+    def test_get_video_names(self, mocker, mock_videonames_class, test_data_loaded):
+        mock_get_video_annotations = mocker.patch.object(VideoNamesField, "get_video_names_annotations", return_value=['video1', 'video2', 'video3'])
 
         video_names = mock_videonames_class.get_video_names([0, 1, 1, 2])
 
-        mock_get_video_annotations.assert_called_once_with([0, 1, 1, 2])
+        mock_get_video_annotations.assert_called_once_with()
         assert video_names == ['video1', 'video2', 'video2', 'video3']
+
+
+class TestFrameSecField:
+    """Unit tests for the FrameSecField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_frame_sec_class(field_kwargs):
+        return FrameSecField(**field_kwargs)
+
+    def test_process(self, mocker, mock_frame_sec_class):
+        mock_get_frame_sec = mocker.patch.object(FrameSecField, "get_frame_sec", return_value=[0, 1, 2, 3])
+        mock_save_hdf5 = mocker.patch.object(FrameSecField, "save_field_to_hdf5")
+
+        mock_frame_sec_class.process()
+
+        mock_get_frame_sec.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='frame_sec',
+        #     data=np.array([0, 1, 2, 3], dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_video_names(self, mocker, mock_frame_sec_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(FrameSecField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(FrameSecField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy'], ['dummy']])
+        mock_get_frame_annotations = mocker.patch.object(FrameSecField, "get_frame_sec_annotations", return_value=[0, 1, 2, 3])
+
+        frame_sec = mock_frame_sec_class.get_frame_sec()
+
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
+        mock_get_frame_annotations.assert_called_once_with()
+        assert frame_sec == [0, 1, 1, 2]
