@@ -76,6 +76,7 @@ class Keypoints(BaseTaskNew):
         ObjposField(**args).process()
         video_ids = VideoIdsField(**args).process()
         VideoNamesField(**args).process(video_ids)
+        FrameSecField(**args).process()
 
         # Lists
         if self.verbose:
@@ -598,6 +599,9 @@ class CustomBaseField(BaseField):
     def get_video_names_annotations(self):
         return self.data['video_names']
 
+    def get_frame_sec_annotations(self):
+        return self.data['frame_sec']
+
 
 class ImageFilenamesField(CustomBaseField):
     """Image filenames' field metadata process/save class."""
@@ -734,6 +738,34 @@ class VideoNamesField(CustomBaseField):
         for video_idx in video_ids:
             video_names.append(video_names_annotations[video_idx])
         return video_names
+
+
+class FrameSecField(CustomBaseField):
+    """Frame sec field metadata process/save class."""
+
+    @display_message_processing('frame_sec')
+    def process(self):
+        """Processes and saves the frame sec metadata to hdf5."""
+        frame_sec = self.get_frame_sec()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='frame_sec',
+            data=np.array(frame_sec, dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_frame_sec(self):
+        """Returns a list of frame sec."""
+        frame_sec = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        frame_sec_annotations = self.get_frame_sec_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                frame_sec.append(frame_sec_annotations[i])
+        return frame_sec
 
 
 # -----------------------------------------------------------
