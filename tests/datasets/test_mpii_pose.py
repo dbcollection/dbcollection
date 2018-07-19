@@ -24,7 +24,8 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     KeypointLabelsField,
     CategoryNamesField,
     ActivityNamesField,
-    ActivityIdsField
+    ActivityIdsField,
+    HeadBoundingBoxField
 )
 
 
@@ -98,6 +99,7 @@ class TestKeypointsTask:
         mock_category_names_field = mocker.patch.object(CategoryNamesField, "process")
         mock_activity_names_field = mocker.patch.object(ActivityNamesField, "process")
         mock_activity_ids_field = mocker.patch.object(ActivityIdsField, "process")
+        mock_head_bbox_field = mocker.patch.object(HeadBoundingBoxField, "process")
 
         mock_keypoints_class.process_set_metadata(
             data={
@@ -122,6 +124,7 @@ class TestKeypointsTask:
         mock_category_names_field.assert_called_once_with()
         mock_activity_names_field.assert_called_once_with()
         mock_activity_ids_field.assert_called_once_with()
+        mock_head_bbox_field.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -1375,6 +1378,7 @@ class TestCategoryNamesField:
             {"category_name": 'category2', "activity_name": '', "activity_id": -1},
             {"category_name": 'category3', "activity_name": '', "activity_id": -1}
         ])
+
         category_names = mock_category_names_class.get_category_name()
 
         mock_get_image_annotations.assert_called_once_with()
@@ -1416,6 +1420,7 @@ class TestActivityNamesField:
             {"category_name": '', "activity_name": 'activity2', "activity_id": -1},
             {"category_name": '', "activity_name": 'activity3', "activity_id": -1}
         ])
+
         activity_names = mock_activity_names_class.get_activity_name()
 
         mock_get_image_annotations.assert_called_once_with()
@@ -1457,9 +1462,51 @@ class TestActivityIdsField:
             {"category_name": '', "activity_name": '', "activity_id": 2},
             {"category_name": '', "activity_name": '', "activity_id": 3}
         ])
+
         activity_ids = mock_activity_ids_class.get_activity_ids()
 
         mock_get_image_annotations.assert_called_once_with()
         mock_get_pose_annotations.assert_called_once_with()
         mock_get_activity_annotations.assert_called_once_with()
         assert activity_ids == [1, 2, 2, 3]
+
+
+class TestHeadBoundingBoxField:
+    """Unit tests for the HeadBoundingBoxField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_head_bbox_class(field_kwargs):
+        return HeadBoundingBoxField(**field_kwargs)
+
+    def test_process(self, mocker, mock_head_bbox_class):
+        mock_get_head_bbox = mocker.patch.object(HeadBoundingBoxField, "get_head_bboxes", return_value=[[1, 1, 10, 10], [10, 10, 20, 20], [40, 40, 60, 60]])
+        mock_save_hdf5 = mocker.patch.object(HeadBoundingBoxField, "save_field_to_hdf5")
+
+        mock_head_bbox_class.process()
+
+        mock_get_head_bbox.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='head_bbox',
+        #     data=np.array([[1, 1, 10, 10], [10, 10, 20, 20], [40, 40, 60, 60]], dtype=np.float32),
+        #     dtype=np.float32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_head_bboxes(self, mocker, mock_head_bbox_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(HeadBoundingBoxField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(HeadBoundingBoxField, "get_pose_annotations", return_value=[[{"head_bbox": (1, 1, 10, 10)}], [{"head_bbox": (100, 100, 200, 200)}, {"head_bbox": (1, 1, 5, 5)}], [{"head_bbox": (10, 10, 15, 15)}]])
+
+        head_bbox = mock_head_bbox_class.get_head_bboxes()
+
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
+        assert head_bbox == [
+            (1, 1, 10, 10),
+            (100, 100, 200, 200),
+            (1, 1, 5, 5),
+            (10, 10, 15, 15)
+        ]
