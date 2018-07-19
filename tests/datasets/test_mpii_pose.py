@@ -25,7 +25,8 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     CategoryNamesField,
     ActivityNamesField,
     ActivityIdsField,
-    HeadBoundingBoxField
+    HeadBoundingBoxField,
+    KeypointsField
 )
 
 
@@ -100,6 +101,7 @@ class TestKeypointsTask:
         mock_activity_names_field = mocker.patch.object(ActivityNamesField, "process")
         mock_activity_ids_field = mocker.patch.object(ActivityIdsField, "process")
         mock_head_bbox_field = mocker.patch.object(HeadBoundingBoxField, "process")
+        mock_keypoints_field = mocker.patch.object(KeypointsField, "process")
 
         mock_keypoints_class.process_set_metadata(
             data={
@@ -125,6 +127,7 @@ class TestKeypointsTask:
         mock_activity_names_field.assert_called_once_with()
         mock_activity_ids_field.assert_called_once_with()
         mock_head_bbox_field.assert_called_once_with()
+        mock_keypoints_field.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -1509,4 +1512,48 @@ class TestHeadBoundingBoxField:
             (100, 100, 200, 200),
             (1, 1, 5, 5),
             (10, 10, 15, 15)
+        ]
+
+
+class TestKeypointsField:
+    """Unit tests for the KeypointsField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_keypoints_class(field_kwargs):
+        return KeypointsField(**field_kwargs)
+
+    def test_process(self, mocker, mock_keypoints_class):
+        mock_get_keypoints = mocker.patch.object(KeypointsField, "get_keypoints", return_value=[[[0, 0, 0]]*16, [[1, 1, 1]]*16])
+        mock_save_hdf5 = mocker.patch.object(KeypointsField, "save_field_to_hdf5")
+
+        mock_keypoints_class.process()
+
+        mock_get_keypoints.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='keypoints',
+        #     data=np.array([[[0, 0, 0]]*16, [[1, 1, 1]]*16], dtype=np.float32),
+        #     dtype=np.float32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_keypoints(self, mocker, mock_keypoints_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(KeypointsField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(KeypointsField, "get_pose_annotations", return_value=[
+            [{"keypoints": [[1, 1, 1], [20, 30, 0]]}],
+            [{"keypoints": [[5, 115, 1], [13, 31, 0]]}, {"keypoints": [[-1, -1, -1], [3, 3, 1]]}],
+            [{"keypoints": [[10, 10, 1], [-1, -1, -1]]}]])
+
+        keypoints = mock_keypoints_class.get_keypoints()
+
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
+        assert keypoints == [
+            [[1, 1, 1], [20, 30, 0]],
+            [[5, 115, 1], [13, 31, 0]],
+            [[-1, -1, -1], [3, 3, 1]],
+            [[10, 10, 1], [-1, -1, -1]]
         ]
