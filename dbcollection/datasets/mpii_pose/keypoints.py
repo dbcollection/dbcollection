@@ -81,6 +81,8 @@ class Keypoints(BaseTaskNew):
         CategoryNamesField(**args).process()
         ActivityNamesField(**args).process()
         ActivityIdsField(**args).process()
+        if set_name is not 'test':
+            HeadBoundingBoxField(**args).process()
 
         # Lists
         if self.verbose:
@@ -895,6 +897,33 @@ class ActivityIdsField(CustomBaseField):
             for _, pose in enumerate(image_pose_annotations):
                 activity_ids.append(activity_annotations[i]['activity_id'])
         return activity_ids
+
+
+class HeadBoundingBoxField(CustomBaseField):
+    """Head bounding box field metadata process/save class."""
+
+    @display_message_processing('head_bbox')
+    def process(self):
+        """Processes and saves the head bbox metadata to hdf5."""
+        head_bboxes = self.get_head_bboxes()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='head_bbox',
+            data=np.array(head_bboxes, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=-1
+        )
+
+    def get_head_bboxes(self):
+        """Returns a list of head bboxes."""
+        head_bboxes = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                head_bboxes.append(pose['head_bbox'])
+        return head_bboxes
 
 
 # -----------------------------------------------------------
