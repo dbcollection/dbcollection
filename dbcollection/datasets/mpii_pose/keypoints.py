@@ -78,6 +78,7 @@ class Keypoints(BaseTaskNew):
         VideoNamesField(**args).process(video_ids)
         FrameSecField(**args).process()
         KeypointLabelsField(**args).process()
+        CategoryNamesField(**args).process()
 
         # Lists
         if self.verbose:
@@ -603,6 +604,9 @@ class CustomBaseField(BaseField):
     def get_frame_sec_annotations(self):
         return self.data['frame_sec']
 
+    def get_activity_annotations(self):
+        return self.data['activity']
+
 
 class ImageFilenamesField(CustomBaseField):
     """Image filenames' field metadata process/save class."""
@@ -805,6 +809,34 @@ class KeypointLabelsField(CustomBaseField):
             'left wrist'  # -- 16
         ]
         return keypoints_labels
+
+
+class CategoryNamesField(CustomBaseField):
+    """Category names field metadata process/save class."""
+
+    @display_message_processing('category_name')
+    def process(self):
+        """Processes and saves the category names metadata to hdf5."""
+        category_name = self.get_category_name()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='category_name',
+            data=str2ascii(category_name),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+    def get_category_name(self):
+        """Returns a list of category names."""
+        category_names = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        activity_annotations = self.get_activity_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                category_names.append(activity_annotations[i]['category_name'])
+        return category_names
 
 
 # -----------------------------------------------------------
