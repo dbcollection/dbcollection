@@ -79,6 +79,7 @@ class Keypoints(BaseTaskNew):
         FrameSecField(**args).process()
         KeypointLabelsField(**args).process()
         CategoryNamesField(**args).process()
+        ActivityNamesField(**args).process()
 
         # Lists
         if self.verbose:
@@ -837,6 +838,34 @@ class CategoryNamesField(CustomBaseField):
             for _, pose in enumerate(image_pose_annotations):
                 category_names.append(activity_annotations[i]['category_name'])
         return category_names
+
+
+class ActivityNamesField(CustomBaseField):
+    """Activity names field metadata process/save class."""
+
+    @display_message_processing('activity_name')
+    def process(self):
+        """Processes and saves the activity names metadata to hdf5."""
+        activity_name = self.get_activity_name()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='activity_name',
+            data=str2ascii(activity_name),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+    def get_activity_name(self):
+        """Returns a list of activity names."""
+        activity_names = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        activity_annotations = self.get_activity_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                activity_names.append(activity_annotations[i]['activity_name'])
+        return activity_names
 
 
 # -----------------------------------------------------------
