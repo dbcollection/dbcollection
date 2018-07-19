@@ -83,6 +83,7 @@ class Keypoints(BaseTaskNew):
         ActivityIdsField(**args).process()
         if set_name is not 'test':
             HeadBoundingBoxField(**args).process()
+            KeypointsField(**args).process()
 
         # Lists
         if self.verbose:
@@ -924,6 +925,33 @@ class HeadBoundingBoxField(CustomBaseField):
             for _, pose in enumerate(image_pose_annotations):
                 head_bboxes.append(pose['head_bbox'])
         return head_bboxes
+
+
+class KeypointsField(CustomBaseField):
+    """Keypoints field metadata process/save class."""
+
+    @display_message_processing('keypoints')
+    def process(self):
+        """Processes and saves the keypoints metadata to hdf5."""
+        keypoints = self.get_keypoints()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='keypoints',
+            data=np.array(keypoints, dtype=np.float32),
+            dtype=np.float32,
+            fillvalue=-1
+        )
+
+    def get_keypoints(self):
+        """Returns a list of keypoints."""
+        keypoints = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                keypoints.append(pose['keypoints'])
+        return keypoints
 
 
 # -----------------------------------------------------------
