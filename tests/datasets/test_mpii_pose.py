@@ -22,7 +22,8 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     VideoNamesField,
     FrameSecField,
     KeypointLabelsField,
-    CategoryNamesField
+    CategoryNamesField,
+    ActivityNamesField
 )
 
 
@@ -94,6 +95,7 @@ class TestKeypointsTask:
         mock_frame_sec_field = mocker.patch.object(FrameSecField, "process")
         mock_keypointlbls_field = mocker.patch.object(KeypointLabelsField, "process")
         mock_category_names_field = mocker.patch.object(CategoryNamesField, "process")
+        mock_activity_names_field = mocker.patch.object(ActivityNamesField, "process")
 
         mock_keypoints_class.process_set_metadata(
             data={
@@ -116,6 +118,7 @@ class TestKeypointsTask:
         mock_frame_sec_field.assert_called_once_with()
         mock_keypointlbls_field.assert_called_once_with()
         mock_category_names_field.assert_called_once_with()
+        mock_activity_names_field.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -1375,3 +1378,44 @@ class TestCategoryNamesField:
         mock_get_pose_annotations.assert_called_once_with()
         mock_get_activity_annotations.assert_called_once_with()
         assert category_names == ['category1', 'category2', 'category2', 'category3']
+
+
+class TestActivityNamesField:
+    """Unit tests for the ActivityNamesField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_activity_names_class(field_kwargs):
+        return ActivityNamesField(**field_kwargs)
+
+    def test_process(self, mocker, mock_activity_names_class):
+        mock_get_activity_name = mocker.patch.object(ActivityNamesField, "get_activity_name", return_value=['activity1', 'activity2', 'activity3'])
+        mock_save_hdf5 = mocker.patch.object(ActivityNamesField, "save_field_to_hdf5")
+
+        mock_activity_names_class.process()
+
+        mock_get_activity_name.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='activity_name',
+        #     data=str2ascii(['activity1', 'activity2', 'activity3']),
+        #     dtype=np.uint8,
+        #     fillvalue=0
+        # )
+
+    def test_get_activity_name(self, mocker, mock_activity_names_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(ActivityNamesField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(ActivityNamesField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy'], ['dummy']])
+        mock_get_activity_annotations = mocker.patch.object(ActivityNamesField, "get_activity_annotations", return_value=[
+            {"category_name": '', "activity_name": 'activity1', "activity_id": -1},
+            {"category_name": '', "activity_name": 'activity2', "activity_id": -1},
+            {"category_name": '', "activity_name": 'activity3', "activity_id": -1}
+        ])
+        activity_names = mock_activity_names_class.get_activity_name()
+
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
+        mock_get_activity_annotations.assert_called_once_with()
+        assert activity_names == ['activity1', 'activity2', 'activity2', 'activity3']
