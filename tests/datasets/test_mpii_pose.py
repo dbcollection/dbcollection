@@ -11,6 +11,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
+from dbcollection.utils.pad import pad_list
 from dbcollection.datasets.mpii_pose.keypoints import (
     Keypoints,
     DatasetAnnotationLoader,
@@ -26,7 +27,8 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     ActivityNamesField,
     ActivityIdsField,
     HeadBoundingBoxField,
-    KeypointsField
+    KeypointsField,
+    SinglePersonPerImageList
 )
 
 
@@ -102,6 +104,7 @@ class TestKeypointsTask:
         mock_activity_ids_field = mocker.patch.object(ActivityIdsField, "process")
         mock_head_bbox_field = mocker.patch.object(HeadBoundingBoxField, "process")
         mock_keypoints_field = mocker.patch.object(KeypointsField, "process")
+        mock_single_person_per_image_list = mocker.patch.object(SinglePersonPerImageList, "process")
 
         mock_keypoints_class.process_set_metadata(
             data={
@@ -128,6 +131,7 @@ class TestKeypointsTask:
         mock_activity_ids_field.assert_called_once_with()
         mock_head_bbox_field.assert_called_once_with()
         mock_keypoints_field.assert_called_once_with()
+        mock_single_person_per_image_list.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -1073,6 +1077,9 @@ class TestCustomBaseField:
     def test_get_pose_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
         assert mock_custom_basefield__class.get_pose_annotations() == test_data_loaded['pose_annotations']
 
+    def test_get_single_person_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
+        assert mock_custom_basefield__class.get_single_person_annotations() == test_data_loaded['single_person']
+
     def test_get_video_idx_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
         assert mock_custom_basefield__class.get_video_idx_annotations() == test_data_loaded['video_idx']
 
@@ -1563,3 +1570,37 @@ class TestKeypointsField:
             [[-1, -1, -1], [3, 3, 1]],
             [[10, 10, 1], [-1, -1, -1]]
         ]
+
+
+class TestSinglePersonPerImageList:
+    """Unit tests for the SinglePersonPerImageList class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_single_per_image_class(field_kwargs):
+        return SinglePersonPerImageList(**field_kwargs)
+
+    def test_process(self, mocker, mock_single_per_image_class):
+        mock_get_single = mocker.patch.object(SinglePersonPerImageList, "get_list_single_person_per_image", return_value=[[1], [2, 3, 4], [5, 6]])
+        mock_save_hdf5 = mocker.patch.object(SinglePersonPerImageList, "save_field_to_hdf5")
+
+        mock_single_per_image_class.process()
+
+        mock_get_single.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='list_single_person_per_image',
+        #     data=np.array(pad_list(single_person_per_image, val=-1), dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_list_single_person_per_image(self, mocker, mock_single_per_image_class, test_data_loaded):
+        mock_get_single_person_annotations = mocker.patch.object(SinglePersonPerImageList, "get_single_person_annotations", return_value=[[-1], [1, 1, -1], [1]])
+
+        single_person_per_image = mock_single_per_image_class.get_list_single_person_per_image()
+
+        mock_get_single_person_annotations.assert_called_once_with()
+        assert single_person_per_image == [[], [1, 2], [4]]
