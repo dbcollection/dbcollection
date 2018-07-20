@@ -81,6 +81,7 @@ class Keypoints(BaseTaskNew):
         CategoryNamesField(**args).process()
         ActivityNamesField(**args).process()
         ActivityIdsField(**args).process()
+        SinglePersonField(**args).process()
         if set_name is not 'test':
             HeadBoundingBoxField(**args).process()
             KeypointsField(**args).process()
@@ -902,6 +903,34 @@ class ActivityIdsField(CustomBaseField):
             for _, pose in enumerate(image_pose_annotations):
                 activity_ids.append(activity_annotations[i]['activity_id'])
         return activity_ids
+
+
+class SinglePersonField(CustomBaseField):
+    """Single person field metadata process/save class."""
+
+    @display_message_processing('single_person')
+    def process(self):
+        """Processes and saves the single person metadata to hdf5."""
+        single_person = self.get_single_person()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='single_person',
+            data=np.array(single_person, dtype=np.uint8),
+            dtype=np.uint8,
+            fillvalue=-1
+        )
+
+    def get_single_person(self):
+        """Returns a list of booleans ([0, 1]) indicating single person detections."""
+        single_persons = []
+        single_person_annotations = self.get_single_person_annotations()
+        for single_persons_image in single_person_annotations:
+            for val in single_persons_image:
+                if val == -1:
+                    single_persons.append(0)
+                else:
+                    single_persons.append(1)
+        return single_persons
 
 
 class HeadBoundingBoxField(CustomBaseField):
