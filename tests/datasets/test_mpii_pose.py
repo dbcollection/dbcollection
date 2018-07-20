@@ -1073,11 +1073,17 @@ class TestCustomBaseField:
     def test_get_pose_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
         assert mock_custom_basefield__class.get_pose_annotations() == test_data_loaded['pose_annotations']
 
-    def test_get_pose_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
+    def test_get_video_idx_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
+        assert mock_custom_basefield__class.get_video_idx_annotations() == test_data_loaded['video_idx']
+
+    def test_get_video_names_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
         assert mock_custom_basefield__class.get_video_names_annotations() == test_data_loaded['video_names']
 
     def test_get_frame_sec_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
         assert mock_custom_basefield__class.get_frame_sec_annotations() == test_data_loaded['frame_sec']
+
+    def test_get_activity_annotations(self, mocker, mock_custom_basefield__class, test_data_loaded):
+        assert mock_custom_basefield__class.get_activity_annotations() == test_data_loaded['activity']
 
 
 class TestImageFilenamesField:
