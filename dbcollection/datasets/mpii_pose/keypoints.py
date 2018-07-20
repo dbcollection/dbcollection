@@ -88,6 +88,7 @@ class Keypoints(BaseTaskNew):
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
+        SinglePersonPerImageList(**args).process()
 
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
@@ -600,6 +601,9 @@ class CustomBaseField(BaseField):
     def get_pose_annotations(self):
         return self.data['pose_annotations']
 
+    def get_single_person_annotations(self):
+        return self.data['single_person']
+
     def get_video_idx_annotations(self):
         return self.data['video_idx']
 
@@ -957,6 +961,36 @@ class KeypointsField(CustomBaseField):
 # -----------------------------------------------------------
 # Metadata lists
 # -----------------------------------------------------------
+
+class SinglePersonPerImageList(CustomBaseField):
+    """Single persons per image list field metadata process/save class."""
+
+    @display_message_processing('list_single_person_per_image')
+    def process(self):
+        """Processes and saves the single persons per image metadata to hdf5."""
+        single_person_per_image = self.get_list_single_person_per_image()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_single_person_per_image',
+            data=np.array(pad_list(single_person_per_image, val=-1), dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_list_single_person_per_image(self):
+        """Returns a list of single persons ids per image."""
+        single_person_per_image = []
+        counter = 0
+        single_person_annotations = self.get_single_person_annotations()
+        for single_person in single_person_annotations:
+            single_persons = []
+            for val in single_person:
+                if val == 1:
+                    single_persons.append(counter)
+                counter += 1
+            single_person_per_image.append(single_persons)
+        return single_person_per_image
+
 
 # -----------------------------------------------------------
 # Additional tasks
