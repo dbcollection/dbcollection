@@ -26,6 +26,7 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     CategoryNamesField,
     ActivityNamesField,
     ActivityIdsField,
+    SinglePersonField,
     HeadBoundingBoxField,
     KeypointsField,
     SinglePersonPerImageList
@@ -102,6 +103,7 @@ class TestKeypointsTask:
         mock_category_names_field = mocker.patch.object(CategoryNamesField, "process")
         mock_activity_names_field = mocker.patch.object(ActivityNamesField, "process")
         mock_activity_ids_field = mocker.patch.object(ActivityIdsField, "process")
+        mock_single_person_field = mocker.patch.object(SinglePersonField, "process")
         mock_head_bbox_field = mocker.patch.object(HeadBoundingBoxField, "process")
         mock_keypoints_field = mocker.patch.object(KeypointsField, "process")
         mock_single_person_per_image_list = mocker.patch.object(SinglePersonPerImageList, "process")
@@ -129,6 +131,7 @@ class TestKeypointsTask:
         mock_category_names_field.assert_called_once_with()
         mock_activity_names_field.assert_called_once_with()
         mock_activity_ids_field.assert_called_once_with()
+        mock_single_person_field.assert_called_once_with()
         mock_head_bbox_field.assert_called_once_with()
         mock_keypoints_field.assert_called_once_with()
         mock_single_person_per_image_list.assert_called_once_with()
@@ -1485,6 +1488,40 @@ class TestActivityIdsField:
         mock_get_pose_annotations.assert_called_once_with()
         mock_get_activity_annotations.assert_called_once_with()
         assert activity_ids == [1, 2, 2, 3]
+
+
+class TestSinglePersonField:
+    """Unit tests for the SinglePersonField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_single_person_class(field_kwargs):
+        return SinglePersonField(**field_kwargs)
+
+    def test_process(self, mocker, mock_single_person_class):
+        mock_get_single_person = mocker.patch.object(SinglePersonField, "get_single_person", return_value=[0, 1, 1, 1, 0, 1])
+        mock_save_hdf5 = mocker.patch.object(SinglePersonField, "save_field_to_hdf5")
+
+        mock_single_person_class.process()
+
+        mock_get_single_person.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='single_person',
+        #     data=np.array([0, 1, 1, 1, 0, 1], dtype=np.uint8),
+        #     dtype=np.uint8,
+        #     fillvalue=-1
+        # )
+
+    def test_get_single_person(self, mocker, mock_single_person_class, test_data_loaded):
+        mock_get_single_pose_annotations = mocker.patch.object(SinglePersonField, "get_single_person_annotations", return_value=[[-1], [1, 1, 1], [-1, 1]])
+
+        single_persons = mock_single_person_class.get_single_person()
+
+        mock_get_single_pose_annotations.assert_called_once_with()
+        assert single_persons == [0, 1, 1, 1, 0, 1]
 
 
 class TestHeadBoundingBoxField:
