@@ -90,6 +90,8 @@ class Keypoints(BaseTaskNew):
         if self.verbose:
             print('\n==> Setting up ordered lists:')
         SinglePersonPerImageList(**args).process()
+        if set_name is not 'test':
+            KeypointsPerImageList(**args).process()
 
 
     def add_data_to_default(self, hdf5_handler, data, set_name):
@@ -1019,6 +1021,40 @@ class SinglePersonPerImageList(CustomBaseField):
                 counter += 1
             single_person_per_image.append(single_persons)
         return single_person_per_image
+
+
+class KeypointsPerImageList(CustomBaseField):
+    """Keypoints per image list field metadata process/save class."""
+
+    @display_message_processing('list_keypoints_per_image')
+    def process(self):
+        """Processes and saves the keypoints per image metadata to hdf5."""
+        keypoints_per_image = self.get_list_keypoints_per_image()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_keypoints_per_image',
+            data=np.array(pad_list(keypoints_per_image, val=-1), dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_list_keypoints_per_image(self):
+        """Returns a list of keypoints ids per image."""
+        keypoints_per_image = []
+        keypoints_empty = [[0, 0, 0]] * 16
+        counter = 0
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        for i, _ in enumerate(image_fnames):
+            keypoints_image = []
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                keypoints = pose['keypoints']
+                if not keypoints == keypoints_empty:
+                    keypoints_image.append(counter)
+                counter += 1
+            keypoints_per_image.append(keypoints_image)
+        return keypoints_per_image
 
 
 # -----------------------------------------------------------
