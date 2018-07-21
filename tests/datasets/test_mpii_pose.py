@@ -564,7 +564,7 @@ class TestDatasetAnnotationLoader:
         assert not mock_get_poses_partial.called
         assert poses == []
 
-    def test_get_pose_annotation_names__try_branch(self, mocker, mock_loader_class):
+    def test_get_pose_annotation_names__try_branch__return_names(self, mocker, mock_loader_class):
         dummy_names = ['name1', 'name2', 'name3']
         dummy_annot = mocker.MagicMock()
         dummy_annot.dtype = mocker.MagicMock()
@@ -577,6 +577,19 @@ class TestDatasetAnnotationLoader:
 
         mock_get_annotation.assert_called_once_with(annotations, ifile)
         assert pnames == dummy_names
+
+    def test_get_pose_annotation_names__try_branch__return_empty_list(self, mocker, mock_loader_class):
+        dummy_annot = mocker.MagicMock()
+        dummy_annot.dtype = mocker.MagicMock()
+        dummy_annot.dtype.names = None
+        mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_annotation_by_file_id", return_value=dummy_annot)
+
+        annotations = {"RELEASE": []}
+        ifile = 1
+        pnames = mock_loader_class.get_pose_annotation_names(annotations, ifile)
+
+        mock_get_annotation.assert_called_once_with(annotations, ifile)
+        assert pnames == []
 
     def test_get_pose_annotation_names__except_branch(self, mocker, mock_loader_class):
         mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_annotation_by_file_id", side_effect=IndexError('raise exception'))
