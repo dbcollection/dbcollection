@@ -721,12 +721,19 @@ class TestDatasetAnnotationLoader:
         )
         assert keypoint_annotations == []
 
-    def test_get_keypoint_annotations__returns_value(self, mocker, mock_loader_class):
+    def test_get_keypoint_annotations__try_branch__returns_value(self, mocker, mock_loader_class):
         keypoint_annotations = mock_loader_class.get_keypoint_annotations(
             annotations_file=[[], [[], [], [], [], [[[[['dummy', 'data']]]]]]],
             ipose=1
         )
         assert keypoint_annotations == ['dummy', 'data']
+
+    def test_get_keypoint_annotations__try_branch__returns_empty_list(self, mocker, mock_loader_class):
+        keypoint_annotations = mock_loader_class.get_keypoint_annotations(
+            annotations_file=[[], [[], [], [], [], [[[['dummy_data']]]]]],
+            ipose=1
+        )
+        assert keypoint_annotations == []
 
     def test_get_head_coordinates__returns_default(self, mocker, mock_loader_class):
         head_coordinates = mock_loader_class.get_head_coordinates(
