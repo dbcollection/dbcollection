@@ -20,24 +20,6 @@ class Keypoints(BaseTaskNew):
 
     filename_h5 = 'keypoint'
     is_full = False
-    keypoints_labels = [
-        'right ankle',  # -- 1
-        'right knee',  # -- 2
-        'right hip',  # -- 3
-        'left hip',  # -- 4
-        'left knee',  # -- 5
-        'left ankle',  # -- 6
-        'pelvis',  # -- 7
-        'thorax',  # -- 8
-        'upper neck',  # -- 9
-        'head top',  # -- 10
-        'right wrist',  # -- 11
-        'right elbow',  # -- 12
-        'right shoulder',  # -- 13
-        'left shoulder',  # -- 14
-        'left elbow',  # -- 15
-        'left wrist'  # -- 16
-    ]
 
     def load_data(self):
         """
@@ -45,7 +27,6 @@ class Keypoints(BaseTaskNew):
         """
         loader = DatasetAnnotationLoader(
             is_full=self.is_full,
-            keypoints_labels=self.keypoints_labels,
             data_path=self.data_path,
             cache_path=self.cache_path,
             verbose=self.verbose
@@ -100,8 +81,7 @@ class Keypoints(BaseTaskNew):
 class DatasetAnnotationLoader:
     """Annotation's data loader for the cifar10 dataset (train/test)."""
 
-    def __init__(self, keypoints_labels, is_full, data_path, cache_path, verbose):
-        self.keypoints_labels = keypoints_labels
+    def __init__(self, is_full, data_path, cache_path, verbose):
         self.is_full = is_full
         self.data_path = data_path
         self.cache_path = cache_path
