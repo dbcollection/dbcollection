@@ -29,7 +29,8 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     SinglePersonField,
     HeadBoundingBoxField,
     KeypointsField,
-    SinglePersonPerImageList
+    SinglePersonPerImageList,
+    KeypointsPerImageList
 )
 
 
@@ -107,6 +108,7 @@ class TestKeypointsTask:
         mock_head_bbox_field = mocker.patch.object(HeadBoundingBoxField, "process")
         mock_keypoints_field = mocker.patch.object(KeypointsField, "process")
         mock_single_person_per_image_list = mocker.patch.object(SinglePersonPerImageList, "process")
+        mock_keypoints_per_image_list = mocker.patch.object(KeypointsPerImageList, "process")
 
         mock_keypoints_class.process_set_metadata(
             data={
@@ -135,6 +137,7 @@ class TestKeypointsTask:
         mock_head_bbox_field.assert_called_once_with()
         mock_keypoints_field.assert_called_once_with()
         mock_single_person_per_image_list.assert_called_once_with()
+        mock_keypoints_per_image_list.assert_called_once_with()
 
 
 class TestDatasetAnnotationLoader:
@@ -1629,7 +1632,7 @@ class TestSinglePersonPerImageList:
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
         #     field='list_single_person_per_image',
-        #     data=np.array(pad_list(single_person_per_image, val=-1), dtype=np.int32),
+        #     data=np.array(pad_list([[1], [2, 3, 4], [5, 6]], val=-1), dtype=np.int32),
         #     dtype=np.int32,
         #     fillvalue=-1
         # )
@@ -1641,3 +1644,42 @@ class TestSinglePersonPerImageList:
 
         mock_get_single_person_annotations.assert_called_once_with()
         assert single_person_per_image == [[], [1, 2], [4]]
+
+
+class TestKeypointsPerImageList:
+    """Unit tests for the KeypointsPerImageList class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_keypoints_per_image_class(field_kwargs):
+        return KeypointsPerImageList(**field_kwargs)
+
+    def test_process(self, mocker, mock_keypoints_per_image_class):
+        mock_get_keypoints = mocker.patch.object(KeypointsPerImageList, "get_list_keypoints_per_image", return_value=[[1], [2, 4], [5, 6]])
+        mock_save_hdf5 = mocker.patch.object(KeypointsPerImageList, "save_field_to_hdf5")
+
+        mock_keypoints_per_image_class.process()
+
+        mock_get_keypoints.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='list_keypoints_per_image',
+        #     data=np.array(pad_list([[1], [2, 4], [5, 6]], val=-1), dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_list_keypoints_per_image(self, mocker, mock_keypoints_per_image_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(KeypointsPerImageList, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(KeypointsPerImageList, "get_pose_annotations", return_value=[
+            [{"keypoints": [[1, 1, 1]] * 16}, {"keypoints": [[0, 0, 0]] * 16}],
+            [{"keypoints": [[5, 115, 1]] * 16}, {"keypoints": [[0, 0, 0]] * 16}, {"keypoints": [[3, 3, 1]] * 16}],
+            [{"keypoints": [[10, 10, 1]] * 16}]])
+
+        keypoints_per_image = mock_keypoints_per_image_class.get_list_keypoints_per_image()
+
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
+        assert keypoints_per_image == [[0], [2, 4], [5]]
