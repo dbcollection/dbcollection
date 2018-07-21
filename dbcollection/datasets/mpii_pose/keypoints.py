@@ -234,7 +234,11 @@ class DatasetAnnotationLoader:
         """Returns the annotation variable (table) names that categorize the annotated data."""
         try:
             annot_ptr = self.get_annotation_by_file_id(annotations, ifile)
-            return annot_ptr.dtype.names
+            names = annot_ptr.dtype.names
+            if names is not None:
+                return names
+            else:
+                return []
         except IndexError:
             return []
 
