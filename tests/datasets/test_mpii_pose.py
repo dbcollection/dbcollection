@@ -474,7 +474,7 @@ class TestDatasetAnnotationLoader:
 
         mock_is_test.assert_called_once_with(annotations, 0)
         mock_get_poses.assert_called_once_with(annotations, 0, True)
-        assert poses_annotations == []
+        assert poses_annotations == [[]]
 
     def test_get_poses_from_annotation_id__returns_empty_list(self, mocker, mock_loader_class):
         mock_get_names = mocker.patch.object(DatasetAnnotationLoader, "get_pose_annotation_names", return_value=[])

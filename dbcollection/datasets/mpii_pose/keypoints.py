@@ -215,7 +215,6 @@ class DatasetAnnotationLoader:
         for ifile in range(num_files):
             if is_test == self.is_test_annotation(annotations, ifile):
                 poses = self.get_poses_from_annotation_id(annotations, ifile, is_test)
-                if any(poses):
                     poses_annotations.append(poses)
         return poses_annotations
 
