@@ -14,6 +14,7 @@ from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.datasets.mpii_pose.keypoints import (
     Keypoints,
+    KeypointsFull,
     DatasetAnnotationLoader,
     CustomBaseField,
     ImageFilenamesField,
@@ -120,6 +121,19 @@ class TestKeypointsTask:
         mock_keypoints_field.assert_called_once_with()
         mock_single_person_per_image_list.assert_called_once_with()
         mock_keypoints_per_image_list.assert_called_once_with()
+
+
+class TestKeypointsFullTask:
+    """Unit tests for the mpii KeypointsFull task."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_keypointsfull_class():
+        return KeypointsFull(data_path='/some/path/data', cache_path='/some/path/cache')
+
+    def test_task_attributes(self, mocker, mock_keypointsfull_class):
+        assert mock_keypointsfull_class.filename_h5 == 'keypoint_full'
+        assert mock_keypointsfull_class.is_full == True
 
 
 class TestDatasetAnnotationLoader:
