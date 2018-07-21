@@ -204,7 +204,7 @@ class DatasetAnnotationLoader:
     def get_video_idx_from_annotation_id(self, annotations, ifile):
         annotations_image = self.get_annotations_list_by_image_id(annotations, ifile)
         if any(annotations_image):
-            return int(annotations_image[0])
+            return int(annotations_image[0]) - 1
         else:
             return -1
 
