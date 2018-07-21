@@ -284,7 +284,10 @@ class DatasetAnnotationLoader:
         """Returns the keypoint's annotations (x,y,id and is_visible)
         for a single pose detection from the annotations data."""
         try:
-            return annotations_file[ipose][4][0][0][0][0]
+            keypoint_annotations = annotations_file[ipose][4][0][0][0][0]
+            if isinstance(keypoint_annotations, str):
+                return []
+            return keypoint_annotations
         except (AttributeError, IndexError):
             return []
 
