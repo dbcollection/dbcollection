@@ -439,7 +439,7 @@ class CustomBaseField(BaseField):
 class ImageFilenamesField(CustomBaseField):
     """Image filenames' field metadata process/save class."""
 
-    @display_message_processing('image filenames')
+    @display_message_processing('image_filenames')
     def process(self):
         """Processes and saves the image filenames metadata to hdf5."""
         image_filenames, image_filename_ids = self.get_image_filenames()
@@ -523,7 +523,7 @@ class ObjposField(CustomBaseField):
 class VideoIdsField(CustomBaseField):
     """Video ids field metadata process/save class."""
 
-    @display_message_processing('video ids')
+    @display_message_processing('video_ids')
     def process(self):
         """Processes and saves the video ids metadata to hdf5."""
         video_ids = self.get_video_ids()
@@ -552,7 +552,7 @@ class VideoIdsField(CustomBaseField):
 class VideoNamesField(CustomBaseField):
     """Video names field metadata process/save class."""
 
-    @display_message_processing('video names')
+    @display_message_processing('video_names')
     def process(self, video_ids):
         """Processes and saves the video names metadata to hdf5."""
         video_names = self.get_video_names(video_ids)
