@@ -8,7 +8,7 @@ import os
 import numpy as np
 
 from dbcollection.datasets import BaseTaskNew, BaseField
-from dbcollection.utils.decorators import display_message_processing
+from dbcollection.utils.decorators import display_message_processing, display_message_load_annotations
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_matlab
@@ -122,6 +122,7 @@ class DatasetAnnotationLoader:
         and returns it as a dictionary."""
         return self.load_annotations_set(is_test=True)
 
+    @display_message_load_annotations
     def load_annotations_set(self, is_test):
         """Loads the annotation's data for the train + test splits."""
         annotations = self.load_annotation_data_from_disk()
