@@ -102,7 +102,7 @@ class DatasetAnnotationLoader:
         split not available in the original dataset but
         it is crafted for use in validation tasks.
         """
-        from .train_val_ids import train_images_ids
+        from .train_image_ids import train_images_ids
         annotations = self.load_annotations_set(is_test=False)
         return self.filter_annotations_by_ids(annotations, train_images_ids)
 
@@ -115,7 +115,7 @@ class DatasetAnnotationLoader:
         split not available in the original dataset but
         it is crafted for use in validation tasks.
         """
-        from .train_val_ids import val_images_ids
+        from .val_image_ids import val_images_ids
         annotations = self.load_annotations_set(is_test=False)
         return self.filter_annotations_by_ids(annotations, val_images_ids)
 
