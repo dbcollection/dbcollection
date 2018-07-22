@@ -579,7 +579,10 @@ class VideoNamesField(CustomBaseField):
         video_names = []
         video_names_annotations = self.get_video_names_annotations()
         for video_idx in video_ids:
+            if video_idx >= 0:
             video_names.append(video_names_annotations[video_idx])
+            else:
+                video_names.append('NA')
         return video_names
 
 

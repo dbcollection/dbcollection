@@ -1256,10 +1256,10 @@ class TestVideoNamesField:
     def test_get_video_names(self, mocker, mock_videonames_class, test_data_loaded):
         mock_get_video_annotations = mocker.patch.object(VideoNamesField, "get_video_names_annotations", return_value=['video1', 'video2', 'video3'])
 
-        video_names = mock_videonames_class.get_video_names([0, 1, 1, 2])
+        video_names = mock_videonames_class.get_video_names([0, 1, 1, 2, -1])
 
         mock_get_video_annotations.assert_called_once_with()
-        assert video_names == ['video1', 'video2', 'video2', 'video3']
+        assert video_names == ['video1', 'video2', 'video2', 'video3', 'NA']
 
 
 class TestFrameSecField:
