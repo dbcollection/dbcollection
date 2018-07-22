@@ -1105,16 +1105,16 @@ class TestImageFilenamesField:
         #     fillvalue=0
         # )
 
-    def get_image_filenames(self, mocker, mock_image_filenames_class, test_data_loaded):
-        mock_get_image_annotations = mocker.patch.object(ImageFilenamesField, "get_image_filenames_annotations", return_value=['image1', 'image2'])
-        mock_get_pose_annotations = mocker.patch.object(ImageFilenamesField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy', 'dummy']])
+    def test_get_image_filenames(self, mocker, mock_image_filenames_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(ImageFilenamesField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(ImageFilenamesField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy', 'dummy'], []])
 
         image_filenames, image_filename_ids = mock_image_filenames_class.get_image_filenames()
 
         mock_get_image_annotations.assert_called_once_with()
         mock_get_pose_annotations.assert_called_once_with()
-        assert image_filenames == ['image1', 'image2', 'image2', 'imag2']
-        assert image_filename_ids == [0, 1, 1, 1]
+        assert image_filenames == ['image1', 'image2', 'image2', 'image2', 'image3']
+        assert image_filename_ids == [0, 1, 1, 1, 2]
 
 
 class TestScalesField:
