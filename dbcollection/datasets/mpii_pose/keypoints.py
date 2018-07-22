@@ -64,6 +64,7 @@ class Keypoints(BaseTaskNew):
         if set_name is not 'test':
             HeadBoundingBoxField(**args).process()
             KeypointsField(**args).process()
+        ObjectFieldNamesField(**args).process()
 
         # Lists
         if self.verbose:
@@ -216,7 +217,7 @@ class DatasetAnnotationLoader:
         for ifile in range(num_files):
             if is_test == self.is_test_annotation(annotations, ifile):
                 poses = self.get_poses_from_annotation_id(annotations, ifile, is_test)
-                    poses_annotations.append(poses)
+                poses_annotations.append(poses)
         return poses_annotations
 
     def get_poses_from_annotation_id(self, annotations, ifile, is_test):
@@ -468,9 +469,9 @@ class ImageFilenamesField(CustomBaseField):
         for i, image_filename in enumerate(image_fnames):
             image_pose_annotations = pose_annotations[i]
             if any(image_pose_annotations):
-            for j, _ in enumerate(image_pose_annotations):
-                image_filenames.append(image_filename)
-                image_filenames_ids.append(i)
+                for j, _ in enumerate(image_pose_annotations):
+                    image_filenames.append(image_filename)
+                    image_filenames_ids.append(i)
             else:
                 image_filenames.append(image_filename)
                 image_filenames_ids.append(i)
@@ -581,7 +582,7 @@ class VideoNamesField(CustomBaseField):
         video_names_annotations = self.get_video_names_annotations()
         for video_idx in video_ids:
             if video_idx >= 0:
-            video_names.append(video_names_annotations[video_idx])
+                video_names.append(video_names_annotations[video_idx])
             else:
                 video_names.append('NA')
         return video_names
@@ -763,6 +764,41 @@ class SinglePersonField(CustomBaseField):
                 else:
                     single_persons.append(1)
         return single_persons
+
+
+class ObjectFieldNamesField(CustomBaseField):
+    """Object field names field metadata process/save class."""
+
+    @display_message_processing('object_fields')
+    def process(self):
+        """Processes and saves the object fields metadata to hdf5."""
+        object_fields = self.get_object_fields()
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='object_fields',
+            data=str2ascii(object_fields),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+    def get_object_fields(self):
+        """Returns a list of object field names."""
+        object_fields = [
+            "image_filenames",
+            "scale",
+            "objpos",
+            "video_ids",
+            "video_names",
+            "frame_sec",
+            "category_name",
+            "activity_name",
+            "activity_id",
+            "single_person",
+            "keypoint_labels"
+        ]
+        if not self.set_name == 'test':
+            object_fields += ["head_bbox", "keypoints"]
+        return object_fields
 
 
 class HeadBoundingBoxField(CustomBaseField):
