@@ -178,7 +178,7 @@ class TestDatasetAnnotationLoader:
 
         annotations = mock_loader_class.load_train_data()
 
-        from dbcollection.datasets.mpii_pose.train_val_ids import train_images_ids
+        from dbcollection.datasets.mpii_pose.train_image_ids import train_images_ids
         assert annotations == dummy_data_filtered
         mock_load_annotations.assert_called_once_with(is_test=False)
         mock_filter_annotations.assert_called_once_with(dummy_data, train_images_ids)
@@ -191,7 +191,7 @@ class TestDatasetAnnotationLoader:
 
         annotations = mock_loader_class.load_val_data()
 
-        from dbcollection.datasets.mpii_pose.train_val_ids import val_images_ids
+        from dbcollection.datasets.mpii_pose.val_image_ids import val_images_ids
         assert annotations == dummy_data_filtered
         mock_load_annotations.assert_called_once_with(is_test=False)
         mock_filter_annotations.assert_called_once_with(dummy_data, val_images_ids)
