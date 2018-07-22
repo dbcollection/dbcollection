@@ -31,6 +31,7 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     HeadBoundingBoxField,
     KeypointsField,
     ObjectFieldNamesField,
+    ObjectIdsField,
     SinglePersonPerImageList,
     KeypointsPerImageList
 )
@@ -92,6 +93,7 @@ class TestKeypointsTask:
         mock_head_bbox_field = mocker.patch.object(HeadBoundingBoxField, "process")
         mock_keypoints_field = mocker.patch.object(KeypointsField, "process")
         mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
+        mock_objids_field = mocker.patch.object(ObjectIdsField, "process")
         mock_single_person_per_image_list = mocker.patch.object(SinglePersonPerImageList, "process")
         mock_keypoints_per_image_list = mocker.patch.object(KeypointsPerImageList, "process")
 
@@ -122,6 +124,7 @@ class TestKeypointsTask:
         mock_head_bbox_field.assert_called_once_with()
         mock_keypoints_field.assert_called_once_with()
         mock_objfields_field.assert_called_once_with()
+        mock_objids_field.assert_called_once_with(dummy_ids, dummy_ids)
         mock_single_person_per_image_list.assert_called_once_with()
         mock_keypoints_per_image_list.assert_called_once_with()
 
@@ -1651,6 +1654,56 @@ class TestObjectFieldNamesField:
             "activity_id",
             "single_person",
             "keypoint_labels"
+        ]
+
+
+class TestObjectIdsField:
+    """Unit tests for the ObjectIdsField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_objids_class(field_kwargs):
+        return ObjectIdsField(**field_kwargs)
+
+    def test_process(self, mocker, mock_objids_class):
+        dummy_ids = [
+            [],
+            [],
+            []
+        ]
+        mock_get_object_ids = mocker.patch.object(ObjectIdsField, "get_object_ids", return_value=dummy_ids)
+        mock_save_hdf5 = mocker.patch.object(ObjectIdsField, "save_field_to_hdf5")
+
+        mock_objids_class.process(
+            image_ids=[1,2,2,3],
+            video_ids=[1,2,2,3]
+        )
+
+        mock_get_object_ids.assert_called_once_with([1,2,2,3], [1,2,2,3])
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='object_ids',
+        #     data=np.array(dummy_ids, dtype=np.int32),
+        #     dtype=np.int32,
+        #     fillvalue=-1
+        # )
+
+    def test_get_object_ids(self, mocker, mock_objids_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(FrameSecField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(FrameSecField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy'], ['dummy']])
+
+        object_ids = mock_objids_class.get_object_ids(
+            image_ids=[0, 1, 1, 2],
+            video_ids=[5, 6, 6, 4]
+        )
+
+        assert object_ids == [
+            [0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 2, 2, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2],
+            [2, 3, 3, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3]
         ]
 
 
