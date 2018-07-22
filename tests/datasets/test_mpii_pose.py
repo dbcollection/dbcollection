@@ -30,6 +30,7 @@ from dbcollection.datasets.mpii_pose.keypoints import (
     SinglePersonField,
     HeadBoundingBoxField,
     KeypointsField,
+    ObjectFieldNamesField,
     SinglePersonPerImageList,
     KeypointsPerImageList
 )
@@ -90,6 +91,7 @@ class TestKeypointsTask:
         mock_single_person_field = mocker.patch.object(SinglePersonField, "process")
         mock_head_bbox_field = mocker.patch.object(HeadBoundingBoxField, "process")
         mock_keypoints_field = mocker.patch.object(KeypointsField, "process")
+        mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
         mock_single_person_per_image_list = mocker.patch.object(SinglePersonPerImageList, "process")
         mock_keypoints_per_image_list = mocker.patch.object(KeypointsPerImageList, "process")
 
@@ -119,6 +121,7 @@ class TestKeypointsTask:
         mock_single_person_field.assert_called_once_with()
         mock_head_bbox_field.assert_called_once_with()
         mock_keypoints_field.assert_called_once_with()
+        mock_objfields_field.assert_called_once_with()
         mock_single_person_per_image_list.assert_called_once_with()
         mock_keypoints_per_image_list.assert_called_once_with()
 
@@ -1589,6 +1592,65 @@ class TestKeypointsField:
             [[5, 115, 1], [13, 31, 0]],
             [[-1, -1, -1], [3, 3, 1]],
             [[10, 10, 1], [-1, -1, -1]]
+        ]
+
+
+class TestObjectFieldNamesField:
+    """Unit tests for the ObjectFieldNamesField class."""
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_objfields_class(field_kwargs):
+        return ObjectFieldNamesField(**field_kwargs)
+
+    def test_process(self, mocker, mock_objfields_class):
+        mock_get_object_fields = mocker.patch.object(ObjectFieldNamesField, "get_object_fields", return_value=['field1', 'field2', 'field3'])
+        mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
+
+        mock_objfields_class.process()
+
+        mock_get_object_fields.assert_called_once_with()
+        assert mock_save_hdf5.called
+        # **disabled until I find a way to do assert calls with numpy arrays**
+        # mock_save_hdf5.assert_called_once_with(
+        #     set_name='train',
+        #     field='object_fields',
+        #     data=str2ascii(['field1', 'field2', 'field3']),
+        #     dtype=np.uint8,
+        #     fillvalue=0
+        # )
+
+    def test_get_keypoints__train_set(self, mocker, mock_objfields_class, test_data_loaded):
+        assert mock_objfields_class.get_object_fields() == [
+            "image_filenames",
+            "scale",
+            "objpos",
+            "video_ids",
+            "video_names",
+            "frame_sec",
+            "category_name",
+            "activity_name",
+            "activity_id",
+            "single_person",
+            "keypoint_labels",
+            "head_bbox",
+            "keypoints"
+        ]
+
+    def test_get_keypoints__test_set(self, mocker, mock_objfields_class, test_data_loaded):
+        mock_objfields_class.set_name = 'test'
+        assert mock_objfields_class.get_object_fields() == [
+            "image_filenames",
+            "scale",
+            "objpos",
+            "video_ids",
+            "video_names",
+            "frame_sec",
+            "category_name",
+            "activity_name",
+            "activity_id",
+            "single_person",
+            "keypoint_labels"
         ]
 
 
