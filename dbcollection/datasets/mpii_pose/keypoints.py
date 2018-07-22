@@ -65,6 +65,7 @@ class Keypoints(BaseTaskNew):
             HeadBoundingBoxField(**args).process()
             KeypointsField(**args).process()
         ObjectFieldNamesField(**args).process()
+        ObjectIdsField(**args).process(image_ids, video_ids)
 
         # Lists
         if self.verbose:
@@ -796,9 +797,53 @@ class ObjectFieldNamesField(CustomBaseField):
             "single_person",
             "keypoint_labels"
         ]
-        if not self.set_name == 'test':
+        if self.set_name is not 'test':
             object_fields += ["head_bbox", "keypoints"]
         return object_fields
+
+
+class ObjectIdsField(CustomBaseField):
+    """Object ids field metadata process/save class."""
+
+    @display_message_processing('object_ids')
+    def process(self, image_ids, video_ids):
+        """Processes and saves the object ids metadata to hdf5."""
+        object_ids = self.get_object_ids(image_ids, video_ids)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='object_ids',
+            data=np.array(object_ids, dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_object_ids(self, image_ids, video_ids):
+        """Returns a list of object ids."""
+        object_ids = []
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        counter = 0
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for _, pose in enumerate(image_pose_annotations):
+                obj_ids = [
+                    image_ids[counter],  # image_filenames
+                    counter,  # scale
+                    counter,  # objpos
+                    video_ids[counter],  # video_ids
+                    video_ids[counter],  # video_name
+                    counter,  # frame_sec
+                    counter,  # category_name
+                    counter,  # activity_name
+                    counter,  # activity_id
+                    counter,  # single_person
+                    counter,  # keypoint_labels
+                ]
+                if self.set_name is not 'test':
+                    obj_ids += [counter, counter]  # [head_bbox, keypoints]
+                object_ids.append(obj_ids)
+                counter += 1
+        return object_ids
 
 
 class HeadBoundingBoxField(CustomBaseField):
