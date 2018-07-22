@@ -51,30 +51,30 @@ class TestKeypointsTask:
 
     def test_load_data(self, mocker, mock_keypoints_class):
         mock_load_trainval = mocker.patch.object(DatasetAnnotationLoader, "load_trainval_data", return_value=['trainval_data'])
-        mock_load_train = mocker.patch.object(DatasetAnnotationLoader, "load_train_data", return_value=['train_data'])
-        mock_load_val = mocker.patch.object(DatasetAnnotationLoader, "load_val_data", return_value=['val_data'])
+        # mock_load_train = mocker.patch.object(DatasetAnnotationLoader, "load_train_data", return_value=['train_data'])
+        # mock_load_val = mocker.patch.object(DatasetAnnotationLoader, "load_val_data", return_value=['val_data'])
         mock_load_test = mocker.patch.object(DatasetAnnotationLoader, "load_test_data", return_value=['test_data'])
 
         load_data_generator = mock_keypoints_class.load_data()
 
         if sys.version[0] == '3':
             trainval_data = load_data_generator.__next__()
-            train_data = load_data_generator.__next__()
-            val_data = load_data_generator.__next__()
+            # train_data = load_data_generator.__next__()
+            # val_data = load_data_generator.__next__()
             test_data = load_data_generator.__next__()
         else:
             trainval_data = load_data_generator.next()
-            train_data = load_data_generator.next()
-            val_data = load_data_generator.next()
+            # train_data = load_data_generator.next()
+            # val_data = load_data_generator.next()
             test_data = load_data_generator.next()
 
         mock_load_trainval.assert_called_once_with()
-        mock_load_train.assert_called_once_with()
-        mock_load_val.assert_called_once_with()
+        # mock_load_train.assert_called_once_with()
+        # mock_load_val.assert_called_once_with()
         mock_load_test.assert_called_once_with()
         assert trainval_data == {"trainval": ['trainval_data']}
-        assert train_data == {"train": ['train_data']}
-        assert val_data == {"val": ['val_data']}
+        # assert train_data == {"train": ['train_data']}
+        # assert val_data == {"val": ['val_data']}
         assert test_data == {"test": ['test_data']}
 
     def test_process_set_metadata(self, mocker, mock_keypoints_class):

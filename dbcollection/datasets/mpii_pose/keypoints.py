@@ -31,8 +31,8 @@ class Keypoints(BaseTaskNew):
             verbose=self.verbose
         )
         yield {"trainval": loader.load_trainval_data()}
-        yield {"train": loader.load_train_data()}
-        yield {"val": loader.load_val_data()}
+        # yield {"train": loader.load_train_data()}
+        # yield {"val": loader.load_val_data()}
         yield {"test": loader.load_test_data()}
 
     def process_set_metadata(self, data, set_name):
