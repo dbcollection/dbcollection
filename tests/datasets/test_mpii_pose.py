@@ -703,6 +703,7 @@ class TestDatasetAnnotationLoader:
         mock_get_keypoints.assert_called_once_with(annotations_file, ipose)
         assert keypoints == [[0, 0, 0]] * 16
 
+    @pytest.mark.skipif(sys.version[0] == '2', reason="requires python3")
     def test_get_keypoints__returns_parsed_keypoint(self, mocker, mock_loader_class):
         vnames = ['x', 'y', 'id']
         dummy_keypoints_annotations = mocker.MagicMock()
