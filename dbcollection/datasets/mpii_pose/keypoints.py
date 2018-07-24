@@ -418,12 +418,33 @@ class DatasetAnnotationLoader:
         """Returns the video names annotations."""
         return annotations['RELEASE'][0][0][5][0]
 
-    def filter_annotations_by_ids(self, annotations, image_ids):
+    def filter_annotations_by_ids(self, annotations, set_image_ids):
         """Returns a subset of the annotations w.r.t. a list of image indices."""
-        annotations_subset = []
-        for ifile in image_ids:
-            annotations_subset.append(annotations[ifile])
-        return annotations_subset
+        filtered_ids = self.get_filtered_ids(annotations['image_ids'], set_image_ids)
+        return {
+            "image_filenames": self.select_items_from_list(annotations['image_filenames'], filtered_ids),
+            "frame_sec": self.select_items_from_list(annotations['frame_sec'], filtered_ids),
+            "video_idx": self.select_items_from_list(annotations['video_idx'], filtered_ids),
+            "pose_annotations": self.select_items_from_list(annotations['pose_annotations'], filtered_ids),
+            "activity": self.select_items_from_list(annotations['activity'], filtered_ids),
+            "single_person": self.select_items_from_list(annotations['single_person'], filtered_ids),
+            "video_names": self.select_items_from_list(annotations['video_names'], filtered_ids)
+        }
+
+    def get_filtered_ids(self, image_ids, set_image_ids):
+        filtered_ids = []
+        for idx in set_image_ids:
+            try:
+                filtered_ids.append(image_ids.index(idx))
+            except ValueError:
+                pass
+        return filtered_ids
+
+    def select_items_from_list(self, annotations, filtered_ids):
+        annotations_filtered = []
+        for idx in filtered_ids:
+            annotations_filtered.append(annotations[idx])
+        return annotations_filtered
 
 
 # -----------------------------------------------------------
