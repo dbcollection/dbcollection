@@ -237,7 +237,7 @@ class TestDatasetAnnotationLoader:
         mock_get_video_idx.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_pose.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_activity.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
-        mock_get_single.assert_called_once_with(dummy_annotations, dummy_nfiles)
+        mock_get_single.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_video_names.assert_called_once_with(dummy_annotations)
         assert annotations == {
             "image_ids": dummy_image_ids,
@@ -882,6 +882,7 @@ class TestDatasetAnnotationLoader:
         }]*5
 
     def test_get_activities__returns_default(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
         mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_activity_annotation_of_file", return_value=[])
         mock_get_category_name = mocker.patch.object(DatasetAnnotationLoader, "get_category_name")
         mock_get_activity_name = mocker.patch.object(DatasetAnnotationLoader, "get_activity_name")
@@ -891,6 +892,7 @@ class TestDatasetAnnotationLoader:
         num_files = 1
         activities = mock_loader_class.get_activities(annotations, num_files, True)
 
+        mock_is_test.assert_called_once_with(annotations, 0)
         mock_get_annotation.assert_called_once_with(annotations, 0)
         assert not mock_get_category_name.called
         assert not mock_get_activity_name.called
@@ -902,6 +904,7 @@ class TestDatasetAnnotationLoader:
         }]
 
     def test_get_activities__returns_single_activity(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
         mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_activity_annotation_of_file", return_value=[1])
         mock_get_category_name = mocker.patch.object(DatasetAnnotationLoader, "get_category_name", return_value='category1')
         mock_get_activity_name = mocker.patch.object(DatasetAnnotationLoader, "get_activity_name", return_value='activity1')
@@ -911,6 +914,7 @@ class TestDatasetAnnotationLoader:
         num_files = 1
         activities = mock_loader_class.get_activities(annotations, num_files, True)
 
+        mock_is_test.assert_called_once_with(annotations, 0)
         mock_get_annotation.assert_called_once_with(annotations, 0)
         mock_get_category_name.assert_called_once_with(annotations, 0)
         mock_get_activity_name.assert_called_once_with(annotations, 0)
@@ -922,6 +926,7 @@ class TestDatasetAnnotationLoader:
         }]
 
     def test_get_activities__returns_multiple_activities(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
         mock_get_annotation = mocker.patch.object(DatasetAnnotationLoader, "get_activity_annotation_of_file", return_value=[1])
         mock_get_category_name = mocker.patch.object(DatasetAnnotationLoader, "get_category_name", return_value='category1')
         mock_get_activity_name = mocker.patch.object(DatasetAnnotationLoader, "get_activity_name", return_value='activity1')
@@ -931,6 +936,7 @@ class TestDatasetAnnotationLoader:
         num_files = 5
         activities = mock_loader_class.get_activities(annotations, num_files, True)
 
+        assert mock_is_test.call_count == 5
         assert mock_get_annotation.call_count == 5
         assert mock_get_category_name.call_count == 5
         assert mock_get_activity_name.call_count == 5
@@ -970,22 +976,26 @@ class TestDatasetAnnotationLoader:
         assert activity_id == 12345
 
     def test_get_single_persons__returns_single_person(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
         mock_get_single_person = mocker.patch.object(DatasetAnnotationLoader, "get_single_persons_by_file", return_value={"dummy": 'data'})
 
         annotations = {"RELEASE": []}
         num_files = 1
-        single_person = mock_loader_class.get_single_persons(annotations, num_files)
+        single_person = mock_loader_class.get_single_persons(annotations, num_files, True)
 
+        mock_is_test.assert_called_once_with(annotations, 0)
         mock_get_single_person.assert_called_once_with(annotations, 0)
         assert single_person == [{"dummy": 'data'}]
 
     def test_get_single_persons__returns_multiple_persons(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
         mock_get_single_person = mocker.patch.object(DatasetAnnotationLoader, "get_single_persons_by_file", return_value={"dummy": 'data'})
 
         annotations = {"RELEASE": []}
         num_files = 5
-        single_person = mock_loader_class.get_single_persons(annotations, num_files)
+        single_person = mock_loader_class.get_single_persons(annotations, num_files, True)
 
+        assert mock_is_test.call_count == 5
         assert mock_get_single_person.call_count == 5
         assert single_person == [{"dummy": 'data'}]*5
 
@@ -1046,13 +1056,13 @@ class TestDatasetAnnotationLoader:
             "pose_annotations": [['dummy_data'], ['dummy_data']],
             "activity": [['dummy_data'], ['dummy_data']],
             "single_person": [['dummy_data'], ['dummy_data']],
-            "video_names": [['dummy_data'], ['dummy_data']]
+            "video_names": [['dummy_video1'], ['dummy_video2']]
         }
         set_image_ids = [1,2,5,6,9]
         filtered_annotations = mock_loader_class.filter_annotations_by_ids(annotations, set_image_ids)
 
         mock_filtered_ids.assert_called_once_with(list(range(5)), set_image_ids)
-        assert mock_select_items.call_count == 7
+        assert mock_select_items.call_count == 6
         assert filtered_annotations == {
             "image_filenames": dummy_filtered,
             "frame_sec": dummy_filtered,
@@ -1060,7 +1070,7 @@ class TestDatasetAnnotationLoader:
             "pose_annotations": dummy_filtered,
             "activity": dummy_filtered,
             "single_person": dummy_filtered,
-            "video_names": dummy_filtered
+            "video_names": [['dummy_video1'], ['dummy_video2']]
         }
 
     def test_get_filtered_ids(self, mocker, mock_loader_class):
