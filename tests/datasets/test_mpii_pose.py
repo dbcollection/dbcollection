@@ -208,6 +208,7 @@ class TestDatasetAnnotationLoader:
     def test_load_annotations_set(self, mocker, mock_loader_class):
         dummy_annotations = {"dummy": 'data'}
         dummy_nfiles = 10
+        dummy_image_ids = [1, 2, 3, 3]
         dummy_filenames = ['filename1', 'filename2', 'filename2', 'filename3', 'filename3']
         dummy_framesec = [141,20,13,74,6]
         dummy_videos = [6,20,1,1, 4]
@@ -217,6 +218,7 @@ class TestDatasetAnnotationLoader:
         dummy_video_names = ['video1', 'video2', 'video3']
         mock_load_annotations = mocker.patch.object(DatasetAnnotationLoader, "load_annotation_data_from_disk", return_value=dummy_annotations)
         mock_get_total_files = mocker.patch.object(DatasetAnnotationLoader, "get_num_files", return_value=dummy_nfiles)
+        mock_get_image_ids = mocker.patch.object(DatasetAnnotationLoader, "get_image_ids", return_value=dummy_image_ids)
         mock_get_filenames = mocker.patch.object(DatasetAnnotationLoader, "get_image_filenames", return_value=dummy_filenames)
         mock_get_frame_sec = mocker.patch.object(DatasetAnnotationLoader, "get_frame_sec", return_value=dummy_framesec)
         mock_get_video_idx = mocker.patch.object(DatasetAnnotationLoader, "get_video_indexes", return_value=dummy_videos)
@@ -229,6 +231,7 @@ class TestDatasetAnnotationLoader:
 
         mock_load_annotations.assert_called_once_with()
         mock_get_total_files.assert_called_once_with(dummy_annotations)
+        mock_get_image_ids.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_filenames.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_frame_sec.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
         mock_get_video_idx.assert_called_once_with(dummy_annotations, dummy_nfiles, True)
@@ -237,6 +240,7 @@ class TestDatasetAnnotationLoader:
         mock_get_single.assert_called_once_with(dummy_annotations, dummy_nfiles)
         mock_get_video_names.assert_called_once_with(dummy_annotations)
         assert annotations == {
+            "image_ids": dummy_image_ids,
             "image_filenames": dummy_filenames,
             "frame_sec": dummy_framesec,
             "video_idx": dummy_videos,
@@ -261,6 +265,36 @@ class TestDatasetAnnotationLoader:
         num_files = mock_loader_class.get_num_files(annotations)
 
         assert num_files == 10
+
+    def test_get_image_ids__only_one_file(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        image_ids = mock_loader_class.get_image_ids(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        assert image_ids == [0]
+
+    def test_get_image_ids__multiple_file(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
+
+        annotations = {"RELEASE": []}
+        num_files = 10
+        image_ids = mock_loader_class.get_image_ids(annotations, num_files, True)
+
+        assert mock_is_test.call_count == 10
+        assert image_ids == list(range(10))
+
+    def test_get_image_ids__returns_empty_list(self, mocker, mock_loader_class):
+        mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=False)
+
+        annotations = {"RELEASE": []}
+        num_files = 1
+        image_ids = mock_loader_class.get_image_ids(annotations, num_files, True)
+
+        mock_is_test.assert_called_once_with(annotations, 0)
+        assert image_ids == []
 
     def test_get_image_filenames__only_one_file(self, mocker, mock_loader_class):
         mock_is_test = mocker.patch.object(DatasetAnnotationLoader, "is_test_annotation", return_value=True)
