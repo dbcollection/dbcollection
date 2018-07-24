@@ -1033,26 +1033,49 @@ class TestDatasetAnnotationLoader:
         )
         assert video_annotations == [['video1'], ['video2'], ['video3']]
 
-    def test_filter_annotations_by_ids__returns_empty_list(self, mocker, mock_loader_class):
-        annotations_subset = mock_loader_class.filter_annotations_by_ids(
-            annotations=[0, 2, 4, 6, 8, 10],
-            image_ids=[]
-        )
-        assert annotations_subset == []
+    def test_filter_annotations_by_ids(self, mocker, mock_loader_class):
+        dummy_filtered = [['dummy_data1'], ['dummy_data2'], ['dummy_data3']]
+        mock_filtered_ids = mocker.patch.object(DatasetAnnotationLoader, "get_filtered_ids", return_value=[1,2,3,4,5])
+        mock_select_items = mocker.patch.object(DatasetAnnotationLoader, "select_items_from_list", return_value=dummy_filtered)
 
-    def test_filter_annotations_by_ids__returns_full_list(self, mocker, mock_loader_class):
-        annotations_subset = mock_loader_class.filter_annotations_by_ids(
-            annotations=[0, 2, 4, 6, 8, 10],
-            image_ids=list(range(6))
-        )
-        assert annotations_subset == [0, 2, 4, 6, 8, 10]
+        annotations = {
+            "image_ids": list(range(5)),
+            "image_filenames": [['dummy_data'], ['dummy_data']],
+            "frame_sec": [['dummy_data'], ['dummy_data']],
+            "video_idx": [['dummy_data'], ['dummy_data']],
+            "pose_annotations": [['dummy_data'], ['dummy_data']],
+            "activity": [['dummy_data'], ['dummy_data']],
+            "single_person": [['dummy_data'], ['dummy_data']],
+            "video_names": [['dummy_data'], ['dummy_data']]
+        }
+        set_image_ids = [1,2,5,6,9]
+        filtered_annotations = mock_loader_class.filter_annotations_by_ids(annotations, set_image_ids)
 
-    def test_filter_annotations_by_ids__returns_filtered_list(self, mocker, mock_loader_class):
-        annotations_subset = mock_loader_class.filter_annotations_by_ids(
-            annotations=[0, 2, 4, 6, 8, 10],
-            image_ids=[2, 3, 5]
+        mock_filtered_ids.assert_called_once_with(list(range(5)), set_image_ids)
+        assert mock_select_items.call_count == 7
+        assert filtered_annotations == {
+            "image_filenames": dummy_filtered,
+            "frame_sec": dummy_filtered,
+            "video_idx": dummy_filtered,
+            "pose_annotations": dummy_filtered,
+            "activity": dummy_filtered,
+            "single_person": dummy_filtered,
+            "video_names": dummy_filtered
+        }
+
+    def test_get_filtered_ids(self, mocker, mock_loader_class):
+        filtered_ids = mock_loader_class.get_filtered_ids(
+            image_ids=[10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0],
+            set_image_ids=[3, 4, 8, 9]
         )
-        assert annotations_subset == [4, 6, 10]
+        assert filtered_ids == [7, 6, 2, 1]
+
+    def test_select_items_from_list(self, mocker, mock_loader_class):
+        annotations_filtered = mock_loader_class.select_items_from_list(
+            annotations=[['dummy_data1'], ['dummy_data2'], ['dummy_data3'], ['dummy_data4'], ['dummy_data5']],
+            filtered_ids=[2,3]
+        )
+        assert annotations_filtered == [['dummy_data3'], ['dummy_data4']]
 
 
 @pytest.fixture()
