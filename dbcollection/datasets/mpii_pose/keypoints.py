@@ -130,6 +130,7 @@ class DatasetAnnotationLoader:
         annotations = self.load_annotation_data_from_disk()
         nfiles = self.get_num_files(annotations)
         return {
+            "image_ids": self.get_image_ids(annotations, nfiles, is_test),
             "image_filenames": self.get_image_filenames(annotations, nfiles, is_test),
             "frame_sec": self.get_frame_sec(annotations, nfiles, is_test),
             "video_idx": self.get_video_indexes(annotations, nfiles, is_test),
@@ -154,6 +155,15 @@ class DatasetAnnotationLoader:
     def get_num_files(self, annotations):
         """Returns the total number of files available in the dataset."""
         return len(annotations["RELEASE"][0][0][3])
+
+    def get_image_ids(self, annotations, num_files, is_test):
+        """Returns the image indexes from the annotation's data for a
+        set split."""
+        image_ids = []
+        for ifile in range(num_files):
+            if is_test == self.is_test_annotation(annotations, ifile):
+                image_ids.append(ifile)
+        return image_ids
 
     def get_image_filenames(self, annotations, num_files, is_test):
         """Returns the image filenames from the annotation's data for a
