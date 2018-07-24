@@ -136,7 +136,7 @@ class DatasetAnnotationLoader:
             "video_idx": self.get_video_indexes(annotations, nfiles, is_test),
             "pose_annotations": self.get_pose_annotations(annotations, nfiles, is_test),
             "activity": self.get_activities(annotations, nfiles, is_test),
-            "single_person": self.get_single_persons(annotations, nfiles),
+            "single_person": self.get_single_persons(annotations, nfiles, is_test),
             "video_names": self.get_video_names(annotations)
         }
 
@@ -352,16 +352,17 @@ class DatasetAnnotationLoader:
         for a set split."""
         activities = []
         for ifile in range(annotation_size):
-            category_name, activity_name, activity_id = '', '', -1
-            if any(self.get_activity_annotation_of_file(annotations, ifile)):
-                category_name = self.get_category_name(annotations, ifile)
-                activity_name = self.get_activity_name(annotations, ifile)
-                activity_id = self.get_activity_id(annotations, ifile)
-            activities.append({
-                "category_name": str(category_name),
-                "activity_name": str(activity_name),
-                "activity_id": int(activity_id)
-            })
+            if is_test == self.is_test_annotation(annotations, ifile):
+                category_name, activity_name, activity_id = '', '', -1
+                if any(self.get_activity_annotation_of_file(annotations, ifile)):
+                    category_name = self.get_category_name(annotations, ifile)
+                    activity_name = self.get_activity_name(annotations, ifile)
+                    activity_id = self.get_activity_id(annotations, ifile)
+                activities.append({
+                    "category_name": str(category_name),
+                    "activity_name": str(activity_name),
+                    "activity_id": int(activity_id)
+                })
         return activities
 
     def get_activity_annotation_of_file(self, annotations, ifile):
@@ -380,13 +381,14 @@ class DatasetAnnotationLoader:
         """Returns the activity id of the activity of an image file."""
         return annotations['RELEASE'][0][0][4][ifile][0][2][0][0]
 
-    def get_single_persons(self, annotations, annotation_size):
+    def get_single_persons(self, annotations, annotation_size, is_test):
         """Returns a list of 0 and 1s indicating the presence of a
         single person from the annotation's data for a set split."""
         single_person = []
         for ifile in range(annotation_size):
-            single_person_ = self.get_single_persons_by_file(annotations, ifile)
-            single_person.append(single_person_)
+            if is_test == self.is_test_annotation(annotations, ifile):
+                single_person_ = self.get_single_persons_by_file(annotations, ifile)
+                single_person.append(single_person_)
         return single_person
 
     def get_single_persons_by_file(self, annotations, ifile):
@@ -428,7 +430,7 @@ class DatasetAnnotationLoader:
             "pose_annotations": self.select_items_from_list(annotations['pose_annotations'], filtered_ids),
             "activity": self.select_items_from_list(annotations['activity'], filtered_ids),
             "single_person": self.select_items_from_list(annotations['single_person'], filtered_ids),
-            "video_names": self.select_items_from_list(annotations['video_names'], filtered_ids)
+            "video_names": annotations['video_names']
         }
 
     def get_filtered_ids(self, image_ids, set_image_ids):
