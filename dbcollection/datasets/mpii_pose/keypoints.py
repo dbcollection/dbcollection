@@ -517,7 +517,7 @@ class ScalesField(CustomBaseField):
         scales = self.get_scales()
         self.save_field_to_hdf5(
             set_name=self.set_name,
-            field='scales',
+            field='scale',
             data=np.array(scales, dtype=np.float),
             dtype=np.float,
             fillvalue=0
