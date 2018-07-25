@@ -571,7 +571,7 @@ class VideoIdsField(CustomBaseField):
         video_ids = self.get_video_ids()
         self.save_field_to_hdf5(
             set_name=self.set_name,
-            field='video_ids',
+            field='video_id',
             data=np.array(video_ids, dtype=np.int32),
             dtype=np.int32,
             fillvalue=-1
