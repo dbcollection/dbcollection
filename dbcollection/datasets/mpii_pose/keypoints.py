@@ -518,8 +518,8 @@ class ScalesField(CustomBaseField):
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='scales',
-            data=np.array(scales, dtype=np.float32),
-            dtype=np.float32,
+            data=np.array(scales, dtype=np.float),
+            dtype=np.float,
             fillvalue=0
         )
 
@@ -545,8 +545,8 @@ class ObjposField(CustomBaseField):
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='objpos',
-            data=np.array(objpos, dtype=np.float32),
-            dtype=np.float32,
+            data=np.array(objpos, dtype=np.float),
+            dtype=np.float,
             fillvalue=0
         )
 
@@ -893,8 +893,8 @@ class HeadBoundingBoxField(CustomBaseField):
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='head_bbox',
-            data=np.array(head_bboxes, dtype=np.float32),
-            dtype=np.float32,
+            data=np.array(head_bboxes, dtype=np.float),
+            dtype=np.float,
             fillvalue=-1
         )
 
@@ -920,8 +920,8 @@ class KeypointsField(CustomBaseField):
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='keypoints',
-            data=np.array(keypoints, dtype=np.float32),
-            dtype=np.float32,
+            data=np.array(keypoints, dtype=np.float),
+            dtype=np.float,
             fillvalue=-1
         )
 
