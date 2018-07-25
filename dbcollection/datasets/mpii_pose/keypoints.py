@@ -600,7 +600,7 @@ class VideoNamesField(CustomBaseField):
         video_names = self.get_video_names(video_ids)
         self.save_field_to_hdf5(
             set_name=self.set_name,
-            field='video_names',
+            field='video_name',
             data=str2ascii(video_names),
             dtype=np.uint8,
             fillvalue=0
