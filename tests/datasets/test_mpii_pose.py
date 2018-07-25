@@ -1181,7 +1181,7 @@ class TestImageFilenamesField:
 
     def test_get_image_filenames(self, mocker, mock_image_filenames_class, test_data_loaded):
         mock_get_image_annotations = mocker.patch.object(ImageFilenamesField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
-        mock_get_pose_annotations = mocker.patch.object(ImageFilenamesField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy', 'dummy'], []])
+        mock_get_pose_annotations = mocker.patch.object(ImageFilenamesField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy', 'dummy'], ['dummy']])
 
         image_filenames, image_filename_ids = mock_image_filenames_class.get_image_filenames()
 
