@@ -1573,12 +1573,16 @@ class TestSinglePersonField:
         # )
 
     def test_get_single_person(self, mocker, mock_single_person_class, test_data_loaded):
+        mock_get_image_annotations = mocker.patch.object(SinglePersonField, "get_image_filenames_annotations", return_value=['image1', 'image2', 'image3'])
+        mock_get_pose_annotations = mocker.patch.object(SinglePersonField, "get_pose_annotations", return_value=[['dummy'], ['dummy', 'dummy', 'dummy'], ['dumnmy', 'dummy', 'dummy']])
         mock_get_single_pose_annotations = mocker.patch.object(SinglePersonField, "get_single_person_annotations", return_value=[[-1], [1, 1, 1], [-1, 1]])
 
         single_persons = mock_single_person_class.get_single_person()
 
+        mock_get_image_annotations.assert_called_once_with()
+        mock_get_pose_annotations.assert_called_once_with()
         mock_get_single_pose_annotations.assert_called_once_with()
-        assert single_persons == [0, 1, 1, 1, 0, 1]
+        assert single_persons == [0, 1, 1, 1, 0, 1, 0]
 
 
 class TestHeadBoundingBoxField:

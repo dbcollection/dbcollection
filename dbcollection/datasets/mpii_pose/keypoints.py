@@ -502,9 +502,9 @@ class ImageFilenamesField(CustomBaseField):
         pose_annotations = self.get_pose_annotations()
         for i, image_filename in enumerate(image_fnames):
             image_pose_annotations = pose_annotations[i]
-                for j, _ in enumerate(image_pose_annotations):
-                    image_filenames.append(image_filename)
-                    image_filenames_ids.append(i)
+            for j, _ in enumerate(image_pose_annotations):
+                image_filenames.append(image_filename)
+                image_filenames_ids.append(i)
         return image_filenames, image_filenames_ids
 
 
@@ -787,8 +787,16 @@ class SinglePersonField(CustomBaseField):
         """Returns a list of booleans ([0, 1]) indicating single person detections."""
         single_persons = []
         single_person_annotations = self.get_single_person_annotations()
-        for single_persons_image in single_person_annotations:
-            for val in single_persons_image:
+        image_fnames = self.get_image_filenames_annotations()
+        pose_annotations = self.get_pose_annotations()
+        activity_annotations = self.get_activity_annotations()
+        for i, _ in enumerate(image_fnames):
+            image_pose_annotations = pose_annotations[i]
+            for j, pose in enumerate(image_pose_annotations):
+                try:
+                    val = single_person_annotations[i][j]
+                except IndexError:
+                    val = -1
                 if val == -1:
                     single_persons.append(0)
                 else:
