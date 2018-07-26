@@ -25,7 +25,7 @@ Properties
 - ``is downloadable``: **yes**
 - ``tasks``:
     - :ref:`keypoints (default) <mpii_readme_keypoints>`
-    - :ref:`keypoints_full <mpii_readme_keypoints_full>`
+    - :ref:`keypoints_clean (TODO) <mpii_readme_keypoints_clean>`
 
 
 Tasks
