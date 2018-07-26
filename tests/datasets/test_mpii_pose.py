@@ -14,7 +14,7 @@ from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.datasets.mpii_pose.keypoints import (
     Keypoints,
-    KeypointsFull,
+    KeypointsClean,
     DatasetAnnotationLoader,
     CustomBaseField,
     ImageFilenamesField,
@@ -47,7 +47,7 @@ class TestKeypointsTask:
 
     def test_task_attributes(self, mocker, mock_keypoints_class):
         assert mock_keypoints_class.filename_h5 == 'keypoint'
-        assert mock_keypoints_class.is_full == False
+        assert mock_keypoints_class.is_full == True
 
     def test_load_data(self, mocker, mock_keypoints_class):
         mock_load_trainval = mocker.patch.object(DatasetAnnotationLoader, "load_trainval_data", return_value=['trainval_data'])
@@ -129,17 +129,17 @@ class TestKeypointsTask:
         mock_keypoints_per_image_list.assert_called_once_with()
 
 
-class TestKeypointsFullTask:
-    """Unit tests for the mpii KeypointsFull task."""
+class TestKeypointsCleanTask:
+    """Unit tests for the mpii KeypointsClean task."""
 
     @staticmethod
     @pytest.fixture()
-    def mock_keypointsfull_class():
-        return KeypointsFull(data_path='/some/path/data', cache_path='/some/path/cache')
+    def mock_keypointsclean_class():
+        return KeypointsClean(data_path='/some/path/data', cache_path='/some/path/cache')
 
-    def test_task_attributes(self, mocker, mock_keypointsfull_class):
-        assert mock_keypointsfull_class.filename_h5 == 'keypoint_full'
-        assert mock_keypointsfull_class.is_full == True
+    def test_task_attributes(self, mocker, mock_keypointsclean_class):
+        assert mock_keypointsclean_class.filename_h5 == 'keypoint_clean'
+        assert mock_keypointsclean_class.is_full == False
 
 
 class TestDatasetAnnotationLoader:

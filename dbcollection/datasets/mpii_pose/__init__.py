@@ -4,7 +4,7 @@ MPII Human Pose Dataset download/process functions.
 
 
 from dbcollection.datasets import BaseDatasetNew
-from .keypoints import Keypoints, KeypointsFull
+from .keypoints import Keypoints, KeypointsClean
 
 
 urls = (
@@ -13,8 +13,8 @@ urls = (
 )
 keywords = ('image_processing', 'detection', 'human_pose', 'keypoints')
 tasks = {
-    "keypoints": Keypoints,           # clean version (removes invalid annotations)
-    "keypoints_full": KeypointsFull,  # Contains all the original annotations
+    "keypoints": Keypoints,             # Contains all the original annotations
+    "keypoints_clean": KeypointsClean,  # clean version (removes invalid annotations)
 }
 default_task = 'keypoints'
 

@@ -18,7 +18,7 @@ class Keypoints(BaseTaskNew):
     """MPII Keypoints preprocessing functions."""
 
     filename_h5 = 'keypoint'
-    is_full = False
+    is_full = True
 
     def load_data(self):
         """
@@ -1009,9 +1009,9 @@ class KeypointsPerImageList(CustomBaseField):
 # Additional tasks
 # -----------------------------------------------------------
 
-class KeypointsFull(Keypoints):
-    """MPII Keypoints (FULL original annotations) task class."""
+class KeypointsClean(Keypoints):
+    """MPII Keypoints (clean annotations) task class."""
 
     # metadata filename
-    filename_h5 = 'keypoint_full'
-    is_full = True
+    filename_h5 = 'keypoint_clean'
+    is_full = False
