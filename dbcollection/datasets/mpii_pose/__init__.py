@@ -3,8 +3,9 @@ MPII Human Pose Dataset download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
-from .keypoints import Keypoints, KeypointsFull
+from dbcollection.datasets import BaseDatasetNew
+from .keypoints import Keypoints, KeypointsClean
+
 
 urls = (
     'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz',
@@ -12,13 +13,13 @@ urls = (
 )
 keywords = ('image_processing', 'detection', 'human_pose', 'keypoints')
 tasks = {
-    "keypoints": Keypoints,           # clean version (removes invalid annotations)
-    "keypoints_full": KeypointsFull,  # Contains all the original annotations
+    "keypoints": Keypoints,             # Contains all the original annotations
+    "keypoints_clean": KeypointsClean,  # clean version (removes invalid annotations)
 }
 default_task = 'keypoints'
 
 
-class Dataset(BaseDataset):
+class Dataset(BaseDatasetNew):
     """MPII Pose Dataset preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
