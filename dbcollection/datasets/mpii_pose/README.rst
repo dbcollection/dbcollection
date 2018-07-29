@@ -52,8 +52,8 @@ How to use
     >>> import dbcollection as dbc
     >>>
     >>> # load the dataset
-    >>> mnist = dbc.load('mpii_pose', 'keypoints')
-    >>> mnist
+    >>> mpii_pose = dbc.load('mpii_pose')
+    >>> mpii_pose
     DataLoader: "mpii_pose" (keypoints task)
 
 
