@@ -3,7 +3,7 @@ dbcollection
 
 |Join the chat at https://gitter.im/dbcollection/dbcollection|
 
-|Build Status| |CircleCI| |Build status| |codecov| |License: MIT|
+|Build Status| |Build status| |codecov| |License: MIT|
 |Documentation Status| |PyPI version|
 
 **dbcollection** is a library for downloading/parsing/managing datasets via simple methods.
@@ -189,8 +189,6 @@ License
    :target: https://gitter.im/dbcollection/dbcollection?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
 .. |Build Status| image:: https://travis-ci.org/dbcollection/dbcollection.svg?branch=master
    :target: https://travis-ci.org/dbcollection/dbcollection
-.. |CircleCI| image:: https://circleci.com/gh/dbcollection/dbcollection/tree/master.svg?style=svg
-   :target: https://circleci.com/gh/dbcollection/dbcollection/tree/master
 .. |Build status| image:: https://ci.appveyor.com/api/projects/status/85gpibosxhjo8yjl/branch/master?svg=true
    :target: https://ci.appveyor.com/project/farrajota/dbcollection-x3l0d/branch/master
 .. |codecov| image:: https://codecov.io/gh/dbcollection/dbcollection/branch/master/graph/badge.svg
