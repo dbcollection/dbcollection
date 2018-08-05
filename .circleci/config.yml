@@ -1,0 +1,35 @@
+version: 2
+jobs:
+  test:
+    docker:
+      - image: circleci/python:3.7-stretch-node
+    steps:
+      - checkout
+      - run:
+          name: Update pip
+          command: pip install --upgrade pip
+      - run:
+          name: Install pipenv
+          command: pip install -U pipenv
+      - run:
+          name: Install dev dependencies
+          command: pipenv install --dev
+      - run:
+          name: List dependencies
+          command: pipenv graph
+      - run:
+          name: Install python versions
+          command: pipenv run pyenv local 2.7.11 3.4.3 3.5.1 3.6.1
+      - run:
+          name: Run tests
+          command: pipenv run tox
+
+workflows:
+  version: 2
+  setup_and_test:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: master
+
