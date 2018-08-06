@@ -27,49 +27,80 @@ Properties
 - ``dataset size``: 11,9 GB
 - ``is downloadable``: **yes**
 - ``tasks``:
-    - detection: **(default)**
-        - ``primary use``: object detection
-        - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
-        - ``sets``: train, test
-        - ``metadata file size in disk``: 728,4 kB
-        - ``has annotations``: **yes**
-            - ``which``:
-                - labels for each class/category.
-                - bounding box of pedestrians.
-                - occlusion % of annotated pedestrians.
-    - detection_10x:
-        - ``primary use``: object detection
-        - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
-        - ``sets``: train, test
-        - ``metadata file size in disk``: 6,2 MB
-        - ``has annotations``: **yes**
-            - ``which``:
-                - labels for each class/category.
-                - bounding box of pedestrians.
-                - occlusion % of annotated pedestrians.
-    - detection_30x:
-        - ``primary use``: object detection
-        - ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
-        - ``sets``: train, test
-        - ``metadata file size in disk``: 17,4 MB
-        - ``has annotations``: **yes**
-            - ``which``:
-                - labels for each class/category.
-                - bounding box of pedestrians.
-                - occlusion % of annotated pedestrians.
+    - :ref:`detection (default) <caltech_pedestrian_readme_detection>`
+    - :ref:`detection_10x <caltech_pedestrian_readme_detection_10x>`
+    - :ref:`detection_30x <caltech_pedestrian_readme_detection_30x>`
 
 
 .. note:
-    The **detection** task contains 1/30 of all frames+annotations from each video.
-    The **detection_10x** task contains 1/3 of all frames+annotations from each video.
-    The **detection_30x** task has all the frames+annotations for each video.
+    The **detection** task contains 1/30 of all frames of each video.
+    The **detection_10x** task contains 1/3 of all frames of each video.
+    The **detection_30x** task has all the frames of each video.
 
 
-Metadata structure (HDF5)
-=========================
+Tasks
+=====
 
-Task: detection
----------------
+.. _caltech_pedestrian_readme_detection:
+
+detection (default)
+------------------------
+
+- :ref:`How to use <caltech_pedestrian_detection_how_to_use>`
+- :ref:`Properties <caltech_pedestrian_detection_properties>`
+- :ref:`HDF5 file structure <caltech_pedestrian_detection_hdf5_file_structure>`
+- :ref:`Fields <caltech_pedestrian_detection_fields>`
+
+.. _caltech_pedestrian_detection_how_to_use:
+
+How to use
+^^^^^^^^^^
+
+.. code-block:: python
+
+    >>> # import the package
+    >>> import dbcollection as dbc
+    >>>
+    >>> # load the dataset
+    >>> caltech_ped = dbc.load('caltech_pedestrian')
+    >>> caltech_ped
+    DataLoader: "caltech_pedestrian" (detection task)
+
+
+.. _caltech_pedestrian_detection_properties:
+
+Properties
+^^^^^^^^^^
+
+- ``primary use``: object detection
+- ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos.
+- ``sets``: train, test
+- ``metadata file size in disk``: 728,4 kB
+- ``has annotations``: **yes**
+    - ``which``:
+        - labels for each class/category.
+        - bounding box of pedestrians.
+        - occlusion % of pedestrian detections.
+- ``available fields``:
+    - :ref:`image_filenames <caltech_pedestrian_detection_fields_image_filenames>`
+    - :ref:`classes <caltech_pedestrian_detection_fields_classes>`
+    - :ref:`boxes <caltech_pedestrian_detection_fields_boxes>`
+    - :ref:`boxesv <caltech_pedestrian_detection_fields_boxesv>`
+    - :ref:`id <caltech_pedestrian_detection_fields_id>`
+    - :ref:`occlusion <caltech_pedestrian_detection_fields_occlusion>`
+    - :ref:`object_fields <caltech_pedestrian_detection_fields_object_fields>`
+    - :ref:`object_ids <caltech_pedestrian_detection_fields_object_ids>`
+    - :ref:`list_image_filenames_per_class <caltech_pedestrian_detection_fields_list_image_filenames_per_class>`
+    - :ref:`list_boxes_per_image <caltech_pedestrian_detection_fields_list_boxes_per_image>`
+    - :ref:`list_boxesv_per_image <caltech_pedestrian_detection_fields_list_boxesv_per_image>`
+    - :ref:`list_object_ids_per_image <caltech_pedestrian_detection_fields_list_object_ids_per_image>`
+    - :ref:`list_objects_ids_per_class <caltech_pedestrian_detection_fields_list_objects_ids_per_class>`
+
+
+.. _caltech_pedestrian_detection_hdf5_file_structure:
+
+HDF5 file structure
+^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -105,43 +136,65 @@ Task: detection
         └── list_objects_ids_per_class       # dtype=np.int32, shape=(4,4371))
 
 
+.. _caltech_pedestrian_detection_fields:
+
 Fields
 ^^^^^^
 
-- ``image_filenames``: image file path+names
+.. _caltech_pedestrian_detection_fields_image_filenames:
+
+- ``image_filenames``: image file path + names
     - ``available in``: train, test
     - ``dtype``: np.uint8
     - ``is padded``: True
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
+
+.. _caltech_pedestrian_detection_fields_classes:
+
 - ``classes``: class names
     - ``available in``: train, test
     - ``dtype``: np.uint8
     - ``is padded``: True
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
+
+.. _caltech_pedestrian_detection_fields_boxes:
+
 - ``boxes``: bounding boxes
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: bbox format (x1,y1,x2,y2)
+
+.. _caltech_pedestrian_detection_fields_boxesv:
+
 - ``boxesv``: bounding boxes (visible)
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: bbox format (x1,y1,x2,y2)
+
+.. _caltech_pedestrian_detection_fields_id:
+
 - ``id``: label ids
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: False
     - ``fill value``: -1
+
+.. _caltech_pedestrian_detection_fields_occlusion:
+
 - ``occlusion``: occlusion percentage
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
+
+.. _caltech_pedestrian_detection_fields_object_fields:
+
 - ``object_fields``: list of field names of the object id list
     - ``available in``: train, test
     - ``dtype``: np.uint8
@@ -149,36 +202,54 @@ Fields
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
     - ``note``: key field (*field name* aggregator)
+
+.. _caltech_pedestrian_detection_fields_object_ids:
+
 - ``object_ids``: list of field ids
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: key field (*field id* aggregator)
+
+.. _caltech_pedestrian_detection_fields_list_image_filenames_per_class:
+
 - ``list_image_filenames_per_class``: list of image per class
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_fields_list_boxes_per_image:
+
 - ``list_boxes_per_image``: list of bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_fields_list_boxesv_per_image:
+
 - ``list_boxesv_per_image``: list of (visible) bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_fields_list_object_ids_per_image:
+
 - ``list_object_ids_per_image``: list of object ids per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_fields_list_objects_ids_per_class:
+
 - ``list_objects_ids_per_class``: list of object ids per class
     - ``available in``: train, test
     - ``dtype``: np.int32
@@ -187,8 +258,66 @@ Fields
     - ``note``: pre-ordered list
 
 
-Task: detection_10x
--------------------
+.. _caltech_pedestrian_readme_detection_10x:
+
+detection_10x
+------------------------
+
+- :ref:`How to use <caltech_pedestrian_detection_10x_how_to_use>`
+- :ref:`Properties <caltech_pedestrian_detection_10x_properties>`
+- :ref:`HDF5 file structure <caltech_pedestrian_detection_10x_hdf5_file_structure>`
+- :ref:`Fields <caltech_pedestrian_detection_10x_fields>`
+
+.. _caltech_pedestrian_detection_10x_how_to_use:
+
+How to use
+^^^^^^^^^^
+
+.. code-block:: python
+
+    >>> # import the package
+    >>> import dbcollection as dbc
+    >>>
+    >>> # load the dataset
+    >>> caltech_ped_10x = dbc.load('caltech_pedestrian', 'detection_10x')
+    >>> caltech_ped_10x
+    DataLoader: "caltech_pedestrian" (detection_10x task)
+
+
+.. _caltech_pedestrian_detection_10x_properties:
+
+Properties
+^^^^^^^^^^
+
+- ``primary use``: object detection
+- ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos. It contains 10x more annotations than the default task ('detection').
+- ``sets``: train, test
+- ``metadata file size in disk``: 6,2 MB
+- ``has annotations``: **yes**
+    - ``which``:
+        - labels for each class/category.
+        - bounding box of pedestrians.
+        - occlusion % of pedestrian detections.
+- ``available fields``:
+    - :ref:`image_filenames <caltech_pedestrian_detection_10x_fields_image_filenames>`
+    - :ref:`classes <caltech_pedestrian_detection_10x_fields_classes>`
+    - :ref:`boxes <caltech_pedestrian_detection_10x_fields_boxes>`
+    - :ref:`boxesv <caltech_pedestrian_detection_10x_fields_boxesv>`
+    - :ref:`id <caltech_pedestrian_detection_10x_fields_id>`
+    - :ref:`occlusion <caltech_pedestrian_detection_10x_fields_occlusion>`
+    - :ref:`object_fields <caltech_pedestrian_detection_10x_fields_object_fields>`
+    - :ref:`object_ids <caltech_pedestrian_detection_10x_fields_object_ids>`
+    - :ref:`list_image_filenames_per_class <caltech_pedestrian_detection_10x_fields_list_image_filenames_per_class>`
+    - :ref:`list_boxes_per_image <caltech_pedestrian_detection_10x_fields_list_boxes_per_image>`
+    - :ref:`list_boxesv_per_image <caltech_pedestrian_detection_10x_fields_list_boxesv_per_image>`
+    - :ref:`list_object_ids_per_image <caltech_pedestrian_detection_10x_fields_list_object_ids_per_image>`
+    - :ref:`list_objects_ids_per_class <caltech_pedestrian_detection_10x_fields_list_objects_ids_per_class>`
+
+
+.. _caltech_pedestrian_detection_10x_hdf5_file_structure:
+
+HDF5 file structure
+^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -224,43 +353,65 @@ Task: detection_10x
         └── list_objects_ids_per_class       # dtype=np.int32, shape=(4,43748))
 
 
+.. _caltech_pedestrian_detection_10x_fields:
+
 Fields
 ^^^^^^
 
-- ``image_filenames``: image file path+names
+.. _caltech_pedestrian_detection_10x_fields_image_filenames:
+
+- ``image_filenames``: image file path + names
     - ``available in``: train, test
     - ``dtype``: np.uint8
     - ``is padded``: True
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
+
+.. _caltech_pedestrian_detection_10x_fields_classes:
+
 - ``classes``: class names
     - ``available in``: train, test
     - ``dtype``: np.uint8
     - ``is padded``: True
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
+
+.. _caltech_pedestrian_detection_10x_fields_boxes:
+
 - ``boxes``: bounding boxes
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: bbox format (x1,y1,x2,y2)
+
+.. _caltech_pedestrian_detection_10x_fields_boxesv:
+
 - ``boxesv``: bounding boxes (visible)
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: bbox format (x1,y1,x2,y2)
+
+.. _caltech_pedestrian_detection_10x_fields_id:
+
 - ``id``: label ids
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: False
     - ``fill value``: -1
+
+.. _caltech_pedestrian_detection_10x_fields_occlusion:
+
 - ``occlusion``: occlusion percentage
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
+
+.. _caltech_pedestrian_detection_10x_fields_object_fields:
+
 - ``object_fields``: list of field names of the object id list
     - ``available in``: train, test
     - ``dtype``: np.uint8
@@ -268,36 +419,54 @@ Fields
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
     - ``note``: key field (*field name* aggregator)
+
+.. _caltech_pedestrian_detection_10x_fields_object_ids:
+
 - ``object_ids``: list of field ids
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: key field (*field id* aggregator)
+
+.. _caltech_pedestrian_detection_10x_fields_list_image_filenames_per_class:
+
 - ``list_image_filenames_per_class``: list of image per class
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_10x_fields_list_boxes_per_image:
+
 - ``list_boxes_per_image``: list of bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_10x_fields_list_boxesv_per_image:
+
 - ``list_boxesv_per_image``: list of (visible) bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_10x_fields_list_object_ids_per_image:
+
 - ``list_object_ids_per_image``: list of object ids per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_10x_fields_list_objects_ids_per_class:
+
 - ``list_objects_ids_per_class``: list of object ids per class
     - ``available in``: train, test
     - ``dtype``: np.int32
@@ -306,8 +475,66 @@ Fields
     - ``note``: pre-ordered list
 
 
-Task: detection_30x
--------------------
+.. _caltech_pedestrian_readme_detection_30x:
+
+detection_30x
+------------------------
+
+- :ref:`How to use <caltech_pedestrian_detection_30x_how_to_use>`
+- :ref:`Properties <caltech_pedestrian_detection_30x_properties>`
+- :ref:`HDF5 file structure <caltech_pedestrian_detection_30x_hdf5_file_structure>`
+- :ref:`Fields <caltech_pedestrian_detection_30x_fields>`
+
+.. _caltech_pedestrian_detection_30x_how_to_use:
+
+How to use
+^^^^^^^^^^
+
+.. code-block:: python
+
+    >>> # import the package
+    >>> import dbcollection as dbc
+    >>>
+    >>> # load the dataset
+    >>> caltech_ped_30x = dbc.load('caltech_pedestrian', 'detection_30x')
+    >>> caltech_ped_30x
+    DataLoader: "caltech_pedestrian" (detection_30x task)
+
+
+.. _caltech_pedestrian_detection_30x_properties:
+
+Properties
+^^^^^^^^^^
+
+- ``primary use``: object detection
+- ``description``: Contains image filenames, classes and bounding box annotations for pedestrian detection in images/videos. It contains 10x more annotations than the default task ('detection').
+- ``sets``: train, test
+- ``metadata file size in disk``: 17,4 MB
+- ``has annotations``: **yes**
+    - ``which``:
+        - labels for each class/category.
+        - bounding box of pedestrians.
+        - occlusion % of pedestrian detections.
+- ``available fields``:
+    - :ref:`image_filenames <caltech_pedestrian_detection_30x_fields_image_filenames>`
+    - :ref:`classes <caltech_pedestrian_detection_30x_fields_classes>`
+    - :ref:`boxes <caltech_pedestrian_detection_30x_fields_boxes>`
+    - :ref:`boxesv <caltech_pedestrian_detection_30x_fields_boxesv>`
+    - :ref:`id <caltech_pedestrian_detection_30x_fields_id>`
+    - :ref:`occlusion <caltech_pedestrian_detection_30x_fields_occlusion>`
+    - :ref:`object_fields <caltech_pedestrian_detection_30x_fields_object_fields>`
+    - :ref:`object_ids <caltech_pedestrian_detection_30x_fields_object_ids>`
+    - :ref:`list_image_filenames_per_class <caltech_pedestrian_detection_30x_fields_list_image_filenames_per_class>`
+    - :ref:`list_boxes_per_image <caltech_pedestrian_detection_30x_fields_list_boxes_per_image>`
+    - :ref:`list_boxesv_per_image <caltech_pedestrian_detection_30x_fields_list_boxesv_per_image>`
+    - :ref:`list_object_ids_per_image <caltech_pedestrian_detection_30x_fields_list_object_ids_per_image>`
+    - :ref:`list_objects_ids_per_class <caltech_pedestrian_detection_30x_fields_list_objects_ids_per_class>`
+
+
+.. _caltech_pedestrian_detection_30x_hdf5_file_structure:
+
+HDF5 file structure
+^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -343,43 +570,65 @@ Task: detection_30x
         └── list_objects_ids_per_class       # dtype=np.int32, shape=(4,131273))
 
 
+.. _caltech_pedestrian_detection_30x_fields:
+
 Fields
 ^^^^^^
 
-- ``image_filenames``: image file path+names
+.. _caltech_pedestrian_detection_30x_fields_image_filenames:
+
+- ``image_filenames``: image file path + names
     - ``available in``: train, test
     - ``dtype``: np.uint8
     - ``is padded``: True
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
+
+.. _caltech_pedestrian_detection_30x_fields_classes:
+
 - ``classes``: class names
     - ``available in``: train, test
     - ``dtype``: np.uint8
     - ``is padded``: True
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
+
+.. _caltech_pedestrian_detection_30x_fields_boxes:
+
 - ``boxes``: bounding boxes
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: bbox format (x1,y1,x2,y2)
+
+.. _caltech_pedestrian_detection_30x_fields_boxesv:
+
 - ``boxesv``: bounding boxes (visible)
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: bbox format (x1,y1,x2,y2)
+
+.. _caltech_pedestrian_detection_30x_fields_id:
+
 - ``id``: label ids
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: False
     - ``fill value``: -1
+
+.. _caltech_pedestrian_detection_30x_fields_occlusion:
+
 - ``occlusion``: occlusion percentage
     - ``available in``: train, test
     - ``dtype``: np.float
     - ``is padded``: False
     - ``fill value``: -1
+
+.. _caltech_pedestrian_detection_30x_fields_object_fields:
+
 - ``object_fields``: list of field names of the object id list
     - ``available in``: train, test
     - ``dtype``: np.uint8
@@ -387,47 +636,57 @@ Fields
     - ``fill value``: 0
     - ``note``: strings stored in ASCII format
     - ``note``: key field (*field name* aggregator)
+
+.. _caltech_pedestrian_detection_30x_fields_object_ids:
+
 - ``object_ids``: list of field ids
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: False
     - ``fill value``: -1
     - ``note``: key field (*field id* aggregator)
+
+.. _caltech_pedestrian_detection_30x_fields_list_image_filenames_per_class:
+
 - ``list_image_filenames_per_class``: list of image per class
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_30x_fields_list_boxes_per_image:
+
 - ``list_boxes_per_image``: list of bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_30x_fields_list_boxesv_per_image:
+
 - ``list_boxesv_per_image``: list of (visible) bounding boxes per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_30x_fields_list_object_ids_per_image:
+
 - ``list_object_ids_per_image``: list of object ids per image
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+.. _caltech_pedestrian_detection_30x_fields_list_objects_ids_per_class:
+
 - ``list_objects_ids_per_class``: list of object ids per class
     - ``available in``: train, test
     - ``dtype``: np.int32
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
-
-
-Disclaimer
-==========
-
-All rights reserved to the original creators of **Caltech Pedestrian Dataset**.
-
-For information about the dataset and its terms of use, please see this `link <http://www.vision.caltech.edu/Image_Datasets/CaltechPedestrians>`_.
