@@ -31,11 +31,12 @@ Properties
     - :ref:`detection_10x <caltech_pedestrian_readme_detection_10x>`
     - :ref:`detection_30x <caltech_pedestrian_readme_detection_30x>`
 
+.. note::
+    The ``detection`` task contains 1/30 of all frames of each video.
 
-.. note:
-    The **detection** task contains 1/30 of all frames of each video.
-    The **detection_10x** task contains 1/3 of all frames of each video.
-    The **detection_30x** task has all the frames of each video.
+    The ``detection_10x`` task contains 1/3 of all frames of each video.
+
+    The ``detection_30x`` task has all the frames of each video.
 
 
 Tasks
@@ -690,3 +691,11 @@ Fields
     - ``is padded``: True
     - ``fill value``: -1
     - ``note``: pre-ordered list
+
+
+Disclaimer
+==========
+
+All rights reserved to the original creators of **Caltech Pedestrian Dataset**.
+
+For information about the dataset and its terms of use, please see this `link <http://www.vision.caltech.edu/Image_Datasets/CaltechPedestrians>`_.
