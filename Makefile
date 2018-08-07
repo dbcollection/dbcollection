@@ -21,7 +21,7 @@ mybuild:
 .PHONY: install
 install: myinstall
 myinstall:
-	pipenv run  python setup.py install
+	pipenv run python setup.py install
 
 .PHONY: docs
 docs: mydocs
