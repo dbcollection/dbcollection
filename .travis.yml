@@ -13,6 +13,7 @@ install:
     - echo "install start"
     - pip install pipenv --upgrade
     - pipenv install --dev
+    - pipenv graph
     - pipenv run python setup.py install
     - echo "install complete."
 
