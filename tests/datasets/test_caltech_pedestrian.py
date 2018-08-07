@@ -16,6 +16,11 @@ from numpy.testing import assert_array_equal
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     Detection,
+    DetectionClean,
+    Detection10x,
+    Detection10xClean,
+    Detection30x,
+    Detection30xClean,
     BaseFieldCustom,
     BoundingBoxBaseField,
     BoundingBoxField,
@@ -935,3 +940,52 @@ class TestObjectsPerClassList:
         objects_per_class_ids = mock_object_per_class_list.get_object_ids_per_class(object_ids, class_unique_ids)
 
         assert objects_per_class_ids == [[0, 1], [2, 3], [4, 5]]
+
+
+class TestDetectionCleanTask:
+    """Unit tests for the mpii DetectionClean task."""
+
+    def test_task_attributes(self, mocker):
+        detection_clean = DetectionClean(data_path='/some/path/data', cache_path='/some/path/cache')
+        assert detection_clean.filename_h5 == 'detection_clean'
+        assert detection_clean.is_clean == True
+
+
+class TestDetection10xTask:
+    """Unit tests for the mpii Detection10x task."""
+
+    def test_task_attributes(self, mocker):
+        detection_10x = Detection10x(data_path='/some/path/data', cache_path='/some/path/cache')
+        assert detection_10x.filename_h5 == 'detection_10x'
+        assert detection_10x.skip_step == 3
+        assert detection_10x.is_clean == False
+
+
+class TestDetection10xCleanTask:
+    """Unit tests for the mpii Detection10xClean task."""
+
+    def test_task_attributes(self, mocker):
+        detection_10x_clean = Detection10xClean(data_path='/some/path/data', cache_path='/some/path/cache')
+        assert detection_10x_clean.filename_h5 == 'detection_10x_clean'
+        assert detection_10x_clean.skip_step == 3
+        assert detection_10x_clean.is_clean == True
+
+
+class TestDetection30xTask:
+    """Unit tests for the mpii Detection30x task."""
+
+    def test_task_attributes(self, mocker):
+        detection_30x = Detection30x(data_path='/some/path/data', cache_path='/some/path/cache')
+        assert detection_30x.filename_h5 == 'detection_30x'
+        assert detection_30x.skip_step == 1
+        assert detection_30x.is_clean == False
+
+
+class TestDetection30xCleanTask:
+    """Unit tests for the mpii Detection30xClean task."""
+
+    def test_task_attributes(self, mocker):
+        detection_30x_clean = Detection30xClean(data_path='/some/path/data', cache_path='/some/path/cache')
+        assert detection_30x_clean.filename_h5 == 'detection_30x_clean'
+        assert detection_30x_clean.skip_step == 1
+        assert detection_30x_clean.is_clean == True

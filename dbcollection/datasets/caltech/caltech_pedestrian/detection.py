@@ -651,28 +651,28 @@ class DetectionClean(Detection):
 class Detection10x(Detection):
     """Caltech Pedestrian detection (10x data) preprocessing functions """
 
-    skip_step = 3
     filename_h5 = 'detection_10x'
+    skip_step = 3
 
 
 class Detection10xClean(Detection):
     """Caltech Pedestrian detection (clean, 10x data) preprocessing functions """
 
-    skip_step = 3
     filename_h5 = 'detection_10x_clean'
+    skip_step = 3
     is_clean = True  # If True, discards detection boxes smaller than 5px
 
 
 class Detection30x(Detection):
     """Caltech Pedestrian detection (30x data) preprocessing functions """
 
-    skip_step = 1
     filename_h5 = 'detection_30x'
+    skip_step = 1
 
 
 class Detection30xClean(Detection):
     """Caltech Pedestrian detection (clean, 30x data) preprocessing functions """
 
-    skip_step = 1
     filename_h5 = 'detection_30x_clean'
+    skip_step = 1
     is_clean = True  # If True, discards detection boxes smaller than 5px
