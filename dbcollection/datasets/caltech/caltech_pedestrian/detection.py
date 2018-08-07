@@ -382,8 +382,8 @@ class BoundingBoxField(BoundingBoxBaseField):
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='bboxes',
-            data=np.array(bboxes, dtype=np.float32),
-            dtype=np.float32,
+            data=np.array(bboxes, dtype=np.float),
+            dtype=np.float,
             fillvalue=-1
         )
         return bboxes_ids
@@ -399,8 +399,8 @@ class BoundingBoxvField(BoundingBoxBaseField):
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='bboxesv',
-            data=np.array(bboxesv, dtype=np.float32),
-            dtype=np.float32,
+            data=np.array(bboxesv, dtype=np.float),
+            dtype=np.float,
             fillvalue=-1
         )
         return bboxesv_ids
@@ -416,8 +416,8 @@ class LabelIdField(BaseFieldCustom):
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='id',
-            data=np.array(labels, dtype=np.float32),
-            dtype=np.float32,
+            data=np.array(labels, dtype=np.float),
+            dtype=np.float,
             fillvalue=-1
         )
         return label_ids
@@ -449,8 +449,8 @@ class OcclusionField(BaseFieldCustom):
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='occlusion',
-            data=np.array(occlusions, dtype=np.float32),
-            dtype=np.float32,
+            data=np.array(occlusions, dtype=np.float),
+            dtype=np.float,
             fillvalue=-1
         )
         return occlusion_ids
