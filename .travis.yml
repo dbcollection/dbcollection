@@ -2,9 +2,10 @@ sudo: false
 language: python
 dist: trusty
 python:
-    - 2.7
-    - 3.5
-    - 3.6
+    - "2.7"
+    - "3.5"
+    - "3.6"
+    - "3.7-dev"
 
 matrix:
     fast_finish: true
@@ -36,4 +37,3 @@ matrix:
         addons: true
         install: pip install flake8
         script: flake8 dbcollection
-
