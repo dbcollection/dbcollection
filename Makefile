@@ -16,7 +16,9 @@ shell-python:
 .PHONY: build
 build: mybuild
 mybuild:
-	pipenv run python setup.py develop
+	pipenv lock --requirements > $(REQUIREMENTS_FILE)
+	python setup.py develop
+	rm $(REQUIREMENTS_FILE)
 
 .PHONY: install
 install: myinstall
@@ -47,7 +49,7 @@ requirements-dev:
 
 .PHONY: test
 test:
-	make build
+	#make build
 	pipenv run tox
 
 .PHONY: test-api

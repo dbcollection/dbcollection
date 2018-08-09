@@ -2,18 +2,21 @@ sudo: false
 language: python
 dist: trusty
 python:
-    - 2.7
-    - 3.5
-    - 3.6
+    - "2.7"
+    - "3.5"
+    - "3.6"
+    - "3.7-dev"
 
 matrix:
     fast_finish: true
 
 install:
     - echo "install start"
+    - pip install --upgrade pip
     - pip install pipenv --upgrade
     - pipenv install --dev
     - pipenv graph
+    - pipenv lock --requirements > requirements.txt
     - pipenv run python setup.py install
     - echo "install complete."
 
@@ -36,4 +39,3 @@ matrix:
         addons: true
         install: pip install flake8
         script: flake8 dbcollection
-

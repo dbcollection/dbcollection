@@ -8,9 +8,10 @@ tox = "*"
 pytest = "*"
 pytest-sugar = "*"
 pytest-cov = "*"
-tox-pyenv = "*"
 funcsigs = "*"
 pytest-mock = "*"
+"pathlib2" = "*"
+scandir = "*"
 
 [packages]
 "h5py" = "*"
