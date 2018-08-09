@@ -8,7 +8,6 @@ tox = "*"
 pytest = "*"
 pytest-sugar = "*"
 pytest-cov = "*"
-tox-pyenv = "*"
 funcsigs = "*"
 pytest-mock = "*"
 
