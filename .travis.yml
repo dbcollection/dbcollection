@@ -15,6 +15,7 @@ install:
     - pip install pipenv --upgrade
     - pipenv install --dev
     - pipenv graph
+    - pipenv lock --requirements > requirements.txt
     - pipenv run python setup.py install
     - echo "install complete."
 
