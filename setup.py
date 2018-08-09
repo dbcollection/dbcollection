@@ -20,7 +20,8 @@ def get_requirements():
     with open('requirements.txt') as f:
         data = f.read().splitlines()
     if any(data):
-        requirements = [item.split(" ")[0] for item in data]
+        data = data[1:]
+        requirements = [item.split(";")[0].split(" ")[0] for item in data]
     return requirements
 
 
