@@ -10,6 +10,7 @@ pytest-sugar = "*"
 pytest-cov = "*"
 funcsigs = "*"
 pytest-mock = "*"
+"pathlib2" = "*"
 
 [packages]
 "h5py" = "*"
