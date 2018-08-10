@@ -3,7 +3,7 @@ Leeds Sports Pose (LSP) Dataset download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.datasets import BaseDatasetNew
 from .keypoints import Keypoints, KeypointsOriginal
 
 urls = (
@@ -21,7 +21,7 @@ tasks = {
 default_task = 'keypoints'
 
 
-class Dataset(BaseDataset):
+class Dataset(BaseDatasetNew):
     """Leeds Sports Pose (LSP) Dataset preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
