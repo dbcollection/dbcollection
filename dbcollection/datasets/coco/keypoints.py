@@ -9,7 +9,7 @@ from collections import OrderedDict
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTask
+from dbcollection.datasets import BaseTaskNew
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list, squeeze_list
 from dbcollection.utils.file_load import load_json
@@ -18,7 +18,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 from .load_data_test import load_data_test
 
 
-class Keypoints2016(BaseTask):
+class Keypoints2016(BaseTaskNew):
     """COCO Keypoints (2016) preprocessing functions."""
 
     # metadata filename
@@ -218,142 +218,11 @@ class Keypoints2016(BaseTask):
             else:
                 yield self.load_data_trainval(set_name, image_dir, annot_filepath)
 
-    def add_data_to_source(self, hdf5_handler, data, set_name):
+    def process_set_metadata(self, data, set_name):
         """
-        Store classes + filenames as a nested tree.
+        Saves the metadata of a set.
         """
-        image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
-        if 'test' in set_name:
-            is_test = True
-            data_ = data[0]
-            annotations = data[2]
-
-            category = data[3]
-            supercategory = data[4]
-
-            category_ = str2ascii(category)
-            supercategory_ = str2ascii(supercategory)
-        else:
-            is_test = False
-            data_ = data[0]
-            annotations = data[1]
-
-            category = data[3]
-            supercategory = data[4]
-            skeleton = data[8]
-            keypoints = data[9]
-
-            category_ = str2ascii(category)
-            supercategory_ = str2ascii(supercategory)
-            keypoints_ = str2ascii(keypoints)
-            skeleton_ = np.array(pad_list(skeleton, -1), dtype=np.uint8)
-
-        if self.verbose:
-            print('> Adding data to source group:')
-
-        if self.verbose:
-            print('>>> Adding data to group: images')
-            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
-
-        # images - original
-        image_grp = hdf5_handler.create_group('images')
-        for i, annot in enumerate(annotations['images']):
-            file_grp = image_grp.create_group(str(i))
-            file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
-            file_grp['coco_url'] = str2ascii(annot["coco_url"])
-            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
-            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
-            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        if self.verbose:
-            prgbar.finish()
-            print('>>> Adding data to group: categories')
-            prgbar = progressbar.ProgressBar(max_value=len(annotations['categories']))
-
-        # categories - original
-        cat_grp = hdf5_handler.create_group('categories')
-        for i, annot in enumerate(annotations['categories']):
-            file_grp = cat_grp.create_group(str(i))
-            file_grp['supercategory'] = str2ascii(annot["supercategory"])
-            file_grp['name'] = str2ascii(annot["name"])
-            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
-            if not is_test:
-                file_grp['keypoints'] = str2ascii(annot["keypoints"])
-                file_grp['skeleton'] = np.array(annot["skeleton"], dtype=np.uint8)
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # annotations - original
-        if not is_test:
-            if self.verbose:
-                prgbar.finish()
-                print('>>> Adding data to group: annotations')
-                prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
-
-        # annotations - original
-        if not is_test:
-            annot_grp = hdf5_handler.create_group('annotations')
-            for i, annot in enumerate(annotations['annotations']):
-                file_grp = annot_grp.create_group(str(i))
-                file_grp['iscrowd'] = np.array(annot["iscrowd"], dtype=np.int32)
-                file_grp['area'] = np.array(annot["area"], dtype=np.float)
-                file_grp['id'] = np.array(annot["id"], dtype=np.int32)
-                file_grp['category_id'] = np.array(annot["category_id"], dtype=np.int32)
-                file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
-                file_grp['bbox'] = np.array(annot["bbox"], dtype=np.float)
-                file_grp['segmentation'] = np.array(annot["segmentation"], dtype=np.float)
-                file_grp['keypoints'] = np.array(annot["keypoints"], dtype=np.int32)
-                file_grp['num_keypoints'] = np.array(annot["num_keypoints"], dtype=np.uint8)
-
-                # update progressbar
-                if self.verbose:
-                    prgbar.update(i)
-
-        if self.verbose:
-            prgbar.finish()
-            print('>>> Adding data to group: grouped')
-            prgbar = progressbar.ProgressBar(max_value=len(data_))
-
-        # grouped/combined data - parsed by me
-        grouped_grp = hdf5_handler.create_group('grouped')
-        for i, key in enumerate(data_):
-            file_grp = grouped_grp.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(data_[key]["file_name"])
-            file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
-            file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
-
-            if 'object' in data_[key]:
-                file_grp['keypoint_names'] = keypoints_
-                file_grp['skeleton'] = skeleton_
-                for j, obj in enumerate(data_[key]["object"]):
-                    obj_grp = file_grp.create_group(str(j))
-                    obj_grp['category'] = category_
-                    obj_grp['supercategory'] = supercategory_
-                    obj_grp['area'] = np.array(obj["area"], dtype=np.int32)
-                    obj_grp['iscrowd'] = np.array(obj["iscrowd"], dtype=np.int32)
-                    obj_grp['bbox'] = np.array(obj["bbox"], dtype=np.float)
-                    obj_grp['segmentation'] = np.array(obj["segmentation"], dtype=np.float)
-                    obj_grp['num_keypoints'] = np.array(obj["num_keypoints"], dtype=np.uint8)
-                    obj_grp['keypoints'] = np.array(obj["keypoints"], dtype=np.int32)
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
-
-    def add_data_to_default(self, hdf5_handler, data, set_name):
-        """
-        Add data of a set to the default group.
-        """
+        hdf5_handler = self.hdf5_manager.get_group(set_name)
         image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
         if 'test' in set_name:
             is_test = True
