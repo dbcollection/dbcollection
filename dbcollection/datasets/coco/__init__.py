@@ -6,7 +6,7 @@ Caltech Pedestrian Dataset download/process functions.
 import os
 import sys
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.datasets import BaseDatasetNew
 from .detection import Detection2015, Detection2016
 from .captions import Caption2015, Caption2016
 from .keypoints import Keypoints2016
@@ -34,7 +34,7 @@ tasks = {
 default_task = 'detection_2015'
 
 
-class Dataset(BaseDataset):
+class Dataset(BaseDatasetNew):
     """ Microsoft COCO Dataset preprocessing/downloading functions """
     urls = urls
     keywords = keywords
