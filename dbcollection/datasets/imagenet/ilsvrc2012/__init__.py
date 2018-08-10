@@ -4,7 +4,7 @@ ImageNet ILSVRC 2012 download/process functions.
 
 
 from __future__ import print_function
-from dbcollection.datasets import BaseDataset
+from dbcollection.datasets import BaseDatasetNew
 from .classification import Classification, Raw256
 
 urls = ()
@@ -16,7 +16,7 @@ tasks = {
 default_task = 'classification'
 
 
-class Dataset(BaseDataset):
+class Dataset(BaseDatasetNew):
     """ImageNet ILSVRC 2012 preprocessing/downloading functions."""
     urls = urls
     keywords = keywords

@@ -10,8 +10,7 @@ import PIL
 from PIL import Image
 import progressbar
 
-from dbcollection.datasets import BaseTask
-
+from dbcollection.datasets import BaseTaskNew
 from dbcollection.utils.file_load import load_txt, load_matlab
 from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -19,7 +18,7 @@ from dbcollection.utils.pad import pad_list
 from dbcollection.utils.hdf5 import hdf5_write_data
 
 
-class Classification(BaseTask):
+class Classification(BaseTaskNew):
     """ImageNet ILSVRC 2012 Classification preprocessing functions."""
 
     # metadata filename
@@ -177,33 +176,6 @@ class Classification(BaseTask):
 
             yield {set_name: data}
 
-    def store_data_source(self, hdf5_handler, data, set_name):
-        """
-        Store classes + filenames as a nested tree.
-        """
-        # progress bar
-        if self.verbose:
-            prgbar = progressbar.ProgressBar(max_value=len(data)).start()
-            counter = 0
-
-        sourceg = hdf5_handler.create_group('source/' + set_name)
-
-        # cycle all classes from the data with the original annotations
-        for cname in data:
-            images_filenames = [os.path.join(set_name, cname, fname) for fname in data[cname]]
-            images_filenames.sort()
-            hdf5_write_data(sourceg, cname + '/' + 'image_filenames',
-                            str2ascii(images_filenames), dtype=np.uint8, fillvalue=0)
-
-            # update progress bar
-            if self.verbose:
-                counter += 1
-                prgbar.update(counter)
-
-        # force progressbar to 100%
-        if self.verbose:
-            prgbar.finish()
-
     def convert_data_to_arrays(self, data, set_name):
         """
         Convert folders/filenames to arrays.
@@ -247,20 +219,11 @@ class Classification(BaseTask):
                                                        dtype=np.int32)
         }
 
-    def add_data_to_source(self, hdf5_handler, data, set_name=None):
+    def process_set_metadata(self, data, set_name):
         """
-        Store data annotations in a nested tree fashion.
-
-        It closely follows the tree structure of the data.
+        Saves the metadata of a set.
         """
-        self.store_data_source(hdf5_handler, data, set_name)
-
-    def add_data_to_default(self, hdf5_handler, data, set_name=None):
-        """
-        Add data of a set to the default group.
-
-        For each field, the data is organized into a single big matrix.
-        """
+        hdf5_handler = self.hdf5_manager.get_group(set_name)
         data_array = self.convert_data_to_arrays(data, set_name)
         hdf5_write_data(hdf5_handler, 'image_filenames',
                         data_array["image_filenames"], dtype=np.uint8, fillvalue=0)
