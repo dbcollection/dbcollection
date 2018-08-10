@@ -3,7 +3,7 @@ Pascal VOC 2012 download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.datasets import BaseDatasetNew
 from .detection import Detection
 
 urls = ('http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar',)
@@ -12,7 +12,7 @@ tasks = {"detection": Detection}
 default_task = 'detection'
 
 
-class Dataset(BaseDataset):
+class Dataset(BaseDatasetNew):
     """Pascal VOC 2012 preprocessing/downloading class."""
     urls = urls
     keywords = keywords
