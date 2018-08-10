@@ -8,7 +8,7 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTaskNew
+from dbcollection.datasets import BaseTask
 from dbcollection.utils.file_load import load_txt
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
@@ -17,7 +17,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 from .extract_frames import extract_video_frames
 
 
-class Recognition(BaseTaskNew):
+class Recognition(BaseTask):
     """UCF101 action recognition preprocessing functions."""
 
     # metadata filename

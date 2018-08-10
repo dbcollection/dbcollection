@@ -8,13 +8,13 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTaskNew
+from dbcollection.datasets import BaseTask
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.file_load import load_matlab
 from dbcollection.utils.hdf5 import hdf5_write_data
 
 
-class Keypoints(BaseTaskNew):
+class Keypoints(BaseTask):
     """FLIC Keypoints preprocessing functions."""
 
     # metadata filename

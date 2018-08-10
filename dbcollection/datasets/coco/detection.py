@@ -9,7 +9,7 @@ from collections import OrderedDict
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTaskNew
+from dbcollection.datasets import BaseTask
 
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list, squeeze_list
@@ -19,7 +19,7 @@ from dbcollection.utils.hdf5 import hdf5_write_data
 from .load_data_test import load_data_test
 
 
-class Detection2015(BaseTaskNew):
+class Detection2015(BaseTask):
     """COCO Detection (2015) preprocessing functions."""
 
     # metadata filename

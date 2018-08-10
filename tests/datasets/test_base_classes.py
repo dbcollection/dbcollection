@@ -9,7 +9,7 @@ import numpy as np
 
 from dbcollection.datasets import (
     BaseDataset,
-    BaseTaskNew,
+    BaseTask,
     BaseField
 )
 
@@ -148,23 +148,23 @@ class TestBaseDataset:
 
 @pytest.fixture()
 def mock_task_class(test_data):
-    return BaseTaskNew(
+    return BaseTask(
         data_path=test_data["data_path"],
         cache_path=test_data["cache_path"],
         verbose=test_data["verbose"]
     )
 
 
-class TestBaseTaskNew:
-    """Unit tests for the BaseTaskNew class."""
+class TestBaseTask:
+    """Unit tests for the BaseTask class."""
 
     def test_init_with_all_input_args(self, mocker):
-        mock_get_filename = mocker.patch.object(BaseTaskNew, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
+        mock_get_filename = mocker.patch.object(BaseTask, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
         data_path = '/path/to/data'
         cache_path = '/path/to/cache'
         verbose = True
 
-        task_manager = BaseTaskNew(data_path=data_path,
+        task_manager = BaseTask(data_path=data_path,
                                 cache_path=cache_path,
                                 verbose=verbose)
 
@@ -177,11 +177,11 @@ class TestBaseTaskNew:
         assert task_manager.hdf5_manager == None
 
     def test_init_without_optional_input_args(self, mocker):
-        mock_get_filename = mocker.patch.object(BaseTaskNew, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
+        mock_get_filename = mocker.patch.object(BaseTask, "get_hdf5_save_filename", return_value='/path/to/hdf5/file.h5')
         data_path = '/path/to/data'
         cache_path = '/path/to/cache'
 
-        task_manager = BaseTaskNew(data_path=data_path,
+        task_manager = BaseTask(data_path=data_path,
                                 cache_path=cache_path)
 
         assert mock_get_filename.called
@@ -194,11 +194,11 @@ class TestBaseTaskNew:
 
     def test_init__raises_error_no_input_args(self, mocker):
         with pytest.raises(TypeError):
-            BaseTaskNew()
+            BaseTask()
 
     def test_init__raises_error_too_many_input_args(self, mocker):
         with pytest.raises(TypeError):
-            BaseTaskNew('/path/to/data', '/path/to/cache', False, 'extra_input')
+            BaseTask('/path/to/data', '/path/to/cache', False, 'extra_input')
 
     def test_get_hdf5_save_filename(self, mocker, mock_task_class):
         mock_task_class.filename_h5 = 'classification'
@@ -208,10 +208,10 @@ class TestBaseTaskNew:
         assert filepath == os.path.join('/path/to/cache', 'classification.h5')
 
     def test_run(self, mocker, mock_task_class):
-        mock_setup_manager = mocker.patch.object(BaseTaskNew, "setup_hdf5_manager")
-        mock_load_data = mocker.patch.object(BaseTaskNew, "load_data", return_value={})
-        mock_process = mocker.patch.object(BaseTaskNew, "process_metadata")
-        mock_teardown_manager = mocker.patch.object(BaseTaskNew, "teardown_hdf5_manager")
+        mock_setup_manager = mocker.patch.object(BaseTask, "setup_hdf5_manager")
+        mock_load_data = mocker.patch.object(BaseTask, "load_data", return_value={})
+        mock_process = mocker.patch.object(BaseTask, "process_metadata")
+        mock_teardown_manager = mocker.patch.object(BaseTask, "teardown_hdf5_manager")
 
         filename = mock_task_class.run()
 
@@ -225,7 +225,7 @@ class TestBaseTaskNew:
         mock_task_class.load_data()
 
     def test_process_metadata(self, mocker, mock_task_class):
-        mock_process_metadata = mocker.patch.object(BaseTaskNew, "process_set_metadata")
+        mock_process_metadata = mocker.patch.object(BaseTask, "process_set_metadata")
 
         def sample_generator():
             yield {'train': ['dummy', 'data']}

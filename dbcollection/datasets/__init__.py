@@ -144,7 +144,7 @@ class BaseDataset(object):
         return self.tasks[task]
 
 
-class BaseTaskNew(object):
+class BaseTask(object):
     """Base class for processing the metadata of a task of a dataset.
 
     Parameters

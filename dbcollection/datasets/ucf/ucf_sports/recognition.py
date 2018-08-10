@@ -12,13 +12,13 @@ import numpy as np
 import progressbar
 from PIL import Image
 
-from dbcollection.datasets import BaseTaskNew
+from dbcollection.datasets import BaseTask
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.hdf5 import hdf5_write_data
 
 
-class Recognition(BaseTaskNew):
+class Recognition(BaseTask):
     """UCF-Sports action recognition preprocessing functions """
 
     # metadata filename

@@ -10,7 +10,7 @@ import PIL
 from PIL import Image
 import progressbar
 
-from dbcollection.datasets import BaseTaskNew
+from dbcollection.datasets import BaseTask
 from dbcollection.utils.file_load import load_txt, load_matlab
 from dbcollection.utils.os_dir import construct_set_from_dir, dir_get_size
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -18,7 +18,7 @@ from dbcollection.utils.pad import pad_list
 from dbcollection.utils.hdf5 import hdf5_write_data
 
 
-class Classification(BaseTaskNew):
+class Classification(BaseTask):
     """ImageNet ILSVRC 2012 Classification preprocessing functions."""
 
     # metadata filename
