@@ -6,11 +6,11 @@ LSPe Keypoints process functions.
 from __future__ import print_function, division
 import os
 
-from dbcollection.datasets.leeds_sports_pose.leeds_sports_pose.keypoints import Keypoints as LspKps
+from dbcollection.datasets.leeds_sports_pose.leeds_sports_pose.keypoints import Keypoints as LspKeypoints
 from dbcollection.utils.file_load import load_matlab
 
 
-class Keypoints(LspKps):
+class Keypoints(LspKeypoints):
     """LSPe Keypoints preprocessing functions."""
 
     # metadata filename
