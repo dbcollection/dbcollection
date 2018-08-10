@@ -3,7 +3,7 @@ UCF101-Action recognition download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDataset
+from dbcollection.datasets import BaseDatasetNew
 from .recognition import Recognition
 
 urls = (
@@ -16,7 +16,7 @@ tasks = {"recognition": Recognition}
 default_task = 'recognition'
 
 
-class Dataset(BaseDataset):
+class Dataset(BaseDatasetNew):
     """UCF101-Action recognition preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
