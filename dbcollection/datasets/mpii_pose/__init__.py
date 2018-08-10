@@ -3,7 +3,7 @@ MPII Human Pose Dataset download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDatasetNew
+from dbcollection.datasets import BaseDataset
 from .keypoints import Keypoints, KeypointsClean
 
 
@@ -19,7 +19,7 @@ tasks = {
 default_task = 'keypoints'
 
 
-class Dataset(BaseDatasetNew):
+class Dataset(BaseDataset):
     """MPII Pose Dataset preprocessing/downloading functions."""
     urls = urls
     keywords = keywords

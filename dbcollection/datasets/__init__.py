@@ -15,7 +15,7 @@ from dbcollection.utils.hdf5 import HDF5Manager
 from dbcollection.utils.url import download_extract_urls
 
 
-class BaseDatasetNew(object):
+class BaseDataset(object):
     """Base class for download/processing a dataset.
 
     Parameters

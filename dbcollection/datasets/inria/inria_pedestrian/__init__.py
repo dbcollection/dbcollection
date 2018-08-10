@@ -3,7 +3,7 @@ Inria Pedestrian Dataset download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDatasetNew
+from dbcollection.datasets import BaseDataset
 from .detection import Detection
 
 url_path = 'http://www.vision.caltech.edu.s3-us-west-2.amazonaws.com/'
@@ -17,7 +17,7 @@ tasks = {"detection": Detection}
 default_task = 'detection'
 
 
-class Dataset(BaseDatasetNew):
+class Dataset(BaseDataset):
     """Inria Pedestrian Dataset preprocessing/downloading functions."""
     urls = urls
     keywords = keywords

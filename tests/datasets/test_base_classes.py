@@ -8,7 +8,7 @@ import pytest
 import numpy as np
 
 from dbcollection.datasets import (
-    BaseDatasetNew,
+    BaseDataset,
     BaseTaskNew,
     BaseField
 )
@@ -26,7 +26,7 @@ def test_data():
 
 @pytest.fixture()
 def mock_dataset_class(test_data):
-    return BaseDatasetNew(
+    return BaseDataset(
         data_path=test_data["data_path"],
         cache_path=test_data["cache_path"],
         extract_data=test_data["extract_data"],
@@ -34,8 +34,8 @@ def mock_dataset_class(test_data):
     )
 
 
-class TestBaseDatasetNew:
-    """Unit tests for the BaseDatasetNew class."""
+class TestBaseDataset:
+    """Unit tests for the BaseDataset class."""
 
     def test_init_with_all_input_args(self, mocker):
         data_path = '/path/to/data'
@@ -43,7 +43,7 @@ class TestBaseDatasetNew:
         extract_data=True
         verbose=True
 
-        db_manager = BaseDatasetNew(
+        db_manager = BaseDataset(
             data_path=data_path,
             cache_path=cache_path,
             extract_data=extract_data,
@@ -63,7 +63,7 @@ class TestBaseDatasetNew:
         data_path = '/path/to/data'
         cache_path = '/path/to/cache'
 
-        db_manager = BaseDatasetNew(
+        db_manager = BaseDataset(
             data_path=data_path,
             cache_path=cache_path
         )
@@ -79,11 +79,11 @@ class TestBaseDatasetNew:
 
     def test_init__raises_error_no_input_args(self, mocker):
         with pytest.raises(TypeError):
-            BaseDatasetNew()
+            BaseDataset()
 
     def test_init__raises_error_too_many_input_args(self, mocker):
         with pytest.raises(TypeError):
-            BaseDatasetNew('/path/to/data', '/path/to/cache', False, False, 'extra_field')
+            BaseDataset('/path/to/data', '/path/to/cache', False, False, 'extra_field')
 
     def test_download(self, mocker, mock_dataset_class):
         mock_download_extract = mocker.patch("dbcollection.datasets.download_extract_urls")
@@ -98,8 +98,8 @@ class TestBaseDatasetNew:
         )
 
     def test_process(self, mocker, mock_dataset_class):
-        mock_parse_task = mocker.patch.object(BaseDatasetNew, "parse_task_name", return_value='taskA')
-        mock_process_metadata = mocker.patch.object(BaseDatasetNew, "process_metadata", return_value='/path/to/task/filename.h5')
+        mock_parse_task = mocker.patch.object(BaseDataset, "parse_task_name", return_value='taskA')
+        mock_process_metadata = mocker.patch.object(BaseDataset, "process_metadata", return_value='/path/to/task/filename.h5')
 
         result = mock_dataset_class.process('taskA')
 
@@ -131,7 +131,7 @@ class TestBaseDatasetNew:
         assert result == 'some_task'
 
     def test_process_metadata(self, mocker, mock_dataset_class):
-        mock_get_constructor = mocker.patch.object(BaseDatasetNew, "get_task_constructor", return_value=mocker.MagicMock())
+        mock_get_constructor = mocker.patch.object(BaseDataset, "get_task_constructor", return_value=mocker.MagicMock())
 
         mock_dataset_class.process_metadata('some_task')
 

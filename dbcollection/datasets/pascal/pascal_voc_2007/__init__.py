@@ -3,7 +3,7 @@ Pascal VOC 2007 download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDatasetNew
+from dbcollection.datasets import BaseDataset
 from .detection import Detection
 
 urls = (
@@ -15,7 +15,7 @@ tasks = {"detection": Detection}
 default_task = 'detection'
 
 
-class Dataset(BaseDatasetNew):
+class Dataset(BaseDataset):
     """Pascal VOC 2007 preprocessing/downloading class."""
     urls = urls
     keywords = keywords

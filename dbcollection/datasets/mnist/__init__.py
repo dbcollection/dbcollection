@@ -6,7 +6,7 @@ MNIST download/process functions.
 import os
 import shutil
 
-from dbcollection.datasets import BaseDatasetNew
+from dbcollection.datasets import BaseDataset
 from .classification import Classification
 
 
@@ -21,7 +21,7 @@ tasks = {"classification": Classification}
 default_task = 'classification'
 
 
-class Dataset(BaseDatasetNew):
+class Dataset(BaseDataset):
     """MNIST preprocessing/downloading functions."""
     urls = urls
     keywords = keywords
