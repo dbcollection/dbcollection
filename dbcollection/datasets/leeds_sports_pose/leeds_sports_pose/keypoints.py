@@ -8,13 +8,13 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTask
+from dbcollection.datasets import BaseTaskNew
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.file_load import load_matlab
 from dbcollection.utils.hdf5 import hdf5_write_data
 
 
-class Keypoints(BaseTask):
+class Keypoints(BaseTaskNew):
     """LSP Keypoints preprocessing functions."""
 
     # metadata filename
@@ -93,34 +93,11 @@ class Keypoints(BaseTask):
                 print('\n> Loading data files for the set: ' + set_name)
             yield {set_name: annotations[set_name]}
 
-    def add_data_to_source(self, hdf5_handler, data, set_name):
+    def process_set_metadata(self, data, set_name):
         """
-        Store classes + filenames as a nested tree.
+        Saves the metadata of a set.
         """
-        if self.verbose:
-            print('> Adding data to source group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data))
-
-        keypoint_names = str2ascii(self.keypoints_labels)
-
-        for i, annot in enumerate(data):
-            file_grp = hdf5_handler.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(annot["filename"])
-            file_grp['keypoints'] = np.array(annot["joints"], dtype=np.float)
-            file_grp['keypoint_names'] = keypoint_names
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
-
-    def add_data_to_default(self, hdf5_handler, data, set_name):
-        """
-        Add data of a set to the default group.
-        """
+        hdf5_handler = self.hdf5_manager.get_group(set_name)
         image_filenames = []
         keypoints = []
         object_id = []
