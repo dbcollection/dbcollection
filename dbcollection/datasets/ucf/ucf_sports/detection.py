@@ -11,7 +11,6 @@ import numpy as np
 import progressbar
 
 from dbcollection.datasets import BaseTask
-
 from dbcollection.utils.file_load import load_txt
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
@@ -294,30 +293,11 @@ class Detection(BaseTask):
                                                    dtype=np.int32)
         }
 
-    def add_data_to_source(self, hdf5_handler, data, set_name=None):
+    def process_set_metadata(self, data, set_name):
         """
-        Store data annotations in a nested tree fashion.
-
-        It closely follows the tree structure of the data.
+        Saves the metadata of a set.
         """
-        for activity in data:
-            activity_grp = hdf5_handler.create_group(activity)
-            for video_name in data[activity]:
-                video_grp = activity_grp.create_group(video_name)
-                set_data = data[activity][video_name]
-                video_grp.create_dataset('image_filenames', data=str2ascii(
-                    set_data['image_filenames']), dtype=np.uint8)
-                video_grp.create_dataset('video_filename', data=str2ascii(
-                    set_data['video_filename']), dtype=np.uint8)
-                video_grp.create_dataset('annotations', data=np.array(
-                    set_data['image_annotations']), dtype=np.int32)
-
-    def add_data_to_default(self, hdf5_handler, data, set_name=None):
-        """
-        Add data of a set to the default group.
-
-        For each field, the data is organized into a single big matrix.
-        """
+        hdf5_handler = self.hdf5_manager.get_group(set_name)
         data_array = self.convert_data_to_arrays(data)
         hdf5_write_data(hdf5_handler, 'videos',
                         data_array["videos"],

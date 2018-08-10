@@ -108,77 +108,11 @@ class Detection(BaseTask):
 
             yield {set_name: data}
 
-    def add_data_to_source(self, hdf5_handler, data, set_name):
+    def process_set_metadata(self, data, set_name):
         """
-        Add data of a set to the source group.
+        Saves the metadata of a set.
         """
-
-        def add_data_hdf5(hdf5_handler, anno, set_name):
-            """Add single annotation data to the hdf5 file."""
-            hdf5_handler['category_id'] = self.classes.index(anno['name'])
-            hdf5_handler['name'] = anno['name']
-            if not set_name == 'test':
-                hdf5_handler['pose'] = anno['pose']
-                hdf5_handler['truncated'] = anno['truncated']
-                hdf5_handler['difficult'] = anno['difficult']
-            hdf5_handler['bndbox/xmin'] = anno['bndbox']['xmin']
-            hdf5_handler['bndbox/ymin'] = anno['bndbox']['ymin']
-            hdf5_handler['bndbox/xmax'] = anno['bndbox']['xmax']
-            hdf5_handler['bndbox/ymax'] = anno['bndbox']['ymax']
-
-            # if anno['part']:
-            #    if isinstance(anno['part'], list):
-            #        part_list = anno['part']
-            #    else:
-            #        part_list = [anno['part']]
-            #
-            #    for j, part in enumerate(part_list):
-            #        part_group = hdf5_handler.create_group('part/{}/'.format(j))
-            #        part_group['name'] = part['name']
-            #        part_group['bndbox/xmin'] = part['bndbox']['xmin']
-            #        part_group['bndbox/ymin'] = part['bndbox']['ymin']
-            #        part_group['bndbox/xmax'] = part['bndbox']['xmax']
-            #        part_group['bndbox/ymax'] = part['bndbox']['ymax']
-
-        if self.verbose:
-            print('> Adding data to source group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data))
-
-        for i, data_ in enumerate(data):
-            image_filename, fileid, annotation = data_
-
-            file_grp = hdf5_handler.create_group(str(i))
-
-            file_grp['image_filename'] = image_filename
-            file_grp['id'] = fileid
-
-            if any(annotation):
-                file_grp['size/width'] = annotation['annotation']['size']['width']
-                file_grp['size/height'] = annotation['annotation']['size']['height']
-                file_grp['size/depth'] = annotation['annotation']['size']['depth']
-                file_grp['segmented'] = annotation['annotation']['segmented']
-
-                if isinstance(annotation['annotation']['object'], list):
-                    obj_list = annotation['annotation']['object']
-                else:
-                    obj_list = [annotation['annotation']['object']]
-
-                for j, obj in enumerate(obj_list):
-                    object_grp = file_grp.create_group('object/{}/'.format(j))
-                    add_data_hdf5(object_grp, obj, set_name)
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
-
-    def add_data_to_default(self, hdf5_handler, data, set_name):
-        """
-        Add data of a set to the default group.
-        """
+        hdf5_handler = self.hdf5_manager.get_group(set_name)
         object_fields = ['image_filenames', 'classes', 'boxes', 'sizes', 'difficult', 'truncated']
         image_filenames = []
         size = []

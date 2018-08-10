@@ -116,88 +116,11 @@ class Caption2015(BaseTask):
             else:
                 yield self.load_data_trainval(set_name, image_dir, annot_filepath)
 
-    def add_data_to_source(self, hdf5_handler, data, set_name):
+    def process_set_metadata(self, data, set_name):
         """
-        Store classes + filenames as a nested tree.
+        Saves the metadata of a set.
         """
-        image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
-        if 'test' in set_name:
-            is_test = True
-            data_ = data[0]
-            annotations = data[2]
-        else:
-            is_test = False
-            data_ = data[0]
-            annotations = data[1]
-
-        if self.verbose:
-            print('> Adding data to source group...')
-
-        if self.verbose:
-            print('>>> Adding data to group: images')
-            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
-
-        # images - original
-        image_grp = hdf5_handler.create_group('images')
-        for i, annot in enumerate(annotations['images']):
-            file_grp = image_grp.create_group(str(i))
-            file_grp['file_name'] = str2ascii(os.path.join(image_dir, annot["file_name"]))
-            file_grp['coco_url'] = str2ascii(annot["coco_url"])
-            file_grp['width'] = np.array(annot["width"], dtype=np.int32)
-            file_grp['height'] = np.array(annot["height"], dtype=np.int32)
-            file_grp['id'] = np.array(annot["id"], dtype=np.int32)
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        if self.verbose:
-            prgbar.finish()
-            print('>>> Adding data to group: annotations')
-            prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
-
-        # annotations - original
-        if not is_test:
-            annot_grp = hdf5_handler.create_group('annotations')
-            for i, annot in enumerate(annotations['annotations']):
-                file_grp = annot_grp.create_group(str(i))
-                file_grp['caption'] = str2ascii(annot["caption"])
-                file_grp['id'] = np.array(annot["id"], dtype=np.int32)
-                file_grp['image_id'] = np.array(annot["image_id"], dtype=np.int32)
-
-                # update progressbar
-                if self.verbose:
-                    prgbar.update(i)
-
-        if self.verbose:
-            prgbar.finish()
-            print('>>> Adding data to group: grouped')
-            prgbar = progressbar.ProgressBar(max_value=len(data_))
-
-        # grouped/combined data - parsed by me
-        grouped_grp = hdf5_handler.create_group('grouped')
-        for i, key in enumerate(data_):
-            file_grp = grouped_grp.create_group(str(i))
-            file_grp['image_filename'] = str2ascii(data_[key]["file_name"])
-            file_grp['width'] = np.array(data_[key]["width"], dtype=np.int32)
-            file_grp['height'] = np.array(data_[key]["height"], dtype=np.int32)
-            file_grp['id'] = np.array(data_[key]["id"], dtype=np.int32)
-            file_grp['coco_url'] = str2ascii(data_[key]["coco_url"])
-            if 'captions' in data_[key]:
-                file_grp['captions'] = str2ascii(data_[key]["captions"])
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
-
-    def add_data_to_default(self, hdf5_handler, data, set_name):
-        """
-        Add data of a set to the default group.
-        """
+        hdf5_handler = self.hdf5_manager.get_group(set_name)
         image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
         if "test" in set_name:
             is_test = True

@@ -7,13 +7,13 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTaskNew, BaseField
+from dbcollection.datasets import BaseTask, BaseField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 
 
-class Classification(BaseTaskNew):
+class Classification(BaseTask):
     """MNIST Classification preprocessing functions."""
 
     # metadata filename

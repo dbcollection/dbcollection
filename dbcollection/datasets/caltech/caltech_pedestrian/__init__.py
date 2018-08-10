@@ -3,7 +3,7 @@ Caltech Pedestrian Dataset download/process functions.
 """
 
 
-from dbcollection.datasets import BaseDatasetNew
+from dbcollection.datasets import BaseDataset
 from .detection import (
     Detection,
     DetectionClean,
@@ -40,7 +40,7 @@ tasks = {
 default_task = 'detection'
 
 
-class Dataset(BaseDatasetNew):
+class Dataset(BaseDataset):
     """Caltech Pedestrian Dataset preprocessing/downloading functions."""
     urls = urls
     keywords = keywords

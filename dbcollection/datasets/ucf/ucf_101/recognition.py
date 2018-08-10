@@ -9,7 +9,6 @@ import numpy as np
 import progressbar
 
 from dbcollection.datasets import BaseTask
-
 from dbcollection.utils.file_load import load_txt
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
@@ -210,27 +209,11 @@ class Recognition(BaseTask):
 
         yield set_splits_data
 
-    def add_data_to_source(self, hdf5_handler, data, set_name=None):
+    def process_set_metadata(self, data, set_name):
         """
-        Store data annotations in a nested tree fashion.
-
-        It closely follows the tree structure of the data.
+        Saves the metadata of a set.
         """
-        for category in data['source_data']:
-            category_grp = hdf5_handler.create_group(category)
-            for video_name in data[set_name]['source_data'][category]:
-                video_grp = category_grp.create_group(video_name)
-                video_grp.create_dataset(
-                    'images_path', data=data['source_data'][category][video_name]['images'])
-                video_grp.create_dataset(
-                    'video_path', data=data['source_data'][category][video_name]['video'])
-
-    def add_data_to_default(self, hdf5_handler, data, set_name=None):
-        """
-        Add data of a set to the default group.
-
-        For each field, the data is organized into a single big matrix.
-        """
+        hdf5_handler = self.hdf5_manager.get_group(set_name)
         hdf5_write_data(hdf5_handler, 'activities',
                         data["activities"],
                         dtype=np.uint8, fillvalue=0)
