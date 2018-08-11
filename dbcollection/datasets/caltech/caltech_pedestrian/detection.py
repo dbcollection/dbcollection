@@ -65,24 +65,13 @@ class Detection(BaseTask):
         bboxv_ids = BoundingBoxvField(**args).process()
         label_ids = LabelIdField(**args).process()
         occlusion_ids = OcclusionField(**args).process()
-        ObjectFieldNamesField(**args).process()
-        object_ids = ObjectIdsField(**args).process(
-            image_filenames_ids=image_filenames_ids,
-            class_ids=class_ids,
-            bbox_ids=bbox_ids,
-            bboxv_ids=bboxv_ids,
-            label_ids=label_ids,
-            occlusion_ids=occlusion_ids
-        )
 
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
         ImageFilenamesPerClassList(**args).process(image_filenames_unique_ids, classes_unique_ids)
-        BoundingBoxPerImageList(**args).process(object_ids, image_filenames_unique_ids)
-        BoundingBoxvPerImageList(**args).process(object_ids, image_filenames_unique_ids)
-        ObjectsPerImageList(**args).process(object_ids, image_filenames_unique_ids)
-        ObjectsPerClassList(**args).process(object_ids, classes_unique_ids)
+        BoundingBoxPerImageList(**args).process(bbox_ids, image_filenames_unique_ids)
+        BoundingBoxvPerImageList(**args).process(bboxv_ids, image_filenames_unique_ids)
 
 
 # -----------------------------------------------------------
@@ -465,41 +454,6 @@ class OcclusionField(BaseFieldCustom):
         return occlusions, occlusion_ids
 
 
-class ObjectFieldNamesField(BaseField):
-    """Object field names' field metadata process/save class."""
-
-    def process(self):
-        """Processes and saves the classes metadata to hdf5."""
-        object_fields = ['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']
-        self.save_field_to_hdf5(
-            set_name=self.set_name,
-            field='object_fields',
-            data=str2ascii(object_fields),
-            dtype=np.uint8,
-            fillvalue=0
-        )
-
-
-class ObjectIdsField(BaseField):
-    """Object ids' field metadata process/save class."""
-
-    def process(self, image_filenames_ids, class_ids, bbox_ids,
-                bboxv_ids, label_ids, occlusion_ids):
-        """Processes and saves the object ids metadata to hdf5."""
-        # img, class, bbox, bboxv, id, occlusion
-        object_ids = [[image_filenames_ids[i], class_ids[i], bbox_ids[i],
-                      bboxv_ids[i], label_ids[i], occlusion_ids[i]]
-                      for i in range(len(bbox_ids))]
-        self.save_field_to_hdf5(
-            set_name=self.set_name,
-            field='object_ids',
-            data=np.array(object_ids, dtype=np.int32),
-            dtype=np.int32,
-            fillvalue=-1
-        )
-        return object_ids
-
-
 # -----------------------------------------------------------
 # Metadata lists
 # -----------------------------------------------------------
@@ -582,59 +536,6 @@ class BoundingBoxvPerImageList(BaseField):
             bboxesv_per_image.sort()
             bboxesv_per_image_ids.append(bboxesv_per_image)
         return bboxesv_per_image_ids
-
-
-class ObjectsPerImageList(BaseField):
-    """Objects per image list metadata process/save class."""
-
-    @display_message_processing('objects per image list')
-    def process(self, object_ids, image_unique_ids):
-        """Processes and saves the list ids metadata to hdf5."""
-        object_ids_per_image = self.get_object_ids_per_image(object_ids, image_unique_ids)
-        self.save_field_to_hdf5(
-            set_name=self.set_name,
-            field='list_object_ids_per_image',
-            data=np.array(pad_list(object_ids_per_image, val=-1), dtype=np.int32),
-            dtype=np.int32,
-            fillvalue=-1
-        )
-
-    def get_object_ids_per_image(self, object_ids, image_unique_ids):
-        """Returns a list of lists of object ids per image id."""
-        objects_per_image_ids = []
-        unique_ids = list(set(image_unique_ids))
-        for i, image_id in enumerate(unique_ids):
-            objects_per_image = [j for j, obj in enumerate(object_ids) if image_unique_ids[obj[0]] == image_id]
-            objects_per_image = list(set(objects_per_image))  # get unique values
-            objects_per_image.sort()
-            objects_per_image_ids.append(objects_per_image)
-        return objects_per_image_ids
-
-
-class ObjectsPerClassList(BaseField):
-    """Objects per class list metadata process/save class."""
-
-    @display_message_processing('objects per class list')
-    def process(self, object_ids, classes_unique_ids):
-        """Processes and saves the list ids metadata to hdf5."""
-        objects_ids_per_class = self.get_object_ids_per_class(object_ids, classes_unique_ids)
-        self.save_field_to_hdf5(
-            set_name=self.set_name,
-            field='list_objects_ids_per_class',
-            data=np.array(pad_list(objects_ids_per_class, val=-1), dtype=np.int32),
-            dtype=np.int32,
-            fillvalue=-1
-        )
-
-    def get_object_ids_per_class(self, object_ids, class_unique_ids):
-        """Returns a list of lists of object ids per class id."""
-        objects_per_class_ids = []
-        classes = list(set(class_unique_ids))
-        for i in range(len(classes)):
-            objects_per_class = [j for j, val in enumerate(class_unique_ids) if val == i]
-            objects_per_class = sorted(list(set(objects_per_class)))  # get unique values
-            objects_per_class_ids.append(objects_per_class)
-        return objects_per_class_ids
 
 
 # -----------------------------------------------------------
