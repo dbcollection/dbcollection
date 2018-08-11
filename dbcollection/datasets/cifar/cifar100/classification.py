@@ -106,7 +106,7 @@ class Classification(BaseTask):
         ClassLabelField(**args).process()
         SuperClassLabelField(**args).process()
         ImageField(**args).process()
-        label_ids = LabelIdField(**args).process()
+        LabelIdField(**args).process()
         super_label_ids = SuperLabelIdField(**args).process()
         ColumnField(**args).process()
 
@@ -258,7 +258,7 @@ class LabelIdField(BaseField):
     @display_message_processing('labels')
     def process(self):
         """Processes and saves the labels metadata to hdf5."""
-        labels, label_ids = self.get_labels()
+        labels = self.get_labels()
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='labels',
@@ -266,14 +266,10 @@ class LabelIdField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
-        return label_ids
 
     def get_labels(self):
-        """Returns a np.ndarray of labels and a list
-        of label ids for each row of 'object_ids' field."""
-        labels = self.data['labels']
-        label_ids = list(range(len(labels)))
-        return labels, label_ids
+        """Returns a np.ndarray of labels."""
+        return self.data['labels']
 
 
 class SuperLabelIdField(BaseField):
