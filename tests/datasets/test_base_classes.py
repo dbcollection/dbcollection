@@ -10,7 +10,8 @@ import numpy as np
 from dbcollection.datasets import (
     BaseDataset,
     BaseTask,
-    BaseField
+    BaseField,
+    BaseColumnField
 )
 
 
@@ -316,3 +317,18 @@ class TestBaseField:
             compression="gzip",
             compression_opts=4
         )
+
+
+class TestBaseColumnField:
+    """Unit tests for the BaseColumnField class."""
+
+    def test_class_attributes(self, mocker):
+        base_column_field = BaseColumnField()
+        assert base_column_field.fields == []
+
+    def test_process(self, mocker):
+        mock_save_field_to_hdf5 = mocker.patch.object(BaseColumnField, 'save_field_to_hdf5')
+        base_column_field = BaseColumnField(set_name='train')
+        base_column_field.fields = ['some', 'fields']
+        base_column_field.process()
+        assert mock_save_field_to_hdf5.called
