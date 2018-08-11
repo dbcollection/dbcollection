@@ -8,7 +8,7 @@ import os
 import numpy as np
 import progressbar
 
-from dbcollection.datasets import BaseTask, BaseField
+from dbcollection.datasets import BaseTask, BaseField, BaseColumnField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_json
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -65,6 +65,7 @@ class Detection(BaseTask):
         bboxv_ids = BoundingBoxvField(**args).process()
         label_ids = LabelIdField(**args).process()
         occlusion_ids = OcclusionField(**args).process()
+        ColumnField(**args).process()
 
         # Lists
         if self.verbose:
@@ -452,6 +453,19 @@ class OcclusionField(BaseFieldCustom):
             occlusions.append(annotation["obj"]["occl"])
             occlusion_ids.append(annotation['obj_counter'])
         return occlusions, occlusion_ids
+
+
+class ColumnField(BaseColumnField):
+    """Column names' field metadata process/save class."""
+
+    fields = [
+        'image_filenames',
+        'classes',
+        'boxes',
+        'boxesv',
+        'id',
+        'occlusion'
+    ]
 
 
 # -----------------------------------------------------------
