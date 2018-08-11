@@ -209,7 +209,10 @@ class ClassLabelField(BaseField):
 
     def get_class_names(self):
         """Returns a list of class names."""
-        return self.data['classes']
+        label_names = self.data['classes']
+        label_ids = self.data['labels']
+        class_names = [label_names[idx] for idx in label_ids]
+        return class_names
 
 
 class SuperClassLabelField(BaseField):
@@ -229,7 +232,10 @@ class SuperClassLabelField(BaseField):
 
     def get_class_names(self):
         """Returns a list of super class names."""
-        return self.data['coarse_classes']
+        coarse_label_names = self.data['coarse_classes']
+        coarse_label_ids = self.data['coarse_labels']
+        coarse_class_names = [coarse_label_names[idx] for idx in coarse_label_ids]
+        return coarse_class_names
 
 
 class ImageField(BaseField):
@@ -298,8 +304,11 @@ class ColumnField(BaseColumnField):
     fields = [
         'images',
         'labels',
+        'classes',
         'superlabels'
+        'superclasses',
     ]
+
 
 # -----------------------------------------------------------
 # Metadata lists
