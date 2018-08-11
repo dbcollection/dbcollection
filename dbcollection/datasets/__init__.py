@@ -10,9 +10,11 @@ and used to manually setup a dataset.
 from __future__ import print_function
 import os
 import h5py
+import numpy as np
 
 from dbcollection.utils.hdf5 import HDF5Manager
 from dbcollection.utils.url import download_extract_urls
+from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
 
 class BaseDataset(object):
@@ -283,4 +285,20 @@ class BaseField(object):
             field=field,
             data=data,
             **kwargs
+        )
+
+
+class BaseColumnField(BaseField):
+    """Base class for the dataset's column data field processor."""
+
+    fields = []
+
+    def process(self):
+        """Processes and saves the columns metadata to hdf5."""
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='__COLUMNS__',
+            data=str2ascii(self.fields),
+            dtype=np.uint8,
+            fillvalue=0
         )
