@@ -365,13 +365,11 @@ class TestImageField:
 
     def test_process(self, mocker, mock_image_class):
         dummy_images = np.random.rand(5,3, 32, 32)
-        dummy_ids = list(range(5))
-        mock_get_images = mocker.patch.object(ImageField, "get_images", return_value=(dummy_images, dummy_ids))
+        mock_get_images = mocker.patch.object(ImageField, "get_images", return_value=dummy_images)
         mock_save_hdf5 = mocker.patch.object(ImageField, "save_field_to_hdf5")
 
-        image_ids = mock_image_class.process()
+        mock_image_class.process()
 
-        assert image_ids == dummy_ids
         mock_get_images.assert_called_once_with()
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -384,10 +382,7 @@ class TestImageField:
         # )
 
     def test_get_images(self, mocker, mock_image_class, test_data_loaded):
-        images, image_ids = mock_image_class.get_images()
-
-        assert_array_equal(images, test_data_loaded['images'])
-        assert image_ids == list(range(len(images)))
+        assert_array_equal(mock_image_class.get_images(), test_data_loaded['images'])
 
 
 class TestLabelIdField:
