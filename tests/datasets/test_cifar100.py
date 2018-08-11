@@ -425,13 +425,11 @@ class TestSuperLabelIdField:
 
     def test_process(self, mocker, mock_superlabel_class):
         dummy_labels = np.array(range(10))
-        dummy_ids = list(range(10))
-        mock_get_labels = mocker.patch.object(SuperLabelIdField, "get_super_labels", return_value=(dummy_labels, dummy_ids))
+        mock_get_labels = mocker.patch.object(SuperLabelIdField, "get_super_labels", return_value=dummy_labels)
         mock_save_hdf5 = mocker.patch.object(SuperLabelIdField, "save_field_to_hdf5")
 
-        super_label_ids = mock_superlabel_class.process()
+        mock_superlabel_class.process()
 
-        assert super_label_ids == dummy_ids
         mock_get_labels.assert_called_once_with()
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -444,10 +442,7 @@ class TestSuperLabelIdField:
         # )
 
     def test_get_super_labels(self, mocker, mock_superlabel_class, test_data_loaded):
-        super_labels, super_label_ids = mock_superlabel_class.get_super_labels()
-
-        assert_array_equal(super_labels, test_data_loaded['coarse_labels'])
-        assert super_label_ids == list(range(len(super_labels)))
+        assert_array_equal(mock_superlabel_class.get_super_labels(), test_data_loaded['coarse_labels'])
 
 
 class TestColumnField:
