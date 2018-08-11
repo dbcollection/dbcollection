@@ -32,13 +32,15 @@ class TestClassificationTask:
 
     def test_task_attributes(self, mocker, mock_classification_class):
         assert mock_classification_class.filename_h5 == 'classification'
-        assert mock_classification_class.data_files == ["batches.meta",
-                                                        "data_batch_1",
-                                                        "data_batch_2",
-                                                        "data_batch_3",
-                                                        "data_batch_4",
-                                                        "data_batch_5",
-                                                        "test_batch"]
+        assert mock_classification_class.data_files == [
+            "batches.meta",
+            "data_batch_1",
+            "data_batch_2",
+            "data_batch_3",
+            "data_batch_4",
+            "data_batch_5",
+            "test_batch"
+        ]
 
     def test_load_data(self, mocker, mock_classification_class):
         dummy_data = ['some_data']
@@ -225,7 +227,8 @@ class TestDatasetAnnotationLoader:
 
 @pytest.fixture()
 def test_data_loaded():
-    classes = ['airplane']*10
+
+    classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     images = np.random.rand(10,3,32,32)
     labels = np.array(range(10))
     return {
@@ -272,7 +275,8 @@ class TestClassLabelField:
         # )
 
     def test_get_class_names(self, mocker, mock_classlabel_class, test_data_loaded):
-        assert mock_classlabel_class.get_class_names() == test_data_loaded['classes']
+        class_names = mock_classlabel_class.get_class_names()
+        expected = [test_data_loaded['classes'][idx] for idx in test_data_loaded['labels']]
 
 
 class TestImageField:
@@ -344,7 +348,8 @@ class TestColumnField:
         column_fields = ColumnField()
         assert column_fields.fields == [
             'images',
-            'labels'
+            'labels',
+            'classes'
         ]
 
 
