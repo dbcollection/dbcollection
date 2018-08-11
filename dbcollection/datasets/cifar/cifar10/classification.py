@@ -177,7 +177,10 @@ class ClassLabelField(BaseField):
 
     def get_class_names(self):
         """Returns a list of class names."""
-        return self.data['classes']
+        label_names = self.data['classes']
+        label_ids = self.data['labels']
+        class_names = [label_names[idx] for idx in label_ids]
+        return class_names
 
 
 class ImageField(BaseField):
@@ -225,7 +228,8 @@ class ColumnField(BaseColumnField):
 
     fields = [
         'images',
-        'labels'
+        'labels',
+        'classes'
     ]
 
 
