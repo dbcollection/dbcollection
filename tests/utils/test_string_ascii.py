@@ -5,10 +5,13 @@ Test dbcollection/utils/string_ascii.py.
 
 import pytest
 import numpy as np
-from dbcollection.utils.string_ascii import (str_to_ascii,
-                                             ascii_to_str,
-                                             convert_str_to_ascii,
-                                             convert_ascii_to_str)
+
+from dbcollection.utils.string_ascii import (
+    str_to_ascii,
+    ascii_to_str,
+    convert_str_to_ascii,
+    convert_ascii_to_str
+)
 
 
 testdata_single_string = [
@@ -54,6 +57,10 @@ def test_convert_str_to_ascii_multiple_strings(sample, output):
     res = convert_str_to_ascii(sample)
     assert(output == res.tolist())
 
+def test_convert_str_to_ascii__raises_error__empty_input():
+    with pytest.raises(AssertionError):
+        convert_str_to_ascii([])
+
 @pytest.mark.parametrize("output, sample", testdata_single_string)
 def test_convert_ascii_to_str_single_string(sample, output):
     res = convert_ascii_to_str(np.array(sample, dtype=np.uint8))
@@ -63,3 +70,7 @@ def test_convert_ascii_to_str_single_string(sample, output):
 def test_convert_ascii_to_str_multiple_strings(sample, output):
     res = convert_ascii_to_str(np.array(sample, dtype=np.uint8))
     assert(output == res)
+
+def test_convert_ascii_to_str__raises_error__empty_input():
+    with pytest.raises(AssertionError):
+        convert_ascii_to_str([])
