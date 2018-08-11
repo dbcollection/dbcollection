@@ -32,11 +32,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     ImageFilenamesField,
     ImageFilenamesPerClassList,
     LabelIdField,
-    ObjectFieldNamesField,
-    ObjectIdsField,
-    ObjectsPerClassList,
-    ObjectsPerImageList,
-    OcclusionField,
+    OcclusionField
 )
 
 
@@ -100,13 +96,9 @@ class TestDetectionTask:
         mock_bboxv_field = mocker.patch.object(BoundingBoxvField, "process", return_value=dummy_ids)
         mock_lblid_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_occlusion_field = mocker.patch.object(OcclusionField, "process", return_value=dummy_ids)
-        mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
-        mock_objids_field = mocker.patch.object(ObjectIdsField, "process", return_value=dummy_object_ids)
         mock_img_per_class_list = mocker.patch.object(ImageFilenamesPerClassList, "process")
         mock_bbox_per_img_list = mocker.patch.object(BoundingBoxPerImageList, "process")
         mock_bboxv_per_img_list = mocker.patch.object(BoundingBoxvPerImageList, "process")
-        mock_object_per_img_list = mocker.patch.object(ObjectsPerImageList, "process")
-        mock_object_per_class_list = mocker.patch.object(ObjectsPerClassList, "process")
 
         mock_detection_class.process_set_metadata(test_data, 'train')
 
@@ -116,20 +108,9 @@ class TestDetectionTask:
         mock_bboxv_field.assert_called_once_with()
         mock_lblid_field.assert_called_once_with()
         mock_occlusion_field.assert_called_once_with()
-        mock_objfields_field.assert_called_once_with()
-        mock_objids_field.assert_called_once_with(
-            image_filenames_ids=dummy_ids,
-            class_ids=dummy_ids,
-            bbox_ids=dummy_ids,
-            bboxv_ids=dummy_ids,
-            label_ids=dummy_ids,
-            occlusion_ids=dummy_ids
-        )
         mock_img_per_class_list.assert_called_once_with([0, 0, 0, 1, 1, 1], dummy_ids)
         mock_bbox_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
         mock_bboxv_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
-        mock_object_per_img_list.assert_called_once_with(dummy_object_ids, [0, 0, 0, 1, 1, 1])
-        mock_object_per_class_list.assert_called_once_with(dummy_object_ids, dummy_ids)
 
 
 class TestDatasetAnnotationLoader:
@@ -675,73 +656,6 @@ class TestOcclusionField:
         assert occlusion_ids == list(range(5))
 
 
-class TestObjectFieldNamesField:
-    """Unit tests for the ObjectFieldNamesField class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_objfields_class(field_kwargs):
-        return ObjectFieldNamesField(**field_kwargs)
-
-    def test_process(self, mocker, mock_objfields_class):
-        mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
-
-        mock_objfields_class.process()
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_fields',
-        #     data=str2ascii(['image_filenames', 'classes', 'boxes', 'boxesv', 'id', 'occlusion']),
-        #     dtype=np.float8,
-        #     fillvalue=0
-        # )
-
-
-class TestObjectIdsField:
-    """Unit tests for the ObjectIdsField class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_objfids_class(field_kwargs):
-        return ObjectIdsField(**field_kwargs)
-
-    def test_process(self, mocker, mock_objfids_class):
-        mock_save_hdf5 = mocker.patch.object(ObjectIdsField, "save_field_to_hdf5")
-
-        image_filenames_ids = [0, 0, 0, 1, 1, 1]
-        class_ids = [0, 0, 1, 1, 2, 2]
-        bbox_ids = range(6)
-        bboxv_ids = range(6)
-        label_ids = range(6)
-        occlusion_ids = range(6)
-        object_ids = mock_objfids_class.process(
-            image_filenames_ids=image_filenames_ids,
-            class_ids=class_ids,
-            bbox_ids=bbox_ids,
-            bboxv_ids=bboxv_ids,
-            label_ids=label_ids,
-            occlusion_ids=occlusion_ids
-        )
-
-        expected_ids = [[image_filenames_ids[i], class_ids[i], bbox_ids[i],
-                         bboxv_ids[i], label_ids[i], occlusion_ids[i]] for i in range(6)]
-        assert object_ids == expected_ids
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # object_ids = [[image_filenames_ids[i], class_ids[i], bbox_ids[i],
-        #               bboxv_ids[i], label_ids[i], occlusion_ids[i]]
-        #               for i in range(len(bbox_ids))]
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_ids',
-        #     data=np.array(object_ids, dtype=np.int32),
-        #     dtype=np.int32,
-        #     fillvalue=-1
-        # )
-
-
 class TestImageFilenamesPerClassList:
     """Unit tests for the ImageFilenamesPerClassList class."""
 
@@ -857,89 +771,6 @@ class TestBoundingBoxvPerImageList:
         image_unique_ids = [0, 0, 1, 1, 2, 2]
         bboxes_per_image = mock_bboxv_per_img_list.get_bboxv_ids_per_image(object_ids, image_unique_ids)
         assert bboxes_per_image == [[0, 1], [2, 3], [4, 5]]
-
-
-class TestObjectsPerImageList:
-    """Unit tests for the ObjectsPerImageList class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_object_per_img_list(field_kwargs):
-        return ObjectsPerImageList(**field_kwargs)
-
-    def test_process(self, mocker, mock_object_per_img_list):
-        dummy_ids = [[0, 1], [2, 3], [4, 5]]
-        mock_get_ids = mocker.patch.object(ObjectsPerImageList, "get_object_ids_per_image", return_value=dummy_ids)
-        mock_save_hdf5 = mocker.patch.object(ObjectsPerImageList, "save_field_to_hdf5")
-
-        object_ids = [[i, i, i, i] for i in range(6)]
-        image_unique_ids = [0, 0, 1, 1, 2, 2]
-        mock_object_per_img_list.process(object_ids, image_unique_ids)
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='list_object_ids_per_image',
-        #     data=np.array(pad_list(mock_get_ids, val=-1), dtype=np.int32),
-        #     dtype=np.int32,
-        #     fillvalue=-1
-        # )
-
-    def test_get_object_ids_per_image(self, mocker, mock_object_per_img_list):
-        object_ids = [
-            [0, 0, 0, 0],
-            [1, 0, 1, 1],
-            [2, 1, 2, 2],
-            [3, 1, 3, 3],
-            [4, 0, 4, 4],
-            [5, 2, 5, 5]
-        ]
-        image_unique_ids = [0, 0, 1, 1, 2, 2]
-        objects_per_image = mock_object_per_img_list.get_object_ids_per_image(object_ids, image_unique_ids)
-        assert objects_per_image == [[0, 1], [2, 3], [4, 5]]
-
-
-class TestObjectsPerClassList:
-    """Unit tests for the ObjectsPerClassList class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_object_per_class_list(field_kwargs):
-        return ObjectsPerClassList(**field_kwargs)
-
-    def test_process(self, mocker, mock_object_per_class_list):
-        dummy_ids = [[0, 1], [2, 3], [4, 5]]
-        mock_get_ids = mocker.patch.object(ObjectsPerClassList, "get_object_ids_per_class", return_value=dummy_ids)
-        mock_save_hdf5 = mocker.patch.object(ObjectsPerClassList, "save_field_to_hdf5")
-
-        object_ids = [[i, i, i, i] for i in range(6)]
-        class_unique_ids = [0, 0, 1, 1, 2, 2]
-        mock_object_per_class_list.process(object_ids, class_unique_ids)
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='list_objects_ids_per_class',
-        #     data=np.array(pad_list(mock_get_ids, val=-1), dtype=np.int32),
-        #     dtype=np.int32,
-        #     fillvalue=-1
-        # )
-
-    def test_get_object_ids_per_class(self, mocker, mock_object_per_class_list):
-        object_ids = [
-            [0, 0, 0, 0],
-            [1, 1, 1, 1],
-            [2, 2, 2, 2],
-            [3, 3, 3, 3],
-            [4, 4, 4, 4],
-            [5, 5, 5, 5]
-        ]
-        class_unique_ids = [0, 0, 1, 1, 2, 2]
-        objects_per_class_ids = mock_object_per_class_list.get_object_ids_per_class(object_ids, class_unique_ids)
-
-        assert objects_per_class_ids == [[0, 1], [2, 3], [4, 5]]
 
 
 class TestDetectionCleanTask:
