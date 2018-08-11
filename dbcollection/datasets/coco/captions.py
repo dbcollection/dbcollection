@@ -1,5 +1,10 @@
 """
 COCO Captions 2015/2016 process functions.
+
+WARNING: the following code is awaiting for a
+         complete refactor. For the time being,
+         this code is working but won't receive
+         addons until a rework is done.
 """
 
 
