@@ -19,8 +19,6 @@ from dbcollection.datasets.cifar.cifar100.classification import (
     ImageField,
     LabelIdField,
     SuperLabelIdField,
-    ObjectFieldNamesField,
-    ObjectIdsField,
     ImagesPerClassList,
     ImagesPerSuperClassList
 )
@@ -122,8 +120,6 @@ class TestClassificationTask:
         mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
         mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_superlabel_field = mocker.patch.object(SuperLabelIdField, "process", return_value=dummy_ids)
-        mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
-        mock_objids_field = mocker.patch.object(ObjectIdsField, "process")
         mock_images_list = mocker.patch.object(ImagesPerClassList, "process")
         mock_images_super_list = mocker.patch.object(ImagesPerSuperClassList, "process")
 
@@ -136,8 +132,6 @@ class TestClassificationTask:
         mock_image_field.assert_called_once_with()
         mock_label_field.assert_called_once_with()
         mock_superlabel_field.assert_called_once_with()
-        mock_objfields_field.assert_called_once_with()
-        mock_objids_field.assert_called_once_with(dummy_ids, dummy_ids, dummy_ids)
         mock_images_list.assert_called_once_with()
         mock_images_super_list.assert_called_once_with()
 
@@ -461,61 +455,6 @@ class TestSuperLabelIdField:
 
         assert_array_equal(super_labels, test_data_loaded['coarse_labels'])
         assert super_label_ids == list(range(len(super_labels)))
-
-
-class TestObjectFieldNamesField:
-    """Unit tests for the ObjectFieldNamesField class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_objfields_class(field_kwargs):
-        return ObjectFieldNamesField(**field_kwargs)
-
-    def test_process(self, mocker, mock_objfields_class):
-        mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
-
-        mock_objfields_class.process()
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_fields',
-        #     data=str2ascii(['images', 'labels', 'superlabels']),
-        #     dtype=np.uint8,
-        #     fillvalue=0
-        # )
-
-
-class TestObjectIdsField:
-    """Unit tests for the ObjectIdsField class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_objfids_class(field_kwargs):
-        return ObjectIdsField(**field_kwargs)
-
-    def test_process(self, mocker, mock_objfids_class):
-        mock_save_hdf5 = mocker.patch.object(ObjectIdsField, "save_field_to_hdf5")
-
-        image_ids = [0, 1, 2, 3, 4, 5]
-        label_ids = [11, 35, 29, 8, 33, 45]
-        super_label_ids = [1, 5, 9, 8, 3, 5]
-        object_ids = mock_objfids_class.process(
-            image_ids=image_ids,
-            label_ids=label_ids,
-            super_label_ids=super_label_ids
-        )
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_ids',
-        #     data=np.array([[0, 11, 1], [1, 35, 5], [2, 29, 9], [3, 8, 8], [4, 33, 3], [5, 45, 5]], dtype=np.int32),
-        #     dtype=np.int32,
-        #     fillvalue=-1
-        # )
 
 
 class TestImagesPerClassList:
