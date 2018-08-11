@@ -72,6 +72,7 @@ class Detection(BaseTask):
             print('\n==> Setting up ordered lists:')
         ImageFilenamesPerClassList(**args).process(image_filenames_unique_ids, classes_unique_ids)
         BoundingBoxPerImageList(**args).process(bbox_ids, image_filenames_unique_ids)
+        BoundingBoxPerClassList(**args).process(bbox_ids, image_filenames_unique_ids)
         BoundingBoxvPerImageList(**args).process(bboxv_ids, image_filenames_unique_ids)
 
 
@@ -523,6 +524,32 @@ class BoundingBoxPerImageList(BaseField):
             bboxes_per_image.sort()
             bboxes_per_image_ids.append(bboxes_per_image)
         return bboxes_per_image_ids
+
+
+class BoundingBoxPerClassList(BaseField):
+    """Bounding boxes per class list metadata process/save class."""
+
+    @display_message_processing('bounding boxes per class list')
+    def process(self, bbox_ids, classes_unique_ids):
+        """Processes and saves the list ids metadata to hdf5."""
+        bboxes_per_class = self.get_bbox_ids_per_class(bbox_ids, classes_unique_ids)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_boxes_per_class',
+            data=np.array(pad_list(bboxes_per_class, val=-1), dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_bbox_ids_per_class(self, bbox_ids, class_unique_ids):
+        """Returns a list of lists of bounding boxes ids per class id."""
+        bboxes_per_class_ids = []
+        classes = list(set(class_unique_ids))
+        for i in range(len(classes)):
+            bboxes_per_class = [j for j, val in enumerate(class_unique_ids) if val == i]
+            bboxes_per_class = sorted(list(set(bboxes_per_class)))  # get unique values
+            bboxes_per_class_ids.append(bboxes_per_class)
+        return bboxes_per_class_ids
 
 
 class BoundingBoxvPerImageList(BaseField):
