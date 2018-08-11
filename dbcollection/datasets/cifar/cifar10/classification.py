@@ -59,7 +59,7 @@ class Classification(BaseTask):
         if self.verbose:
             print('\n==> Setting up the data fields:')
         ClassLabelField(**args).process()
-        image_ids = ImageField(**args).process()
+        ImageField(**args).process()
         LabelIdField(**args).process()
         ColumnField(**args).process()
 
@@ -186,7 +186,7 @@ class ImageField(BaseField):
     @display_message_processing('images')
     def process(self):
         """Processes and saves the images metadata to hdf5."""
-        images, image_ids = self.get_images()
+        images = self.get_images()
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='images',
@@ -194,14 +194,10 @@ class ImageField(BaseField):
             dtype=np.uint8,
             fillvalue=-1
         )
-        return image_ids
 
     def get_images(self):
-        """Returns a np.ndarray of images and a list
-        of image ids for each row of 'object_ids' field."""
-        images = self.data['images']
-        image_ids = list(range(len(images)))
-        return images, image_ids
+        """Returns a np.ndarray of images."""
+        return self.data['images']
 
 
 class LabelIdField(BaseField):
