@@ -7,7 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTask, BaseField
+from dbcollection.datasets import BaseTask, BaseField, BaseColumnField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -108,6 +108,7 @@ class Classification(BaseTask):
         image_ids = ImageField(**args).process()
         label_ids = LabelIdField(**args).process()
         super_label_ids = SuperLabelIdField(**args).process()
+        ColumnField(**args).process()
 
         # Lists
         if self.verbose:
@@ -302,6 +303,15 @@ class SuperLabelIdField(BaseField):
         super_label_ids = list(range(len(super_labels)))
         return super_labels, super_label_ids
 
+
+class ColumnField(BaseColumnField):
+    """Column names' field metadata process/save class."""
+
+    fields = [
+        'images',
+        'labels',
+        'superlabels'
+    ]
 
 # -----------------------------------------------------------
 # Metadata lists
