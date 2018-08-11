@@ -25,6 +25,7 @@ from dbcollection.datasets.caltech.caltech_pedestrian.detection import (
     BoundingBoxBaseField,
     BoundingBoxField,
     BoundingBoxPerImageList,
+    BoundingBoxPerClassList,
     BoundingBoxvField,
     BoundingBoxvPerImageList,
     ClassLabelField,
@@ -99,6 +100,7 @@ class TestDetectionTask:
         mock_column_field = mocker.patch.object(ColumnField, "process")
         mock_img_per_class_list = mocker.patch.object(ImageFilenamesPerClassList, "process")
         mock_bbox_per_img_list = mocker.patch.object(BoundingBoxPerImageList, "process")
+        mock_bbox_per_class_list = mocker.patch.object(BoundingBoxPerClassList, "process")
         mock_bboxv_per_img_list = mocker.patch.object(BoundingBoxvPerImageList, "process")
 
         mock_detection_class.process_set_metadata(test_data, 'train')
@@ -112,6 +114,7 @@ class TestDetectionTask:
         mock_column_field.assert_called_once_with()
         mock_img_per_class_list.assert_called_once_with([0, 0, 0, 1, 1, 1], dummy_ids)
         mock_bbox_per_img_list.assert_called_once_with(dummy_ids, [0, 0, 0, 1, 1, 1])
+        mock_bbox_per_class_list.assert_called_once_with(dummy_ids, [0, 0, 0, 1, 1, 1])
         mock_bboxv_per_img_list.assert_called_once_with(dummy_ids, [0, 0, 0, 1, 1, 1])
 
 
@@ -790,7 +793,7 @@ class TestBoundingBoxvPerImageList:
         assert bboxes_per_image == [[0, 1], [2, 3], [4, 5]]
 
 
-class SkipTestBoundingBoxPerClassList:
+class TestBoundingBoxPerClassList:
     """Unit tests for the BoundingBoxPerClassList class."""
 
     @staticmethod
@@ -800,24 +803,24 @@ class SkipTestBoundingBoxPerClassList:
 
     def test_process(self, mocker, mock_object_per_class_list):
         dummy_ids = [[0, 1], [2, 3], [4, 5]]
-        mock_get_ids = mocker.patch.object(BoundingBoxPerClassList, "get_object_ids_per_class", return_value=dummy_ids)
+        mock_get_ids = mocker.patch.object(BoundingBoxPerClassList, "get_bbox_ids_per_class", return_value=dummy_ids)
         mock_save_hdf5 = mocker.patch.object(BoundingBoxPerClassList, "save_field_to_hdf5")
 
-        object_ids = [[i, i, i, i] for i in range(6)]
+        bbox_ids = [[i, i, i, i] for i in range(6)]
         class_unique_ids = [0, 0, 1, 1, 2, 2]
-        mock_object_per_class_list.process(object_ids, class_unique_ids)
+        mock_object_per_class_list.process(bbox_ids, class_unique_ids)
 
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
         # mock_save_hdf5.assert_called_once_with(
         #     set_name='train',
-        #     field='list_objects_ids_per_class',
+        #     field='list_boxes_per_class',
         #     data=np.array(pad_list(mock_get_ids, val=-1), dtype=np.int32),
         #     dtype=np.int32,
         #     fillvalue=-1
         # )
 
-    def test_get_object_ids_per_class(self, mocker, mock_object_per_class_list):
+    def test_get_bbox_ids_per_class(self, mocker, mock_object_per_class_list):
         object_ids = [
             [0, 0, 0, 0],
             [1, 1, 1, 1],
@@ -827,9 +830,9 @@ class SkipTestBoundingBoxPerClassList:
             [5, 5, 5, 5]
         ]
         class_unique_ids = [0, 0, 1, 1, 2, 2]
-        objects_per_class_ids = mock_object_per_class_list.get_object_ids_per_class(object_ids, class_unique_ids)
+        bboxes_per_class_ids = mock_object_per_class_list.get_bbox_ids_per_class(object_ids, class_unique_ids)
 
-        assert objects_per_class_ids == [[0, 1], [2, 3], [4, 5]]
+        assert bboxes_per_class_ids == [[0, 1], [2, 3], [4, 5]]
 
 
 class TestDetectionCleanTask:
