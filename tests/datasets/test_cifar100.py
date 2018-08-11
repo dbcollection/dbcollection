@@ -395,13 +395,11 @@ class TestLabelIdField:
 
     def test_process(self, mocker, mock_label_class):
         dummy_labels = np.array(range(10))
-        dummy_ids = list(range(10))
-        mock_get_labels = mocker.patch.object(LabelIdField, "get_labels", return_value=(dummy_labels, dummy_ids))
+        mock_get_labels = mocker.patch.object(LabelIdField, "get_labels", return_value=dummy_labels)
         mock_save_hdf5 = mocker.patch.object(LabelIdField, "save_field_to_hdf5")
 
-        label_ids = mock_label_class.process()
+        mock_label_class.process()
 
-        assert label_ids == dummy_ids
         mock_get_labels.assert_called_once_with()
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -414,10 +412,7 @@ class TestLabelIdField:
         # )
 
     def test_get_labels(self, mocker, mock_label_class, test_data_loaded):
-        labels, label_ids = mock_label_class.get_labels()
-
-        assert_array_equal(labels, test_data_loaded['labels'])
-        assert label_ids == list(range(len(labels)))
+        assert_array_equal(mock_label_class.get_labels(), test_data_loaded['labels'])
 
 
 class TestSuperLabelIdField:
