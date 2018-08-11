@@ -260,14 +260,43 @@ def test_data_loaded():
         'orchids', 'poppies', 'roses', 'sunflowers', 'tulips',
         'bottles', 'bowls', 'cans', 'cups', 'plates',
         'apples', 'mushrooms', 'oranges', 'pears', 'sweet peppers',
-        'clock', 'computer keyboard', 'lamp', 'telephone', 'television'
+        'clock', 'computer keyboard', 'lamp', 'telephone', 'television',
+        'bed', 'chair', 'couch', 'table', 'wardrobe',
+        'bee', 'beetle', 'butterfly', 'caterpillar', 'cockroach',
+        'bear', 'leopard', 'lion', 'tiger', 'wolf',
+        'bridge', 'castle', 'house', 'road', 'skyscraper',
+        'cloud', 'forest', 'mountain', 'plain', 'sea',
+        'camel', 'cattle', 'chimpanzee', 'elephant', 'kangaroo',
+        'fox', 'porcupine', 'possum', 'raccoon', 'skunk',
+        'crab', 'lobster', 'snail', 'spider', 'worm',
+        'baby', 'boy', 'girl', 'man', 'woman',
+        'crocodile', 'dinosaur', 'lizard', 'snake', 'turtle',
+        'hamster', 'mouse', 'rabbit', 'shrew', 'squirrel',
+        'maple', 'oak', 'palm', 'pine', 'willow',
+        'bicycle', 'bus', 'motorcycle', 'pickup truck', 'train',
+        'lawn-mower', 'rocket', 'streetcar', 'tank', 'tractor'
     ]
     coarse_classes = ['aquatic mammals',
+        'aquatic mammals',
         'fish',
         'flowers',
         'food containers',
         'fruit and vegetables',
-        'household electrical devices'
+        'household electrical devices',
+        'household furniture',
+        'insects',
+        'large carnivores',
+        'large man-made outdoor things',
+        'large natural outdoor scenes',
+        'large omnivores and herbivores',
+        'medium-sized mammals',
+        'non-insect invertebrates',
+        'people',
+        'reptiles',
+        'small mammals',
+        'trees',
+        'vehicles 1',
+        'vehicles 2',
     ]
     images = np.random.rand(10,3,32,32)
     labels = np.random.randint(0,100,10)
@@ -319,8 +348,8 @@ class TestClassLabelField:
 
     def test_get_class_names(self, mocker, mock_classlabel_class, test_data_loaded):
         class_names = mock_classlabel_class.get_class_names()
-
-        assert class_names == test_data_loaded['classes']
+        expected_names = [test_data_loaded['classes'][idx] for idx in test_data_loaded['labels']]
+        assert class_names == expected_names
 
 
 class TestSuperClassLabelField:
@@ -350,9 +379,9 @@ class TestSuperClassLabelField:
         # )
 
     def test_get_class_names(self, mocker, mock_coarseclasslabel_class, test_data_loaded):
-        class_names = mock_coarseclasslabel_class.get_class_names()
-
-        assert class_names == test_data_loaded['coarse_classes']
+        coarse_class_names = mock_coarseclasslabel_class.get_class_names()
+        expected_names = [test_data_loaded['coarse_classes'][idx] for idx in test_data_loaded['coarse_labels']]
+        assert coarse_class_names == expected_names
 
 
 class TestImageField:
@@ -453,7 +482,9 @@ class TestColumnField:
         assert column_fields.fields == [
             'images',
             'labels',
+            'classes',
             'superlabels'
+            'superclasses',
         ]
 
 
