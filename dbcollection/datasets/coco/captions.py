@@ -156,9 +156,9 @@ class Caption2015(BaseTask):
         coco_categories_ids = []
 
         if is_test:
-            object_fields = ["image_filenames", "coco_urls", "width", "height"]
+            object_fields = ["image_filename", "image_id", "coco_images_id", "width", "height", "coco_url"]
         else:
-            object_fields = ["image_filenames", "coco_urls", "width", "height", "captions"]
+            object_fields = ["image_filename", "image_id", "coco_images_id", "width", "height", "coco_url", "caption"]
 
         list_captions_per_image = []
         list_object_ids_per_image = []
@@ -177,7 +177,7 @@ class Caption2015(BaseTask):
             image_id.append(annotation["id"])
 
             if is_test:
-                object_id.append([i, i, i, i])
+                object_id.append([i, i, i, i, i, i])
                 list_object_ids_per_image.append([i])
             else:
                 captions_per_image = []
@@ -185,8 +185,8 @@ class Caption2015(BaseTask):
                     caption.append(cap)
 
                     # object_id
-                    # [filename, caption, width, height]
-                    object_id.append([i, i, i, i, counter])
+                    # [filename, caption, width, height, coco_url]
+                    object_id.append([i, i, i, i, i, i, counter])
 
                     captions_per_image.append(counter)
 
@@ -224,36 +224,54 @@ class Caption2015(BaseTask):
         if is_test:
             coco_categories_ids = list(range(len(category)))
 
-        hdf5_write_data(hdf5_handler, 'image_filenames',
-                        str2ascii(image_filenames), dtype=np.uint8,
+        ##################################################################
+        # Temporary hack to convert table style storage to column format
+        #
+        # Todo: remove this hack when refactoring
+        #
+        ##################################################################
+        image_filenames_full = []
+        coco_urls_full = []
+        width_full = []
+        height_full = []
+        image_id_full = []
+        coco_images_ids_full = []
+        for obj in object_id:
+            image_filenames_full.append(image_filenames[obj[0]])
+            image_id_full.append(image_id[obj[1]])
+            coco_images_ids_full.append(coco_images_ids[obj[2]])
+            width_full.append(width[obj[3]])
+            height_full.append(height[obj[4]])
+            coco_urls_full.append(coco_urls[obj[5]])
+
+        hdf5_write_data(hdf5_handler, 'image_filename',
+                        str2ascii(image_filenames_full), dtype=np.uint8,
                         fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_urls',
-                        str2ascii(coco_urls), dtype=np.uint8,
-                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'image_id',
+                        np.array(image_id_full, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'coco_images_id',
+                        np.array(coco_images_ids_full, dtype=np.int32),
+                        fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'width',
-                        np.array(width, dtype=np.int32),
+                        np.array(width_full, dtype=np.int32),
                         fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'height',
-                        np.array(height, dtype=np.int32),
+                        np.array(height_full, dtype=np.int32),
                         fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'image_id',
-                        np.array(image_id, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'coco_images_ids',
-                        np.array(coco_images_ids, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids',
-                        np.array(object_id, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields',
-                        str2ascii(object_fields), dtype=np.uint8,
+        hdf5_write_data(hdf5_handler, 'coco_url',
+                        str2ascii(coco_urls_full), dtype=np.uint8,
+                        fillvalue=0)
+        column_fields = object_fields
+        hdf5_write_data(hdf5_handler, '__COLUMNS__',
+                        str2ascii(column_fields), dtype=np.uint8,
                         fillvalue=0)
         hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
                         np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32),
                         fillvalue=-1)
 
         if not is_test:
-            hdf5_write_data(hdf5_handler, 'captions',
+            hdf5_write_data(hdf5_handler, 'caption',
                             str2ascii(caption), dtype=np.uint8,
                             fillvalue=0)
             hdf5_write_data(hdf5_handler, 'list_captions_per_image',
@@ -266,7 +284,7 @@ class Caption2015(BaseTask):
             hdf5_write_data(hdf5_handler, 'supercategory',
                             str2ascii(supercategory), dtype=np.uint8,
                             fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'coco_categories_ids',
+            hdf5_write_data(hdf5_handler, 'coco_categories_id',
                             np.array(coco_categories_ids, dtype=np.int32),
                             fillvalue=-1)
 
