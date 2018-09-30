@@ -108,7 +108,7 @@ class Detection2015(BaseTask):
 
 
 class DatasetAnnotationLoader:
-    """Annotation's data loader for the cifar10 dataset (train/test)."""
+    """Annotation's data loader for the coco detection dataset (train/test)."""
 
     def __init__(self, annotations, data_path, cache_path, verbose):
         self.annotations = annotations
@@ -537,7 +537,6 @@ class IdsPerSuperCategoryList(CustomListBaseField):
 class Detection2016(Detection2015):
     """COCO Detection (2016) preprocessing functions."""
 
-    # metadata filename
     filename_h5 = 'detection_2016'
 
     annotations = {
