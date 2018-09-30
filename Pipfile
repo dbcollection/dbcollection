@@ -12,6 +12,7 @@ funcsigs = "*"
 pytest-mock = "*"
 "pathlib2" = "*"
 scandir = "*"
+"flake8" = "*"
 
 [packages]
 "h5py" = "*"
@@ -22,3 +23,4 @@ scipy = "*"
 xmltodict = "*"
 requests = "*"
 Pillow = "*"
+pandas = "*"
