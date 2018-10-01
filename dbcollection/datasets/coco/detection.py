@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from dbcollection.datasets import BaseTask, BaseField, BaseColumnField
+from dbcollection.datasets import BaseField, BaseMetadataField, BaseTask
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list, squeeze_list
@@ -103,8 +103,8 @@ class Detection2015(BaseTask):
         IdsPerCategoryList(**kwargs).process()
         IdsPerSuperCategoryList(**kwargs).process()
 
-        # Column field
-        ColumnField(**kwargs).process()
+        # Fields' metadata info
+        MetadataField(**kwargs).process()
 
 
 class DatasetAnnotationLoader:
@@ -370,36 +370,35 @@ class ImageWidthField(BaseField):
         )
 
 
-class ColumnField(BaseColumnField):
-    """Column names' field metadata process/save class."""
+class MetadataField(BaseMetadataField):
+    """Metadata field class."""
 
     fields = [
-        'id',
-        'category_id',
-        'image_id',
-        'area',
-        'bbox',
-        'iscrowd',
-        'segmentation',
-        'category',
-        'supercategory',
-        'coco_url',
-        'image_filename',
-        'height',
-        'width',
-        'list_images_per_category',
-        'list_images_per_supercategory',
-        'list_images_per_category',
-        'list_ids_per_image',
-        'list_ids_per_category',
-        'list_ids_per_supercategory'
+        {"name": 'id', "type": 'number'},
+        {"name": 'category_id', "type": 'number'},
+        {"name": 'image_id', "type": 'number'},
+        {"name": 'area', "type": 'number'},
+        {"name": 'bbox', "type": 'list'},
+        {"name": 'iscrowd', "type": 'number'},
+        {"name": 'segmentation', "type": 'list[list]'},
+        {"name": 'category', "type": 'string'},
+        {"name": 'supercategory', "type": 'string'},
+        {"name": 'coco_url', "type": 'string'},
+        {"name": 'image_filename', "type": 'string'},
+        {"name": 'height', "type": 'number'},
+        {"name": 'width', "type": 'number'},
+        {"name": 'list_images_per_category', "type": 'list'},
+        {"name": 'list_images_per_supercategory', "type": 'list'},
+        {"name": 'list_images_per_category', "type": 'list'},
+        {"name": 'list_ids_per_image', "type": 'list'},
+        {"name": 'list_ids_per_category', "type": 'list'},
+        {"name": 'list_ids_per_supercategory', "type": 'list'}
     ]
 
 
 # -----------------------------------------------------------
 # Metadata lists
 # -----------------------------------------------------------
-
 
 class CustomListBaseField(BaseField):
     """Custom base class for list fields."""
