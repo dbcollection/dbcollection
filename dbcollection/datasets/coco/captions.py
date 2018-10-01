@@ -9,7 +9,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from dbcollection.datasets import BaseTask, BaseField, BaseColumnField
+from dbcollection.datasets import BaseField, BaseMetadataField, BaseTask
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
@@ -92,8 +92,8 @@ class Caption2015(BaseTask):
             print('\n==> Setting up ordered lists:')
         CaptionsPerImageList(**kwargs).process()
 
-        # Column field
-        ColumnField(**kwargs).process()
+        # Fields' metadata info
+        MetadataField(**kwargs).process()
 
 
 class DatasetAnnotationLoader:
@@ -250,18 +250,18 @@ class ImageWidthField(BaseField):
         )
 
 
-class ColumnField(BaseColumnField):
-    """Column names' field metadata process/save class."""
+class MetadataField(BaseMetadataField):
+    """Metadata field class."""
 
     fields = [
-        'id',
-        'image_id',
-        'caption',
-        'coco_url',
-        'image_filename',
-        'height',
-        'width',
-        'list_captions_per_image'
+        {"name": 'id', "type": 'number'},
+        {"name": 'image_id', "type": 'number'},
+        {"name": 'caption', "type": 'string'},
+        {"name": 'coco_url', "type": 'string'},
+        {"name": 'image_filename', "type": 'string'},
+        {"name": 'height', "type": 'number'},
+        {"name": 'width', "type": 'number'},
+        {"name": 'list_captions_per_image', "type": 'list'}
     ]
 
 
