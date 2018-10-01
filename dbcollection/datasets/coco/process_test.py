@@ -5,7 +5,7 @@ Process and save the test set metadata to disk.
 
 from __future__ import print_function, division
 import numpy as np
-from dbcollection.datasets import BaseField, BaseColumnField
+from dbcollection.datasets import BaseField, BaseMetadataField, BaseTask
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 
@@ -33,8 +33,8 @@ def process_save_test_metadata_to_hdf5(data, set_name, hdf5_manager, verbose=Tru
     ImageHeightField(**kwargs).process()
     ImageWidthField(**kwargs).process()
 
-    # Column field
-    ColumnField(**kwargs).process()
+    # Fields' metadata info
+    MetadataField(**kwargs).process()
 
 
 # -----------------------------------------------------------
@@ -153,16 +153,16 @@ class ImageWidthField(BaseField):
         )
 
 
-class ColumnField(BaseColumnField):
-    """Column names' field metadata process/save class."""
+class MetadataField(BaseMetadataField):
+    """Metadata field class."""
 
     fields = [
-        'category_id',
-        'image_id',
-        'category',
-        'supercategory',
-        'coco_url',
-        'image_filename',
-        'height',
-        'width'
+        {"name": 'category_id', "type": 'number'},
+        {"name": 'image_id', "type": 'number'},
+        {"name": 'category', "type": 'string'},
+        {"name": 'supercategory', "type": 'string'},
+        {"name": 'coco_url', "type": 'string'},
+        {"name": 'image_filename', "type": 'string'},
+        {"name": 'height', "type": 'number'},
+        {"name": 'width', "type": 'number'}
     ]
