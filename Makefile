@@ -23,7 +23,9 @@ mybuild:
 .PHONY: install
 install: myinstall
 myinstall:
-	pipenv run python setup.py install
+	pipenv lock --requirements > $(REQUIREMENTS_FILE)
+	python setup.py install
+	rm $(REQUIREMENTS_FILE)
 
 .PHONY: docs
 docs: mydocs
@@ -49,8 +51,9 @@ requirements-dev:
 
 .PHONY: test
 test:
-	#make build
+	pipenv lock --requirements > requirements.txt
 	pipenv run tox
+	rm requirements.txt
 
 .PHONY: test-api
 test-api:
