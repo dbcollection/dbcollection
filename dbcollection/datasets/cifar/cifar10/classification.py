@@ -48,7 +48,7 @@ class Classification(BaseTask):
         """
         Saves the metadata of a set.
         """
-        args = {
+        configs = {
             "data": data,
             "set_name": set_name,
             "hdf5_manager": self.hdf5_manager,
@@ -58,17 +58,17 @@ class Classification(BaseTask):
         # Fields
         if self.verbose:
             print('\n==> Setting up the data fields:')
-        ClassLabelField(**args).process()
-        ImageField(**args).process()
-        LabelIdField(**args).process()
+        ClassLabelField(**configs).process()
+        ImageField(**configs).process()
+        LabelIdField(**configs).process()
 
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
-        ImagesPerClassList(**args).process()
+        ImagesPerClassList(**configs).process()
 
         # Fields' metadata info
-        MetadataField(**kwargs).process()
+        MetadataField(**configs).process()
 
 
 # -----------------------------------------------------------
