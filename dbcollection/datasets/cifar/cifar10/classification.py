@@ -7,7 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTask, BaseField, BaseColumnField
+from dbcollection.datasets import BaseTask, BaseField, BaseMetadataField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -61,12 +61,14 @@ class Classification(BaseTask):
         ClassLabelField(**args).process()
         ImageField(**args).process()
         LabelIdField(**args).process()
-        ColumnField(**args).process()
 
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
         ImagesPerClassList(**args).process()
+
+        # Fields' metadata info
+        MetadataField(**kwargs).process()
 
 
 # -----------------------------------------------------------
@@ -223,13 +225,13 @@ class LabelIdField(BaseField):
         return self.data['labels']
 
 
-class ColumnField(BaseColumnField):
-    """Column names' field metadata process/save class."""
+class MetadataField(BaseMetadataField):
+    """Metadata field class."""
 
     fields = [
-        'images',
-        'labels',
-        'classes'
+        {"name": 'images', "type": 'array'},
+        {"name": 'labels', "type": 'number'},
+        {"name": 'classes', "type": 'string'}
     ]
 
 
