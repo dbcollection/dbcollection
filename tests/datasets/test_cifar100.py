@@ -15,7 +15,7 @@ from dbcollection.datasets.cifar.cifar100.classification import (
     Classification,
     DatasetAnnotationLoader,
     ClassLabelField,
-    ColumnField,
+    MetadataField,
     SuperClassLabelField,
     ImageField,
     LabelIdField,
@@ -121,7 +121,7 @@ class TestClassificationTask:
         mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
         mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_superlabel_field = mocker.patch.object(SuperLabelIdField, "process", return_value=dummy_ids)
-        mock_column_field = mocker.patch.object(ColumnField, "process")
+        mock_metadata_field = mocker.patch.object(MetadataField, "process")
         mock_images_list = mocker.patch.object(ImagesPerClassList, "process")
         mock_images_super_list = mocker.patch.object(ImagesPerSuperClassList, "process")
 
@@ -134,7 +134,7 @@ class TestClassificationTask:
         mock_image_field.assert_called_once_with()
         mock_label_field.assert_called_once_with()
         mock_superlabel_field.assert_called_once_with()
-        mock_column_field.assert_called_once_with()
+        mock_metadata_field.assert_called_once_with()
         mock_images_list.assert_called_once_with()
         mock_images_super_list.assert_called_once_with()
 
@@ -474,17 +474,17 @@ class TestSuperLabelIdField:
         assert_array_equal(mock_superlabel_class.get_super_labels(), test_data_loaded['coarse_labels'])
 
 
-class TestColumnField:
-    """Unit tests for the ColumnField class."""
+class TestMetadataField:
+    """Unit tests for the MetadataField class."""
 
     def test_field_attributes(self):
-        column_fields = ColumnField()
-        assert column_fields.fields == [
-            'images',
-            'labels',
-            'classes',
-            'superlabels'
-            'superclasses',
+        metadata_fields = MetadataField()
+        assert metadata_fields.fields == [
+            {"images": 'id', "type": 'array'},
+            {"labels": 'category_id', "type": 'number'},
+            {"classes": 'image_id', "type": 'string'},
+            {"superlabels": 'area', "type": 'number'},
+            {"superclasses": 'bbox', "type": 'string'}
         ]
 
 
