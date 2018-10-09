@@ -35,4 +35,4 @@ class Dataset(BaseDataset):
         "keypoints_2016": Keypoints2016,
     }
     default_task = 'detection_2015'
-    version = '0.1.0'
+    version = '1.0.0'
