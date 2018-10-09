@@ -21,6 +21,8 @@ from .process_test import process_save_test_metadata_to_hdf5
 class Caption2015(BaseTask):
     """COCO Captions (2015) preprocessing functions."""
 
+    version = '1.0.0'
+
     # metadata filename
     filename_h5 = 'caption_2015'
 
