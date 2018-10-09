@@ -15,7 +15,7 @@ from dbcollection.datasets.cifar.cifar10.classification import (
     Classification,
     DatasetAnnotationLoader,
     ClassLabelField,
-    ColumnField,
+    MetadataField,
     ImageField,
     LabelIdField,
     ImagesPerClassList
@@ -65,7 +65,7 @@ class TestClassificationTask:
         mock_class_field = mocker.patch.object(ClassLabelField, "process")
         mock_image_field = mocker.patch.object(ImageField, "process")
         mock_label_field = mocker.patch.object(LabelIdField, "process")
-        mock_column_field = mocker.patch.object(ColumnField, "process")
+        mock_metadata_field = mocker.patch.object(MetadataField, "process")
         mock_images_per_class_list = mocker.patch.object(ImagesPerClassList, "process")
 
         data = {"classes": 1, "images": 1, "labels": 1,
@@ -75,7 +75,7 @@ class TestClassificationTask:
         mock_class_field.assert_called_once_with()
         mock_image_field.assert_called_once_with()
         mock_label_field.assert_called_once_with()
-        mock_column_field.assert_called_once_with()
+        mock_metadata_field.assert_called_once_with()
         mock_images_per_class_list.assert_called_once_with()
 
 
@@ -341,15 +341,15 @@ class TestLabelIdField:
         assert_array_equal(labels, test_data_loaded['labels'])
 
 
-class TestColumnField:
-    """Unit tests for the ColumnField class."""
+class TestMetadataField:
+    """Unit tests for the MetadataField class."""
 
     def test_field_attributes(self):
-        column_fields = ColumnField()
-        assert column_fields.fields == [
-            'images',
-            'labels',
-            'classes'
+        metadata_fields = MetadataField()
+        assert metadata_fields.fields == [
+            {"name": 'images', "type": 'array'},
+            {"name": 'labels', "type": 'number'},
+            {"name": 'classes', "type": 'string'}
         ]
 
 
