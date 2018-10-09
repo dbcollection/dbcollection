@@ -248,9 +248,6 @@ class Keypoints2016(BaseTask):
             keypoints_ = str2ascii(keypoints)
             skeleton_ = np.array(pad_list(skeleton, -1), dtype=np.uint8)
 
-        category_ = str2ascii(category)
-        supercategory_ = str2ascii(supercategory)
-
         image_filenames = []
         coco_urls = []
         width = []
@@ -275,13 +272,11 @@ class Keypoints2016(BaseTask):
         coco_annotations_ids = []
 
         if is_test:
-            object_fields = ["image_filenames", "coco_urls", "width", "height"]
+            object_fields = ["image_filename", "image_id", "coco_images_id", "width", "height", "coco_url"]
         else:
-            object_fields = ["image_filenames", "coco_urls", "width", "height",
-                             "category", "supercategory", "boxes", "area",
-                             "iscrowd", "segmentation",
-                             "image_id", "category_id", "annotation_id",
-                             "num_keypoints", "keypoints"]
+            object_fields = ["image_filename", "image_id", "coco_images_id", "width", "height", "coco_url",
+                             "category", "supercategory", "boxes", "area", "iscrowd", "segmentation",
+                             "category_id", "annotation_id", "num_keypoints", "keypoints"]
 
         list_boxes_per_image = []
         list_keypoints_per_image = []
@@ -307,7 +302,7 @@ class Keypoints2016(BaseTask):
             if is_test:
                 # *** object_id ***
                 # [filename, coco_url, width, height]
-                object_id.append([i, i, i, i])
+                object_id.append([i, i, i, i, i, i])
                 list_object_ids_per_image.append([i])
             else:
                 boxes_per_image = []
@@ -327,11 +322,10 @@ class Keypoints2016(BaseTask):
                         # bbox, area, iscrowd, segmentation,
                         # "image_id", "category_id", "annotation_id"
                         # "num_keypoints", "keypoints"]
-                        object_id.append([i, i, i, i,
-                                          category.index(obj["category"]), supercategory.index(
-                                              obj["supercategory"]),
+                        object_id.append([i, i, i, i, i, i,
+                                          category.index(obj["category"]), supercategory.index(obj["supercategory"]),
                                           counter, counter, obj["iscrowd"], counter,
-                                          i, category.index(obj["category"]), counter,
+                                          category.index(obj["category"]), counter,
                                           obj["num_keypoints"], counter])
 
                         boxes_per_image.append(counter)
@@ -406,40 +400,85 @@ class Keypoints2016(BaseTask):
                 objs_per_keypoint.sort()
                 list_object_ids_per_keypoint.append(objs_per_keypoint)
 
-        hdf5_write_data(hdf5_handler, 'image_filenames',
-                        str2ascii(image_filenames), dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_urls',
-                        str2ascii(coco_urls), dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'width',
-                        np.array(width, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'height',
-                        np.array(height, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'category',
-                        category_, dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'supercategory',
-                        supercategory_, dtype=np.uint8,
+        ##################################################################
+        # Temporary hack to convert table style storage to column format
+        #
+        # Todo: remove this hack when refactoring
+        #
+        ##################################################################
+        image_filenames_full = []
+        coco_urls_full = []
+        width_full = []
+        height_full = []
+        image_id_full = []
+        coco_images_ids_full = []
+        if not is_test:
+            category_full = []
+            supercategory_full = []
+            is_crowd_full = []
+            category_id_full = []
+            num_keypoints_full = []
+        for obj in object_id:
+            image_filenames_full.append(image_filenames[obj[0]])
+            image_id_full.append(image_id[obj[1]])
+            coco_images_ids_full.append(coco_images_ids[obj[2]])
+            width_full.append(width[obj[3]])
+            height_full.append(height[obj[4]])
+            coco_urls_full.append(coco_urls[obj[5]])
+            if not is_test:
+                category_full.append(category[obj[6]])
+                supercategory_full.append(supercategory[obj[7]])
+                is_crowd_full.append(iscrowd[obj[10]])
+                category_id_full.append(category_id[obj[12]])
+                num_keypoints_full.append(category_id[obj[14]])
+
+        hdf5_write_data(hdf5_handler, 'image_filename',
+                        str2ascii(image_filenames_full), dtype=np.uint8,
                         fillvalue=0)
         hdf5_write_data(hdf5_handler, 'image_id',
-                        np.array(image_id, dtype=np.int32),
+                        np.array(image_id_full, dtype=np.int32),
                         fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'category_id',
-                        np.array(category_id, dtype=np.int32),
+        hdf5_write_data(hdf5_handler, 'coco_images_id',
+                        np.array(coco_images_ids_full, dtype=np.int32),
                         fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids',
-                        np.array(object_id, dtype=np.int32),
+        hdf5_write_data(hdf5_handler, 'width',
+                        np.array(width_full, dtype=np.int32),
                         fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields',
-                        str2ascii(object_fields), dtype=np.uint8,
+        hdf5_write_data(hdf5_handler, 'height',
+                        np.array(height_full, dtype=np.int32),
+                        fillvalue=-1)
+        hdf5_write_data(hdf5_handler, 'coco_url',
+                        str2ascii(coco_urls_full), dtype=np.uint8,
                         fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_images_ids',
-                        np.array(coco_images_ids, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'coco_categories_ids',
+        if is_test:
+            hdf5_write_data(hdf5_handler, 'category',
+                            str2ascii(category), dtype=np.uint8,
+                            fillvalue=0)
+        else:
+            hdf5_write_data(hdf5_handler, 'category',
+                            str2ascii(category_full), dtype=np.uint8,
+                            fillvalue=0)
+        if is_test:
+            hdf5_write_data(hdf5_handler, 'supercategory',
+                            str2ascii(supercategory), dtype=np.uint8,
+                            fillvalue=0)
+        else:
+            hdf5_write_data(hdf5_handler, 'supercategory',
+                            str2ascii(supercategory_full), dtype=np.uint8,
+                            fillvalue=0)
+        if is_test:
+            hdf5_write_data(hdf5_handler, 'category_id',
+                            np.array(category_id, dtype=np.int32),
+                            fillvalue=-1)
+        else:
+            hdf5_write_data(hdf5_handler, 'category_id',
+                            np.array(category_id_full, dtype=np.int32),
+                            fillvalue=-1)
+        column_fields = object_fields
+        hdf5_write_data(hdf5_handler, '__COLUMNS__',
+                        str2ascii(column_fields), dtype=np.uint8,
+                        fillvalue=0)
+        hdf5_write_data(hdf5_handler, 'coco_categories_id',
                         np.array(coco_categories_ids, dtype=np.int32),
                         fillvalue=-1)
         hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
@@ -456,11 +495,11 @@ class Keypoints2016(BaseTask):
             hdf5_write_data(hdf5_handler, 'skeleton',
                             skeleton_, dtype=np.uint8,
                             fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'boxes',
+            hdf5_write_data(hdf5_handler, 'bbox',
                             np.array(bbox, dtype=np.float),
                             fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'iscrowd',
-                            np.array(iscrowd, dtype=np.uint8),
+            hdf5_write_data(hdf5_handler, 'is_crowd',
+                            np.array(is_crowd_full, dtype=np.uint8),
                             fillvalue=-1)
 
             nrows = len(segmentation)
@@ -488,12 +527,12 @@ class Keypoints2016(BaseTask):
                             np.array(area, dtype=np.int32),
                             fillvalue=-1)
             hdf5_write_data(hdf5_handler, 'num_keypoints',
-                            np.array(num_keypoints, dtype=np.uint8),
+                            np.array(num_keypoints_full, dtype=np.uint8),
                             fillvalue=0)
             hdf5_write_data(hdf5_handler, 'keypoints',
                             np.array(keypoints_list, dtype=np.int32),
                             fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'coco_annotations_ids',
+            hdf5_write_data(hdf5_handler, 'coco_annotations_id',
                             np.array(coco_annotations_ids, dtype=np.int32),
                             fillvalue=-1)
 
