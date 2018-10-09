@@ -22,6 +22,8 @@ from .process_test import process_save_test_metadata_to_hdf5
 class Keypoints2016(BaseTask):
     """COCO Keypoints (2016) preprocessing functions."""
 
+    version = '1.0.0'
+
     # metadata filename
     filename_h5 = 'keypoint_2016'
 
