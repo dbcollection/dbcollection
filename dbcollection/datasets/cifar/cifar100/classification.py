@@ -17,6 +17,8 @@ from dbcollection.utils.pad import pad_list
 class Classification(BaseTask):
     """Cifar100 Classification preprocessing functions."""
 
+    version = '1.0.0'
+
     # metadata filename
     filename_h5 = 'classification'
 
