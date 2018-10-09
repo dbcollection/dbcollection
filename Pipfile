@@ -13,6 +13,8 @@ pytest-mock = "*"
 "pathlib2" = "*"
 scandir = "*"
 "flake8" = "*"
+sphinx-rtd-theme = "*"
+sphinx = "*"
 
 [packages]
 "h5py" = "*"
