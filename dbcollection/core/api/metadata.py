@@ -39,12 +39,13 @@ def get_dataset_attributes(name):
     __import__(name)
     module = sys.modules[name]
     try:
+        dataset = getattr(module, 'Dataset')
         db_fields = {
-            "urls": getattr(module, 'urls'),
-            "keywords": getattr(module, 'keywords'),
-            "tasks": getattr(module, 'tasks'),
-            "default_task": getattr(module, 'default_task'),
-            "constructor": getattr(module, 'Dataset')
+            "urls": dataset.urls,
+            "keywords": dataset.keywords,
+            "tasks": dataset.tasks,
+            "default_task": dataset.default_task,
+            "constructor": dataset
         }
     except AttributeError:
         db_fields = None
