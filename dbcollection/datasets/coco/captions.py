@@ -68,7 +68,7 @@ class Caption2015(BaseTask):
 
     def process_set_metadata_train_val(self, data, set_name):
         """Saves the metadata of the train and validation sets."""
-        kwargs = {
+        configs = {
             "data": data,
             "set_name": set_name,
             "hdf5_manager": self.hdf5_manager,
@@ -79,21 +79,21 @@ class Caption2015(BaseTask):
         if self.verbose:
             print('\n==> Setting up the data fields:')
         # 'id',
-        IdField(**kwargs).process()
-        ImageIdField(**kwargs).process()
-        CaptionField(**kwargs).process()
-        CocoURLField(**kwargs).process()
-        ImageFilenameField(**kwargs).process()
-        ImageHeightField(**kwargs).process()
-        ImageWidthField(**kwargs).process()
+        IdField(**configs).process()
+        ImageIdField(**configs).process()
+        CaptionField(**configs).process()
+        CocoURLField(**configs).process()
+        ImageFilenameField(**configs).process()
+        ImageHeightField(**configs).process()
+        ImageWidthField(**configs).process()
 
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
-        CaptionsPerImageList(**kwargs).process()
+        CaptionsPerImageList(**configs).process()
 
         # Fields' metadata info
-        MetadataField(**kwargs).process()
+        MetadataField(**configs).process()
 
 
 class DatasetAnnotationLoader:

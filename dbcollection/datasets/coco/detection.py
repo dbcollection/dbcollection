@@ -69,7 +69,7 @@ class Detection2015(BaseTask):
 
     def process_set_metadata_train_val(self, data, set_name):
         """Saves the metadata of the train and validation sets."""
-        kwargs = {
+        configs = {
             "data": data,
             "set_name": set_name,
             "hdf5_manager": self.hdf5_manager,
@@ -79,32 +79,32 @@ class Detection2015(BaseTask):
         # Fields
         if self.verbose:
             print('\n==> Setting up the data fields:')
-        IdField(**kwargs).process()
-        CategoryIdField(**kwargs).process()
-        ImageIdField(**kwargs).process()
-        AreaField(**kwargs).process()
-        BboxField(**kwargs).process()
-        IsCrowdField(**kwargs).process()
-        SegmentationField(**kwargs).process()
-        CategoryField(**kwargs).process()
-        SuperCategoryField(**kwargs).process()
-        CocoURLField(**kwargs).process()
-        ImageFilenameField(**kwargs).process()
-        ImageHeightField(**kwargs).process()
-        ImageWidthField(**kwargs).process()
+        IdField(**configs).process()
+        CategoryIdField(**configs).process()
+        ImageIdField(**configs).process()
+        AreaField(**configs).process()
+        BboxField(**configs).process()
+        IsCrowdField(**configs).process()
+        SegmentationField(**configs).process()
+        CategoryField(**configs).process()
+        SuperCategoryField(**configs).process()
+        CocoURLField(**configs).process()
+        ImageFilenameField(**configs).process()
+        ImageHeightField(**configs).process()
+        ImageWidthField(**configs).process()
 
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
-        ImagesPerCategoryIdList(**kwargs).process()
-        ImagesPerSuperCategoryList(**kwargs).process()
-        BboxesPerImageList(**kwargs).process()
-        IdsPerImageList(**kwargs).process()
-        IdsPerCategoryList(**kwargs).process()
-        IdsPerSuperCategoryList(**kwargs).process()
+        ImagesPerCategoryIdList(**configs).process()
+        ImagesPerSuperCategoryList(**configs).process()
+        BboxesPerImageList(**configs).process()
+        IdsPerImageList(**configs).process()
+        IdsPerCategoryList(**configs).process()
+        IdsPerSuperCategoryList(**configs).process()
 
         # Fields' metadata info
-        MetadataField(**kwargs).process()
+        MetadataField(**configs).process()
 
 
 class DatasetAnnotationLoader:
