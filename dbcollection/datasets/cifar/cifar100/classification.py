@@ -7,7 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTask, BaseField, BaseColumnField
+from dbcollection.datasets import BaseTask, BaseField, BaseMetadataField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -108,13 +108,15 @@ class Classification(BaseTask):
         ImageField(**args).process()
         LabelIdField(**args).process()
         SuperLabelIdField(**args).process()
-        ColumnField(**args).process()
 
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
         ImagesPerClassList(**args).process()
         ImagesPerSuperClassList(**args).process()
+
+        # Fields' metadata info
+        MetadataField(**kwargs).process()
 
 
 # -----------------------------------------------------------
@@ -298,15 +300,15 @@ class SuperLabelIdField(BaseField):
         return self.data['coarse_labels']
 
 
-class ColumnField(BaseColumnField):
-    """Column names' field metadata process/save class."""
+class MetadataField(BaseMetadataField):
+    """Metadata field class."""
 
     fields = [
-        'images',
-        'labels',
-        'classes',
-        'superlabels'
-        'superclasses',
+        {"images": 'id', "type": 'array'},
+        {"labels": 'category_id', "type": 'number'},
+        {"classes": 'image_id', "type": 'string'},
+        {"superlabels": 'area', "type": 'number'},
+        {"superclasses": 'bbox', "type": 'string'}
     ]
 
 
