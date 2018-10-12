@@ -26,7 +26,7 @@ class DataLoader(object):
 
     Attributes
     ----------
-    db_name : str
+    dataset : str
         Name of the dataset.
     task : str
         Name of the task.
@@ -52,7 +52,7 @@ class DataLoader(object):
         assert data_dir, 'Must input a valid path for the data directory.'
         assert hdf5_filepath, 'Must input a valid path for the cache file.'
 
-        self.db_name = name
+        self.dataset = name
         self.task = task
         self.data_dir = data_dir
         self.hdf5_filepath = hdf5_filepath
@@ -284,7 +284,7 @@ class DataLoader(object):
         return len(self.sets)
 
     def __str__(self):
-        s = "DataLoader: {} ('{}' task)".format(self.db_name, self.task)
+        s = "DataLoader: {} ('{}' task)".format(self.dataset, self.task)
         return s
 
     def __repr__(self):

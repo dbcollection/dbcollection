@@ -795,7 +795,7 @@ class TestDataLoader:
 
         data_loader = DataLoader(name, task, data_dir, hdf5_file)
 
-        assert data_loader.db_name == name
+        assert data_loader.dataset == name
         assert data_loader.task == task
         assert data_loader.data_dir == data_dir
         assert data_loader.hdf5_filepath == hdf5_file
