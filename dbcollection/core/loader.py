@@ -55,10 +55,9 @@ class DataLoader(object):
         self.data_dir = data_dir
         self.hdf5_filename = hdf5_filename
         self.hdf5_file = self._load_hdf5_file()
-        self._sets = self._get_sets()
+        self.sets = self._get_sets()
+        self._sets_loader = self._get_set_loaders()
         self.object_fields = self._get_object_fields()
-
-        self.sets = self._get_set_loaders()
 
     def _load_hdf5_file(self):
         return h5py.File(self.hdf5_filename, 'r', libver='latest')
@@ -69,7 +68,7 @@ class DataLoader(object):
     def _get_object_fields(self):
         """# fetch list of field names that compose the object list."""
         object_fields = {}
-        for set_name in self._sets:
+        for set_name in self.sets:
             data = self.hdf5_file['/{}/object_fields'.format(set_name)].value
             object_fields[set_name] = tuple(convert_ascii_to_str(data))
         return object_fields
@@ -77,7 +76,7 @@ class DataLoader(object):
     def _get_set_loaders(self):
         """Return a dictionary with list of set loaders."""
         sets = {}
-        for set_name in self._sets:
+        for set_name in self.sets:
             sets[set_name] = SetLoader(self.hdf5_file[set_name])
         return sets
 
@@ -117,12 +116,12 @@ class DataLoader(object):
         assert set_name, 'Must input a set name.'
         assert field, 'Must input a field name.'
         try:
-            return self.sets[set_name].get(field, index, convert_to_str=convert_to_str)
+            return self._sets_loader[set_name].get(field, index, convert_to_str=convert_to_str)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
     def _raise_error_invalid_set_name(self, set_name):
-        raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self._sets))
+        raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self.sets))
 
     def size(self, set_name=None, field='object_ids'):
         """Size of a field.
@@ -155,15 +154,15 @@ class DataLoader(object):
     def _get_size_all_sets(self, field):
         assert field
         out = {}
-        for set_name in self.sets:
-            out[set_name] = self.sets[set_name].size(field)
+        for set_name in self._sets_loader:
+            out[set_name] = self._sets_loader[set_name].size(field)
         return out
 
     def _get_size_single_set(self, set_name, field):
         assert set_name
         assert field
         try:
-            return self.sets[set_name].size(field)
+            return self._sets_loader[set_name].size(field)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -193,14 +192,14 @@ class DataLoader(object):
 
     def _get_list_all_sets(self):
         out = {}
-        for set_name in self.sets:
-            out.update({set_name: self.sets[set_name].list()})
+        for set_name in self._sets_loader:
+            out.update({set_name: self._sets_loader[set_name].list()})
         return out
 
     def _get_list_single_set(self, set_name):
         assert set_name
         try:
-            return self.sets[set_name].list()
+            return self._sets_loader[set_name].list()
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -231,7 +230,7 @@ class DataLoader(object):
         assert set_name, 'Must input a valid set name.'
         assert field, 'Must input a valid field name.'
         try:
-            return self.sets[set_name].object_field_id(field)
+            return self._sets_loader[set_name].object_field_id(field)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -267,18 +266,18 @@ class DataLoader(object):
             self._print_info_single_set(set_name)
 
     def _print_info_all_sets(self):
-        for set_name in sorted(self.sets):
-            self.sets[set_name].info()
+        for set_name in sorted(self._sets_loader):
+            self._sets_loader[set_name].info()
 
     def _print_info_single_set(self, set_name):
         assert set_name
         try:
-            self.sets[set_name].info()
+            self._sets_loader[set_name].info()
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
     def __len__(self):
-        return len(self.sets)
+        return len(self._sets_loader)
 
     def __str__(self):
         s = "DataLoader: {} ('{}' task)".format(self.dataset, self.task)

@@ -834,7 +834,7 @@ class TestDataLoader:
             set_name = 'train'
             field = 'data'
             idx = 1
-            data = data_loader.sets[set_name].get(field, idx)
+            data = data_loader._sets_loader[set_name].get(field, idx)
 
             assert np.array_equal(data, dataset[set_name][field][idx])
 
