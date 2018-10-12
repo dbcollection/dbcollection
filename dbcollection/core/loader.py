@@ -36,8 +36,6 @@ class DataLoader(object):
         Path of the hdf5 metadata file stored on disk.
     hdf5_file : h5py._hl.files.File
         hdf5 file object handler.
-    root_path : str
-        Default data group of the hdf5 file.
     sets : tuple
         List of names of set splits (e.g. train, test, val, etc.)
     object_fields : dict
@@ -57,7 +55,6 @@ class DataLoader(object):
         self.data_dir = data_dir
         self.hdf5_filename = hdf5_filename
         self.hdf5_file = self._load_hdf5_file()
-        self.root_path = '/'
         self._sets = self._get_sets()
         self.object_fields = self._get_object_fields()
 
