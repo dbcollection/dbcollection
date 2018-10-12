@@ -7,75 +7,98 @@ import h5py
 from dbcollection.utils.string_ascii import convert_ascii_to_str
 
 
-class FieldLoader(object):
-    """Field metadata loader class.
+class DataLoader(object):
+    """Dataset metadata loader class.
 
-    This class contains several methods to fetch data from a specific
-    field of a set (group) in a hdf5 file. It contains useful information
-    about the field and also several methods to fetch data.
+    This class contains several methods to fetch data from a hdf5 file
+    by using simple, easy to use functions for (meta)data handling.
 
     Parameters
     ----------
-    hdf5_field : h5py._hl.dataset.Dataset
-        hdf5 field object handler.
-    obj_id : int, optional
-        Position of the field in 'object_fields'.
+    name : str
+        Name of the dataset.
+    task : str
+        Name of the task.
+    data_dir : str
+        Path of the dataset's data directory on disk.
+    hdf5_filepath : str
+        Path of the metadata cache file stored on disk.
 
     Attributes
     ----------
-    data : h5py._hl.dataset.Dataset
-        hdf5 group object handler.
-    set : str
-        Name of the set.
-    name : str
-        Name of the field.
-    type : type
-        Type of the field's data.
-    shape : tuple
-        Shape of the field's data.
-    fillvalue : int
-        Value used to pad arrays when storing the data in the hdf5 file.
-    obj_id : int
-        Identifier of the field if contained in the 'object_ids' list.
+    db_name : str
+        Name of the dataset.
+    task : str
+        Name of the task.
+    data_dir : str
+        Path of the dataset's data directory on disk.
+    hdf5_filepath : str
+        Path of the hdf5 metadata file stored on disk.
+    hdf5_file : h5py._hl.files.File
+        hdf5 file object handler.
+    root_path : str
+        Default data group of the hdf5 file.
+    sets : tuple
+        List of names of set splits (e.g. train, test, val, etc.)
+    object_fields : dict
+        Data field names for each set split.
 
     """
 
-    def __init__(self, hdf5_field, obj_id=None):
+    def __init__(self, name, task, data_dir, hdf5_filepath):
         """Initialize class."""
-        assert hdf5_field, 'Must input a valid hdf5 dataset.'
+        assert name, 'Must input a valid dataset name.'
+        assert task, 'Must input a valid task name.'
+        assert data_dir, 'Must input a valid path for the data directory.'
+        assert hdf5_filepath, 'Must input a valid path for the cache file.'
 
-        self.data = hdf5_field
-        self.hdf5_handler = hdf5_field
-        self._in_memory = False
-        self.set = self._get_set_name()
-        self.name = self._get_field_name()
-        self.shape = hdf5_field.shape
-        self.type = hdf5_field.dtype
-        self.fillvalue = hdf5_field.fillvalue
-        self.obj_id = obj_id
+        self.db_name = name
+        self.task = task
+        self.data_dir = data_dir
+        self.hdf5_filepath = hdf5_filepath
+        self.hdf5_file = self._load_hdf5_file()
+        self.root_path = '/'
+        self._sets = self._get_sets()
+        self.object_fields = self._get_object_fields()
 
-    def _get_set_name(self):
-        hdf5_object_str = self._get_hdf5_object_str()
-        return hdf5_object_str[1]
+        self.sets = self._get_set_loaders()
 
-    def _get_field_name(self):
-        hdf5_object_str = self._get_hdf5_object_str()
-        return hdf5_object_str[-1]
+    def _load_hdf5_file(self):
+        return h5py.File(self.hdf5_filepath, 'r', libver='latest')
 
-    def _get_hdf5_object_str(self):
-        return self.hdf5_handler.name.split('/')
+    def _get_sets(self):
+        return tuple(sorted(self.hdf5_file['/'].keys()))
 
-    def get(self, index=None, convert_to_str=False):
-        """Retrieves data of the field from the dataset's hdf5 metadata file.
+    def _get_object_fields(self):
+        """# fetch list of field names that compose the object list."""
+        object_fields = {}
+        for set_name in self._sets:
+            data = self.hdf5_file['/{}/object_fields'.format(set_name)].value
+            object_fields[set_name] = tuple(convert_ascii_to_str(data))
+        return object_fields
 
-        This method retrieves the i'th data from the hdf5 file. Also, it is
-        possible to retrieve multiple values by inserting a list/tuple of
-        number values as indexes.
+    def _get_set_loaders(self):
+        """Return a dictionary with list of set loaders."""
+        sets = {}
+        for set_name in self._sets:
+            sets[set_name] = SetLoader(self.hdf5_file[set_name])
+        return sets
+
+    def get(self, set_name, field, index=None, convert_to_str=False):
+        """Retrieves data from the dataset's hdf5 metadata file.
+
+        This method retrieves the i'th data from the hdf5 file with the
+        same 'field' name. Also, it is possible to retrieve multiple values
+        by inserting a list/tuple of number values as indexes.
 
         Parameters
         ----------
-        index : int/list/tuple, optional
-            Index number of he field. If it is a list, returns the data
+        set_name : str
+            Name of the set.
+        field : str
+            Name of the data field.
+        idx : int/list/tuple, optional
+            Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
         convert_to_str : bool, optional
             Convert the output data into a string.
@@ -88,150 +111,220 @@ class FieldLoader(object):
             If convert_to_str is set to True, it returns a string
             or list of strings.
 
-        Note
-        ----
-        When using lists/tuples of indexes, this method sorts the list
-        and removes duplicate values. This is because the h5py
-        api requires the indexing elements to be in increasing order when
-        retrieving data.
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
 
         """
-        if index is None:
-            data = self._get_all_idx()
-        else:
-            data = self._get_range_idx(index)
-        if convert_to_str:
-            data = convert_ascii_to_str(data)
-        return data
+        assert set_name, 'Must input a set name.'
+        assert field, 'Must input a field name.'
+        try:
+            return self.sets[set_name].get(field, index, convert_to_str=convert_to_str)
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
-    def _get_all_idx(self):
-        """Return the full data array."""
-        if self._in_memory:
-            return self.data
-        else:
-            return self.data.value
+    def _raise_error_invalid_set_name(self, set_name):
+        raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self._sets))
 
-    def _get_range_idx(self, idx):
-        """Return a slice of the data array."""
-        assert idx is not None
-        if isinstance(idx, int):
-            return self.data[idx]
-        else:
-            size = len(idx)
-            if size > 1:
-                return self.data[sorted(set(idx))]
-            elif size == 1:
-                return self.data[idx[0]]
-            else:
-                return self._get_all_idx()
+    def object(self, set_name, index=None, convert_to_value=False):
+        """Retrieves a list of all fields' indexes/values of an object composition.
 
-    def size(self):
-        """Size of the field.
+        Retrieves the data's ids or contents of all fields of an object.
 
-        Returns the number of the elements of the field.
+        It basically works as calling the get() method for each individual field
+        and then groups all values into a list w.r.t. the corresponding order of
+        the fields.
+
+        Parameters
+        ----------
+        set_name : str
+            Name of the set.
+        index : int/list/tuple, optional
+            Index number of the field. If it is a list, returns the data
+            for all the value indexes of that list. If no index is used,
+            it returns the entire data field array.
+        convert_to_value : bool, optional
+            If False, outputs a list of indexes. If True,
+            it outputs a list of arrays/values instead of indexes.
 
         Returns
         -------
-        tuple
-            Returns the size of the field.
+        list
+            List of indexes of the data fields available in 'object_fields'.
+            If convert_to_value is set to True, it returns a list of data
+            instead of indexes.
+
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
 
         """
-        return self.shape
+        assert set_name, 'Must input a valid set name.'
+        try:
+            return self.sets[set_name].object(index, convert_to_value)
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
-    def object_field_id(self):
-        """Retrieves the index position of the field in the 'object_ids' list.
+    def size(self, set_name=None, field='object_ids'):
+        """Size of a field.
 
-        This method returns the position of the field in the 'object_ids' object.
+        Returns the number of the elements of a field.
+
+        Parameters
+        ----------
+        set_name : str, optional
+            Name of the set.
+        field : str, optional
+            Name of the field in the metadata file.
+
+        Returns
+        -------
+        list/dict
+            Returns the size of a field.
+
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
+
+        """
+        if set_name is None:
+            return self._get_size_all_sets(field)
+        else:
+            return self._get_size_single_set(set_name, field)
+
+    def _get_size_all_sets(self, field):
+        assert field
+        out = {}
+        for set_name in self.sets:
+            out[set_name] = self.sets[set_name].size(field)
+        return out
+
+    def _get_size_single_set(self, set_name, field):
+        assert set_name
+        assert field
+        try:
+            return self.sets[set_name].size(field)
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
+
+    def list(self, set_name=None):
+        """List of all field names of a set.
+
+        Parameters
+        ----------
+        set_name : str, optional
+            Name of the set.
+
+        Returns
+        -------
+        list/dict
+            List of all data fields of the dataset.
+
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
+
+        """
+        if set_name is None:
+            return self._get_list_all_sets()
+        else:
+            return self._get_list_single_set(set_name)
+
+    def _get_list_all_sets(self):
+        out = {}
+        for set_name in self.sets:
+            out.update({set_name: self.sets[set_name].list()})
+        return out
+
+    def _get_list_single_set(self, set_name):
+        assert set_name
+        try:
+            return self.sets[set_name].list()
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
+
+    def object_field_id(self, set_name, field):
+        """Retrieves the index position of a field in the 'object_ids' list.
+
+        This method returns the position of a field in the 'object_ids' object.
         If the field is not contained in this object, it returns a null value.
+
+        Parameters
+        ----------
+        set_name : str
+            Name of the set.
+        field : str
+            Name of the field in the metadata file.
 
         Returns
         -------
         int
             Index of the field in the 'object_ids' list.
 
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
+
         """
-        return self.obj_id
+        assert set_name, 'Must input a valid set name.'
+        assert field, 'Must input a valid field name.'
+        try:
+            return self.sets[set_name].object_field_id(field)
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
-    def info(self, verbose=True):
-        """Prints information about the field.
+    def info(self, set_name=None):
+        """Prints information about all data fields of a set.
 
-        Displays information like name, size and shape of the field.
+        Displays information of all fields of a set group inside the hdf5
+        metadata file. This information contains the name of the field, as well
+        as the size/shape of the data, the data type and if the field is
+        contained in the 'object_ids' list.
+
+        If no 'set_name' is provided, it displays information for all available
+        sets.
+
+        This method only shows the most useful information about a set/fields
+        internals, which should be enough for most users in helping to
+        determine how to use/handle a specific dataset with little effort.
 
         Parameters
         ----------
-        verbose : bool, optional
-            If true, display extra information about the field.
+        set_name : str, optional
+            Name of the set.
+
+        Raises
+        ------
+        KeyError
+            If set name is not valid or does not exist.
 
         """
-        if verbose:
-            if hasattr(self, 'obj_id'):
-                print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})'
-                      .format(self.name, str(self.shape), str(self.type), self.obj_id))
-            else:
-                print('Field: {},  shape = {},  dtype = {}'
-                      .format(self.name, str(self.shape), str(self.type)))
-
-    def _set_to_memory(self, is_in_memory):
-        """Stores the contents of the field in a numpy array if True.
-
-        Parameters
-        ----------
-        is_in_memory : bool
-            Move the data to memory (if True).
-
-        """
-        assert isinstance(is_in_memory, bool), 'Invalid input. Must insert a boolean type.'
-        if is_in_memory:
-            self.data = self.hdf5_handler.value
+        if set_name is None:
+            self._print_info_all_sets()
         else:
-            self.data = self.hdf5_handler
-        self._in_memory = is_in_memory
+            self._print_info_single_set(set_name)
 
-    def _get_to_memory(self):
-        """Modifies how data is accessed and stored.
+    def _print_info_all_sets(self):
+        for set_name in sorted(self.sets):
+            self.sets[set_name].info()
 
-        Accessing data from a field can be done in two ways: memory or disk.
-        To enable data allocation and access from memory requires the user to
-        specify a boolean. If set to True, data is allocated to a numpy ndarray
-        and all accesses are done in memory. Otherwise, data is kept in disk and
-        accesses are done using the HDF5 object handler.
-
-        """
-        return self._in_memory
-
-    to_memory = property(_get_to_memory, _set_to_memory)
-
-    def __getitem__(self, index):
-        """
-        Parameters
-        ----------
-        index : int
-            Index
-
-        Returns
-        -------
-        np.ndarray
-            Numpy data array.
-
-        """
-        return self.data[index]
+    def _print_info_single_set(self, set_name):
+        assert set_name
+        try:
+            self.sets[set_name].info()
+        except KeyError:
+            self._raise_error_invalid_set_name(set_name)
 
     def __len__(self):
-        """
-        Returns
-        -------
-        int
-            Number of samples
-
-        """
-        return self.shape[0]
+        return len(self.sets)
 
     def __str__(self):
-        if self._in_memory:
-            s = 'FieldLoader: <numpy.ndarray "{}": shape {}, type "{}">' \
-                .format(self.name, self.data.shape, self.data.dtype)
-        else:
-            s = 'FieldLoader: ' + self.data.__str__()
+        s = "DataLoader: {} ('{}' task)".format(self.db_name, self.task)
         return s
 
     def __repr__(self):
@@ -591,98 +684,75 @@ class SetLoader(object):
         return str(self)
 
 
-class DataLoader(object):
-    """Dataset metadata loader class.
+class FieldLoader(object):
+    """Field metadata loader class.
 
-    This class contains several methods to fetch data from a hdf5 file
-    by using simple, easy to use functions for (meta)data handling.
+    This class contains several methods to fetch data from a specific
+    field of a set (group) in a hdf5 file. It contains useful information
+    about the field and also several methods to fetch data.
 
     Parameters
     ----------
-    name : str
-        Name of the dataset.
-    task : str
-        Name of the task.
-    data_dir : str
-        Path of the dataset's data directory on disk.
-    hdf5_filepath : str
-        Path of the metadata cache file stored on disk.
+    hdf5_field : h5py._hl.dataset.Dataset
+        hdf5 field object handler.
+    obj_id : int, optional
+        Position of the field in 'object_fields'.
 
     Attributes
     ----------
-    db_name : str
-        Name of the dataset.
-    task : str
-        Name of the task.
-    data_dir : str
-        Path of the dataset's data directory on disk.
-    hdf5_filepath : str
-        Path of the hdf5 metadata file stored on disk.
-    hdf5_file : h5py._hl.files.File
-        hdf5 file object handler.
-    root_path : str
-        Default data group of the hdf5 file.
-    sets : tuple
-        List of names of set splits (e.g. train, test, val, etc.)
-    object_fields : dict
-        Data field names for each set split.
+    data : h5py._hl.dataset.Dataset
+        hdf5 group object handler.
+    set : str
+        Name of the set.
+    name : str
+        Name of the field.
+    type : type
+        Type of the field's data.
+    shape : tuple
+        Shape of the field's data.
+    fillvalue : int
+        Value used to pad arrays when storing the data in the hdf5 file.
+    obj_id : int
+        Identifier of the field if contained in the 'object_ids' list.
 
     """
 
-    def __init__(self, name, task, data_dir, hdf5_filepath):
+    def __init__(self, hdf5_field, obj_id=None):
         """Initialize class."""
-        assert name, 'Must input a valid dataset name.'
-        assert task, 'Must input a valid task name.'
-        assert data_dir, 'Must input a valid path for the data directory.'
-        assert hdf5_filepath, 'Must input a valid path for the cache file.'
+        assert hdf5_field, 'Must input a valid hdf5 dataset.'
 
-        self.db_name = name
-        self.task = task
-        self.data_dir = data_dir
-        self.hdf5_filepath = hdf5_filepath
-        self.hdf5_file = self._load_hdf5_file()
-        self.root_path = '/'
-        self._sets = self._get_sets()
-        self.object_fields = self._get_object_fields()
+        self.data = hdf5_field
+        self.hdf5_handler = hdf5_field
+        self._in_memory = False
+        self.set = self._get_set_name()
+        self.name = self._get_field_name()
+        self.shape = hdf5_field.shape
+        self.type = hdf5_field.dtype
+        self.fillvalue = hdf5_field.fillvalue
+        self.obj_id = obj_id
 
-        self.sets = self._get_set_loaders()
+    def _get_set_name(self):
+        hdf5_object_str = self._get_hdf5_object_str()
+        return hdf5_object_str[1]
 
-    def _load_hdf5_file(self):
-        return h5py.File(self.hdf5_filepath, 'r', libver='latest')
+    def _get_field_name(self):
+        hdf5_object_str = self._get_hdf5_object_str()
+        return hdf5_object_str[-1]
 
-    def _get_sets(self):
-        return tuple(sorted(self.hdf5_file['/'].keys()))
+    def _get_hdf5_object_str(self):
+        return self.hdf5_handler.name.split('/')
 
-    def _get_object_fields(self):
-        """# fetch list of field names that compose the object list."""
-        object_fields = {}
-        for set_name in self._sets:
-            data = self.hdf5_file['/{}/object_fields'.format(set_name)].value
-            object_fields[set_name] = tuple(convert_ascii_to_str(data))
-        return object_fields
+    def get(self, index=None, convert_to_str=False):
+        """Retrieves data of the field from the dataset's hdf5 metadata file.
 
-    def _get_set_loaders(self):
-        """Return a dictionary with list of set loaders."""
-        sets = {}
-        for set_name in self._sets:
-            sets[set_name] = SetLoader(self.hdf5_file[set_name])
-        return sets
-
-    def get(self, set_name, field, index=None, convert_to_str=False):
-        """Retrieves data from the dataset's hdf5 metadata file.
-
-        This method retrieves the i'th data from the hdf5 file with the
-        same 'field' name. Also, it is possible to retrieve multiple values
-        by inserting a list/tuple of number values as indexes.
+        This method retrieves the i'th data from the hdf5 file. Also, it is
+        possible to retrieve multiple values by inserting a list/tuple of
+        number values as indexes.
 
         Parameters
         ----------
-        set_name : str
-            Name of the set.
-        field : str
-            Name of the data field.
-        idx : int/list/tuple, optional
-            Index number of the field. If it is a list, returns the data
+        index : int/list/tuple, optional
+            Index number of he field. If it is a list, returns the data
             for all the value indexes of that list.
         convert_to_str : bool, optional
             Convert the output data into a string.
@@ -695,220 +765,150 @@ class DataLoader(object):
             If convert_to_str is set to True, it returns a string
             or list of strings.
 
-        Raises
-        ------
-        KeyError
-            If set name is not valid or does not exist.
+        Note
+        ----
+        When using lists/tuples of indexes, this method sorts the list
+        and removes duplicate values. This is because the h5py
+        api requires the indexing elements to be in increasing order when
+        retrieving data.
 
         """
-        assert set_name, 'Must input a set name.'
-        assert field, 'Must input a field name.'
-        try:
-            return self.sets[set_name].get(field, index, convert_to_str=convert_to_str)
-        except KeyError:
-            self._raise_error_invalid_set_name(set_name)
-
-    def _raise_error_invalid_set_name(self, set_name):
-        raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self._sets))
-
-    def object(self, set_name, index=None, convert_to_value=False):
-        """Retrieves a list of all fields' indexes/values of an object composition.
-
-        Retrieves the data's ids or contents of all fields of an object.
-
-        It basically works as calling the get() method for each individual field
-        and then groups all values into a list w.r.t. the corresponding order of
-        the fields.
-
-        Parameters
-        ----------
-        set_name : str
-            Name of the set.
-        index : int/list/tuple, optional
-            Index number of the field. If it is a list, returns the data
-            for all the value indexes of that list. If no index is used,
-            it returns the entire data field array.
-        convert_to_value : bool, optional
-            If False, outputs a list of indexes. If True,
-            it outputs a list of arrays/values instead of indexes.
-
-        Returns
-        -------
-        list
-            List of indexes of the data fields available in 'object_fields'.
-            If convert_to_value is set to True, it returns a list of data
-            instead of indexes.
-
-        Raises
-        ------
-        KeyError
-            If set name is not valid or does not exist.
-
-        """
-        assert set_name, 'Must input a valid set name.'
-        try:
-            return self.sets[set_name].object(index, convert_to_value)
-        except KeyError:
-            self._raise_error_invalid_set_name(set_name)
-
-    def size(self, set_name=None, field='object_ids'):
-        """Size of a field.
-
-        Returns the number of the elements of a field.
-
-        Parameters
-        ----------
-        set_name : str, optional
-            Name of the set.
-        field : str, optional
-            Name of the field in the metadata file.
-
-        Returns
-        -------
-        list/dict
-            Returns the size of a field.
-
-        Raises
-        ------
-        KeyError
-            If set name is not valid or does not exist.
-
-        """
-        if set_name is None:
-            return self._get_size_all_sets(field)
+        if index is None:
+            data = self._get_all_idx()
         else:
-            return self._get_size_single_set(set_name, field)
+            data = self._get_range_idx(index)
+        if convert_to_str:
+            data = convert_ascii_to_str(data)
+        return data
 
-    def _get_size_all_sets(self, field):
-        assert field
-        out = {}
-        for set_name in self.sets:
-            out[set_name] = self.sets[set_name].size(field)
-        return out
+    def _get_all_idx(self):
+        """Return the full data array."""
+        if self._in_memory:
+            return self.data
+        else:
+            return self.data.value
 
-    def _get_size_single_set(self, set_name, field):
-        assert set_name
-        assert field
-        try:
-            return self.sets[set_name].size(field)
-        except KeyError:
-            self._raise_error_invalid_set_name(set_name)
+    def _get_range_idx(self, idx):
+        """Return a slice of the data array."""
+        assert idx is not None
+        if isinstance(idx, int):
+            return self.data[idx]
+        else:
+            size = len(idx)
+            if size > 1:
+                return self.data[sorted(set(idx))]
+            elif size == 1:
+                return self.data[idx[0]]
+            else:
+                return self._get_all_idx()
 
-    def list(self, set_name=None):
-        """List of all field names of a set.
+    def size(self):
+        """Size of the field.
 
-        Parameters
-        ----------
-        set_name : str, optional
-            Name of the set.
+        Returns the number of the elements of the field.
 
         Returns
         -------
-        list/dict
-            List of all data fields of the dataset.
-
-        Raises
-        ------
-        KeyError
-            If set name is not valid or does not exist.
+        tuple
+            Returns the size of the field.
 
         """
-        if set_name is None:
-            return self._get_list_all_sets()
-        else:
-            return self._get_list_single_set(set_name)
+        return self.shape
 
-    def _get_list_all_sets(self):
-        out = {}
-        for set_name in self.sets:
-            out.update({set_name: self.sets[set_name].list()})
-        return out
+    def object_field_id(self):
+        """Retrieves the index position of the field in the 'object_ids' list.
 
-    def _get_list_single_set(self, set_name):
-        assert set_name
-        try:
-            return self.sets[set_name].list()
-        except KeyError:
-            self._raise_error_invalid_set_name(set_name)
-
-    def object_field_id(self, set_name, field):
-        """Retrieves the index position of a field in the 'object_ids' list.
-
-        This method returns the position of a field in the 'object_ids' object.
+        This method returns the position of the field in the 'object_ids' object.
         If the field is not contained in this object, it returns a null value.
-
-        Parameters
-        ----------
-        set_name : str
-            Name of the set.
-        field : str
-            Name of the field in the metadata file.
 
         Returns
         -------
         int
             Index of the field in the 'object_ids' list.
 
-        Raises
-        ------
-        KeyError
-            If set name is not valid or does not exist.
-
         """
-        assert set_name, 'Must input a valid set name.'
-        assert field, 'Must input a valid field name.'
-        try:
-            return self.sets[set_name].object_field_id(field)
-        except KeyError:
-            self._raise_error_invalid_set_name(set_name)
+        return self.obj_id
 
-    def info(self, set_name=None):
-        """Prints information about all data fields of a set.
+    def info(self, verbose=True):
+        """Prints information about the field.
 
-        Displays information of all fields of a set group inside the hdf5
-        metadata file. This information contains the name of the field, as well
-        as the size/shape of the data, the data type and if the field is
-        contained in the 'object_ids' list.
-
-        If no 'set_name' is provided, it displays information for all available
-        sets.
-
-        This method only shows the most useful information about a set/fields
-        internals, which should be enough for most users in helping to
-        determine how to use/handle a specific dataset with little effort.
+        Displays information like name, size and shape of the field.
 
         Parameters
         ----------
-        set_name : str, optional
-            Name of the set.
-
-        Raises
-        ------
-        KeyError
-            If set name is not valid or does not exist.
+        verbose : bool, optional
+            If true, display extra information about the field.
 
         """
-        if set_name is None:
-            self._print_info_all_sets()
+        if verbose:
+            if hasattr(self, 'obj_id'):
+                print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})'
+                      .format(self.name, str(self.shape), str(self.type), self.obj_id))
+            else:
+                print('Field: {},  shape = {},  dtype = {}'
+                      .format(self.name, str(self.shape), str(self.type)))
+
+    def _set_to_memory(self, is_in_memory):
+        """Stores the contents of the field in a numpy array if True.
+
+        Parameters
+        ----------
+        is_in_memory : bool
+            Move the data to memory (if True).
+
+        """
+        assert isinstance(is_in_memory, bool), 'Invalid input. Must insert a boolean type.'
+        if is_in_memory:
+            self.data = self.hdf5_handler.value
         else:
-            self._print_info_single_set(set_name)
+            self.data = self.hdf5_handler
+        self._in_memory = is_in_memory
 
-    def _print_info_all_sets(self):
-        for set_name in sorted(self.sets):
-            self.sets[set_name].info()
+    def _get_to_memory(self):
+        """Modifies how data is accessed and stored.
 
-    def _print_info_single_set(self, set_name):
-        assert set_name
-        try:
-            self.sets[set_name].info()
-        except KeyError:
-            self._raise_error_invalid_set_name(set_name)
+        Accessing data from a field can be done in two ways: memory or disk.
+        To enable data allocation and access from memory requires the user to
+        specify a boolean. If set to True, data is allocated to a numpy ndarray
+        and all accesses are done in memory. Otherwise, data is kept in disk and
+        accesses are done using the HDF5 object handler.
+
+        """
+        return self._in_memory
+
+    to_memory = property(_get_to_memory, _set_to_memory)
+
+    def __getitem__(self, index):
+        """
+        Parameters
+        ----------
+        index : int
+            Index
+
+        Returns
+        -------
+        np.ndarray
+            Numpy data array.
+
+        """
+        return self.data[index]
 
     def __len__(self):
-        return len(self.sets)
+        """
+        Returns
+        -------
+        int
+            Number of samples
+
+        """
+        return self.shape[0]
 
     def __str__(self):
-        s = "DataLoader: {} ('{}' task)".format(self.db_name, self.task)
+        if self._in_memory:
+            s = 'FieldLoader: <numpy.ndarray "{}": shape {}, type "{}">' \
+                .format(self.name, self.data.shape, self.data.dtype)
+        else:
+            s = 'FieldLoader: ' + self.data.__str__()
         return s
 
     def __repr__(self):
