@@ -38,7 +38,7 @@ class DataLoader(object):
         hdf5 file object handler.
     sets : tuple
         List of names of set splits (e.g. train, test, val, etc.)
-    object_fields : dict
+    columns : dict
         Data field names for each set split.
 
     """
@@ -55,23 +55,23 @@ class DataLoader(object):
         self.data_dir = data_dir
         self.hdf5_filename = hdf5_filename
         self.hdf5_file = self._load_hdf5_file()
-        self.sets = self._get_sets()
+        self.sets = self._get_set_names()
         self._sets_loader = self._get_set_loaders()
-        self.object_fields = self._get_object_fields()
+        self.columns = self._get_column_names()
 
     def _load_hdf5_file(self):
         return h5py.File(self.hdf5_filename, 'r', libver='latest')
 
-    def _get_sets(self):
+    def _get_set_names(self):
         return tuple(sorted(self.hdf5_file['/'].keys()))
 
-    def _get_object_fields(self):
+    def _get_column_names(self):
         """# fetch list of field names that compose the object list."""
-        object_fields = {}
+        columns = {}
         for set_name in self.sets:
-            data = self.hdf5_file['/{}/object_fields'.format(set_name)].value
-            object_fields[set_name] = tuple(convert_ascii_to_str(data))
-        return object_fields
+            data = self.hdf5_file['/{}/__COLUMNS__'.format(set_name)].value
+            columns[set_name] = tuple(convert_ascii_to_str(data))
+        return columns
 
     def _get_set_loaders(self):
         """Return a dictionary with list of set loaders."""
@@ -307,7 +307,7 @@ class SetLoader(object):
         Name of the set.
     fields : tuple
         List of all field names of the set.
-    object_fields : tuple
+    columns : tuple
         List of all field names of the set contained by the 'object_ids' list.
     nelems : int
         Number of rows in 'object_ids'.
@@ -320,7 +320,7 @@ class SetLoader(object):
 
         self.hdf5_group = hdf5_group
         self.set = self._get_set_name()
-        self.object_fields = self._get_object_fields()
+        self.columns = self._get_column_names()
         self.nelems = self._get_num_elements()
         self._fields = self._get_field_names()
         self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
@@ -333,9 +333,9 @@ class SetLoader(object):
         str_split = hdf5_object_str.split('/')
         return str_split[-1]
 
-    def _get_object_fields(self):
-        object_fields_data = self.hdf5_group['object_fields'].value
-        output = convert_ascii_to_str(object_fields_data)
+    def _get_column_names(self):
+        columns_data = self.hdf5_group['__COLUMNS__'].value
+        output = convert_ascii_to_str(columns_data)
         if type(output) == 'string':
             output = (output,)
         return output
@@ -354,8 +354,8 @@ class SetLoader(object):
         return fields
 
     def _get_obj_id_field(self, field):
-        if field in self.object_fields:
-            return self.object_fields.index(field)
+        if field in self.columns:
+            return self.columns.index(field)
         else:
             return None
 
@@ -459,7 +459,7 @@ class SetLoader(object):
         try:
             return self.fields[field].object_field_id()
         except KeyError:
-            raise KeyError('\'{}\' is not contained in \'object_fields\'.'.format(field))
+            raise KeyError('\'{}\' is not contained in \'__COLUMNS__\'.'.format(field))
 
     def info(self):
         """Prints information about the data fields of a set.
@@ -501,7 +501,7 @@ class SetLoader(object):
     def _get_field_info(self, field):
         assert field
         s_obj = ''
-        if field in self.object_fields:
+        if field in self.columns:
             obj_id = self.object_field_id(field)
             s_obj = "(in 'object_ids', position = {})".format(obj_id)
 
@@ -575,7 +575,7 @@ class FieldLoader(object):
     hdf5_field : h5py._hl.dataset.Dataset
         hdf5 field object handler.
     obj_id : int, optional
-        Position of the field in 'object_fields'.
+        Position of the field in '__COLUMNS__'.
 
     Attributes
     ----------

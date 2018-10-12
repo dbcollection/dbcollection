@@ -113,7 +113,7 @@ class HDF5DatasetMetadataGenerator:
             dataset[field] = lists[field]
 
         obj_fields = sorted(fields.keys())
-        dataset['object_fields'] = str_to_ascii(obj_fields)
+        dataset['__COLUMNS__'] = str_to_ascii(obj_fields)
         dataset['object_ids'] = np.array([[i] * len(obj_fields) for i in range(size)])
 
         return dataset
@@ -594,7 +594,7 @@ class TestSetLoader:
         set_loader = SetLoader(h5obj[set_name])
 
         assert set_loader.set == set_name
-        assert set_loader.object_fields == ascii_to_str(dataset[set_name]['object_fields'])
+        assert set_loader.columns == ascii_to_str(dataset[set_name]['__COLUMNS__'])
         assert set_loader.nelems == 5
 
     class TestGet:
