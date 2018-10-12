@@ -728,59 +728,6 @@ class TestSetLoader:
 
             assert np.array_equal(data, set_data[field][idx])
 
-    class TestObject:
-        """Group tests for the object() method."""
-
-        def test_object_single_obj(self):
-            set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
-
-            idx = 0
-            data = set_loader.object(idx)
-
-            assert np.array_equal(data, set_data['object_ids'][idx])
-
-        def test_object_single_obj_value(self):
-            set_loader, set_data, fields = db_generator.get_test_dataset_SetLoader('train')
-
-            idx = 0
-            data = set_loader.object(idx, True)
-            expected = get_expected_object_values(set_data, set_loader.object_fields, idx)
-
-            assert compare_lists(data, expected)
-
-        def test_object_two_objs(self):
-            set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
-
-            idx = [0, 1]
-            data = set_loader.object(idx)
-
-            assert np.array_equal(data, set_data['object_ids'][idx])
-
-        def test_object_two_objs_value(self):
-            set_loader, set_data, fields = db_generator.get_test_dataset_SetLoader('train')
-
-            idx = [0, 1]
-            data = set_loader.object(idx, True)
-            expected = get_expected_object_values(set_data, set_loader.object_fields, idx)
-
-            assert compare_lists(data, expected)
-
-        def test_object_all_objs(self):
-            set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
-
-            data = set_loader.object()
-
-            assert np.array_equal(data, set_data['object_ids'])
-
-        def test_object_all_objs_value(self):
-            set_loader, set_data, fields = db_generator.get_test_dataset_SetLoader('train')
-
-            data = set_loader.object(convert_to_value=True)
-            idx = range(len(set_data['object_ids']))
-            expected = get_expected_object_values(set_data, set_loader.object_fields, idx)
-
-            assert compare_lists(data, expected)
-
     def test_size(self):
         set_loader, set_data, _ = db_generator.get_test_dataset_SetLoader('train')
 
@@ -929,54 +876,6 @@ class TestDataLoader:
 
             assert np.array_equal(data, dataset[set_name][field])
 
-    class TestObject:
-        """Group tests for the object() method."""
-
-        def test_object_single_obj(self):
-            data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
-
-            set_name = 'train'
-            idx = 3
-            data = data_loader.object(set_name, idx)
-
-            assert np.array_equal(data, dataset[set_name]['object_ids'][idx])
-
-        def test_object_single_obj_values(self):
-            data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
-
-            set_name = 'train'
-            idx = 3
-            data = data_loader.object(set_name, idx, True)
-            expected = get_expected_object_values(dataset[set_name],
-                                                data_loader.sets[set_name].object_fields,
-                                                idx)
-
-            assert compare_lists(data, expected)
-
-        def test_object_single_obj_raise_error_invalid_set(self):
-            data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
-
-            with pytest.raises(KeyError):
-                set_name = 'val'
-                idx = 3
-                data = data_loader.object(set_name, idx)
-
-        def test_object_two_objs(self):
-            data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
-
-            set_name = 'train'
-            idx = [3, 4]
-            data = data_loader.object(set_name, idx)
-
-            assert np.array_equal(data, dataset[set_name]['object_ids'][idx])
-
-        def test_object_all_objs(self):
-            data_loader, dataset, _ = db_generator.get_test_dataset_DataLoader()
-
-            set_name = 'train'
-            data = data_loader.object(set_name)
-
-            assert np.array_equal(data, dataset[set_name]['object_ids'])
 
     class TestSize:
         """Group tests for the size() method."""
