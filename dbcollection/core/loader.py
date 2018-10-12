@@ -21,7 +21,7 @@ class DataLoader(object):
         Name of the task.
     data_dir : str
         Path of the dataset's data directory on disk.
-    hdf5_filepath : str
+    hdf5_filename : str
         Path of the metadata cache file stored on disk.
 
     Attributes
@@ -32,7 +32,7 @@ class DataLoader(object):
         Name of the task.
     data_dir : str
         Path of the dataset's data directory on disk.
-    hdf5_filepath : str
+    hdf5_filename : str
         Path of the hdf5 metadata file stored on disk.
     hdf5_file : h5py._hl.files.File
         hdf5 file object handler.
@@ -45,17 +45,17 @@ class DataLoader(object):
 
     """
 
-    def __init__(self, name, task, data_dir, hdf5_filepath):
+    def __init__(self, name, task, data_dir, hdf5_filename):
         """Initialize class."""
         assert name, 'Must input a valid dataset name.'
         assert task, 'Must input a valid task name.'
         assert data_dir, 'Must input a valid path for the data directory.'
-        assert hdf5_filepath, 'Must input a valid path for the cache file.'
+        assert hdf5_filename, 'Must input a valid path for the cache file.'
 
         self.dataset = name
         self.task = task
         self.data_dir = data_dir
-        self.hdf5_filepath = hdf5_filepath
+        self.hdf5_filename = hdf5_filename
         self.hdf5_file = self._load_hdf5_file()
         self.root_path = '/'
         self._sets = self._get_sets()
@@ -64,7 +64,7 @@ class DataLoader(object):
         self.sets = self._get_set_loaders()
 
     def _load_hdf5_file(self):
-        return h5py.File(self.hdf5_filepath, 'r', libver='latest')
+        return h5py.File(self.hdf5_filename, 'r', libver='latest')
 
     def _get_sets(self):
         return tuple(sorted(self.hdf5_file['/'].keys()))

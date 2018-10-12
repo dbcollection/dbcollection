@@ -24,7 +24,7 @@ class HDF5DatasetMetadataGenerator:
 
     Attributes
     ----------
-    hdf5_filepath : str
+    hdf5_filename : str
         File name + path for thetest HDF5 file.
     task : str
         Name of the task.
@@ -38,7 +38,7 @@ class HDF5DatasetMetadataGenerator:
     def __init__(self, verbose=True):
         """Initialize class."""
         self.verbose = verbose
-        self.hdf5_filepath = self.get_hdf5_filepath()
+        self.hdf5_filename = self.get_hdf5_filename()
 
         dataset, data_fields = self.generate_dataset()
         self.dataset = dataset
@@ -46,10 +46,10 @@ class HDF5DatasetMetadataGenerator:
 
         self.generate_data()
 
-    def get_hdf5_filepath(self):
+    def get_hdf5_filename(self):
         home_dir = os.path.expanduser("~")
-        hdf5_filepath = os.path.join(home_dir, 'tmp', 'dbcollection', 'dummy.h5')
-        return hdf5_filepath
+        hdf5_filename = os.path.join(home_dir, 'tmp', 'dbcollection', 'dummy.h5')
+        return hdf5_filename
 
     def generate_data(self):
         """Generate the dataset's data if it does not exist."""
@@ -58,15 +58,15 @@ class HDF5DatasetMetadataGenerator:
         self.populate_hdf5_file(hdf5_handler, self.dataset)
 
     def remove_hdf5_file(self):
-        if os.path.exists(self.hdf5_filepath):
-            os.remove(self.hdf5_filepath)
+        if os.path.exists(self.hdf5_filename):
+            os.remove(self.hdf5_filename)
 
     def create_hdf5_file(self):
         self.create_hdf5_dir()
-        return h5py.File(self.hdf5_filepath, 'w')
+        return h5py.File(self.hdf5_filename, 'w')
 
     def create_hdf5_dir(self):
-        hdf5_dir = os.path.dirname(self.hdf5_filepath)
+        hdf5_dir = os.path.dirname(self.hdf5_filename)
         if not os.path.exists(hdf5_dir):
             os.makedirs(hdf5_dir)
 
@@ -126,7 +126,7 @@ class HDF5DatasetMetadataGenerator:
         hdf5_handler.close()
 
     def load_hdf5_file(self):
-        return h5py.File(self.hdf5_filepath, 'r')
+        return h5py.File(self.hdf5_filename, 'r')
 
     def get_test_data_FieldLoader(self, set_name='train', field='data'):
         """Load data for testing the FieldLoader class."""
@@ -174,11 +174,11 @@ class HDF5DatasetMetadataGenerator:
             "name": 'some_db',
             "task": 'task',
             "data_dir": './some/dir',
-            "hdf5_file": self.hdf5_filepath,
+            "hdf5_file": self.hdf5_filename,
         }
 
-    def get_test_hdf5_filepath_DataLoader(self):
-        return self.hdf5_filepath
+    def get_test_hdf5_filename_DataLoader(self):
+        return self.hdf5_filename
 
 
 # Setup test hdf5 file in disk + dataset generator
@@ -791,14 +791,14 @@ class TestDataLoader:
         name = 'some_db'
         task = 'task'
         data_dir = './some/dir'
-        hdf5_file = db_generator.get_test_hdf5_filepath_DataLoader()
+        hdf5_file = db_generator.get_test_hdf5_filename_DataLoader()
 
         data_loader = DataLoader(name, task, data_dir, hdf5_file)
 
         assert data_loader.dataset == name
         assert data_loader.task == task
         assert data_loader.data_dir == data_dir
-        assert data_loader.hdf5_filepath == hdf5_file
+        assert data_loader.hdf5_filename == hdf5_file
         assert 'train' in data_loader.sets
 
     class TestGet:
