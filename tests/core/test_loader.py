@@ -445,6 +445,18 @@ class TestFieldLoader:
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         field_loader.info(False)
 
+    def test_sample(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert len(field_loader.sample().shape) == 1
+
+    def test_sample_multiple_samples(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert field_loader.sample(5).shape[0] == 5
+
+    def test_sample_multiple_samples_with_replacement(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert field_loader.sample(10, replace=True, random_state=123).shape[0] < 10
+
     def test_values(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         assert_array_equal(field_loader.values, field_loader.hdf5_handler.value)
