@@ -500,7 +500,7 @@ class SetLoader(object):
         return {
             "name": str(field),
             "shape": 'shape = {}'.format(str(self.fields[field].shape)),
-            "type": 'dtype = {}'.format(str(self.fields[field].type))
+            "type": 'dtype = {}'.format(str(self.fields[field].dtype))
         }
 
     def _get_field_info(self, field):
@@ -513,7 +513,7 @@ class SetLoader(object):
         return {
             "name": str(field),
             "shape": 'shape = {}'.format(str(self.fields[field].shape)),
-            "type": 'dtype = {}'.format(str(self.fields[field].type)),
+            "type": 'dtype = {}'.format(str(self.fields[field].dtype)),
             "obj": s_obj
         }
 
@@ -611,7 +611,7 @@ class FieldLoader(object):
         self.set = self._get_set_name()
         self.name = self._get_field_name()
         self.shape = hdf5_field.shape
-        self.type = hdf5_field.dtype
+        self.dtype = hdf5_field.dtype
         self.fillvalue = hdf5_field.fillvalue
         self.column_id = column_id
 
@@ -713,15 +713,15 @@ class FieldLoader(object):
         if verbose:
             if hasattr(self, 'obj_id'):
                 print('Field: {},  shape = {},  dtype = {},  (in \'object_ids\', position = {})'
-                      .format(self.name, str(self.shape), str(self.type), self.obj_id))
+                      .format(self.name, str(self.shape), str(self.dtype), self.obj_id))
             else:
                 print('Field: {},  shape = {},  dtype = {}'
-                      .format(self.name, str(self.shape), str(self.type)))
+                      .format(self.name, str(self.shape), str(self.dtype)))
         else:
             return {
                 "name": self.name,
                 "shape": self.shape,
-                "dtype": self.type
+                "dtype": self.dtype
             }
 
     def _set_to_memory(self, is_in_memory):
