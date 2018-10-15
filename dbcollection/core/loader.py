@@ -635,10 +635,10 @@ class FieldLoader(object):
 
         Parameters
         ----------
-        index : int/list/tuple, optional
+        index : int/list/tuple, optional (default=None)
             Index number of he field. If it is a list, returns the data
             for all the value indexes of that list.
-        convert_to_str : bool, optional
+        convert_to_str : bool, optional (default=False)
             Convert the output data into a string.
             Warning: output must be of type np.uint8
 
@@ -717,6 +717,12 @@ class FieldLoader(object):
             else:
                 print('Field: {},  shape = {},  dtype = {}'
                       .format(self.name, str(self.shape), str(self.type)))
+        else:
+            return {
+                "name": self.name,
+                "shape": self.shape,
+                "dtype": self.type
+            }
 
     def _set_to_memory(self, is_in_memory):
         """Stores the contents of the field in a numpy array if True.
