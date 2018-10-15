@@ -6,6 +6,7 @@ Test dbcollection/utils/loader.py.
 import os
 import sys
 import numpy as np
+from numpy.testing import assert_array_equal
 import h5py
 import pytest
 
@@ -443,6 +444,10 @@ class TestFieldLoader:
     def test_info_no_verbose(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         field_loader.info(False)
+
+    def test_values(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert_array_equal(field_loader.values, field_loader.hdf5_handler.value)
 
     def test_to_memory(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')

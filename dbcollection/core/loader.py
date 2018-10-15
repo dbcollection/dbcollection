@@ -724,6 +724,10 @@ class FieldLoader(object):
                 "dtype": self.dtype
             }
 
+    @property
+    def values(self):
+        return self.hdf5_handler.value
+
     def _set_to_memory(self, is_in_memory):
         """Stores the contents of the field in a numpy array if True.
 
