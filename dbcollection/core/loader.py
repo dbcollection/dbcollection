@@ -58,6 +58,7 @@ class DataLoader(object):
         self.sets = self._get_set_names()
         self._sets_loader = self._get_set_loaders()
         self.columns = self._get_column_names()
+        self.types = self._get_types()
 
     def _load_hdf5_file(self):
         return h5py.File(self.hdf5_filename, 'r', libver='latest')
@@ -66,12 +67,16 @@ class DataLoader(object):
         return tuple(sorted(self.hdf5_file['/'].keys()))
 
     def _get_column_names(self):
-        """# fetch list of field names that compose the object list."""
+        """Return a list of the column names that compose the set."""
         columns = {}
         for set_name in self.sets:
             data = self.hdf5_file['/{}/__COLUMNS__'.format(set_name)].value
             columns[set_name] = tuple(convert_ascii_to_str(data))
         return columns
+
+    def _get_types(self):
+        """Return a list of the types for each column."""
+        pass
 
     def _get_set_loaders(self):
         """Return a dictionary with list of set loaders."""
@@ -203,7 +208,7 @@ class DataLoader(object):
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
-    def object_field_id(self, set_name, field):
+    def get_column_id(self, set_name, field):
         """Retrieves the index position of a field in the 'object_ids' list.
 
         This method returns the position of a field in the 'object_ids' object.
@@ -230,7 +235,7 @@ class DataLoader(object):
         assert set_name, 'Must input a valid set name.'
         assert field, 'Must input a valid field name.'
         try:
-            return self._sets_loader[set_name].object_field_id(field)
+            return self._sets_loader[set_name].get_column_id(field)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -433,7 +438,7 @@ class SetLoader(object):
         """
         return self._fields
 
-    def object_field_id(self, field):
+    def get_column_id(self, field):
         """Retrieves the index position of a field in the 'object_ids' list.
 
         This method returns the position of a field in the 'object_ids' object.
@@ -457,7 +462,7 @@ class SetLoader(object):
         """
         assert field, 'Must input a valid field.'
         try:
-            return self.fields[field].object_field_id()
+            return self.fields[field].column_id
         except KeyError:
             raise KeyError('\'{}\' is not contained in \'__COLUMNS__\'.'.format(field))
 
@@ -502,7 +507,7 @@ class SetLoader(object):
         assert field
         s_obj = ''
         if field in self.columns:
-            obj_id = self.object_field_id(field)
+            obj_id = self.get_column_id(field)
             s_obj = "(in 'object_ids', position = {})".format(obj_id)
 
         return {
@@ -596,7 +601,7 @@ class FieldLoader(object):
 
     """
 
-    def __init__(self, hdf5_field, obj_id=None):
+    def __init__(self, hdf5_field, column_id=None):
         """Initialize class."""
         assert hdf5_field, 'Must input a valid hdf5 dataset.'
 
@@ -608,7 +613,7 @@ class FieldLoader(object):
         self.shape = hdf5_field.shape
         self.type = hdf5_field.dtype
         self.fillvalue = hdf5_field.fillvalue
-        self.obj_id = obj_id
+        self.column_id = column_id
 
     def _get_set_name(self):
         hdf5_object_str = self._get_hdf5_object_str()
@@ -693,20 +698,6 @@ class FieldLoader(object):
 
         """
         return self.shape
-
-    def object_field_id(self):
-        """Retrieves the index position of the field in the 'object_ids' list.
-
-        This method returns the position of the field in the 'object_ids' object.
-        If the field is not contained in this object, it returns a null value.
-
-        Returns
-        -------
-        int
-            Index of the field in the 'object_ids' list.
-
-        """
-        return self.obj_id
 
     def info(self, verbose=True):
         """Prints information about the field.

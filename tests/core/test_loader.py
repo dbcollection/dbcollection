@@ -436,20 +436,6 @@ class TestFieldLoader:
 
         assert size == set_data['data'].shape
 
-    def test_object_field_id(self):
-        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-
-        obj_id = field_loader.object_field_id()
-
-        assert obj_id is 1
-
-    def test_object_field_id_not_equal(self):
-        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-
-        obj_id = field_loader.object_field_id()
-
-        assert obj_id is not 2
-
     def test_info(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         field_loader.info()
@@ -750,18 +736,18 @@ class TestSetLoader:
 
         assert fields == tuple(sorted(set_fields))
 
-    def test_object_field_id(self):
+    def test_get_column_id(self):
         set_loader, _, _ = db_generator.get_test_dataset_SetLoader('train')
 
-        obj_id = set_loader.object_field_id('data')
+        obj_id = set_loader.get_column_id('data')
 
         assert obj_id == 0
 
-    def test_object_field_id_raise_error_invalid_field(self):
+    def test_get_column_id_raise_error_invalid_field(self):
         set_loader, _, _ = db_generator.get_test_dataset_SetLoader('train')
 
         with pytest.raises(KeyError):
-            obj_id = set_loader.object_field_id('data_invalid_field')
+            obj_id = set_loader.get_column_id('data_invalid_field')
 
     def test_info(self):
         set_loader, _, _ = db_generator.get_test_dataset_SetLoader('train')
@@ -957,31 +943,31 @@ class TestDataLoader:
             set_name = 'val'
             fields = data_loader.list(set_name)
 
-    def test_object_field_id_field1(self):
+    def test_get_column_id_field1(self):
         data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
         set_name = 'train'
         field = 'data'
-        obj_id = data_loader.object_field_id(set_name, field)
+        obj_id = data_loader.get_column_id(set_name, field)
 
         assert obj_id == 0
 
-    def test_object_field_id_field2(self):
+    def test_get_column_id_field2(self):
         data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
         set_name = 'train'
         field = 'number'
-        obj_id = data_loader.object_field_id(set_name, field)
+        obj_id = data_loader.get_column_id(set_name, field)
 
         assert obj_id == 2
 
-    def test_object_field_id_raise_error_invalid_set(self):
+    def test_get_column_id_raise_error_invalid_set(self):
         data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
 
         with pytest.raises(KeyError):
             set_name = 'val'
             field = 'data'
-            obj_id = data_loader.object_field_id(set_name, field)
+            obj_id = data_loader.get_column_id(set_name, field)
 
     def test_info_single_set(self):
         data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
