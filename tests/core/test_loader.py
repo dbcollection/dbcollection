@@ -10,6 +10,8 @@ from numpy.testing import assert_array_equal
 import pandas as pd
 import h5py
 import pytest
+import random
+import string
 
 from dbcollection.core.loader import FieldLoader, SetLoader, DataLoader
 from dbcollection.utils.string_ascii import convert_ascii_to_str as ascii_to_str
@@ -80,15 +82,37 @@ class HDF5DatasetMetadataGenerator:
         }
 
         fields = {
-            "strings_list": lambda x: str_to_ascii(self.generate_string_list(x)),
-            "data": lambda x: np.random.randint(0, 10, (x, 10)),
-            "number": lambda x: np.array(range(x)),
-            "field_with_a_long_name_for_printing": lambda x: np.array(range(x)),
+            "filenames": {
+                "data": lambda x: str_to_ascii(['fname_' + self.generate_random_string(n=5) for i in range(x)]),
+                "type": 'filename'
+            },
+            "strings_list": {
+                "data": lambda x: str_to_ascii(self.generate_string_list(x)),
+                "type": 'string'
+            },
+            "data": {
+                "data": lambda x: np.random.randint(0, 10, (x, 10)),
+                "type": 'int'
+            },
+            "number": {
+                "data": lambda x: np.array(range(x)),
+                "type": 'int'
+            },
+            "field_with_a_long_name_for_printing": {
+                "data": lambda x: np.array(range(x)),
+                "type": 'int'
+            }
         }
 
         lists = {
-            "list_dummy_data": np.array(range(10)),
-            "list_dummy_number": np.array(range(10), dtype=np.uint8),
+            "list_dummy_data": {
+                "data": np.array(range(10)),
+                "type": 'list'
+            },
+            "list_dummy_number": {
+                "data": np.array(range(10), dtype=np.uint8),
+                "type": 'list'
+            }
         }
 
         dataset = {}
@@ -99,6 +123,9 @@ class HDF5DatasetMetadataGenerator:
 
         return dataset, data_fields
 
+    def generate_random_string(self, n=5):
+        return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(n))
+
     def generate_string_list(self, n):
         """Generate a list of strings."""
         template_str = 'string_'
@@ -107,15 +134,15 @@ class HDF5DatasetMetadataGenerator:
 
     def populate_set(self, size, fields, lists):
         dataset = {}
-
         for field in fields:
-            dataset[field] = fields[field](size)
-
+            dataset[field] = fields[field]["data"](size)
         for field in lists:
-            dataset[field] = lists[field]
+            dataset[field] = lists[field]["data"]
 
         obj_fields = sorted(fields.keys())
         dataset['__COLUMNS__'] = str_to_ascii(obj_fields)
+        types = [fields[field]["type"] for field in obj_fields]
+        dataset['__TYPES__'] = str_to_ascii(types)
         dataset['object_ids'] = np.array([[i] * len(obj_fields) for i in range(size)])
 
         return dataset
@@ -617,7 +644,7 @@ class TestSetLoader:
 
         assert set_loader.set == set_name
         assert set_loader.columns == ascii_to_str(dataset[set_name]['__COLUMNS__'])
-        assert set_loader.nelems == 5
+        assert set_loader.num_elements == 5
 
     class TestGet:
         """Group tests for the get() method."""
@@ -990,12 +1017,8 @@ class TestDataLoader:
 
     def test_get_column_id_field2(self):
         data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
-
-        set_name = 'train'
-        field = 'number'
-        obj_id = data_loader.get_column_id(set_name, field)
-
-        assert obj_id == 2
+        obj_id = data_loader.get_column_id(set_name='train', field='number')
+        assert obj_id == 3
 
     def test_get_column_id_raise_error_invalid_set(self):
         data_loader, _, _ = db_generator.get_test_dataset_DataLoader()
