@@ -637,12 +637,13 @@ class FieldLoader(object):
 
         Parameters
         ----------
-        index : int/list/tuple, optional (default=None)
-            Index number of he field. If it is a list, returns the data
+        index : int | list | tuple, optional
+            Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
-        convert_to_str : bool, optional (default=False)
-            Convert the output data into a string.
-            Warning: output must be of type np.uint8
+            Default: None.
+        convert_to_str : bool, optional
+            Convert the output data into a string. Default: False.
+            Warning: output must be of type np.uint8.
 
         Returns
         -------
@@ -675,18 +676,31 @@ class FieldLoader(object):
             return self.data.value
 
     def _get_range_idx(self, idx):
-        """Return a slice of the data array."""
+        """Return a slice of the data array.
+
+        Parameters
+        ----------
+        index : int | list | tuple
+            Index number of the field. If it is a list, returns the
+            data for all the value indexes of that list.
+
+        Returns
+        -------
+        h5py.Dataset
+            Returns the data for a single or set of indexes.
+        """
         assert idx is not None
         if isinstance(idx, int):
             return self.data[idx]
         else:
             size = len(idx)
+            assert len(idx) > 0
             if size > 1:
                 return self.data[sorted(set(idx))]
             elif size == 1:
                 return self.data[idx[0]]
             else:
-                return self._get_all_idx()
+                raise Exception("Invalid index range: {idx}".format(idx=idx))
 
     def size(self):
         """Size of the field.
@@ -760,7 +774,7 @@ class FieldLoader(object):
             idx = np.random.choice(length, num_samples)
         else:
             idx = np.random.permutation(length)[:num_samples]
-        return self.get(list(idx))
+        return np.array([self.get(int(i)) for i in idx])
 
     @property
     def values(self):

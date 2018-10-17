@@ -307,20 +307,14 @@ class TestFieldLoader:
 
         def test_get_single_obj_empty_list(self):
             field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
-            idx = []
-            data = field_loader.get(idx)
-
-            assert np.array_equal(data, set_data['data'])
+            with pytest.raises(Exception):
+                data = field_loader.get([])
 
         def test_get_single_obj_empty_list_in_memory(self):
             field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
-
             field_loader.to_memory = True
-            idx = []
-            data = field_loader.get(idx)
-
-            assert np.array_equal(data, set_data['data'])
+            with pytest.raises(Exception):
+                data = field_loader.get([])
 
         @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
         def test_get_single_obj_convert_to_string(self, idx):
@@ -447,7 +441,7 @@ class TestFieldLoader:
 
     def test_sample(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-        assert len(field_loader.sample().shape) == 1
+        assert field_loader.sample().shape[0] == 1
 
     def test_sample_multiple_samples(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
@@ -455,7 +449,7 @@ class TestFieldLoader:
 
     def test_sample_multiple_samples_with_replacement(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-        assert field_loader.sample(10, replace=True, random_state=123).shape[0] < 10
+        assert field_loader.sample(10, replace=True, random_state=123).shape[0] == 10
 
     def test_values(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
