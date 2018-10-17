@@ -5,6 +5,7 @@ Dataset's metadata loader classes.
 
 import math
 import numpy as np
+import pandas as pd
 import h5py
 from dbcollection.utils.string_ascii import convert_ascii_to_str
 
@@ -814,6 +815,22 @@ class FieldLoader(object):
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
         size = len(self)
         return self.get(list(range(size - n, size)))
+
+    def to_pandas(self, name=None):
+        """Converts the field into a Pandas Series.
+
+        Parameters
+        ----------
+        name : str, optional
+            Name to give to the Pandas Series. Default: None.
+
+        Returns
+        -------
+        pandas.Series
+        """
+        if name is None:
+            name = self.name
+        return pd.Series(self.data, name=name)
 
     @property
     def values(self):

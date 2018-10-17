@@ -7,6 +7,7 @@ import os
 import sys
 import numpy as np
 from numpy.testing import assert_array_equal
+import pandas as pd
 import h5py
 import pytest
 
@@ -496,6 +497,15 @@ class TestFieldLoader:
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         with pytest.raises(AssertionError):
             field_loader.tail(-1)
+
+    def test_to_pandas(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert pd.Series.equals(field_loader.to_pandas(), pd.Series(field_loader.data))
+
+    def test_to_pandas_set_name(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert pd.Series.equals(field_loader.to_pandas(name='dummy_name'),
+                                pd.Series(field_loader.data, name='dummy_name'))
 
     def test_values(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
