@@ -776,6 +776,27 @@ class FieldLoader(object):
             idx = np.random.permutation(length)[:num_samples]
         return np.array([self.get(int(i)) for i in idx])
 
+    def head(self, n=5):
+        """
+        Return the first elements of a field.
+
+        This function is mainly useful to preview the values of the
+        field without displaying all of the data data.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of values to return. Default: 5.
+            It must be greater than 0.
+
+        Returns
+        -------
+        np.ndarray
+            Subset of the original field with the n first values.
+        """
+        assert n > 0, "Sample size must be greater than 0: {}.".format(n)
+        return self.get(list(range(0, n)))
+
     @property
     def values(self):
         return self.hdf5_handler.value

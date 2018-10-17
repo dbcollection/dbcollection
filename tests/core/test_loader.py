@@ -451,6 +451,28 @@ class TestFieldLoader:
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         assert field_loader.sample(10, replace=True, random_state=123).shape[0] == 10
 
+    def test_head(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert_array_equal(field_loader.head(), field_loader.get([0, 1, 2, 3, 4]))
+
+    def test_head_sample_first_value(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert_array_equal(field_loader.head(1), field_loader.get(0))
+
+    def test_head_sample_first_six_values(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert_array_equal(field_loader.head(6), field_loader.get([0, 1, 2, 3, 4, 5]))
+
+    def test_head_raises_error_if_number_is_zero(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        with pytest.raises(AssertionError):
+            field_loader.head(0)
+
+    def test_head_raises_error_if_number_is_negative(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        with pytest.raises(AssertionError):
+            field_loader.head(-1)
+
     def test_values(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         assert_array_equal(field_loader.values, field_loader.hdf5_handler.value)
