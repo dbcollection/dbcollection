@@ -473,6 +473,30 @@ class TestFieldLoader:
         with pytest.raises(AssertionError):
             field_loader.head(-1)
 
+    def test_tail(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        idx = list(range(len(field_loader) - 5, len(field_loader)))
+        assert_array_equal(field_loader.tail(), field_loader.get(idx))
+
+    def test_tail_sample_last_value(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        assert_array_equal(field_loader.tail(1), field_loader.get(len(field_loader)-1))
+
+    def test_tail_sample_last_six_values(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        idx = list(range(len(field_loader) - 6, len(field_loader)))
+        assert_array_equal(field_loader.tail(6), field_loader.get(idx))
+
+    def test_tail_raises_error_if_number_is_zero(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        with pytest.raises(AssertionError):
+            field_loader.tail(0)
+
+    def test_tail_raises_error_if_number_is_negative(self):
+        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
+        with pytest.raises(AssertionError):
+            field_loader.tail(-1)
+
     def test_values(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         assert_array_equal(field_loader.values, field_loader.hdf5_handler.value)
