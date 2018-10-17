@@ -329,7 +329,7 @@ class SetLoader(object):
         self.hdf5_group = hdf5_group
         self.set = self._get_set_name()
         self.columns = self._get_column_names()
-        self.nelems = self._get_num_elements()
+        self.num_elements = self._get_num_elements()
         self._fields = self._get_field_names()
         self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
 
@@ -561,10 +561,10 @@ class SetLoader(object):
             Number of elements
 
         """
-        return self.nelems
+        return self.num_elements
 
     def __str__(self):
-        s = 'SetLoader: set<{}>, len<{}>'.format(self.set, self.nelems)
+        s = 'SetLoader: set<{}>, len<{}>'.format(self.set, self.num_elements)
         return s
 
     def __repr__(self):
