@@ -780,36 +780,6 @@ class FieldLoader(object):
     def values(self):
         return self.hdf5_handler.value
 
-    def _set_to_memory(self, is_in_memory):
-        """Stores the contents of the field in a numpy array if True.
-
-        Parameters
-        ----------
-        is_in_memory : bool
-            Move the data to memory (if True).
-
-        """
-        assert isinstance(is_in_memory, bool), 'Invalid input. Must insert a boolean type.'
-        if is_in_memory:
-            self.data = self.hdf5_handler.value
-        else:
-            self.data = self.hdf5_handler
-        self._in_memory = is_in_memory
-
-    def _get_to_memory(self):
-        """Modifies how data is accessed and stored.
-
-        Accessing data from a field can be done in two ways: memory or disk.
-        To enable data allocation and access from memory requires the user to
-        specify a boolean. If set to True, data is allocated to a numpy ndarray
-        and all accesses are done in memory. Otherwise, data is kept in disk and
-        accesses are done using the HDF5 object handler.
-
-        """
-        return self._in_memory
-
-    to_memory = property(_get_to_memory, _set_to_memory)
-
     def __getitem__(self, index):
         """
         Parameters
@@ -836,12 +806,7 @@ class FieldLoader(object):
         return self.shape[0]
 
     def __str__(self):
-        if self._in_memory:
-            s = 'FieldLoader: <numpy.ndarray "{}": shape {}, type "{}">' \
-                .format(self.name, self.data.shape, self.data.dtype)
-        else:
-            s = 'FieldLoader: ' + self.data.__str__()
-        return s
+        return 'FieldLoader: ' + self.data.__str__()
 
     def __repr__(self):
         return str(self)

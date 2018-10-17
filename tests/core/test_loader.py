@@ -455,21 +455,6 @@ class TestFieldLoader:
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
         assert_array_equal(field_loader.values, field_loader.hdf5_handler.value)
 
-    def test_to_memory(self):
-        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-
-        field_loader.to_memory = True
-
-        assert isinstance(field_loader.data, np.ndarray)
-
-    def test_to_memory_to_disk(self):
-        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-
-        field_loader.to_memory = True
-        field_loader.to_memory = False
-
-        assert isinstance(field_loader.data, h5py._hl.dataset.Dataset)
-
     def test__len__(self):
         field_loader, set_data = db_generator.get_test_data_FieldLoader('train')
 
@@ -479,26 +464,10 @@ class TestFieldLoader:
 
     def test__str__(self):
         field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-
         if os.name == 'nt':
             matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i4">'
         else:
             matching_str = 'FieldLoader: <HDF5 dataset "data": shape (10, 10), type "<i8">'
-
-        assert str(field_loader) == matching_str
-
-    def test__str__in_memory(self):
-        field_loader, _ = db_generator.get_test_data_FieldLoader('train')
-
-        field_loader.to_memory = True
-        if os.name == 'nt':
-            if sys.version_info[0] == 2:
-                matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10L, 10L), type "int32">'
-            else:
-                matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int32">'
-        else:
-            matching_str = 'FieldLoader: <numpy.ndarray "data": shape (10, 10), type "int64">'
-
         assert str(field_loader) == matching_str
 
     class TestIndexing:
