@@ -329,6 +329,7 @@ class SetLoader(object):
         self.hdf5_group = hdf5_group
         self.set = self._get_set_name()
         self.columns = self._get_column_names()
+        self.dtypes = self._get_column_data_types()
         self.num_elements = self._get_num_elements()
         self._fields = self._get_field_names()
         self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
@@ -347,6 +348,13 @@ class SetLoader(object):
         if type(output) == 'string':
             output = (output,)
         return output
+
+    def _get_column_data_types(self):
+        types_data = self.hdf5_group['__TYPES__'].value
+        types = convert_ascii_to_str(types_data)
+        if type(types) == 'string':
+            types = (types,)
+        return types
 
     def _get_field_names(self):
         return tuple(self.hdf5_group.keys())
