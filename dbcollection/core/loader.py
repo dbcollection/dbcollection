@@ -88,7 +88,7 @@ class DataLoader(object):
             sets[set_name] = SetLoader(self.hdf5_file[set_name])
         return sets
 
-    def get(self, set_name, field, index=None, convert_to_str=False):
+    def get(self, set_name, field, index=None, parse=False):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -124,7 +124,7 @@ class DataLoader(object):
         assert set_name, 'Must input a set name.'
         assert field, 'Must input a field name.'
         try:
-            return self._sets_loader[set_name].get(field, index, convert_to_str=convert_to_str)
+            return self._sets_loader[set_name].get(field, index, parse=parse)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -375,7 +375,7 @@ class SetLoader(object):
         else:
             return None
 
-    def get(self, field, index=None, convert_to_str=False):
+    def get(self, field, index=None, parse=False):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -386,31 +386,29 @@ class SetLoader(object):
         ----------
         field : str
             Field name.
-        index : int/list/tuple, optional
+        index : int | list | tuple, optional
             Index number of the field. If it is a list, returns the data
-            for all the value indexes of that list.
-        convert_to_str : bool, optional
-            Convert the output data into a string.
-            Warning: output must be of type np.uint8
+            for all the value indexes of that list. Default: None.
+        parse : bool, optional
+            Convert the output data into its original format.
+            Default: False.
 
         Returns
         -------
-        np.ndarray/list/str
+        np.ndarray | list | str
             Numpy array containing the field's data.
             If convert_to_str is set to True, it returns a string
             or list of strings.
-
-        Raises
-        ------
-        KeyError
-            If the field does not exist in the list.
-
         """
-        assert field, 'Must input a valid field name.'
-        try:
-            return self.fields[field].get(index=index, convert_to_str=convert_to_str)
-        except KeyError:
-            raise KeyError('\'{}\' does not exist in the \'{}\' set.'.format(field, self.set))
+        if field:
+            assert field in self.columns, "'{}' does not exist in the '{}' set.".format(field, self.set)
+            data = self._get_field_data(field, index, parse)
+        else:
+            data = [self._get_field_data(field, index, parse) for field in self.columns]
+        return data
+
+    def _get_field_data(self, field, index, parse):
+        return self.fields[field].get(index=index, parse=parse)
 
     def size(self, field='object_ids'):
         """Size of a field.
@@ -609,16 +607,13 @@ class FieldLoader(object):
         Value used to pad arrays when storing the data in the hdf5 file.
     obj_id : int
         Identifier of the field if contained in the 'object_ids' list.
-
     """
 
     def __init__(self, hdf5_field, column_id=None):
         """Initialize class."""
         assert hdf5_field, 'Must input a valid hdf5 dataset.'
-
         self.data = hdf5_field
         self.hdf5_handler = hdf5_field
-        self._in_memory = False
         self.set = self._get_set_name()
         self.name = self._get_field_name()
         self.shape = hdf5_field.shape
@@ -637,7 +632,7 @@ class FieldLoader(object):
     def _get_hdf5_object_str(self):
         return self.hdf5_handler.name.split('/')
 
-    def get(self, index=None, convert_to_str=False):
+    def get(self, index=None, parse=False):
         """Retrieves data of the field from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file. Also, it is
@@ -650,9 +645,9 @@ class FieldLoader(object):
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list.
             Default: None.
-        convert_to_str : bool, optional
-            Convert the output data into a string. Default: False.
-            Warning: output must be of type np.uint8.
+        parse : bool, optional
+            Convert the output data into its original format.
+            Default: False.
 
         Returns
         -------
@@ -670,19 +665,12 @@ class FieldLoader(object):
 
         """
         if index is None:
-            data = self._get_all_idx()
+            data = self.data.value
         else:
             data = self._get_range_idx(index)
-        if convert_to_str:
+        if parse:
             data = convert_ascii_to_str(data)
         return data
-
-    def _get_all_idx(self):
-        """Return the full data array."""
-        if self._in_memory:
-            return self.data
-        else:
-            return self.data.value
 
     def _get_range_idx(self, idx):
         """Return a slice of the data array.
