@@ -474,11 +474,7 @@ class TestSetLoader:
             assert_array_equal(set_loader.get(field), set_data[field])
 
     def test_size(self, set_loader, set_data):
-        field = 'data'
-        assert set_loader.size(field) == set_data[field].shape
-
-    def test_size_object_ids(self, set_loader, set_data):
-        assert set_loader.size() == set_data['object_ids'].shape
+        assert set_loader.size() == set_data['data'].shape[0]
 
     def test_list(self, set_loader, set_fields):
         assert set_loader.list() == tuple(sorted(set_fields))
@@ -579,22 +575,11 @@ class TestDataLoader:
 
         def test_size_single_field(self, data_loader, dataset):
             set_name = 'train'
-            field = 'data'
-            assert data_loader.size(set_name, field) == dataset[set_name][field].shape
-
-        def test_size_default(self, data_loader, dataset):
-            set_name = 'train'
-            assert data_loader.size(set_name) == dataset[set_name]['object_ids'].shape
-
-        def test_size_single_field_all_sets(self, data_loader, dataset):
-            field = 'data'
-            size = data_loader.size(field=field)
-            expected = {set_name: dataset[set_name][field].shape for set_name in dataset}
-            assert size == expected
+            assert data_loader.size(set_name) == dataset[set_name]['data'].shape[0]
 
         def test_size_no_inputs(self, data_loader, dataset):
             size = data_loader.size()
-            expected = {set_name: dataset[set_name]['object_ids'].shape for set_name in dataset}
+            expected = {set_name: len(dataset[set_name]['data']) for set_name in dataset}
             assert size == expected
 
         def test_size_raise_error_invalid_set(self, data_loader):
@@ -603,7 +588,7 @@ class TestDataLoader:
 
         def test_size_raise_error_invalid_sfield(self, data_loader):
             with pytest.raises(KeyError):
-                size = data_loader.size(field="invalid_field_name")
+                size = data_loader.size(set_name="invalid_set_name")
 
     def test_list_single_set(self, data_loader, dataset):
         set_name= 'train'

@@ -131,17 +131,15 @@ class DataLoader(object):
     def _raise_error_invalid_set_name(self, set_name):
         raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self.sets))
 
-    def size(self, set_name=None, field='object_ids'):
-        """Size of a field.
+    def size(self, set_name=None):
+        """Size of each setof the dataset .
 
         Returns the number of the elements of a field.
 
         Parameters
         ----------
         set_name : str, optional
-            Name of the set.
-        field : str, optional
-            Name of the field in the metadata file.
+            Name of the set. Default: None.
 
         Returns
         -------
@@ -155,24 +153,12 @@ class DataLoader(object):
 
         """
         if set_name is None:
-            return self._get_size_all_sets(field)
+            return {set_name: self._sets_loader[set_name].size() for set_name in self._sets_loader}
         else:
-            return self._get_size_single_set(set_name, field)
-
-    def _get_size_all_sets(self, field):
-        assert field
-        out = {}
-        for set_name in self._sets_loader:
-            out[set_name] = self._sets_loader[set_name].size(field)
-        return out
-
-    def _get_size_single_set(self, set_name, field):
-        assert set_name
-        assert field
-        try:
-            return self._sets_loader[set_name].size(field)
-        except KeyError:
-            self._raise_error_invalid_set_name(set_name)
+            try:
+                return self._sets_loader[set_name].size()
+            except KeyError:
+                self._raise_error_invalid_set_name(set_name)
 
     def list(self, set_name=None):
         """List of all field names of a set.
@@ -333,7 +319,6 @@ class SetLoader(object):
         self.num_elements = self._get_num_elements()
         self._fields = self._get_field_names()
         self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
-
         self._fields_info = []
         self._lists_info = []
 
@@ -360,7 +345,7 @@ class SetLoader(object):
         return tuple(self.hdf5_group.keys())
 
     def _get_num_elements(self):
-        return len(self.hdf5_group['object_ids'])
+        return len(self.hdf5_group[self.columns[0]])
 
     def _load_hdf5_fields(self):
         fields = {}
@@ -410,31 +395,17 @@ class SetLoader(object):
     def _get_field_data(self, field, index, parse):
         return self.fields[field].get(index=index, parse=parse)
 
-    def size(self, field='object_ids'):
-        """Size of a field.
+    def size(self):
+        """Size of the set.
 
-        Returns the number of the elements of a field.
-
-        Parameters
-        ----------
-        field : str, optional
-            Name of the field in the metadata file.
+        Returns the number of the elements of the set.
 
         Returns
         -------
-        tuple
-            Returns the size of the field.
-
-        Raises
-        ------
-        KeyError
-            If field is invalid or does not exist in the fields dict.
-
+        int
+            Number of elements in the set.
         """
-        try:
-            return self.fields[field].shape
-        except KeyError:
-            raise KeyError('\'{}\' does not exist in the \'{}\' set.'.format(field, self.set))
+        return self.num_elements
 
     def list(self):
         """List of all field names.
