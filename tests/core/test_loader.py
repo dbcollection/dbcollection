@@ -140,7 +140,6 @@ class HDF5DatasetMetadataGenerator:
         dataset['__COLUMNS__'] = str_to_ascii(obj_fields)
         types = [fields[field]["type"] for field in obj_fields]
         dataset['__TYPES__'] = str_to_ascii(types)
-        dataset['object_ids'] = np.array([[i] * len(obj_fields) for i in range(size)])
 
         return dataset
 
@@ -477,7 +476,8 @@ class TestSetLoader:
         assert set_loader.size() == set_data['data'].shape[0]
 
     def test_list(self, set_loader, set_fields):
-        assert set_loader.list() == tuple(sorted(set_fields))
+        expected = [name for name in sorted(set_fields) if name not in ['__COLUMNS__', '__TYPES__']]
+        assert sorted(set_loader.list()) == expected
 
     def test_get_column_id(self, set_loader):
         assert set_loader.get_column_id('data') == 0
@@ -490,10 +490,10 @@ class TestSetLoader:
         set_loader.info()
 
     def test__len__(self, set_loader, set_data):
-        assert len(set_loader) == len(set_data['object_ids'])
+        assert len(set_loader) == len(set_data['data'])
 
     def test__str__(self, set_loader, set_data):
-        size = len(set_data['object_ids'])
+        size = len(set_data['data'])
         matching_str = 'SetLoader: set<train>, len<{}>'.format(size)
         assert str(set_loader) == matching_str
 
@@ -592,11 +592,16 @@ class TestDataLoader:
 
     def test_list_single_set(self, data_loader, dataset):
         set_name= 'train'
-        assert data_loader.list(set_name) == tuple(sorted(dataset[set_name]))
+        expected = [name for name in sorted(dataset[set_name]) if name not in ['__COLUMNS__', '__TYPES__']]
+        assert sorted(data_loader.list(set_name)) == expected
 
     def test_list_all_sets(self, data_loader, dataset):
         fields = data_loader.list()
-        expected = {set_name: tuple(sorted(dataset[set_name])) for set_name in dataset}
+        expected = {}
+        for set_name in sorted(dataset):
+            expected[set_name] = sorted([name for name in dataset[set_name] if name not in ['__COLUMNS__', '__TYPES__']])
+            fields[set_name] = sorted(fields[set_name])
+        pytest.set_trace()
         assert fields == expected
 
     def test_list_raise_error_invalid_set(self, data_loader):

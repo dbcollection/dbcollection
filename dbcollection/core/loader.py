@@ -161,12 +161,12 @@ class DataLoader(object):
                 self._raise_error_invalid_set_name(set_name)
 
     def list(self, set_name=None):
-        """List of all field names of a set.
+        """Returns all column names of a set.
 
         Parameters
         ----------
         set_name : str, optional
-            Name of the set.
+            Name of the set. Default: None.
 
         Returns
         -------
@@ -180,22 +180,12 @@ class DataLoader(object):
 
         """
         if set_name is None:
-            return self._get_list_all_sets()
+            return {set_name: self._sets_loader[set_name].list() for set_name in self._sets_loader}
         else:
-            return self._get_list_single_set(set_name)
-
-    def _get_list_all_sets(self):
-        out = {}
-        for set_name in self._sets_loader:
-            out.update({set_name: self._sets_loader[set_name].list()})
-        return out
-
-    def _get_list_single_set(self, set_name):
-        assert set_name
-        try:
-            return self._sets_loader[set_name].list()
-        except KeyError:
-            self._raise_error_invalid_set_name(set_name)
+            try:
+                return self._sets_loader[set_name].list()
+            except KeyError:
+                self._raise_error_invalid_set_name(set_name)
 
     def get_column_id(self, set_name, field):
         """Retrieves the index position of a field in the 'object_ids' list.
@@ -316,6 +306,7 @@ class SetLoader(object):
         self.set = self._get_set_name()
         self.columns = self._get_column_names()
         self.dtypes = self._get_column_data_types()
+        self.lists = self._get_preordered_lists()
         self.num_elements = self._get_num_elements()
         self._fields = self._get_field_names()
         self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
@@ -340,6 +331,13 @@ class SetLoader(object):
         if type(types) == 'string':
             types = (types,)
         return types
+
+    def _get_preordered_lists(self):
+        fields = []
+        for field in self.hdf5_group.keys():
+            if field.startswith("list_"):
+                fields.append(field)
+        return fields
 
     def _get_field_names(self):
         return tuple(self.hdf5_group.keys())
@@ -386,7 +384,7 @@ class SetLoader(object):
             or list of strings.
         """
         if field:
-            assert field in self.columns, "'{}' does not exist in the '{}' set.".format(field, self.set)
+            assert field in self.columns + self.lists, "'{}' does not exist in the '{}' set.".format(field, self.set)
             data = self._get_field_data(field, index, parse)
         else:
             data = [self._get_field_data(field, index, parse) for field in self.columns]
@@ -408,7 +406,7 @@ class SetLoader(object):
         return self.num_elements
 
     def list(self):
-        """List of all field names.
+        """List of all column names.
 
         Returns
         -------
@@ -416,7 +414,7 @@ class SetLoader(object):
             List of all data fields of the dataset.
 
         """
-        return self._fields
+        return self.columns + self.lists
 
     def get_column_id(self, field):
         """Retrieves the index position of a field in the 'object_ids' list.
