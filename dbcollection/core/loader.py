@@ -492,17 +492,8 @@ class SetLoader(object):
         List of values.
         """
         assert n >= 1
-        if random_state:
-            np.random.seed(random_state)
-        length = len(self)
-        if frac:
-            num_samples = math.floor(frac * length)
-        else:
-            num_samples = n
-        if replace:
-            idx = np.random.choice(length, num_samples)
-        else:
-            idx = np.random.permutation(length)[:num_samples]
+        idx = generate_random_indices(len(self), n, frac=frac, replace=replace,
+                                      random_state=random_state)
         samples = []
         for i in idx:
             samples.append([self.get(column, int(i)) for column in self.columns])
@@ -768,17 +759,8 @@ class FieldLoader(object):
         List of values.
         """
         assert n >= 1
-        if random_state:
-            np.random.seed(random_state)
-        length = len(self)
-        if frac:
-            num_samples = math.floor(frac * length)
-        else:
-            num_samples = n
-        if replace:
-            idx = np.random.choice(length, num_samples)
-        else:
-            idx = np.random.permutation(length)[:num_samples]
+        idx = generate_random_indices(len(self), n, frac=frac, replace=replace,
+                                      random_state=random_state)
         return np.array([self.get(int(i)) for i in idx])
 
     def head(self, n=5):
@@ -870,3 +852,18 @@ class FieldLoader(object):
 
     def __repr__(self):
         return str(self)
+
+
+def generate_random_indices(length, n, frac=None, replace=None, random_state=None):
+    """Generates random indices."""
+    if random_state:
+        np.random.seed(random_state)
+    if frac:
+        num_samples = math.floor(frac * length)
+    else:
+        num_samples = n
+    if replace:
+        idx = np.random.choice(length, num_samples)
+    else:
+        idx = np.random.permutation(length)[:num_samples]
+    return idx
