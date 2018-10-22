@@ -489,6 +489,15 @@ class TestSetLoader:
     def test_info(self, set_loader):
         set_loader.info()
 
+    def test_sample(self, set_loader):
+        assert set_loader.sample().shape[0] == 1
+
+    def test_sample_multiple_samples(self, field_loader):
+        assert field_loader.sample(5).shape[0] == 5
+
+    def test_sample_multiple_samples_with_replacement(self, field_loader):
+        assert field_loader.sample(10, replace=True, random_state=123).shape[0] == 10
+
     def test__len__(self, set_loader, set_data):
         assert len(set_loader) == len(set_data['data'])
 
@@ -601,7 +610,6 @@ class TestDataLoader:
         for set_name in sorted(dataset):
             expected[set_name] = sorted([name for name in dataset[set_name] if name not in ['__COLUMNS__', '__TYPES__']])
             fields[set_name] = sorted(fields[set_name])
-        pytest.set_trace()
         assert fields == expected
 
     def test_list_raise_error_invalid_set(self, data_loader):

@@ -469,6 +469,45 @@ class SetLoader(object):
             else:
                 self._fields_info.append(self._get_field_info(field))
 
+    def sample(self, n=1, frac=None, replace=False, random_state=None):
+        """Return a random sample of items.
+
+        You can use `random_state` for reproducibility.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of items from axis to return. Cannot be used with `frac`.
+            Default = 1 if `frac` = None.
+        frac : float, optional
+            Fraction of axis items to return. Cannot be used with `n`.
+        replace : boolean, optional
+            Sample with or without replacement. Default = False.
+        random_state : int or numpy.random.RandomState, optional
+            Seed for the random number generator (if int), or numpy RandomState
+            object.
+
+        Returns
+        -------
+        List of values.
+        """
+        assert n >= 1
+        if random_state:
+            np.random.seed(random_state)
+        length = len(self)
+        if frac:
+            num_samples = math.floor(frac * length)
+        else:
+            num_samples = n
+        if replace:
+            idx = np.random.choice(length, num_samples)
+        else:
+            idx = np.random.permutation(length)[:num_samples]
+        samples = []
+        for i in idx:
+            samples.append([self.get(column, int(i)) for column in self.columns])
+        return np.array(samples)
+
     def _is_field_a_list(self, field):
         assert field
         return field.startswith('list_')
