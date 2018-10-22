@@ -88,7 +88,7 @@ class DataLoader(object):
             sets[set_name] = SetLoader(self.hdf5_file[set_name])
         return sets
 
-    def get(self, set_name, field, index=None, parse=False):
+    def get(self, set_name, index=None, field=None, parse=False):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -99,13 +99,13 @@ class DataLoader(object):
         ----------
         set_name : str
             Name of the set.
-        field : str
-            Name of the data field.
         idx : int/list/tuple, optional
             Index number of the field. If it is a list, returns the data
-            for all the value indexes of that list.
-        convert_to_str : bool, optional
-            Convert the output data into a string.
+            for all the value indexes of that list. Default: None.
+        field : str, optional
+            Name of the data field. Defaul: None.
+        parse : bool, optional
+            Convert the output data into a string. Default: False.
             Warning: output must be of type np.uint8
 
         Returns
@@ -122,9 +122,8 @@ class DataLoader(object):
 
         """
         assert set_name, 'Must input a set name.'
-        assert field, 'Must input a field name.'
         try:
-            return self._sets_loader[set_name].get(field, index, parse=parse)
+            return self._sets_loader[set_name].get(index=index, field=field, parse=parse)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -358,7 +357,7 @@ class SetLoader(object):
         else:
             return None
 
-    def get(self, field, index=None, parse=False):
+    def get(self, index=None, field=None, parse=False):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -367,11 +366,11 @@ class SetLoader(object):
 
         Parameters
         ----------
-        field : str
-            Field name.
         index : int | list | tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list. Default: None.
+        field : str
+            Field name.
         parse : bool, optional
             Convert the output data into its original format.
             Default: False.
@@ -494,9 +493,7 @@ class SetLoader(object):
         assert n >= 1
         idx = generate_random_indices(len(self), n, frac=frac, replace=replace,
                                       random_state=random_state)
-        samples = []
-        for i in idx:
-            samples.append([self.get(column, int(i)) for column in self.columns])
+        samples = [self.get(int(i)) for i in idx]
         return np.array(samples)
 
     def _is_field_a_list(self, field):

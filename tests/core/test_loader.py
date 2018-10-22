@@ -446,31 +446,31 @@ class TestSetLoader:
 
         def test_get_data_raises_keyerror_invalid_field(self, set_loader, set_data):
             with pytest.raises(AssertionError):
-                data = set_loader.get('data_invalid', 0)
+                data = set_loader.get(index=0, field='data_invalid')
 
         @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
         def test_get_data_single_obj(self, idx, set_loader, set_data):
             field = 'data'
-            assert_array_equal(set_loader.get(field, idx), set_data[field][idx])
+            assert_array_equal(set_loader.get(idx, field), set_data[field][idx])
 
         def test_get_data_two_objs(self, set_loader, set_data):
             field = 'data'
             idx = [0, 1]
-            assert_array_equal(set_loader.get(field, idx), set_data[field][idx])
+            assert_array_equal(set_loader.get(idx, field), set_data[field][idx])
 
         def test_get_data_two_objs_same_index(self, set_loader, set_data):
             field = 'data'
             idx = [0, 0]
-            assert_array_equal(set_loader.get(field, idx), set_data[field][list(set(idx))])
+            assert_array_equal(set_loader.get(idx, field), set_data[field][list(set(idx))])
 
         def test_get_data_multiple_objs(self, set_loader, set_data):
             field = 'data'
             idx = range(5)
-            assert_array_equal(set_loader.get(field, idx), set_data[field][idx])
+            assert_array_equal(set_loader.get(idx, field), set_data[field][idx])
 
         def test_get_data_all_obj(self, set_loader, set_data):
             field = 'data'
-            assert_array_equal(set_loader.get(field), set_data[field])
+            assert_array_equal(set_loader.get(field=field), set_data[field])
 
     def test_size(self, set_loader, set_data):
         assert set_loader.size() == set_data['data'].shape[0]
@@ -541,7 +541,7 @@ class TestDataLoader:
         def test_get_single_obj(self, idx, data_loader, dataset):
             set_name = 'train'
             field = 'data'
-            assert_array_equal(data_loader.get(set_name, field, idx),
+            assert_array_equal(data_loader.get(set_name, idx, field),
                                dataset[set_name][field][idx])
 
         def test_get_single_obj_named_args(self, data_loader, dataset):
@@ -555,7 +555,7 @@ class TestDataLoader:
             set_name = 'train'
             field = 'data'
             idx = 1
-            assert_array_equal(data_loader._sets_loader[set_name].get(field, idx),
+            assert_array_equal(data_loader._sets_loader[set_name].get(idx, field),
                                dataset[set_name][field][idx])
 
         def test_get_single_obj_raise_error_invalid_set(self, data_loader, dataset):
@@ -566,18 +566,18 @@ class TestDataLoader:
             set_name = 'train'
             field = 'data'
             idx = (2, 6, )
-            assert_array_equal(data_loader.get(set_name, field, idx),
+            assert_array_equal(data_loader.get(set_name, idx, field),
                                dataset[set_name][field][list(idx)])
 
         def test_get_all_objs(self, data_loader, dataset):
             set_name = 'train'
             field = 'data'
-            assert_array_equal(data_loader.get(set_name, field), dataset[set_name][field])
+            assert_array_equal(data_loader.get(set_name, field=field), dataset[set_name][field])
 
         def test_get_all_objs_empty_index(self, data_loader, dataset):
             set_name = 'train'
             field = 'data'
-            assert_array_equal(data_loader.get(set_name, field), dataset[set_name][field])
+            assert_array_equal(data_loader.get(set_name, field=field), dataset[set_name][field])
 
     class TestSize:
         """Group tests for the size() method."""
