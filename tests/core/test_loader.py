@@ -437,9 +437,11 @@ class TestSetLoader:
         dataset = db_generator.dataset
         set_name = 'test'
         set_loader = SetLoader(h5obj[set_name])
+        columns = ascii_to_str(dataset[set_name]['__COLUMNS__'])
         assert set_loader.set == set_name
-        assert set_loader.columns == ascii_to_str(dataset[set_name]['__COLUMNS__'])
+        assert set_loader.columns == columns
         assert set_loader.num_elements == 5
+        assert_array_equal(set_loader.shape, np.array([5, len(columns)]))
 
     class TestGet:
         """Group tests for the get() method."""

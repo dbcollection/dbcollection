@@ -307,6 +307,7 @@ class SetLoader(object):
         self.dtypes = self._get_column_data_types()
         self.lists = self._get_preordered_lists()
         self.num_elements = self._get_num_elements()
+        self.shape = np.array([self.num_elements, len(self.columns)])
         self._fields = self._get_field_names()
         self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
         self._fields_info = []
