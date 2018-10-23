@@ -386,8 +386,18 @@ class SetLoader(object):
             assert field in self.columns + self.lists, "'{}' does not exist in the '{}' set.".format(field, self.set)
             data = self._get_field_data(field, index, parse)
         else:
-            data = [self._get_field_data(field, index, parse) for field in self.columns]
-        return data
+            if index is None:
+                index = list(range(len(self)))
+            else:
+                if isinstance(index, int):
+                    index = [index]
+            data = []
+            for idx in index:
+                data.append([self._get_field_data(field, idx, parse) for field in self.columns])
+        if len(data) == 1:
+            return data[0]
+        else:
+            return data
 
     def _get_field_data(self, field, index, parse):
         return self.fields[field].get(index=index, parse=parse)
@@ -493,8 +503,11 @@ class SetLoader(object):
         assert n >= 1
         idx = generate_random_indices(len(self), n, frac=frac, replace=replace,
                                       random_state=random_state)
-        samples = [self.get(int(i)) for i in idx]
-        return np.array(samples)
+        if len(idx) == 1:
+            samples = self.get(int(idx))
+        else:
+            samples = [self.get(int(i)) for i in idx]
+        return samples
 
     def _is_field_a_list(self, field):
         assert field
