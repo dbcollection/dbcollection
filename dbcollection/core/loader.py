@@ -640,8 +640,7 @@ class SetLoader(object):
         return self.num_elements
 
     def __str__(self):
-        s = 'SetLoader: set<{}>, len<{}>'.format(self.set, self.num_elements)
-        return s
+        return 'SetLoader: set<{}>, len<{}>'.format(self.set, self.num_elements)
 
     def __repr__(self):
         return str(self)
