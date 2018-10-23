@@ -533,6 +533,24 @@ class SetLoader(object):
         else:
             return self.get(list(range(n)))
 
+    def tail(self, n=5):
+        """Returns last n rows of each group.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of values to return. Default: 5.
+            It must be greater than 0.
+
+        Returns
+        -------
+        np.ndarray
+            Subset of the original field with the last ``n`` values.
+        """
+        assert n > 0, "Sample size must be greater than 0: {}.".format(n)
+        size = len(self)
+        return self.get(list(range(size - n, size)))
+
     def _is_field_a_list(self, field):
         assert field
         return field.startswith('list_')

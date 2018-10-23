@@ -523,6 +523,33 @@ class TestSetLoader:
         with pytest.raises(AssertionError):
             set_loader.head(n)
 
+    def test_tail(self, set_loader):
+        idx = list(range(len(set_loader) - 5, len(set_loader)))
+        samples = set_loader.tail()
+        expected = set_loader.get(idx)
+        for i in range(len(samples)):
+            for j in range(len(samples[i])):
+                assert_array_equal(samples[i][j], expected[i][j])
+
+    def test_tail_sample_last_value(self, set_loader):
+        sample = set_loader.tail(1)
+        expected = set_loader.get(len(set_loader) - 1)
+        for i in range(len(sample)):
+            assert_array_equal(sample[i], expected[i])
+
+    def test_tail_sample_last_six_values(self, set_loader):
+        idx = list(range(len(set_loader) - 6, len(set_loader)))
+        samples = set_loader.tail(6)
+        expected = set_loader.get(idx)
+        for i in range(len(samples)):
+            for j in range(len(samples[i])):
+                assert_array_equal(samples[i][j], expected[i][j])
+
+    @pytest.mark.parametrize('n', [0, -1])
+    def test_tail_raises_error_if_number_is_zero_or_negative(self, set_loader, n):
+        with pytest.raises(AssertionError):
+            set_loader.tail(n)
+
     def test__len__(self, set_loader, set_data):
         assert len(set_loader) == len(set_data['data'])
 
