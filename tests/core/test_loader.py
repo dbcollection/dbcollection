@@ -550,6 +550,17 @@ class TestSetLoader:
         with pytest.raises(AssertionError):
             set_loader.tail(n)
 
+    def test_to_pandas(self, set_loader):
+        df = set_loader.to_pandas()
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == set_loader.columns
+
+    def test_to_pandas_custom_column_names(self, set_loader):
+        columns = ['custom_' + column for column in set_loader.columns]
+        df = set_loader.to_pandas(columns=columns)
+        assert isinstance(df, pd.DataFrame)
+        assert list(df.columns) == columns
+
     def test__len__(self, set_loader, set_data):
         assert len(set_loader) == len(set_data['data'])
 

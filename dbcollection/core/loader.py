@@ -551,6 +551,24 @@ class SetLoader(object):
         size = len(self)
         return self.get(list(range(size - n, size)))
 
+    def to_pandas(self, columns=None):
+        """Converts the field into a Pandas Series.
+
+        Parameters
+        ----------
+        columns : str, optional
+            Name to give to the Pandas DataFrame's columns.
+            Default: None.
+
+        Returns
+        -------
+        pandas.DataFrame
+        """
+        if columns is None:
+            columns = self.columns
+        df = pd.DataFrame(data=self.get(), columns=columns)
+        return df
+
     def _is_field_a_list(self, field):
         assert field
         return field.startswith('list_')
