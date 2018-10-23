@@ -294,11 +294,13 @@ class SetLoader(object):
 
     """
 
-    def __init__(self, hdf5_group):
+    def __init__(self, hdf5_group, data_dir):
         """Initialize class."""
         assert hdf5_group, 'Must input a valid hdf5 group'
+        assert data_dir, 'Must input a valid directory'
 
         self.hdf5_group = hdf5_group
+        self.data_dir = data_dir
         self.set = self._get_set_name()
         self.columns = self._get_column_names()
         self.dtypes = self._get_column_data_types()

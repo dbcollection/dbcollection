@@ -177,7 +177,8 @@ class HDF5DatasetMetadataGenerator:
     def load_hdf5_file_SetLoader(self, set_name):
         assert set_name
         h5obj = self.load_hdf5_file()
-        set_loader = SetLoader(h5obj[set_name])
+        info = self.get_test_DataLoader_info()
+        set_loader = SetLoader(h5obj[set_name], info['data_dir'])
         return set_loader
 
     def get_test_dataset_DataLoader(self):
@@ -196,7 +197,7 @@ class HDF5DatasetMetadataGenerator:
         return {
             "name": 'some_db',
             "task": 'task',
-            "data_dir": './some/dir',
+            "data_dir": '/some/dir',
             "hdf5_file": self.hdf5_filename,
         }
 
@@ -436,7 +437,8 @@ class TestSetLoader:
         h5obj = db_generator.load_hdf5_file()
         dataset = db_generator.dataset
         set_name = 'test'
-        set_loader = SetLoader(h5obj[set_name])
+        data_dir = '/some/dir'
+        set_loader = SetLoader(h5obj[set_name], data_dir)
         columns = ascii_to_str(dataset[set_name]['__COLUMNS__'])
         assert set_loader.set == set_name
         assert set_loader.columns == columns
@@ -590,7 +592,7 @@ class TestDataLoader:
     def test__init(self):
         name = 'some_db'
         task = 'task'
-        data_dir = './some/dir'
+        data_dir = '/some/dir'
         hdf5_file = db_generator.get_test_hdf5_filename_DataLoader()
         data_loader = DataLoader(name, task, data_dir, hdf5_file)
         assert data_loader.dataset == name
