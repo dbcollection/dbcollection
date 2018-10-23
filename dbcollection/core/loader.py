@@ -478,6 +478,65 @@ class SetLoader(object):
             else:
                 self._fields_info.append(self._get_field_info(field))
 
+    def _is_field_a_list(self, field):
+        assert field
+        return field.startswith('list_')
+
+    def _get_list_info(self, field):
+        assert field
+        return {
+            "name": str(field),
+            "shape": 'shape = {}'.format(str(self.fields[field].shape)),
+            "type": 'dtype = {}'.format(str(self.fields[field].dtype))
+        }
+
+    def _get_field_info(self, field):
+        assert field
+        s_obj = ''
+        if field in self.columns:
+            obj_id = self.get_column_id(field)
+            s_obj = "(in 'object_ids', position = {})".format(obj_id)
+
+        return {
+            "name": str(field),
+            "shape": 'shape = {}'.format(str(self.fields[field].shape)),
+            "type": 'dtype = {}'.format(str(self.fields[field].dtype)),
+            "obj": s_obj
+        }
+
+    def _print_info_fields(self):
+        maxsize_name, maxsize_shape, maxsize_type = self._get_max_sizes_fields()
+        for i, info in enumerate(self._fields_info):
+            s_name = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
+            s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
+            s_obj = info["obj"]
+            if any(s_obj):
+                s_type = '{:{}}'.format('{},'.format(info["type"]), maxsize_type)
+            else:
+                s_type = '{:{}}'.format('{}'.format(info["type"]), maxsize_type)
+            print(s_name + s_shape + s_type + s_obj)
+
+    def _get_max_sizes_fields(self):
+        maxsize_name = max([len(d["name"]) for d in self._fields_info]) + 8
+        maxsize_shape = max([len(d["shape"]) for d in self._fields_info]) + 3
+        maxsize_type = max([len(d["type"]) for d in self._fields_info]) + 3
+        return maxsize_name, maxsize_shape, maxsize_type
+
+    def _print_info_lists(self):
+        if any(self._lists_info):
+            print('\n   (Pre-ordered lists)')
+            maxsize_name, maxsize_shape = self._get_max_sizes_lists()
+            for i, info in enumerate(self._lists_info):
+                s_name = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
+                s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
+                s_type = info["type"]
+                print(s_name + s_shape + s_type)
+
+    def _get_max_sizes_lists(self):
+        maxsize_name = max([len(d["name"]) for d in self._lists_info]) + 8
+        maxsize_shape = max([len(d["shape"]) for d in self._lists_info]) + 3
+        return maxsize_name, maxsize_shape
+
     def sample(self, n=1, frac=None, replace=False, random_state=None):
         """Return a random sample of items.
 
@@ -568,65 +627,6 @@ class SetLoader(object):
             columns = self.columns
         df = pd.DataFrame(data=self.get(), columns=columns)
         return df
-
-    def _is_field_a_list(self, field):
-        assert field
-        return field.startswith('list_')
-
-    def _get_list_info(self, field):
-        assert field
-        return {
-            "name": str(field),
-            "shape": 'shape = {}'.format(str(self.fields[field].shape)),
-            "type": 'dtype = {}'.format(str(self.fields[field].dtype))
-        }
-
-    def _get_field_info(self, field):
-        assert field
-        s_obj = ''
-        if field in self.columns:
-            obj_id = self.get_column_id(field)
-            s_obj = "(in 'object_ids', position = {})".format(obj_id)
-
-        return {
-            "name": str(field),
-            "shape": 'shape = {}'.format(str(self.fields[field].shape)),
-            "type": 'dtype = {}'.format(str(self.fields[field].dtype)),
-            "obj": s_obj
-        }
-
-    def _print_info_fields(self):
-        maxsize_name, maxsize_shape, maxsize_type = self._get_max_sizes_fields()
-        for i, info in enumerate(self._fields_info):
-            s_name = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
-            s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
-            s_obj = info["obj"]
-            if any(s_obj):
-                s_type = '{:{}}'.format('{},'.format(info["type"]), maxsize_type)
-            else:
-                s_type = '{:{}}'.format('{}'.format(info["type"]), maxsize_type)
-            print(s_name + s_shape + s_type + s_obj)
-
-    def _get_max_sizes_fields(self):
-        maxsize_name = max([len(d["name"]) for d in self._fields_info]) + 8
-        maxsize_shape = max([len(d["shape"]) for d in self._fields_info]) + 3
-        maxsize_type = max([len(d["type"]) for d in self._fields_info]) + 3
-        return maxsize_name, maxsize_shape, maxsize_type
-
-    def _print_info_lists(self):
-        if any(self._lists_info):
-            print('\n   (Pre-ordered lists)')
-            maxsize_name, maxsize_shape = self._get_max_sizes_lists()
-            for i, info in enumerate(self._lists_info):
-                s_name = '{:{}}'.format('   - {}, '.format(info["name"]), maxsize_name)
-                s_shape = '{:{}}'.format('{}, '.format(info["shape"]), maxsize_shape)
-                s_type = info["type"]
-                print(s_name + s_shape + s_type)
-
-    def _get_max_sizes_lists(self):
-        maxsize_name = max([len(d["name"]) for d in self._lists_info]) + 8
-        maxsize_shape = max([len(d["shape"]) for d in self._lists_info]) + 3
-        return maxsize_name, maxsize_shape
 
     def __len__(self):
         """
