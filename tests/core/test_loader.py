@@ -461,7 +461,7 @@ class TestSetLoader:
         def test_get_data_two_objs_same_index(self, set_loader, set_data):
             field = 'data'
             idx = [0, 0]
-            assert_array_equal(set_loader.get(idx, field), set_data[field][list(set(idx))])
+            assert_array_equal(set_loader.get(idx, field), set_data[field][idx[0]])
 
         def test_get_data_multiple_objs(self, set_loader, set_data):
             field = 'data'
@@ -490,13 +490,38 @@ class TestSetLoader:
         set_loader.info()
 
     def test_sample(self, set_loader):
-        assert set_loader.sample().shape[0] == 1
+        assert len(set_loader.sample()) == 5
 
-    def test_sample_multiple_samples(self, field_loader):
-        assert field_loader.sample(5).shape[0] == 5
+    def test_sample_multiple_samples(self, set_loader):
+        assert len(set_loader.sample(5)) == 5
 
-    def test_sample_multiple_samples_with_replacement(self, field_loader):
-        assert field_loader.sample(10, replace=True, random_state=123).shape[0] == 10
+    def test_sample_multiple_samples_with_replacement(self, set_loader):
+        assert len(set_loader.sample(10, replace=True, random_state=123)) == 10
+
+    def test_head(self, set_loader):
+        samples = set_loader.head()
+        expected = set_loader.get([0, 1, 2, 3, 4])
+        for i in range(len(samples)):
+            for j in range(len(samples[i])):
+                assert_array_equal(samples[i][j], expected[i][j])
+
+    def test_head_sample_first_value(self, set_loader):
+        sample = set_loader.head(1)
+        expected = set_loader.get(0)
+        for i in range(len(sample)):
+            assert_array_equal(sample[i], expected[i])
+
+    def test_head_sample_first_six_values(self, set_loader):
+        samples = set_loader.head(6)
+        expected = set_loader.get([0, 1, 2, 3, 4, 5])
+        for i in range(len(samples)):
+            for j in range(len(samples[i])):
+                assert_array_equal(samples[i][j], expected[i][j])
+
+    @pytest.mark.parametrize('n', [0, -1])
+    def test_head_raises_error_if_number_is_zero_or_negative(self, set_loader, n):
+        with pytest.raises(AssertionError):
+            set_loader.head(n)
 
     def test__len__(self, set_loader, set_data):
         assert len(set_loader) == len(set_data['data'])

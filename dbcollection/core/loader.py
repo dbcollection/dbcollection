@@ -509,6 +509,30 @@ class SetLoader(object):
             samples = [self.get(int(i)) for i in idx]
         return samples
 
+    def head(self, n=5):
+        """
+        Return the first elements of a field.
+
+        This function is mainly useful to preview the values of the
+        field without displaying all of the data data.
+
+        Parameters
+        ----------
+        n : int, optional
+            Number of values to return. Default: 5.
+            It must be greater than 0.
+
+        Returns
+        -------
+        np.ndarray
+            Subset of the original field with the first ``n`` values.
+        """
+        assert n > 0, "Sample size must be greater than 0: {}.".format(n)
+        if n == 1:
+            return self.get(0)
+        else:
+            return self.get(list(range(n)))
+
     def _is_field_a_list(self, field):
         assert field
         return field.startswith('list_')
