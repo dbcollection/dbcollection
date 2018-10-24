@@ -308,6 +308,26 @@ class DataLoader(object):
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
         return self._sets_loader[set_name].head(n)
 
+    def tail(self, set_name, n=5):
+        """Returns last n rows of each group.
+
+        Parameters
+        ----------
+        set_name : str
+            Name of the set.
+        n : int, optional
+            Number of values to return. Default: 5.
+            It must be greater than 0.
+
+        Returns
+        -------
+        np.ndarray
+            Subset of the original field with the last ``n`` values.
+        """
+        assert set_name
+        assert n > 0, "Sample size must be greater than 0: {}.".format(n)
+        return self._sets_loader[set_name].tail(n)
+
     def __len__(self):
         return len(self._sets_loader)
 

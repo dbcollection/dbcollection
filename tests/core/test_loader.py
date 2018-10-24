@@ -714,6 +714,10 @@ class TestDataLoader:
     def test_sample_multiple_samples_with_replacement(self, data_loader):
         assert len(data_loader.sample('train', 10, replace=True, random_state=123)) == 10
 
+    def test_sample_raises_error_no_inputs(self, data_loader):
+        with pytest.raises(TypeError):
+            data_loader.sample()
+
     def test_head(self, data_loader):
         set_name = 'train'
         samples = data_loader.head(set_name)
@@ -745,6 +749,43 @@ class TestDataLoader:
     def test_head_raises_error_if_number_is_zero_or_negative(self, data_loader, n):
         with pytest.raises(AssertionError):
             data_loader.head('train', n)
+
+    def test_tail(self, data_loader):
+        set_name = 'train'
+        set_size = len(data_loader._sets_loader[set_name])
+        idx = list(range(set_size - 5, set_size))
+        samples = data_loader.tail(set_name)
+        expected = data_loader.get(set_name, idx)
+        for i in range(len(samples)):
+            for j in range(len(samples[i])):
+                assert_array_equal(samples[i][j], expected[i][j])
+
+    def test_tail_sample_last_value(self, data_loader):
+        set_name = 'train'
+        set_size = len(data_loader._sets_loader[set_name])
+        sample = data_loader.tail(set_name, 1)
+        expected = data_loader.get(set_name, set_size - 1)
+        for i in range(len(sample)):
+            assert_array_equal(sample[i], expected[i])
+
+    def test_tail_sample_last_six_values(self, data_loader):
+        set_name = 'train'
+        set_size = len(data_loader._sets_loader[set_name])
+        idx = list(range(set_size - 6, set_size))
+        samples = data_loader.tail(set_name, 6)
+        expected = data_loader.get(set_name, idx)
+        for i in range(len(samples)):
+            for j in range(len(samples[i])):
+                assert_array_equal(samples[i][j], expected[i][j])
+
+    @pytest.mark.parametrize('n', [0, -1])
+    def test_tail_raises_error_if_number_is_zero_or_negative(self, data_loader, n):
+        with pytest.raises(AssertionError):
+            data_loader.tail('train', n)
+
+    def test_tail_raises_error_no_inputs(self, data_loader):
+        with pytest.raises(TypeError):
+            data_loader.tail()
 
     def test__len__(self, data_loader, dataset):
         assert len(data_loader) == len(dataset)
