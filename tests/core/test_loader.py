@@ -705,6 +705,15 @@ class TestDataLoader:
         with pytest.raises(KeyError):
             data_loader.info('val')
 
+    def test_sample(self, data_loader):
+        assert len(data_loader.sample('train')) == 5
+
+    def test_sample_multiple_samples(self, data_loader):
+        assert len(data_loader.sample('test', 5)) == 5
+
+    def test_sample_multiple_samples_with_replacement(self, data_loader):
+        assert len(data_loader.sample('train', 10, replace=True, random_state=123)) == 10
+
     def test__len__(self, data_loader, dataset):
         assert len(data_loader) == len(dataset)
 

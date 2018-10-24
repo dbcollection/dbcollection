@@ -256,6 +256,34 @@ class DataLoader(object):
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
+    def sample(self, set_name, n=1, frac=None, replace=False, random_state=None):
+        """Return a random sample of items.
+
+        You can use `random_state` for reproducibility.
+
+        Parameters
+        ----------
+        set_name : str
+            Name of the set.
+        n : int, optional
+            Number of items from axis to return. Cannot be used with `frac`.
+            Default = 1 if `frac` = None.
+        frac : float, optional
+            Fraction of axis items to return. Cannot be used with `n`.
+        replace : boolean, optional
+            Sample with or without replacement. Default = False.
+        random_state : int or numpy.random.RandomState, optional
+            Seed for the random number generator (if int), or numpy RandomState
+            object.
+
+        Returns
+        -------
+        List of values.
+        """
+        assert set_name
+        assert n >= 1
+        return self._sets_loader[set_name].sample(n=n, frac=frac, replace=replace, random_state=random_state)
+
     def __len__(self):
         return len(self._sets_loader)
 
