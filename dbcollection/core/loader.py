@@ -348,7 +348,7 @@ class SetLoader(object):
         fields = {}
         for field in self._fields:
             obj_id = self._get_obj_id_field(field)
-            fields[field] = FieldLoader(self.hdf5_group[field], obj_id)
+            fields[field] = FieldLoader(self.hdf5_group[field], obj_id, self.data_dir)
         return fields
 
     def _get_obj_id_field(self, field):
@@ -677,10 +677,11 @@ class FieldLoader(object):
         Identifier of the field if contained in the 'object_ids' list.
     """
 
-    def __init__(self, hdf5_field, column_id=None):
+    def __init__(self, hdf5_field, column_id=None, data_dir=None):
         """Initialize class."""
         assert hdf5_field, 'Must input a valid hdf5 dataset.'
         self.data = hdf5_field
+        self.data_dir = data_dir
         self.hdf5_handler = hdf5_field
         self.set = self._get_set_name()
         self.name = self._get_field_name()

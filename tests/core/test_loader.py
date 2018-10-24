@@ -230,9 +230,11 @@ class TestFieldLoader:
 
     def test__init(self):
         h5obj = db_generator.load_hdf5_file()
-        obj_id = 1
-        field_loader = FieldLoader(h5obj['/train/data'], obj_id)
+        column_id = 1
+        field_loader = FieldLoader(h5obj['/train/data'], column_id, '/some/dir')
         assert field_loader.name == 'data'
+        assert field_loader.data_dir == '/some/dir'
+        assert field_loader.column_id == column_id
 
     class TestGet:
         """Groups tests for the get() method."""
