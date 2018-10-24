@@ -328,6 +328,10 @@ class DataLoader(object):
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
         return self._sets_loader[set_name].tail(n)
 
+    @property
+    def dtypes(self):
+        return {set_name: self._sets_loader[set_name].dtypes for set_name in self.sets}
+
     def __len__(self):
         return len(self._sets_loader)
 

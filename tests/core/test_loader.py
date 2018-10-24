@@ -787,6 +787,12 @@ class TestDataLoader:
         with pytest.raises(TypeError):
             data_loader.tail()
 
+    def test_dtypes(self, data_loader):
+        dtypes = data_loader.dtypes
+        pytest.set_trace()
+        for set_name in data_loader.sets:
+            assert dtypes[set_name] == data_loader._sets_loader[set_name].dtypes
+
     def test__len__(self, data_loader, dataset):
         assert len(data_loader) == len(dataset)
 
