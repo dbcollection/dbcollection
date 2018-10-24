@@ -60,7 +60,6 @@ class DataLoader(object):
         self.hdf5_file = self._load_hdf5_file()
         self.sets = self._get_set_names()
         self._sets_loader = self._get_set_loaders()
-        self.columns = self._get_column_names()
         self.types = self._get_types()
 
     def _load_hdf5_file(self):
@@ -68,14 +67,6 @@ class DataLoader(object):
 
     def _get_set_names(self):
         return tuple(sorted(self.hdf5_file['/'].keys()))
-
-    def _get_column_names(self):
-        """Return a list of the column names that compose the set."""
-        columns = {}
-        for set_name in self.sets:
-            data = self.hdf5_file['/{}/__COLUMNS__'.format(set_name)].value
-            columns[set_name] = tuple(convert_ascii_to_str(data))
-        return columns
 
     def _get_types(self):
         """Return a list of the types for each column."""
@@ -335,6 +326,10 @@ class DataLoader(object):
     @property
     def shape(self):
         return {set_name: self._sets_loader[set_name].shape for set_name in self.sets}
+
+    @property
+    def columns(self):
+        return {set_name: self._sets_loader[set_name].columns for set_name in self.sets}
 
     def __len__(self):
         return len(self._sets_loader)

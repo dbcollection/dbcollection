@@ -797,6 +797,11 @@ class TestDataLoader:
         for set_name in data_loader.sets:
             assert_array_equal(shape[set_name], data_loader._sets_loader[set_name].shape)
 
+    def test_columns(self, data_loader):
+        columns = data_loader.columns
+        for set_name in data_loader.sets:
+            assert columns[set_name] == data_loader._sets_loader[set_name].columns
+
     def test__len__(self, data_loader, dataset):
         assert len(data_loader) == len(dataset)
 
