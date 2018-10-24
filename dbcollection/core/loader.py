@@ -332,6 +332,10 @@ class DataLoader(object):
     def dtypes(self):
         return {set_name: self._sets_loader[set_name].dtypes for set_name in self.sets}
 
+    @property
+    def shape(self):
+        return {set_name: self._sets_loader[set_name].shape for set_name in self.sets}
+
     def __len__(self):
         return len(self._sets_loader)
 

@@ -789,9 +789,13 @@ class TestDataLoader:
 
     def test_dtypes(self, data_loader):
         dtypes = data_loader.dtypes
-        pytest.set_trace()
         for set_name in data_loader.sets:
             assert dtypes[set_name] == data_loader._sets_loader[set_name].dtypes
+
+    def test_shape(self, data_loader):
+        shape = data_loader.shape
+        for set_name in data_loader.sets:
+            assert_array_equal(shape[set_name], data_loader._sets_loader[set_name].shape)
 
     def test__len__(self, data_loader, dataset):
         assert len(data_loader) == len(dataset)
