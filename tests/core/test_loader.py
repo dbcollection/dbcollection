@@ -714,6 +714,38 @@ class TestDataLoader:
     def test_sample_multiple_samples_with_replacement(self, data_loader):
         assert len(data_loader.sample('train', 10, replace=True, random_state=123)) == 10
 
+    def test_head(self, data_loader):
+        set_name = 'train'
+        samples = data_loader.head(set_name)
+        expected = data_loader.get(set_name, [0, 1, 2, 3, 4])
+        for i in range(len(samples)):
+            for j in range(len(samples[i])):
+                assert_array_equal(samples[i][j], expected[i][j])
+
+    def test_head_sample_first_value(self, data_loader):
+        set_name = 'test'
+        sample = data_loader.head(set_name, 1)
+        expected = data_loader.get(set_name, 0)
+        for i in range(len(sample)):
+            assert_array_equal(sample[i], expected[i])
+
+    def test_head_sample_first_six_values(self, data_loader):
+        set_name = 'train'
+        samples = data_loader.head(set_name, 6)
+        expected = data_loader.get(set_name, [0, 1, 2, 3, 4, 5])
+        for i in range(len(samples)):
+            for j in range(len(samples[i])):
+                assert_array_equal(samples[i][j], expected[i][j])
+
+    def test_head_raises_error_no_inputs(self, data_loader):
+        with pytest.raises(TypeError):
+            data_loader.head()
+
+    @pytest.mark.parametrize('n', [0, -1])
+    def test_head_raises_error_if_number_is_zero_or_negative(self, data_loader, n):
+        with pytest.raises(AssertionError):
+            data_loader.head('train', n)
+
     def test__len__(self, data_loader, dataset):
         assert len(data_loader) == len(dataset)
 

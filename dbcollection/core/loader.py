@@ -281,8 +281,32 @@ class DataLoader(object):
         List of values.
         """
         assert set_name
-        assert n >= 1
+        assert n > 0, "Sample size must be greater than 0: {}.".format(n)
         return self._sets_loader[set_name].sample(n=n, frac=frac, replace=replace, random_state=random_state)
+
+    def head(self, set_name, n=5):
+        """
+        Return the first elements of a field.
+
+        This function is mainly useful to preview the values of the
+        field without displaying all of the data data.
+
+        Parameters
+        ----------
+        set_name : str
+            Name of the set.
+        n : int, optional
+            Number of values to return. Default: 5.
+            It must be greater than 0.
+
+        Returns
+        -------
+        np.ndarray
+            Subset of the original field with the first ``n`` values.
+        """
+        assert set_name
+        assert n > 0, "Sample size must be greater than 0: {}.".format(n)
+        return self._sets_loader[set_name].head(n)
 
     def __len__(self):
         return len(self._sets_loader)
