@@ -60,17 +60,12 @@ class DataLoader(object):
         self.hdf5_file = self._load_hdf5_file()
         self.sets = self._get_set_names()
         self._sets_loader = self._get_set_loaders()
-        self.types = self._get_types()
 
     def _load_hdf5_file(self):
         return h5py.File(self.hdf5_filename, 'r', libver='latest')
 
     def _get_set_names(self):
         return tuple(sorted(self.hdf5_file['/'].keys()))
-
-    def _get_types(self):
-        """Return a list of the types for each column."""
-        pass
 
     def _get_set_loaders(self):
         """Return a dictionary with list of set loaders."""
