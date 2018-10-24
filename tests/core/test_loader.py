@@ -1,5 +1,5 @@
 """
-Test dbcollection/utils/loader.py.
+Test dbcollection/core/loader.py.
 """
 
 

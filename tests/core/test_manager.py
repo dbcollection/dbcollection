@@ -1,5 +1,5 @@
 """
-Test dbcollection/utils/cache.py.
+Test dbcollection/core/cache.py.
 """
 
 
