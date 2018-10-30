@@ -89,26 +89,26 @@ class HDF5DatasetMetadataGenerator:
             },
             "data": {
                 "data": lambda x: np.random.randint(0, 10, (x, 10)),
-                "type": 'int'
+                "type": 'number'
             },
             "number": {
                 "data": lambda x: np.array(range(x)),
-                "type": 'int'
+                "type": 'number'
             },
             "field_with_a_long_name_for_printing": {
                 "data": lambda x: np.array(range(x)),
-                "type": 'int'
+                "type": 'number'
             }
         }
 
         lists = {
             "list_dummy_data": {
                 "data": np.array(range(10)),
-                "type": 'list'
+                "type": 'list[number]'
             },
             "list_dummy_number": {
                 "data": np.array(range(10), dtype=np.uint8),
-                "type": 'list'
+                "type": 'list[number]'
             }
         }
 
@@ -164,8 +164,17 @@ class HDF5DatasetMetadataGenerator:
         assert path
         h5obj = self.load_hdf5_file()
         obj_id = 1
-        field_loader = FieldLoader(h5obj[path], obj_id)
+        ctype = self.get_ctype_by_column(h5obj, path)
+        field_loader = FieldLoader(h5obj[path], ctype, obj_id)
         return field_loader
+
+    def get_ctype_by_column(self, h5obj, path):
+        column_name = path.split('/')[-1]
+        set_name = path.split('/')[1]
+        columns = ascii_to_str(h5obj["/{}/__COLUMNS__".format(set_name)].value)
+        types = ascii_to_str(h5obj["/{}/__TYPES__".format(set_name)].value)
+        ctype = types[columns.index(column_name)]
+        return ctype
 
     def get_test_dataset_SetLoader(self, set_name='train'):
         """Return a dataset for testing the FieldLoader class."""
@@ -231,7 +240,9 @@ class TestFieldLoader:
     def test__init(self):
         h5obj = db_generator.load_hdf5_file()
         column_id = 1
-        field_loader = FieldLoader(h5obj['/train/data'], column_id, '/some/dir')
+        ctype = 'array'
+        field_loader = FieldLoader(h5obj['/train/data'], ctype, column_id, '/some/dir')
+        assert field_loader.ctype == ctype
         assert field_loader.name == 'data'
         assert field_loader.data_dir == '/some/dir'
         assert field_loader.column_id == column_id
@@ -241,23 +252,22 @@ class TestFieldLoader:
 
         @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
         def test_get_single_obj(self, idx, field_loader, set_data):
-            assert_array_equal(field_loader.get(idx), set_data['data'][idx])
+            assert field_loader.get(idx) == set_data['data'][idx].tolist()
 
         def test_get_single_obj_by_arg_name(self, field_loader, set_data):
-            idx = 0
-            assert_array_equal(field_loader.get(index=idx), set_data['data'][idx])
+            assert field_loader.get(index=0) == set_data['data'][0].tolist()
 
         def test_get_single_obj_list_of_equal_indexes(self, field_loader, set_data):
             idx = [0, 0]
-            assert_array_equal(field_loader.get(idx), set_data['data'][list(set(idx))])
+            assert field_loader.get(idx) == set_data['data'][list(set(idx))].tolist()[0]
 
         def test_get_single_obj_list(self, field_loader, set_data):
             idx = [0]
-            assert_array_equal(field_loader.get(idx), set_data['data'][idx[0]])
+            assert field_loader.get(idx) == set_data['data'][idx[0]].tolist()
 
         def test_get_single_obj_tuple(self, field_loader, set_data):
             idx = (0,)
-            assert_array_equal(field_loader.get(idx), set_data['data'][idx[0]])
+            assert field_loader.get(idx) == set_data['data'][idx[0]].tolist()
 
         def test_get_single_obj_raises_error_wrong_format(self, field_loader, set_data):
             with pytest.raises(TypeError):
@@ -272,7 +282,7 @@ class TestFieldLoader:
             data_field = 'strings_list'
             field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
             data = field_loader.get(idx, parse=True)
-            assert_array_equal(data, ascii_to_str(set_data[data_field][idx]))
+            assert data == ascii_to_str(set_data[data_field][idx])
             assert isinstance(data, str)
 
         def test_get_multi_obj_convert_to_string(self):
@@ -280,23 +290,23 @@ class TestFieldLoader:
             field_loader, set_data = db_generator.get_test_data_FieldLoader('train', data_field)
             idx = list(range(3))
             data = field_loader.get(idx, parse=True)
-            assert_array_equal(data, ascii_to_str(set_data[data_field][idx]))
+            assert data == ascii_to_str(set_data[data_field][idx])
             assert isinstance(data, list)
 
         def test_get_two_obj(self, field_loader, set_data):
             idx = [1, 2]
-            assert_array_equal(field_loader.get(idx), set_data['data'][idx])
+            assert field_loader.get(idx) == set_data['data'][idx].tolist()
 
         def test_get_multiple_objs(self, field_loader, set_data):
             idx = [1, 2, 5, 8]
-            assert_array_equal(field_loader.get(idx), set_data['data'][idx])
+            assert field_loader.get(idx) == set_data['data'][idx].tolist()
 
         def test_get_multiple_objs_unordered(self, field_loader, set_data):
             idx = [8, 2, 5, 1]
-            assert not np.array_equal(field_loader.get(idx), set_data['data'][idx])
+            assert not field_loader.get(idx) == set_data['data'][idx].tolist()
 
         def test_get_all_obj(self, field_loader, set_data):
-            assert_array_equal(field_loader.get(), set_data['data'])
+            assert field_loader.get() == set_data['data'].tolist()
 
     def test_size(self, field_loader, set_data):
         assert field_loader.size() == set_data['data'].shape
@@ -317,13 +327,13 @@ class TestFieldLoader:
         assert field_loader.sample(10, replace=True, random_state=123).shape[0] == 10
 
     def test_head(self, field_loader):
-        assert_array_equal(field_loader.head(), field_loader.get([0, 1, 2, 3, 4]))
+        assert field_loader.head() == field_loader.get([0, 1, 2, 3, 4])
 
     def test_head_sample_first_value(self, field_loader):
-        assert_array_equal(field_loader.head(1), field_loader.get(0))
+        assert field_loader.head(1) == field_loader.get(0)
 
     def test_head_sample_first_six_values(self, field_loader):
-        assert_array_equal(field_loader.head(6), field_loader.get([0, 1, 2, 3, 4, 5]))
+        assert field_loader.head(6) == field_loader.get([0, 1, 2, 3, 4, 5])
 
     def test_head_raises_error_if_number_is_zero(self, field_loader):
         with pytest.raises(AssertionError):
@@ -335,14 +345,14 @@ class TestFieldLoader:
 
     def test_tail(self, field_loader):
         idx = list(range(len(field_loader) - 5, len(field_loader)))
-        assert_array_equal(field_loader.tail(), field_loader.get(idx))
+        assert field_loader.tail() == field_loader.get(idx)
 
     def test_tail_sample_last_value(self, field_loader):
-        assert_array_equal(field_loader.tail(1), field_loader.get(len(field_loader) - 1))
+        assert field_loader.tail(1) == field_loader.get(len(field_loader) - 1)
 
     def test_tail_sample_last_six_values(self, field_loader):
         idx = list(range(len(field_loader) - 6, len(field_loader)))
-        assert_array_equal(field_loader.tail(6), field_loader.get(idx))
+        assert field_loader.tail(6) == field_loader.get(idx)
 
     def test_tail_raises_error_if_number_is_zero(self, field_loader):
         with pytest.raises(AssertionError):

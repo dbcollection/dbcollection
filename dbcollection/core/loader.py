@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import h5py
 from dbcollection.utils.string_ascii import convert_ascii_to_str
+from dbcollection.core.types import parse_data_format_by_type
 
 
 class DataLoader(object):
@@ -71,7 +72,7 @@ class DataLoader(object):
         """Return a dictionary with list of set loaders."""
         return {set_name: SetLoader(self.hdf5_file[set_name], self.data_dir) for set_name in self.sets}
 
-    def get(self, set_name, index=None, field=None, parse=False):
+    def get(self, set_name, index=None, field=None, parse=True):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -374,6 +375,7 @@ class SetLoader(object):
         self.set = self._get_set_name()
         self.columns = self._get_column_names()
         self.dtypes = self._get_column_data_types()
+        self._column_type = self._get_types_by_column_name()
         self.lists = self._get_preordered_lists()
         self.num_elements = self._get_num_elements()
         self.shape = np.array([self.num_elements, len(self.columns)])
@@ -401,6 +403,9 @@ class SetLoader(object):
             types = (types,)
         return types
 
+    def _get_types_by_column_name(self):
+        return {self.columns[i]: self.dtypes[i] for i in range(len(self.columns))}
+
     def _get_preordered_lists(self):
         fields = []
         for field in self.hdf5_group.keys():
@@ -409,7 +414,10 @@ class SetLoader(object):
         return fields
 
     def _get_field_names(self):
-        return tuple(self.hdf5_group.keys())
+        field_names = list(self.hdf5_group.keys())
+        field_names.remove('__COLUMNS__')
+        field_names.remove('__TYPES__')
+        return tuple(field_names)
 
     def _get_num_elements(self):
         return len(self.hdf5_group[self.columns[0]])
@@ -418,7 +426,14 @@ class SetLoader(object):
         fields = {}
         for field in self._fields:
             obj_id = self._get_obj_id_field(field)
-            fields[field] = FieldLoader(self.hdf5_group[field], obj_id, self.data_dir)
+            if field in self.lists:
+                ctype = 'list[number]'
+            else:
+                ctype = self._column_type[field]
+            fields[field] = FieldLoader(hdf5_field=self.hdf5_group[field],
+                                        ctype=ctype,
+                                        column_id=obj_id,
+                                        data_dir=self.data_dir)
         return fields
 
     def _get_obj_id_field(self, field):
@@ -427,7 +442,7 @@ class SetLoader(object):
         else:
             return None
 
-    def get(self, index=None, field=None, parse=False):
+    def get(self, index=None, field=None, parse=True):
         """Retrieves data from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file with the
@@ -747,10 +762,11 @@ class FieldLoader(object):
         Identifier of the field if contained in the 'object_ids' list.
     """
 
-    def __init__(self, hdf5_field, column_id=None, data_dir=None):
+    def __init__(self, hdf5_field, ctype, column_id=None, data_dir=None):
         """Initialize class."""
         assert hdf5_field, 'Must input a valid hdf5 dataset.'
         self.data = hdf5_field
+        self.ctype = ctype  # column type
         self.data_dir = data_dir
         self.hdf5_handler = hdf5_field
         self.set = self._get_set_name()
@@ -771,7 +787,7 @@ class FieldLoader(object):
     def _get_hdf5_object_str(self):
         return self.hdf5_handler.name.split('/')
 
-    def get(self, index=None, parse=False):
+    def get(self, index=None, parse=True):
         """Retrieves data of the field from the dataset's hdf5 metadata file.
 
         This method retrieves the i'th data from the hdf5 file. Also, it is
@@ -808,7 +824,10 @@ class FieldLoader(object):
         else:
             data = self._get_range_idx(index)
         if parse:
-            data = convert_ascii_to_str(data)
+            data = parse_data_format_by_type(data=data,
+                                             ctype=self.ctype,
+                                             path=self.data_dir,
+                                             pad_value=self.fillvalue)
         return data
 
     def _get_range_idx(self, idx):
