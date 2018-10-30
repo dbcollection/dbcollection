@@ -89,10 +89,13 @@ def parse_filename(data, path=None):
 
 
 def _parse_output(data):
-    if len(data) > 1:
-        return data
+    if isinstance(data, list):
+        if len(data) > 1:
+            return data
+        else:
+            return data[0]
     else:
-        return data[0]
+        return data
 
 
 def _concat_path_filename(path, filename):
