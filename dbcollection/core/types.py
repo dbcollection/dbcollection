@@ -22,7 +22,7 @@ from dbcollection.utils.pad import unpad_list, unsqueeze_list
 from dbcollection.utils.string_ascii import convert_ascii_to_str
 
 
-def parse_data_format_by_type(data, ctype, path=None):
+def parse_data_format_by_type(data, ctype, path=None, pad_value=-1):
     """Converts a ndarray to a data type.
 
     Parameters
@@ -34,6 +34,8 @@ def parse_data_format_by_type(data, ctype, path=None):
     path : str, optional
         Directory path of the file names. If exists, the path is
         concatenated with the parsed string. Default: None.
+    pad_value : str | int, optional
+        Value used to pad the input data.
 
     Returns
     -------
@@ -49,6 +51,14 @@ def parse_data_format_by_type(data, ctype, path=None):
         data_parsed = parse_boolean(data=data)
     elif ctype == 'array':
         data_parsed = data
+    elif ctype == 'list[string]':
+        data_parsed = parse_list_string(data=data)
+    elif ctype == 'list[number]':
+        data_parsed = parse_list_number(data=data, pad_value=pad_value)
+    elif ctype == 'list[boolean]':
+        data_parsed = parse_list_boolean(data=data, pad_value=pad_value)
+    elif ctype == 'list[list[number]]':
+        data_parsed = parse_list_of_lists_number(data=data, pad_value=pad_value)
     else:
         raise TypeFormatError("Invalid data type format: {}".format(ctype))
     return data_parsed
@@ -140,7 +150,7 @@ def parse_boolean(data):
     return _parse_output(data_parsed)
 
 
-def parse_list_string(data):
+def parse_list_string(data, pad_value=''):
     """Converts a padded ndarray to a list of lists of strings.
 
     Parameters
@@ -153,7 +163,7 @@ def parse_list_string(data):
     list
     """
     data_parsed = [convert_ascii_to_str(data_) for data_ in data]
-    data_unpad = [unpad_list(l, val='') for l in data_parsed]
+    data_unpad = [unpad_list(l, val=pad_value) for l in data_parsed]
     return _parse_output(data_unpad)
 
 
