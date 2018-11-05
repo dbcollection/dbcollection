@@ -1,5 +1,6 @@
 """
-Dataset's metadata loader classes.
+Metadata loader classes containing methods for fetching
+(meta)data of datasets stored in HDF5 files.
 """
 
 
@@ -12,10 +13,10 @@ from dbcollection.core.types import parse_data_format_by_type
 
 
 class DataLoader(object):
-    """Metadata loader class for a dataset.
+    """Metadata loader class for a data set.
 
-    This class contains several methods to fetch data from a hdf5 file
-    by using simple, easy to use functions for metadata handling.
+    This class contains several methods to fetch data from an HDF5 file
+    by using simple, easy to use functions for handling metadata.
 
     Parameters
     ----------
@@ -37,15 +38,14 @@ class DataLoader(object):
     data_dir : str
         Path of the dataset's data directory on disk.
     hdf5_filename : str
-        Path of the hdf5 metadata file stored on disk.
+        Path of the HDF5 metadata file stored on disk.
     hdf5_file : h5py._hl.files.File
-        hdf5 file object handler.
+        HDF5 file object handler.
     sets : tuple
         List of names of set splits (e.g. train, test, val, etc.)
     """
 
     def __init__(self, name, task, data_dir, hdf5_filename):
-        """Initialize class."""
         assert name, 'Must input a valid dataset name.'
         assert task, 'Must input a valid task name.'
         assert data_dir, 'Must input a valid path for the data directory.'
@@ -75,9 +75,9 @@ class DataLoader(object):
             setattr(self, set_name, self._set_loaders[set_name])
 
     def get(self, set_name, index=None, field=None, parse=True):
-        """Retrieves data from the dataset's hdf5 metadata file.
+        """Retrieves data from the dataset's HDF5 metadata file.
 
-        This method retrieves the i'th data from the hdf5 file with the
+        This method retrieves the i'th data from the HDF5 file with the
         same 'field' name. Also, it is possible to retrieve multiple values
         by inserting a list/tuple of number values as indexes.
 
@@ -91,8 +91,8 @@ class DataLoader(object):
         field : str, optional
             Name of the data field. Defaul: None.
         parse : bool, optional
-            Convert the output data into a string. Default: False.
-            Warning: output must be of type numpy.uint8
+            Convert the output data into a string. The output must be of type
+            numpy.uint8. Default: False.
 
         Returns
         -------
@@ -243,7 +243,7 @@ class DataLoader(object):
     def sample(self, set_name, n=1, frac=None, replace=False, random_state=None):
         """Returns a random sample of items.
 
-        You can use `random_state` for reproducibility.
+        You can use ``random_state`` for reproducibility.
 
         Parameters
         ----------
@@ -254,11 +254,12 @@ class DataLoader(object):
             Default = 1 if `frac` = None.
         frac : float, optional
             Fraction of axis items to return. Cannot be used with `n`.
+            Default: None.
         replace : boolean, optional
-            Sample with or without replacement. Default = False.
-        random_state : int or numpy.random.RandomState, optional
+            Sample with or without replacement. Default: False.
+        random_state : int | numpy.random.RandomState, optional
             Seed for the random number generator (if int), or numpy RandomState
-            object.
+            object. Default: None.
 
         Returns
         -------
@@ -285,7 +286,7 @@ class DataLoader(object):
 
         Returns
         -------
-        numpy.ndarray
+        list
             Subset of the set data with the first ``n`` rows.
         """
         assert set_name
@@ -293,7 +294,7 @@ class DataLoader(object):
         return self._set_loaders[set_name].head(n)
 
     def tail(self, set_name, n=5):
-        """Returns last n rows of each group.
+        """Returns the last ``n`` rows of each group.
 
         Parameters
         ----------
@@ -314,14 +315,17 @@ class DataLoader(object):
 
     @property
     def dtypes(self):
+        """Fields' type by set."""
         return {set_name: self._set_loaders[set_name].dtypes for set_name in self.sets}
 
     @property
     def shape(self):
+        """Fields' shape by set."""
         return {set_name: self._set_loaders[set_name].shape for set_name in self.sets}
 
     @property
     def columns(self):
+        """Fields' columns by set."""
         return {set_name: self._set_loaders[set_name].columns for set_name in self.sets}
 
     def __len__(self):
@@ -339,7 +343,7 @@ class SetLoader(object):
     """Metadata loader class for a single set of the dataset.
 
     This class contains several methods to fetch data from a specific
-    set (group) in a hdf5 file. It contains useful information about a
+    set (group) in an HDF5 file. It contains useful information about a
     specific group and also several methods to fetch data.
 
     Parameters
@@ -357,21 +361,22 @@ class SetLoader(object):
         Path of the dataset's data directory on disk.
     set : str
         Name of the set.
-    columns : tuple
-        List with the names of all fields / columns of the set.
+    columns : list
+        Names of all fields / columns of the set.
     dtypes : tuple
         List of the data types of the columns.
-    lists : tuple
-        List of names of all list fields of the set.
+    lists : list
+        Names of all list fields of the set.
     num_elements : int
         Number of rows in the set.
     shape : tuple
-        List of number of rows and columns.
+        Number of rows and columns available in the set.
+    fields : list
+        Name of all fields (columns + lists) of the set.
     """
 
     def __init__(self, hdf5_group, data_dir):
-        """Initialize class."""
-        assert hdf5_group, 'Must input a valid hdf5 group'
+        assert hdf5_group, 'Must input a valid HDF5 group'
         assert data_dir, 'Must input a valid directory'
 
         self.hdf5_group = hdf5_group
@@ -384,10 +389,10 @@ class SetLoader(object):
         self.num_elements = self._get_num_elements()
         self.shape = (self.num_elements, len(self.columns))
         self.fields = self._get_field_names()
-        self._field_loaders = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
+        self._field_loaders = self._load_hdf5_fields()
+        self._add_field_loaders()
         self._info_fields = []
         self._info_lists = []
-        self._add_field_loaders()
 
     def _get_set_name(self):
         hdf5_object_str = self.hdf5_group.name
@@ -398,7 +403,7 @@ class SetLoader(object):
         columns_data = self.hdf5_group['__COLUMNS__'].value
         output = convert_ascii_to_str(columns_data)
         if type(output) == 'string':
-            output = (output,)
+            output = [output]
         return output
 
     def _get_column_data_types(self):
@@ -422,12 +427,13 @@ class SetLoader(object):
         field_names = list(self.hdf5_group.keys())
         field_names.remove('__COLUMNS__')
         field_names.remove('__TYPES__')
-        return tuple(field_names)
+        return field_names
 
     def _get_num_elements(self):
         return len(self.hdf5_group[self.columns[0]])
 
     def _load_hdf5_fields(self):
+        """Returns a dictionary of field loaders by name of all fields in the HDF5 group."""
         fields = {}
         for field in self.fields:
             obj_id = self._get_obj_id_field(field)
@@ -452,9 +458,9 @@ class SetLoader(object):
             setattr(self, field, self._field_loaders[field])
 
     def get(self, index=None, field=None, parse=True):
-        """Retrieves data from the dataset's hdf5 metadata file.
+        """Retrieves data from the dataset's HDF5 metadata file.
 
-        This method retrieves the i'th data from the hdf5 file with the
+        This method retrieves the i'th data from the HDF5 file with the
         same 'field' name. Also, it is possible to retrieve multiple values
         by inserting a list/tuple of number values as indexes.
 
@@ -471,7 +477,7 @@ class SetLoader(object):
 
         Returns
         -------
-        np.ndarray | list | str
+        np.ndarray | list | str | int | float
             Numpy array containing the field's data.
             If convert_to_str is set to True, it returns a string
             or list of strings.
@@ -509,13 +515,12 @@ class SetLoader(object):
         return self.num_elements
 
     def list(self):
-        """List of all column names.
+        """List of all field names.
 
         Returns
         -------
         list
             List of all data fields of the dataset.
-
         """
         return self.columns + self.lists
 
@@ -539,7 +544,6 @@ class SetLoader(object):
         ------
         KeyError
             If field does not exists in the list of object fields.
-
         """
         assert field, 'Must input a valid field.'
         try:
@@ -556,7 +560,6 @@ class SetLoader(object):
 
         This method provides the necessary information about a data set
         internals to help determine how to use/handle a specific field.
-
         """
         print('\n> Set: {}'.format(self.set))
         self._set_fields_lists_info()
@@ -632,9 +635,9 @@ class SetLoader(object):
         return maxsize_name, maxsize_shape
 
     def sample(self, n=1, frac=None, replace=False, random_state=None):
-        """Return a random sample of items.
+        """Returns a random sample of items.
 
-        You can use `random_state` for reproducibility.
+        You can use ``random_state`` for reproducibility.
 
         Parameters
         ----------
@@ -643,15 +646,17 @@ class SetLoader(object):
             Default = 1 if `frac` = None.
         frac : float, optional
             Fraction of axis items to return. Cannot be used with `n`.
+            Default: None.
         replace : boolean, optional
-            Sample with or without replacement. Default = False.
-        random_state : int or numpy.random.RandomState, optional
+            Sample with or without replacement. Default: False.
+        random_state : int | numpy.random.RandomState, optional
             Seed for the random number generator (if int), or numpy RandomState
-            object.
+            object. Default: None.
 
         Returns
         -------
-        List of values.
+        list
+            List of values of one or more rows.
         """
         assert n >= 1
         idx = generate_random_indices(len(self), n, frac=frac, replace=replace,
@@ -663,8 +668,7 @@ class SetLoader(object):
         return samples
 
     def head(self, n=5):
-        """
-        Return the first elements of a field.
+        """Returns the first elements of a field.
 
         This function is mainly useful to preview the values of the
         field without displaying all of the data data.
@@ -677,7 +681,7 @@ class SetLoader(object):
 
         Returns
         -------
-        np.ndarray
+        list
             Subset of the original field with the first ``n`` values.
         """
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
@@ -687,7 +691,7 @@ class SetLoader(object):
             return self.get(list(range(n)))
 
     def tail(self, n=5):
-        """Returns last n rows of each group.
+        """Returns the last ``n`` rows of each group.
 
         Parameters
         ----------
@@ -697,7 +701,7 @@ class SetLoader(object):
 
         Returns
         -------
-        np.ndarray
+        list
             Subset of the original field with the last ``n`` values.
         """
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
@@ -728,7 +732,6 @@ class SetLoader(object):
         -------
         int
             Number of elements
-
         """
         return self.num_elements
 
@@ -743,7 +746,7 @@ class FieldLoader(object):
     """Metadata loader class for a field (column or list).
 
     This class contains several methods to fetch data from a specific
-    field of a set (group) in a hdf5 file. It contains useful information
+    field of a set (group) in an HDF5 file. It contains useful information
     about the field and also several methods to fetch data.
 
     Parameters
@@ -773,18 +776,15 @@ class FieldLoader(object):
         Shape of the data array.
     dtype : type
         Type of the field's data.
-    shape : tuple
-        Shape of the field's data.
     fillvalue : int
-        Value used to pad arrays when storing the data in the hdf5 file.
+        Value used to pad arrays when storing the data in the HDF5 file.
     column_id : int
         Position of the field in the column list.
-        Note that list fields don't have an id.
+        Note that list fields do not have ids.
     """
 
     def __init__(self, hdf5_field, ctype, column_id=None, data_dir=None):
-        """Initialize class."""
-        assert hdf5_field, 'Must input a valid hdf5 dataset.'
+        assert hdf5_field, 'Must input a valid HDF5 dataset.'
         assert ctype, 'Must input a valid metadata field type.'
         self.data = hdf5_field
         self.ctype = ctype
@@ -808,9 +808,9 @@ class FieldLoader(object):
         return self.data.name.split('/')
 
     def get(self, index=None, parse=True):
-        """Retrieves data of the field from the dataset's hdf5 metadata file.
+        """Retrieves data of the field from the dataset's HDF5 metadata file.
 
-        This method retrieves the i'th data from the hdf5 file. Also, it is
+        This method retrieves the i'th data from the HDF5 file. Also, it is
         possible to retrieve multiple values by inserting a list/tuple of
         number values as indexes.
 
@@ -826,15 +826,16 @@ class FieldLoader(object):
 
         Returns
         -------
-        numpy.ndarray | list | str | int | float
+        numpy.ndarray | list | str | int | float | bool
             Slice of the field's data. If ``parse`` is set to False,
             it returns a numpy.ndarray of the slice of the data.
 
         Note
         ----
-        When using lists / tuples of indexes, this method sorts the list
-        and removes duplicate values. This is because the h5py api requires
-        the indexing elements to be in increasing order when retrieving data.
+        When using lists / tuples of indexes, this method preemptively sorts
+        the list and removes duplicate values. This is because the h5py api
+        requires the indexing elements to be in increasing order when
+        retrieving data.
         """
         if index is None:
             data = self.data.value
@@ -919,7 +920,7 @@ class FieldLoader(object):
     def sample(self, n=1, frac=None, replace=False, random_state=None):
         """Return a random sample of items.
 
-        You can use `random_state` for reproducibility.
+        You can use ``random_state`` for reproducibility.
 
         Parameters
         ----------
@@ -930,10 +931,10 @@ class FieldLoader(object):
             Fraction of axis items to return. Cannot be used with `n`.
             Default: None.
         replace : boolean, optional
-            Sample with or without replacement. Default = False.
-        random_state : int or numpy.random.RandomState, optional
+            Sample with or without replacement. Default: False.
+        random_state : int | numpy.random.RandomState, optional
             Seed for the random number generator (if int), or numpy RandomState
-            object.
+            object. Default: None.
 
         Returns
         -------
@@ -959,14 +960,14 @@ class FieldLoader(object):
 
         Returns
         -------
-        np.ndarray
+        list
             Subset of the original field with the first ``n`` values.
         """
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
         return self.get(list(range(0, n)))
 
     def tail(self, n=5):
-        """Returns last n rows of each group.
+        """Returns the last ``n`` rows of each group.
 
         Parameters
         ----------
@@ -976,7 +977,7 @@ class FieldLoader(object):
 
         Returns
         -------
-        numpy.ndarray
+        list
             Subset of the original field with the last ``n`` values.
         """
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
@@ -1001,6 +1002,7 @@ class FieldLoader(object):
 
     @property
     def values(self):
+        """Field's values."""
         return self.data.value
 
     def __getitem__(self, index):
