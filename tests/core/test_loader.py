@@ -634,7 +634,7 @@ class TestDataLoader:
             set_name = 'train'
             field = 'data'
             idx = 1
-            assert_array_equal(data_loader._sets_loader[set_name].get(idx, field),
+            assert_array_equal(data_loader._set_loaders[set_name].get(idx, field),
                                dataset[set_name][field][idx])
 
         def test_get_single_obj_raise_error_invalid_set(self, data_loader, dataset):
@@ -762,7 +762,7 @@ class TestDataLoader:
 
     def test_tail(self, data_loader):
         set_name = 'train'
-        set_size = len(data_loader._sets_loader[set_name])
+        set_size = len(data_loader._set_loaders[set_name])
         idx = list(range(set_size - 5, set_size))
         samples = data_loader.tail(set_name)
         expected = data_loader.get(set_name, idx)
@@ -772,7 +772,7 @@ class TestDataLoader:
 
     def test_tail_sample_last_value(self, data_loader):
         set_name = 'train'
-        set_size = len(data_loader._sets_loader[set_name])
+        set_size = len(data_loader._set_loaders[set_name])
         sample = data_loader.tail(set_name, 1)
         expected = data_loader.get(set_name, set_size - 1)
         for i in range(len(sample)):
@@ -780,7 +780,7 @@ class TestDataLoader:
 
     def test_tail_sample_last_six_values(self, data_loader):
         set_name = 'train'
-        set_size = len(data_loader._sets_loader[set_name])
+        set_size = len(data_loader._set_loaders[set_name])
         idx = list(range(set_size - 6, set_size))
         samples = data_loader.tail(set_name, 6)
         expected = data_loader.get(set_name, idx)
@@ -800,17 +800,17 @@ class TestDataLoader:
     def test_dtypes(self, data_loader):
         dtypes = data_loader.dtypes
         for set_name in data_loader.sets:
-            assert dtypes[set_name] == data_loader._sets_loader[set_name].dtypes
+            assert dtypes[set_name] == data_loader._set_loaders[set_name].dtypes
 
     def test_shape(self, data_loader):
         shape = data_loader.shape
         for set_name in data_loader.sets:
-            assert_array_equal(shape[set_name], data_loader._sets_loader[set_name].shape)
+            assert_array_equal(shape[set_name], data_loader._set_loaders[set_name].shape)
 
     def test_columns(self, data_loader):
         columns = data_loader.columns
         for set_name in data_loader.sets:
-            assert columns[set_name] == data_loader._sets_loader[set_name].columns
+            assert columns[set_name] == data_loader._set_loaders[set_name].columns
 
     def test__len__(self, data_loader, dataset):
         assert len(data_loader) == len(dataset)

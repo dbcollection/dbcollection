@@ -57,7 +57,7 @@ class DataLoader(object):
         self.hdf5_filename = hdf5_filename
         self.hdf5_file = self._load_hdf5_file()
         self.sets = self._get_set_names()
-        self._sets_loader = self._get_set_loaders()
+        self._set_loaders = self._get_set_loaders()
         self._add_set_loaders()
 
     def _load_hdf5_file(self):
@@ -71,8 +71,8 @@ class DataLoader(object):
         return {set_name: SetLoader(self.hdf5_file[set_name], self.data_dir) for set_name in self.sets}
 
     def _add_set_loaders(self):
-        for set_name in self._sets_loader:
-            setattr(self, set_name, self._sets_loader[set_name])
+        for set_name in self._set_loaders:
+            setattr(self, set_name, self._set_loaders[set_name])
 
     def get(self, set_name, index=None, field=None, parse=True):
         """Retrieves data from the dataset's hdf5 metadata file.
@@ -108,7 +108,7 @@ class DataLoader(object):
         """
         assert set_name, 'Must input a set name.'
         try:
-            return self._sets_loader[set_name].get(index=index, field=field, parse=parse)
+            return self._set_loaders[set_name].get(index=index, field=field, parse=parse)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -138,10 +138,10 @@ class DataLoader(object):
             If set name is not valid or does not exist.
         """
         if set_name is None:
-            return {set_name: self._sets_loader[set_name].size() for set_name in self._sets_loader}
+            return {set_name: self._set_loaders[set_name].size() for set_name in self._set_loaders}
         else:
             try:
-                return self._sets_loader[set_name].size()
+                return self._set_loaders[set_name].size()
             except KeyError:
                 self._raise_error_invalid_set_name(set_name)
 
@@ -167,10 +167,10 @@ class DataLoader(object):
             If set name is not valid or does not exist.
         """
         if set_name is None:
-            return {set_name: self._sets_loader[set_name].list() for set_name in self._sets_loader}
+            return {set_name: self._set_loaders[set_name].list() for set_name in self._set_loaders}
         else:
             try:
-                return self._sets_loader[set_name].list()
+                return self._set_loaders[set_name].list()
             except KeyError:
                 self._raise_error_invalid_set_name(set_name)
 
@@ -200,7 +200,7 @@ class DataLoader(object):
         assert set_name, 'Must input a valid set name.'
         assert field, 'Must input a valid field name.'
         try:
-            return self._sets_loader[set_name].get_column_id(field)
+            return self._set_loaders[set_name].get_column_id(field)
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -230,13 +230,13 @@ class DataLoader(object):
             self._print_info_single_set(set_name)
 
     def _print_info_all_sets(self):
-        for set_name in sorted(self._sets_loader):
-            self._sets_loader[set_name].info()
+        for set_name in sorted(self._set_loaders):
+            self._set_loaders[set_name].info()
 
     def _print_info_single_set(self, set_name):
         assert set_name
         try:
-            self._sets_loader[set_name].info()
+            self._set_loaders[set_name].info()
         except KeyError:
             self._raise_error_invalid_set_name(set_name)
 
@@ -267,7 +267,7 @@ class DataLoader(object):
         """
         assert set_name
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
-        return self._sets_loader[set_name].sample(n=n, frac=frac, replace=replace, random_state=random_state)
+        return self._set_loaders[set_name].sample(n=n, frac=frac, replace=replace, random_state=random_state)
 
     def head(self, set_name, n=5):
         """Returns the first elements of a field.
@@ -290,7 +290,7 @@ class DataLoader(object):
         """
         assert set_name
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
-        return self._sets_loader[set_name].head(n)
+        return self._set_loaders[set_name].head(n)
 
     def tail(self, set_name, n=5):
         """Returns last n rows of each group.
@@ -310,22 +310,22 @@ class DataLoader(object):
         """
         assert set_name
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
-        return self._sets_loader[set_name].tail(n)
+        return self._set_loaders[set_name].tail(n)
 
     @property
     def dtypes(self):
-        return {set_name: self._sets_loader[set_name].dtypes for set_name in self.sets}
+        return {set_name: self._set_loaders[set_name].dtypes for set_name in self.sets}
 
     @property
     def shape(self):
-        return {set_name: self._sets_loader[set_name].shape for set_name in self.sets}
+        return {set_name: self._set_loaders[set_name].shape for set_name in self.sets}
 
     @property
     def columns(self):
-        return {set_name: self._sets_loader[set_name].columns for set_name in self.sets}
+        return {set_name: self._set_loaders[set_name].columns for set_name in self.sets}
 
     def __len__(self):
-        return len(self._sets_loader)
+        return len(self._set_loaders)
 
     def __str__(self):
         s = "DataLoader: {} ('{}' task)".format(self.dataset, self.task)
