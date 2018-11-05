@@ -374,7 +374,7 @@ class SetLoader(object):
         self.set = self._get_set_name()
         self.columns = self._get_column_names()
         self.dtypes = self._get_column_data_types()
-        self._column_type = self._get_types_by_column_name()
+        self._columns_type = self._get_types_by_column_name()
         self.lists = self._get_preordered_lists()
         self.num_elements = self._get_num_elements()
         self.shape = (self.num_elements, len(self.columns))
@@ -428,7 +428,7 @@ class SetLoader(object):
             if field in self.lists:
                 ctype = 'list[number]'
             else:
-                ctype = self._column_type[field]
+                ctype = self._columns_type[field]
             fields[field] = FieldLoader(hdf5_field=self.hdf5_group[field],
                                         ctype=ctype,
                                         column_id=obj_id,
