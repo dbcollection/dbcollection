@@ -387,10 +387,10 @@ class TestFieldLoader:
 
         @pytest.mark.parametrize("idx", [0, 1, 2, 3, 4])
         def test__index__single_obj(self, idx, field_loader, set_data):
-            assert_array_equal(field_loader[idx], set_data['data'][idx])
+            assert field_loader[idx] == set_data['data'][idx].tolist()
 
         def test__index__single_objs_single_value(self, field_loader, set_data):
-            assert_array_equal(field_loader[0, 0], set_data['data'][0][0])
+            assert field_loader[0, 0] == set_data['data'][0][0]
 
 
 def get_expected_object_values(set_data, fields, idx):

@@ -1017,7 +1017,11 @@ class FieldLoader(object):
         -------
         numpy.ndarray
         """
-        return self.data[index]
+        data = self.data[index]
+        return parse_data_format_by_type(data=data,
+                                         ctype=self.ctype,
+                                         path=self.data_dir,
+                                         pad_value=self.fillvalue)
 
     def __len__(self):
         """Lenght of the field.
