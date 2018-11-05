@@ -58,6 +58,7 @@ class DataLoader(object):
         self.hdf5_file = self._load_hdf5_file()
         self.sets = self._get_set_names()
         self._sets_loader = self._get_set_loaders()
+        self._add_set_loaders()
 
     def _load_hdf5_file(self):
         return h5py.File(self.hdf5_filename, 'r', libver='latest')
@@ -68,6 +69,10 @@ class DataLoader(object):
     def _get_set_loaders(self):
         """Return a dictionary with list of set loaders."""
         return {set_name: SetLoader(self.hdf5_file[set_name], self.data_dir) for set_name in self.sets}
+
+    def _add_set_loaders(self):
+        for set_name in self._sets_loader:
+            setattr(self, set_name, self._sets_loader[set_name])
 
     def get(self, set_name, index=None, field=None, parse=True):
         """Retrieves data from the dataset's hdf5 metadata file.
