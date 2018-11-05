@@ -12,10 +12,10 @@ from dbcollection.core.types import parse_data_format_by_type
 
 
 class DataLoader(object):
-    """Dataset metadata loader class.
+    """Metadata loader class for a dataset.
 
     This class contains several methods to fetch data from a hdf5 file
-    by using simple, easy to use functions for (meta)data handling.
+    by using simple, easy to use functions for metadata handling.
 
     Parameters
     ----------
@@ -42,9 +42,6 @@ class DataLoader(object):
         hdf5 file object handler.
     sets : tuple
         List of names of set splits (e.g. train, test, val, etc.)
-    columns : dict
-        Data field names for each set split.
-
     """
 
     def __init__(self, name, task, data_dir, hdf5_filename):
@@ -83,27 +80,26 @@ class DataLoader(object):
         ----------
         set_name : str
             Name of the set.
-        idx : int/list/tuple, optional
+        idx : int | list | tuple, optional
             Index number of the field. If it is a list, returns the data
             for all the value indexes of that list. Default: None.
         field : str, optional
             Name of the data field. Defaul: None.
         parse : bool, optional
             Convert the output data into a string. Default: False.
-            Warning: output must be of type np.uint8
+            Warning: output must be of type numpy.uint8
 
         Returns
         -------
-        np.ndarray/list/str
-            Numpy array containing the field's data.
-            If convert_to_str is set to True, it returns a string
-            or list of strings.
+        numpy.ndarray | list | str
+            Numpy array containing the field's data. If ``parse`` is
+            set to False, it returns a numpy.ndarray of the slice of
+            the data.
 
         Raises
         ------
         KeyError
             If set name is not valid or does not exist.
-
         """
         assert set_name, 'Must input a set name.'
         try:
@@ -115,9 +111,11 @@ class DataLoader(object):
         raise KeyError("'{}' does not exist in the sets list: {}".format(set_name, self.sets))
 
     def size(self, set_name=None):
-        """Size of each setof the dataset .
+        """Size of each set of the dataset.
 
-        Returns the number of the elements of a field.
+        Returns the number of the elements of a set of columns.
+        If no ``set_name`` is set, it returns the size of all
+        sets of the dataset.
 
         Parameters
         ----------
@@ -126,14 +124,13 @@ class DataLoader(object):
 
         Returns
         -------
-        list/dict
-            Returns the size of a field.
+        list | dict
+            Returns the size of set.
 
         Raises
         ------
         KeyError
             If set name is not valid or does not exist.
-
         """
         if set_name is None:
             return {set_name: self._sets_loader[set_name].size() for set_name in self._sets_loader}
@@ -146,6 +143,9 @@ class DataLoader(object):
     def list(self, set_name=None):
         """Returns all column names of a set.
 
+        If no ``set_name`` is set, it returns the column names of all
+        sets of the dataset.
+
         Parameters
         ----------
         set_name : str, optional
@@ -153,14 +153,13 @@ class DataLoader(object):
 
         Returns
         -------
-        list/dict
-            List of all data fields of the dataset.
+        list | dict
+            List of all data fields / columns of the set.
 
         Raises
         ------
         KeyError
             If set name is not valid or does not exist.
-
         """
         if set_name is None:
             return {set_name: self._sets_loader[set_name].list() for set_name in self._sets_loader}
@@ -171,28 +170,27 @@ class DataLoader(object):
                 self._raise_error_invalid_set_name(set_name)
 
     def get_column_id(self, set_name, field):
-        """Retrieves the index position of a field in the 'object_ids' list.
+        """Retrieves the index position of the column in the set's column list.
 
-        This method returns the position of a field in the 'object_ids' object.
-        If the field is not contained in this object, it returns a null value.
+        This method returns the position of a field / column in the set's column
+        list. If the field is not in the list, it raises an exception.
 
         Parameters
         ----------
         set_name : str
             Name of the set.
         field : str
-            Name of the field in the metadata file.
+            Name of the field / column in the metadata file.
 
         Returns
         -------
         int
-            Index of the field in the 'object_ids' list.
+            Index of the field / column in the set's column list.
 
         Raises
         ------
         KeyError
-            If set name is not valid or does not exist.
-
+            If the set / field name is invalid.
         """
         assert set_name, 'Must input a valid set name.'
         assert field, 'Must input a valid field name.'
@@ -205,27 +203,21 @@ class DataLoader(object):
         """Prints information about all data fields of a set.
 
         Displays information of all fields of a set group inside the hdf5
-        metadata file. This information contains the name of the field, as well
-        as the size/shape of the data, the data type and if the field is
-        contained in the 'object_ids' list.
+        metadata file. This information contains the name of the field, as
+        well as the size / shape of the data, the data type and if the field
+        is contained in the set's column list.
 
-        If no 'set_name' is provided, it displays information for all available
+        If no ``set_name`` is provided, it displays information for all available
         sets.
 
-        This method only shows the most useful information about a set/fields
+        This method only shows the most useful information about a set / fields
         internals, which should be enough for most users in helping to
         determine how to use/handle a specific dataset with little effort.
 
         Parameters
         ----------
         set_name : str, optional
-            Name of the set.
-
-        Raises
-        ------
-        KeyError
-            If set name is not valid or does not exist.
-
+            Name of the set. Default: None.
         """
         if set_name is None:
             self._print_info_all_sets()
@@ -244,7 +236,7 @@ class DataLoader(object):
             self._raise_error_invalid_set_name(set_name)
 
     def sample(self, set_name, n=1, frac=None, replace=False, random_state=None):
-        """Return a random sample of items.
+        """Returns a random sample of items.
 
         You can use `random_state` for reproducibility.
 
@@ -265,15 +257,15 @@ class DataLoader(object):
 
         Returns
         -------
-        List of values.
+        list
+            List of values of a set's rows.
         """
         assert set_name
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
         return self._sets_loader[set_name].sample(n=n, frac=frac, replace=replace, random_state=random_state)
 
     def head(self, set_name, n=5):
-        """
-        Return the first elements of a field.
+        """Returns the first elements of a field.
 
         This function is mainly useful to preview the values of the
         field without displaying all of the data data.
@@ -283,13 +275,13 @@ class DataLoader(object):
         set_name : str
             Name of the set.
         n : int, optional
-            Number of values to return. Default: 5.
-            It must be greater than 0.
+            Number of values to return. It must be greater than 0.
+            Default: 5.
 
         Returns
         -------
-        np.ndarray
-            Subset of the original field with the first ``n`` values.
+        numpy.ndarray
+            Subset of the set data with the first ``n`` rows.
         """
         assert set_name
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
@@ -303,13 +295,13 @@ class DataLoader(object):
         set_name : str
             Name of the set.
         n : int, optional
-            Number of values to return. Default: 5.
-            It must be greater than 0.
+            Number of values to return. It must be greater than 0.
+            Default: 5.
 
         Returns
         -------
-        np.ndarray
-            Subset of the original field with the last ``n`` values.
+        numpy.ndarray
+            Subset of the set data with the last ``n`` rows.
         """
         assert set_name
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
@@ -339,7 +331,7 @@ class DataLoader(object):
 
 
 class SetLoader(object):
-    """Set metadata loader class.
+    """Metadata loader class for a single set of the dataset.
 
     This class contains several methods to fetch data from a specific
     set (group) in a hdf5 file. It contains useful information about a
@@ -348,21 +340,28 @@ class SetLoader(object):
     Parameters
     ----------
     hdf5_group : h5py._hl.group.Group
-        hdf5 group object handler.
+        HDF5 group object handler.
+    data_dir : str
+        Path of the dataset's data directory on disk.
 
     Attributes
     ----------
     hdf5_group : h5py._hl.group.Group
-        hdf5 group object handler.
+        HDF5 group object handler.
+    data_dir : str
+        Path of the dataset's data directory on disk.
     set : str
         Name of the set.
-    fields : tuple
-        List of all field names of the set.
     columns : tuple
-        List of all field names of the set contained by the 'object_ids' list.
-    nelems : int
-        Number of rows in 'object_ids'.
-
+        List with the names of all fields / columns of the set.
+    dtypes : tuple
+        List of the data types of the columns.
+    lists : tuple
+        List of names of all list fields of the set.
+    num_elements : int
+        Number of rows in the set.
+    shape : tuple
+        List of number of rows and columns.
     """
 
     def __init__(self, hdf5_group, data_dir):
@@ -378,7 +377,7 @@ class SetLoader(object):
         self._column_type = self._get_types_by_column_name()
         self.lists = self._get_preordered_lists()
         self.num_elements = self._get_num_elements()
-        self.shape = np.array([self.num_elements, len(self.columns)])
+        self.shape = (self.num_elements, len(self.columns))
         self._fields = self._get_field_names()
         self.fields = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
         self._fields_info = []
@@ -731,7 +730,7 @@ class SetLoader(object):
 
 
 class FieldLoader(object):
-    """Field metadata loader class.
+    """Metadata loader class for a field (column or list).
 
     This class contains several methods to fetch data from a specific
     field of a set (group) in a hdf5 file. It contains useful information
@@ -740,33 +739,47 @@ class FieldLoader(object):
     Parameters
     ----------
     hdf5_field : h5py._hl.dataset.Dataset
-        hdf5 field object handler.
+        HDF5 dataset object handler.
+    ctype : str
+        Metadata field type.
     obj_id : int, optional
-        Position of the field in '__COLUMNS__'.
+        Position of the field in '__COLUMNS__'. Default: None.
+    data_dir : str, optional
+        Path of the data directory on disk. Default: Mone.
 
     Attributes
     ----------
     data : h5py._hl.dataset.Dataset
-        hdf5 group object handler.
+        HDF5 dataset object handler.
+    ctype : str
+        Metadata field type.
+    data_dir : str
+        Path of the data directory on disk.
+    hdf5_handler : h5py._hl.dataset.Dataset
+        HDF5 dataset object handler. Same as the data attribute.
     set : str
         Name of the set.
     name : str
         Name of the field.
-    type : type
+    shape : tuple
+        Shape of the data array.
+    dtype : type
         Type of the field's data.
     shape : tuple
         Shape of the field's data.
     fillvalue : int
         Value used to pad arrays when storing the data in the hdf5 file.
-    obj_id : int
-        Identifier of the field if contained in the 'object_ids' list.
+    column_id : int
+        Position of the field in the column list.
+        Note that list fields don't have an id.
     """
 
     def __init__(self, hdf5_field, ctype, column_id=None, data_dir=None):
         """Initialize class."""
         assert hdf5_field, 'Must input a valid hdf5 dataset.'
+        assert ctype, 'Must input a valid metadata field type.'
         self.data = hdf5_field
-        self.ctype = ctype  # column type
+        self.ctype = ctype
         self.data_dir = data_dir
         self.hdf5_handler = hdf5_field
         self.set = self._get_set_name()
@@ -806,18 +819,15 @@ class FieldLoader(object):
 
         Returns
         -------
-        np.ndarray/list/str
-            Numpy array containing the field's data.
-            If convert_to_str is set to True, it returns a string
-            or list of strings.
+        numpy.ndarray | list | str | int | float
+            Slice of the field's data. If ``parse`` is set to False,
+            it returns a numpy.ndarray of the slice of the data.
 
         Note
         ----
-        When using lists/tuples of indexes, this method sorts the list
-        and removes duplicate values. This is because the h5py
-        api requires the indexing elements to be in increasing order when
-        retrieving data.
-
+        When using lists / tuples of indexes, this method sorts the list
+        and removes duplicate values. This is because the h5py api requires
+        the indexing elements to be in increasing order when retrieving data.
         """
         if index is None:
             data = self.data.value
@@ -866,7 +876,6 @@ class FieldLoader(object):
         -------
         tuple
             Returns the size of the field.
-
         """
         return self.shape
 
@@ -879,7 +888,12 @@ class FieldLoader(object):
         ----------
         verbose : bool, optional
             If true, display extra information about the field.
+            Default: True.
 
+        Returns
+        -------
+        dict
+            Name, shape and type of the field.
         """
         if verbose:
             if hasattr(self, 'obj_id'):
@@ -907,6 +921,7 @@ class FieldLoader(object):
             Default = 1 if `frac` = None.
         frac : float, optional
             Fraction of axis items to return. Cannot be used with `n`.
+            Default: None.
         replace : boolean, optional
             Sample with or without replacement. Default = False.
         random_state : int or numpy.random.RandomState, optional
@@ -915,7 +930,8 @@ class FieldLoader(object):
 
         Returns
         -------
-        List of values.
+        list
+            List of values.
         """
         assert n >= 1
         idx = generate_random_indices(len(self), n, frac=frac, replace=replace,
@@ -923,8 +939,7 @@ class FieldLoader(object):
         return np.array([self.get(int(i)) for i in idx])
 
     def head(self, n=5):
-        """
-        Return the first elements of a field.
+        """Returns the first elements of a field.
 
         This function is mainly useful to preview the values of the
         field without displaying all of the data data.
@@ -954,7 +969,7 @@ class FieldLoader(object):
 
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
             Subset of the original field with the last ``n`` values.
         """
         assert n > 0, "Sample size must be greater than 0: {}.".format(n)
@@ -982,27 +997,26 @@ class FieldLoader(object):
         return self.hdf5_handler.value
 
     def __getitem__(self, index):
-        """
+        """Gets a slice of the field's data.
+
         Parameters
         ----------
         index : int
-            Index
+            Array index slice.
 
         Returns
         -------
-        np.ndarray
-            Numpy data array.
-
+        numpy.ndarray
         """
         return self.data[index]
 
     def __len__(self):
-        """
+        """Lenght of the field.
+
         Returns
         -------
         int
-            Number of samples
-
+            Number of samples.
         """
         return self.shape[0]
 
