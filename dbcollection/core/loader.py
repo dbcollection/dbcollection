@@ -382,6 +382,7 @@ class SetLoader(object):
         self._field_loaders = self._load_hdf5_fields()  # add all hdf5 datasets as data fields
         self._info_fields = []
         self._info_lists = []
+        self._add_field_loaders()
 
     def _get_set_name(self):
         hdf5_object_str = self.hdf5_group.name
@@ -440,6 +441,10 @@ class SetLoader(object):
             return self.columns.index(field)
         else:
             return None
+
+    def _add_field_loaders(self):
+        for field in self._field_loaders:
+            setattr(self, field, self._field_loaders[field])
 
     def get(self, index=None, field=None, parse=True):
         """Retrieves data from the dataset's hdf5 metadata file.
