@@ -765,8 +765,6 @@ class FieldLoader(object):
         Metadata field type.
     data_dir : str
         Path of the data directory on disk.
-    hdf5_handler : h5py._hl.dataset.Dataset
-        HDF5 dataset object handler. Same as the data attribute.
     set : str
         Name of the set.
     name : str
@@ -791,7 +789,6 @@ class FieldLoader(object):
         self.data = hdf5_field
         self.ctype = ctype
         self.data_dir = data_dir
-        self.hdf5_handler = hdf5_field
         self.set = self._get_set_name()
         self.name = self._get_field_name()
         self.shape = hdf5_field.shape
@@ -808,7 +805,7 @@ class FieldLoader(object):
         return hdf5_object_str[-1]
 
     def _get_hdf5_object_str(self):
-        return self.hdf5_handler.name.split('/')
+        return self.data.name.split('/')
 
     def get(self, index=None, parse=True):
         """Retrieves data of the field from the dataset's hdf5 metadata file.
@@ -1004,7 +1001,7 @@ class FieldLoader(object):
 
     @property
     def values(self):
-        return self.hdf5_handler.value
+        return self.data.value
 
     def __getitem__(self, index):
         """Gets a slice of the field's data.

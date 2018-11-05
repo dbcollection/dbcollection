@@ -370,7 +370,7 @@ class TestFieldLoader:
                                 pd.Series(field_loader.data, name='dummy_name'))
 
     def test_values(self, field_loader):
-        assert_array_equal(field_loader.values, field_loader.hdf5_handler.value)
+        assert_array_equal(field_loader.values, field_loader.data.value)
 
     def test__len__(self, field_loader, set_data):
         assert len(field_loader) == len(set_data['data'])
