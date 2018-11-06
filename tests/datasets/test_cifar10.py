@@ -277,6 +277,7 @@ class TestClassLabelField:
     def test_get_class_names(self, mocker, mock_classlabel_class, test_data_loaded):
         class_names = mock_classlabel_class.get_class_names()
         expected = [test_data_loaded['classes'][idx] for idx in test_data_loaded['labels']]
+        assert class_names == expected
 
 
 class TestImageField:

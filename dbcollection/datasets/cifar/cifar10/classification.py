@@ -181,7 +181,7 @@ class ClassLabelField(BaseField):
 
     def get_class_names(self):
         """Returns a list of class names."""
-        label_names = self.data['classes']['label_names']
+        label_names = self.data['classes']
         label_ids = self.data['labels']
         class_names = [label_names[idx] for idx in label_ids]
         return class_names
