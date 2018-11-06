@@ -333,3 +333,34 @@ class BaseMetadataField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
+
+
+class BaseMetadataField(BaseField):
+    """Base class for the dataset's metadata field processor."""
+
+    fields = []
+
+    def process(self):
+        """Processes and saves the metadata name and types info to hdf5."""
+        self.save_fields_names()
+        self.save_fields_types()
+
+    def save_fields_names(self):
+        columns = [field['name'] for field in self.fields]
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='__COLUMNS__',
+            data=str2ascii(columns),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+    def save_fields_types(self):
+        columns = [field['type'] for field in self.fields]
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='__TYPES__',
+            data=str2ascii(columns),
+            dtype=np.uint8,
+            fillvalue=0
+        )
