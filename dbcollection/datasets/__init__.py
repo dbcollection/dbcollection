@@ -318,7 +318,7 @@ class BaseMetadataField(BaseField):
         columns = [field['name'] for field in self.fields]
         self.save_field_to_hdf5(
             set_name=self.set_name,
-            field='__FIELD_NAMES__',
+            field='__COLUMNS__',
             data=str2ascii(columns),
             dtype=np.uint8,
             fillvalue=0
@@ -328,7 +328,7 @@ class BaseMetadataField(BaseField):
         columns = [field['type'] for field in self.fields]
         self.save_field_to_hdf5(
             set_name=self.set_name,
-            field='__FIELD_TYPES__',
+            field='__TYPES__',
             data=str2ascii(columns),
             dtype=np.uint8,
             fillvalue=0
