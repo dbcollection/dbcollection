@@ -27,7 +27,6 @@ class Keypoints(BaseTask):
         Loads data from annotation files.
         """
         loader = DatasetAnnotationLoader(
-            data_files=self.data_files,
             data_path=self.data_path,
             cache_path=self.cache_path,
             verbose=self.verbose
@@ -68,8 +67,7 @@ class Keypoints(BaseTask):
 class DatasetAnnotationLoader:
     """Annotation's data loader for the cifar10 dataset (train/test)."""
 
-    def __init__(self, data_files, data_path, cache_path, verbose):
-        self.data_files = data_files
+    def __init__(self, data_path, cache_path, verbose):
         self.data_path = data_path
         self.cache_path = cache_path
         self.verbose = verbose
@@ -88,9 +86,8 @@ class DatasetAnnotationLoader:
         """
         Load annotations from file and split them to train and test sets.
         """
-        annotations = self.load_annotations()
-
         data = []
+        annotations = self.load_annotations()
         for i, annot in enumerate(annotations['examples'][0]):
             if self.use_sample(annot, is_test):
                 width, height, _ = annot[4][0].tolist()
@@ -111,7 +108,6 @@ class DatasetAnnotationLoader:
                     [annot[2][0][13], annot[2][1][13], 1],  # -- 10, Right_Eye
                     [annot[2][0][16], annot[2][1][16], 1]  # -- 11, Nose
                 ]
-
                 data.append({
                     "filename": filename,
                     "width": width,
@@ -129,12 +125,12 @@ class DatasetAnnotationLoader:
 
     def use_sample(self, annotation, is_test):
         if is_test:
-            if annot[-1][0][0] == 0:
+            if annotation[-1][0][0] == 0:
                 use_sample = False
             else:
                 use_sample = True
         else:
-            if annot[-1][0][0] == 0:
+            if annotation[-1][0][0] == 0:
                 use_sample = True
             else:
                 use_sample = False
@@ -222,7 +218,7 @@ class TorsoBoxesField(CustomBaseField):
     @display_message_processing('torso_boxes')
     def process(self):
         """Processes and saves the torso boxes metadata to hdf5."""
-        torso_boxes = self.get_field_data("torso_boxes")
+        torso_boxes = self.get_field_data("torso_box")
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='torso_boxes',
