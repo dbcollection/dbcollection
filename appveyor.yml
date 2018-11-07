@@ -20,14 +20,6 @@ environment:
   matrix:
 
     - CONDA_ROOT: "C:\\Miniconda3_64"
-      PYTHON_VERSION: "3.7"
-      PYTHON_ARCH: "64"
-      CONDA_PY: "37"
-      CONDA_NPY: "112"
-      PLAT_NAME: "win-amd64"
-      PY_TAG: "cp37"
-
-    - CONDA_ROOT: "C:\\Miniconda3_64"
       PYTHON_VERSION: "3.6"
       PYTHON_ARCH: "64"
       CONDA_PY: "36"
