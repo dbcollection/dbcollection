@@ -28,7 +28,7 @@ of the work of the community that shared these resources.
 WARNING - Project Inactivity
 ============================
 
-**Until further notice, this project won't receive any new update for the time being due to lack of time**. Moreover, other solutions work sufficiently good enough for most use cases (for example, kaggle). Therefore, consider this project deprecated unless further interest grows for a centralised solution like dbcollection by enough people.
+**Until further notice, this project won't receive new contributions for the time being due to lack of personal time and interest**. Moreover, other solutions work sufficiently good enough for most use cases (for example, kaggle). Therefore, consider this project deprecated unless further interest grows for a centralised solution like dbcollection by enough people.
 
 
 Main features
