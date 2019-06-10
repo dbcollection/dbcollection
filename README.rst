@@ -25,6 +25,12 @@ or testing them in different datasets without having to incur the loss of spendi
 datasets or creating/modyfing scripts to load/fetch data by taking advantage
 of the work of the community that shared these resources.
 
+WARNING - Project Inactivity
+============================
+
+**Until further notice, this project won't receive any new update for the time being due to lack of time**. Moreover, other solutions work sufficiently good enough for most use cases (for example, kaggle). Therefore, consider this project deprecated unless further interest grows for a centralised solution like dbcollection by enough people.
+
+
 Main features
 -------------
 
