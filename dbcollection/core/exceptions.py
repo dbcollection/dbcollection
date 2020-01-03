@@ -21,3 +21,8 @@ class GoogleDriveFileIdDoesNotExist(Exception):
 class InvalidURLDownloadSource(Exception):
     """The url source is invalid/undefined."""
     pass
+
+
+class TypeFormatError(Exception):
+    """The data type format invalid."""
+    pass
