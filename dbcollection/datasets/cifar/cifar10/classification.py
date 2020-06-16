@@ -7,7 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTask, BaseField
+from dbcollection.datasets import BaseTask, BaseField, BaseMetadataField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -16,6 +16,8 @@ from dbcollection.utils.pad import pad_list
 
 class Classification(BaseTask):
     """Cifar10 Classification preprocessing functions."""
+
+    version = '1.0.0'
 
     # metadata filename
     filename_h5 = 'classification'
@@ -48,7 +50,7 @@ class Classification(BaseTask):
         """
         Saves the metadata of a set.
         """
-        args = {
+        configs = {
             "data": data,
             "set_name": set_name,
             "hdf5_manager": self.hdf5_manager,
@@ -58,16 +60,17 @@ class Classification(BaseTask):
         # Fields
         if self.verbose:
             print('\n==> Setting up the data fields:')
-        ClassLabelField(**args).process()
-        image_ids = ImageField(**args).process()
-        label_ids = LabelIdField(**args).process()
-        ObjectFieldNamesField(**args).process()
-        ObjectIdsField(**args).process(image_ids, label_ids)
+        ClassLabelField(**configs).process()
+        ImageField(**configs).process()
+        LabelIdField(**configs).process()
 
         # Lists
         if self.verbose:
             print('\n==> Setting up ordered lists:')
-        ImagesPerClassList(**args).process()
+        ImagesPerClassList(**configs).process()
+
+        # Fields' metadata info
+        MetadataField(**configs).process()
 
 
 # -----------------------------------------------------------
@@ -178,7 +181,10 @@ class ClassLabelField(BaseField):
 
     def get_class_names(self):
         """Returns a list of class names."""
-        return self.data['classes']
+        label_names = self.data['classes']
+        label_ids = self.data['labels']
+        class_names = [label_names[idx] for idx in label_ids]
+        return class_names
 
 
 class ImageField(BaseField):
@@ -187,7 +193,7 @@ class ImageField(BaseField):
     @display_message_processing('images')
     def process(self):
         """Processes and saves the images metadata to hdf5."""
-        images, image_ids = self.get_images()
+        images = self.get_images()
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='images',
@@ -195,14 +201,10 @@ class ImageField(BaseField):
             dtype=np.uint8,
             fillvalue=-1
         )
-        return image_ids
 
     def get_images(self):
-        """Returns a np.ndarray of images and a list
-        of image ids for each row of 'object_ids' field."""
-        images = self.data['images']
-        image_ids = list(range(len(images)))
-        return images, image_ids
+        """Returns a np.ndarray of images."""
+        return self.data['images']
 
 
 class LabelIdField(BaseField):
@@ -211,7 +213,7 @@ class LabelIdField(BaseField):
     @display_message_processing('labels')
     def process(self):
         """Processes and saves the labels metadata to hdf5."""
-        labels, label_ids = self.get_labels()
+        labels = self.get_labels()
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='labels',
@@ -219,44 +221,20 @@ class LabelIdField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
-        return label_ids
 
     def get_labels(self):
-        """Returns a np.ndarray of labels and a list
-        of label ids for each row of 'object_ids' field."""
-        labels = self.data['labels']
-        label_ids = list(range(len(labels)))
-        return labels, label_ids
+        """Returns a np.ndarray of labels."""
+        return self.data['labels']
 
 
-class ObjectFieldNamesField(BaseField):
-    """Object field names metadata process/save class."""
+class MetadataField(BaseMetadataField):
+    """Metadata field class."""
 
-    def process(self):
-        """Processes and saves the labels metadata to hdf5."""
-        self.save_field_to_hdf5(
-            set_name=self.set_name,
-            field='object_fields',
-            data=str2ascii(['images', 'labels']),
-            dtype=np.uint8,
-            fillvalue=0
-        )
-
-
-class ObjectIdsField(BaseField):
-    """Object ids' field metadata process/save class."""
-
-    def process(self, image_ids, label_ids):
-        """Processes and saves the object ids metadata to hdf5."""
-        # images, labels
-        object_ids = [[image_ids[i], label_ids[i]] for i, _ in enumerate(label_ids)]
-        self.save_field_to_hdf5(
-            set_name=self.set_name,
-            field='object_ids',
-            data=np.array(object_ids, dtype=np.int32),
-            dtype=np.int32,
-            fillvalue=-1
-        )
+    fields = [
+        {"name": 'images', "type": 'array'},
+        {"name": 'labels', "type": 'number'},
+        {"name": 'classes', "type": 'string'}
+    ]
 
 
 # -----------------------------------------------------------

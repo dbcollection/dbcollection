@@ -15,10 +15,9 @@ from dbcollection.datasets.cifar.cifar10.classification import (
     Classification,
     DatasetAnnotationLoader,
     ClassLabelField,
+    MetadataField,
     ImageField,
     LabelIdField,
-    ObjectFieldNamesField,
-    ObjectIdsField,
     ImagesPerClassList
 )
 
@@ -33,13 +32,15 @@ class TestClassificationTask:
 
     def test_task_attributes(self, mocker, mock_classification_class):
         assert mock_classification_class.filename_h5 == 'classification'
-        assert mock_classification_class.data_files == ["batches.meta",
-                                                        "data_batch_1",
-                                                        "data_batch_2",
-                                                        "data_batch_3",
-                                                        "data_batch_4",
-                                                        "data_batch_5",
-                                                        "test_batch"]
+        assert mock_classification_class.data_files == [
+            "batches.meta",
+            "data_batch_1",
+            "data_batch_2",
+            "data_batch_3",
+            "data_batch_4",
+            "data_batch_5",
+            "test_batch"
+        ]
 
     def test_load_data(self, mocker, mock_classification_class):
         dummy_data = ['some_data']
@@ -61,12 +62,10 @@ class TestClassificationTask:
         assert test_data == {"test": ['some_data']}
 
     def test_process_set_metadata(self, mocker, mock_classification_class):
-        dummy_ids = [0, 1, 2, 3, 4, 5]
         mock_class_field = mocker.patch.object(ClassLabelField, "process")
-        mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
-        mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
-        mock_objfield_field = mocker.patch.object(ObjectFieldNamesField, "process")
-        mock_objids_field = mocker.patch.object(ObjectIdsField, "process")
+        mock_image_field = mocker.patch.object(ImageField, "process")
+        mock_label_field = mocker.patch.object(LabelIdField, "process")
+        mock_metadata_field = mocker.patch.object(MetadataField, "process")
         mock_images_per_class_list = mocker.patch.object(ImagesPerClassList, "process")
 
         data = {"classes": 1, "images": 1, "labels": 1,
@@ -76,8 +75,7 @@ class TestClassificationTask:
         mock_class_field.assert_called_once_with()
         mock_image_field.assert_called_once_with()
         mock_label_field.assert_called_once_with()
-        mock_objfield_field.assert_called_once_with()
-        mock_objids_field.assert_called_once_with(dummy_ids, dummy_ids)
+        mock_metadata_field.assert_called_once_with()
         mock_images_per_class_list.assert_called_once_with()
 
 
@@ -229,7 +227,8 @@ class TestDatasetAnnotationLoader:
 
 @pytest.fixture()
 def test_data_loaded():
-    classes = ['airplane']*10
+
+    classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
     images = np.random.rand(10,3,32,32)
     labels = np.array(range(10))
     return {
@@ -277,8 +276,8 @@ class TestClassLabelField:
 
     def test_get_class_names(self, mocker, mock_classlabel_class, test_data_loaded):
         class_names = mock_classlabel_class.get_class_names()
-
-        assert class_names == test_data_loaded['classes']
+        expected = [test_data_loaded['classes'][idx] for idx in test_data_loaded['labels']]
+        assert class_names == expected
 
 
 class TestImageField:
@@ -291,13 +290,11 @@ class TestImageField:
 
     def test_process(self, mocker, mock_image_class):
         dummy_images = np.random.rand(5,3, 32, 32)
-        dummy_ids = list(range(5))
-        mock_get_images = mocker.patch.object(ImageField, "get_images", return_value=(dummy_images, dummy_ids))
+        mock_get_images = mocker.patch.object(ImageField, "get_images", return_value=dummy_images)
         mock_save_hdf5 = mocker.patch.object(ImageField, "save_field_to_hdf5")
 
-        image_ids = mock_image_class.process()
+        mock_image_class.process()
 
-        assert image_ids == dummy_ids
         mock_get_images.assert_called_once_with()
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -310,10 +307,7 @@ class TestImageField:
         # )
 
     def test_get_images(self, mocker, mock_image_class, test_data_loaded):
-        images, image_ids = mock_image_class.get_images()
-
-        assert_array_equal(images, test_data_loaded['images'])
-        assert image_ids == list(range(len(images)))
+        assert_array_equal(mock_image_class.get_images(), test_data_loaded['images'])
 
 
 class TestLabelIdField:
@@ -326,13 +320,11 @@ class TestLabelIdField:
 
     def test_process(self, mocker, mock_label_class):
         dummy_labels = np.array(range(10))
-        dummy_ids = list(range(10))
-        mock_get_labels = mocker.patch.object(LabelIdField, "get_labels", return_value=(dummy_labels, dummy_ids))
+        mock_get_labels = mocker.patch.object(LabelIdField, "get_labels", return_value=dummy_labels)
         mock_save_hdf5 = mocker.patch.object(LabelIdField, "save_field_to_hdf5")
 
-        label_ids = mock_label_class.process()
+        mock_label_class.process()
 
-        assert label_ids == dummy_ids
         mock_get_labels.assert_called_once_with()
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -345,63 +337,21 @@ class TestLabelIdField:
         # )
 
     def test_get_images(self, mocker, mock_label_class, test_data_loaded):
-        labels, label_ids = mock_label_class.get_labels()
+        labels = mock_label_class.get_labels()
 
         assert_array_equal(labels, test_data_loaded['labels'])
-        assert label_ids == list(range(len(labels)))
 
 
-class TestObjectFieldNamesField:
-    """Unit tests for the ObjectFieldNamesField class."""
+class TestMetadataField:
+    """Unit tests for the MetadataField class."""
 
-    @staticmethod
-    @pytest.fixture()
-    def mock_objfields_class(field_kwargs):
-        return ObjectFieldNamesField(**field_kwargs)
-
-    def test_process(self, mocker, mock_objfields_class):
-        mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
-
-        mock_objfields_class.process()
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_fields',
-        #     data=str2ascii(['images', 'labels']),
-        #     dtype=np.uint8,
-        #     fillvalue=0
-        # )
-
-
-class TestObjectIdsField:
-    """Unit tests for the ObjectIdsField class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_objfids_class(field_kwargs):
-        return ObjectIdsField(**field_kwargs)
-
-    def test_process(self, mocker, mock_objfids_class):
-        mock_save_hdf5 = mocker.patch.object(ObjectIdsField, "save_field_to_hdf5")
-
-        image_ids = [0, 1, 2, 3, 4, 5]
-        label_ids = [1, 5, 9, 8, 3, 5]
-        object_ids = mock_objfids_class.process(
-            image_ids=image_ids,
-            label_ids=label_ids
-        )
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_ids',
-        #     data=np.array([[0, 1], [1, 5], [2, 9], [3, 8], [4, 3], [5, 5]], dtype=np.int32),
-        #     dtype=np.int32,
-        #     fillvalue=-1
-        # )
+    def test_field_attributes(self):
+        metadata_fields = MetadataField()
+        assert metadata_fields.fields == [
+            {"name": 'images', "type": 'array'},
+            {"name": 'labels', "type": 'number'},
+            {"name": 'classes', "type": 'string'}
+        ]
 
 
 class TestImagesPerClassList:
