@@ -4,511 +4,597 @@ COCO Keypoints 2016 process functions.
 
 
 from __future__ import print_function, division
-import os
-from collections import OrderedDict
-import numpy as np
-import progressbar
 
-from dbcollection.datasets import BaseTask
+import os
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
+
+from dbcollection.datasets import BaseField, BaseMetadataField, BaseTask
+from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list, squeeze_list
 from dbcollection.utils.file_load import load_json
-from dbcollection.utils.hdf5 import hdf5_write_data
 
-from .load_data_test import load_data_test
+from .process_test import process_save_test_metadata_to_hdf5
 
 
 class Keypoints2016(BaseTask):
     """COCO Keypoints (2016) preprocessing functions."""
 
+    version = '1.0.0'
+
     # metadata filename
     filename_h5 = 'keypoint_2016'
 
-    image_dir_path = {
-        "train": 'train2014',
-        "val": 'val2014',
-        "test": 'test2015',
-        "test-dev": 'test2015'
+    annotations = {
+        "train": {
+            "images_dir": 'train2014',
+            "file_name": 'person_keypoints_train2014.json',
+        },
+        "val": {
+            "images_dir": 'val2014',
+            "file_name": 'person_keypoints_val2014.json'
+        },
+        "test": {
+            "images_dir": 'test2015',
+            "file_name": 'image_info_test2015.json'
+        },
+        "test_dev": {
+            "images_dir": 'test2015',
+            "file_name": 'image_info_test-dev2015.json'
+        }
     }
-
-    annotation_path = {
-        "train": os.path.join('annotations', 'person_keypoints_train2014.json'),
-        "val": os.path.join('annotations', 'person_keypoints_val2014.json'),
-        "test": os.path.join('annotations', 'image_info_test2015.json'),
-        "test-dev": os.path.join('annotations', 'image_info_test-dev2015.json')
-    }
-
-    keypoints_list = {
-        'nose',       # -- 1
-        'left_eye',   # -- 2
-        'right_eye',  # -- 3
-        'left_ear',   # -- 4
-        'right_ear',  # -- 5
-
-        'left_shoulder',   # -- 6
-        'right_shoulder',  # -- 7
-        'left_elbow',      # -- 8
-        'right_elbow',     # -- 9
-        'left_wrist',      # -- 10
-        'right_wrist',     # -- 11
-
-        'left_hip',    # -- 12
-        'right_hip',   # -- 13
-        'left_knee',   # -- 14
-        'right_knee',  # -- 15
-        'left_ankle',  # -- 16
-        'right_ankle'  # -- 17
-    }
-
-    def parse_image_annotations(self, image_dir, annotations):
-        """
-        Parse image annotations data to a dictionary and  lists
-        """
-        filename_ids = {}
-        for i, annot in enumerate(annotations['images']):
-            filename_ids[annot['file_name']] = i
-
-        # order image data by file name
-        images_annot_by_fname = {}
-        for i, annot in enumerate(annotations['images']):
-            images_annot_by_fname[annot['file_name']] = {
-                "file_name": os.path.join(image_dir, annot['file_name']),
-                "width": annot['width'],
-                "height": annot['height'],
-                "id": annot['id'],
-                "coco_url": annot['coco_url'],
-            }
-
-        # order image data by file id
-        images_fname_by_id = {}
-        for i, annot in enumerate(annotations['images']):
-            images_fname_by_id[annot['id']] = annot['file_name']
-
-        return filename_ids, images_annot_by_fname, images_fname_by_id
-
-    def parse_category_annotations(self, annotations):
-        """
-        Parse category annotations data to a dictionary and  lists
-        """
-        categories = {}
-        category_list, supercategory_list, category_id = [], [], []
-        for i, annot in enumerate(annotations['categories']):
-            categories[annot['id']] = {
-                "name": annot['name'],
-                "supercategory": annot['supercategory'],
-                "id": annot['id']
-            }
-            category_id.append(annot['id'])
-            category_list.append(annot['name'])
-            supercategory_list.append(annot['supercategory'])
-        supercategory_list = list(set(supercategory_list))
-
-        return categories, category_list, supercategory_list, category_id
-
-    def load_data_trainval(self, set_name, image_dir, annotation_path):
-        """
-        Load train+val data
-        """
-        data = {}
-
-        # load annotations file
-        if self.verbose:
-            print('  > Loading annotation file: ' + annotation_path)
-        annotations = load_json(annotation_path)
-
-        # progressbar
-        if self.verbose:
-            prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
-
-        # parse annotations
-        # images
-        if self.verbose:
-            print('  > Processing image annotations... ')
-        # get all image filenames + ids into a list
-        filename_ids, images_annot_by_fname, images_fname_by_id = self.parse_image_annotations(
-            image_dir, annotations)
-
-        if self.verbose:
-            print('  > Processing category annotations... ')
-        parsed_annots = self.parse_category_annotations(annotations)
-        categories, category_list, supercategory_list, category_id = parsed_annots
-        skeleton = annotations['categories'][0]['skeleton']
-        keypoints = annotations['categories'][0]['keypoints']
-
-        if self.verbose:
-            print('  > Processing data annotations... ')
-        # group annotations by file name
-        annotation_id_dict = {}
-        for i, annot in enumerate(annotations['annotations']):
-            filename = images_fname_by_id[annot['image_id']]
-            category_annot = categories[annot['category_id']]
-            obj_id = annot["id"]
-            annotation_id_dict[obj_id] = i
-
-            if isinstance(annot["segmentation"], list):
-                segmentation = squeeze_list(annot["segmentation"], -1)  # squeeze list
-            elif isinstance(annot["segmentation"]['counts'], list):
-                segmentation = annot["segmentation"]["counts"]
-            else:
-                segmentation = annot["segmentation"]
-
-            # convert from [x,y,w,h] to [xmin,ymin,xmax,ymax]
-            bbox = [annot['bbox'][0],  # xmin
-                    annot['bbox'][1],  # ymin
-                    annot['bbox'][0] + annot['bbox'][2] - 1,  # ymax
-                    annot['bbox'][1] + annot['bbox'][3] - 1]  # ymax
-
-            obj = {
-                "category": category_annot['name'],
-                "supercategory": category_annot['supercategory'],
-                "area": annot['area'],
-                "iscrowd": annot['iscrowd'],
-                "segmentation": segmentation,
-                "bbox": bbox,
-                "num_keypoints": annot['num_keypoints'],
-                "keypoints": annot['keypoints'],
-
-                "image_id": annot['image_id'],
-                "category_id": annot['category_id'],
-                "id": annot["id"],
-                "annotation_id": i
-            }
-
-            # add annotations to the image data
-            try:
-                images_annot_by_fname[filename]["object"].update({obj_id: obj})
-            except KeyError:
-                images_annot_by_fname[filename]["object"] = {obj_id: obj}
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # reset progressbar
-        if self.verbose:
-            prgbar.finish()
-
-        return {set_name: [OrderedDict(sorted(images_annot_by_fname.items())),
-                           annotations,
-                           annotation_id_dict,
-                           category_list,
-                           supercategory_list,
-                           category_id,
-                           filename_ids,
-                           images_fname_by_id,
-                           skeleton,
-                           keypoints]}
 
     def load_data(self):
         """
-        Load data of the dataset (create a generator).
+        Fetches the train/test data.
         """
-        for set_name in self.image_dir_path:
-            if self.verbose:
-                print('\n> Loading data files for the set: ' + set_name)
-
-            # image dir
-            image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
-
-            # annotation file path
-            annot_filepath = os.path.join(self.data_path, self.annotation_path[set_name])
-
-            if 'test' in set_name:
-                yield load_data_test(set_name, image_dir, annot_filepath, self.verbose)
-            else:
-                yield self.load_data_trainval(set_name, image_dir, annot_filepath)
+        loader = DatasetAnnotationLoader(
+            annotations=self.annotations,
+            data_path=self.data_path,
+            cache_path=self.cache_path,
+            verbose=self.verbose
+        )
+        yield {"train": loader.load_data_set('train')}
+        yield {"val": loader.load_data_set('val')}
+        yield {"test": loader.load_data_set('test')}
+        yield {"test_dev": loader.load_data_set('test_dev')}
 
     def process_set_metadata(self, data, set_name):
         """
         Saves the metadata of a set.
         """
-        hdf5_handler = self.hdf5_manager.get_group(set_name)
-        image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
-        if 'test' in set_name:
-            is_test = True
-            data_ = data[0]
-            filename_ids = data[1]
-            annotations = data[2]
-            category = data[3]
-            supercategory = data[4]
-            category_id = data[5]
+        if set_name in ['test', 'test_dev']:
+            self.process_set_metadata_test(data, set_name)
         else:
-            is_test = False
-            data_ = data[0]
-            annotations = data[1]
-            annotation_id_dict = data[2]
-            category = data[3]
-            supercategory = data[4]
-            category_id = data[5]
-            filename_ids = data[6]
-            images_fname_by_id = data[7]
-            skeleton = data[8]
-            keypoints = data[9]
+            self.process_set_metadata_train_val(data, set_name)
 
-            keypoints_ = str2ascii(keypoints)
-            skeleton_ = np.array(pad_list(skeleton, -1), dtype=np.uint8)
+    def process_set_metadata_test(self, data, set_name):
+        """Saves the metadata of the test sets."""
+        process_save_test_metadata_to_hdf5(data, set_name, self.hdf5_manager, self.verbose)
 
-        category_ = str2ascii(category)
-        supercategory_ = str2ascii(supercategory)
+    def process_set_metadata_train_val(self, data, set_name):
+        """Saves the metadata of the train and validation sets."""
+        configs = {
+            "data": data,
+            "set_name": set_name,
+            "hdf5_manager": self.hdf5_manager,
+            "verbose": self.verbose
+        }
 
-        image_filenames = []
-        coco_urls = []
-        width = []
-        height = []
-        image_id = []
-
-        annotation_id = []
-        area = []
-        iscrowd = [0, 1]
-        segmentation = []
-        num_keypoints = list(range(0, 17 + 1))
-        keypoints_list = []
-        bbox = []
-        object_id = []
-
-        # coco id lists
-        # These are order by entry like in the annotation files.
-        # I.e., coco_images_ids[0] has the object_id with the file_name, id, height, etc.
-        # as coco_annotation_file[set_name]["images"][0]
-        coco_images_ids = []
-        coco_categories_ids = []
-        coco_annotations_ids = []
-
-        if is_test:
-            object_fields = ["image_filenames", "coco_urls", "width", "height"]
-        else:
-            object_fields = ["image_filenames", "coco_urls", "width", "height",
-                             "category", "supercategory", "boxes", "area",
-                             "iscrowd", "segmentation",
-                             "image_id", "category_id", "annotation_id",
-                             "num_keypoints", "keypoints"]
-
-        list_boxes_per_image = []
-        list_keypoints_per_image = []
-        list_object_ids_per_image = []
-        list_image_filenames_per_num_keypoints = []
-        list_object_ids_per_keypoint = []  # body part
-
+        # Fields
         if self.verbose:
-            print('> Adding data to default group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data_))
+            print('\n==> Setting up the data fields:')
+        IdField(**configs).process()
+        CategoryIdField(**configs).process()
+        ImageIdField(**configs).process()
+        AreaField(**configs).process()
+        BboxField(**configs).process()
+        IsCrowdField(**configs).process()
+        SegmentationField(**configs).process()
+        KeypointsField(**configs).process()
+        NumberKeypointsField(**configs).process()
+        KeypointNamesField(**configs).process()
+        SkeletonField(**configs).process()
+        CategoryField(**configs).process()
+        SuperCategoryField(**configs).process()
+        CocoURLField(**configs).process()
+        ImageFilenameField(**configs).process()
+        ImageHeightField(**configs).process()
+        ImageWidthField(**configs).process()
 
-        counter = 0
-        tmp_coco_annotations_ids = {}
+        # Lists
+        if self.verbose:
+            print('\n==> Setting up ordered lists:')
+        ImagesPerCategoryIdList(**configs).process()
+        ImagesPerSuperCategoryList(**configs).process()
+        BboxesPerImageList(**configs).process()
+        IdsPerImageList(**configs).process()
+        IdsPerCategoryList(**configs).process()
+        IdsPerSuperCategoryList(**configs).process()
 
-        for i, key in enumerate(data_):
-            annotation = data_[key]
-            image_filenames.append(annotation["file_name"])
-            width.append(annotation["width"])
-            height.append(annotation["height"])
-            coco_urls.append(annotation["coco_url"])
-            image_id.append(annotation["id"])
+        # Fields' metadata info
+        MetadataField(**configs).process()
 
-            if is_test:
-                # *** object_id ***
-                # [filename, coco_url, width, height]
-                object_id.append([i, i, i, i])
-                list_object_ids_per_image.append([i])
+
+class DatasetAnnotationLoader:
+    """Annotation's data loader for the coco detection dataset (train/test)."""
+
+    def __init__(self, annotations, data_path, cache_path, verbose):
+        self.annotations = annotations
+        self.data_path = data_path
+        self.cache_path = cache_path
+        self.verbose = verbose
+
+    def load_data_set(self, set_name):
+        """Loads the data from disk."""
+        assert set_name
+        filename = os.path.join(self.data_path, 'annotations', self.annotations[set_name]['file_name'])
+        image_dir_path = self.annotations[set_name]['images_dir']
+        if self.verbose:
+            print("\n[Set: {}] Loading file from disk: {}".format(set_name, filename))
+        data = load_json(filename)
+        categories = self.get_dataframe_categories(data)
+        images = self.get_dataframe_images(data, image_dir_path)
+        if set_name in ['test', 'test_dev']:
+            return {
+                "images": images.reset_index(),
+                "categories": categories.reset_index()
+            }
+        else:
+            annotations = self.get_dataframe_annotations(data)
+            df = annotations.join(categories, on='category_id', rsuffix='_names').join(images, on='image_id')
+            return {
+                "full_data": df.reset_index()
+            }
+
+    def get_dataframe_categories(self, data):
+        categories = pd.DataFrame(data=data['categories'])
+        categories = categories.set_index('id')
+        categories = categories.sort_index(ascending=True)
+        return categories
+
+    def get_dataframe_images(self, data, image_dir_path):
+        images = pd.DataFrame(data=data["images"])
+        images = images.set_index('id')
+        images = images.sort_index(ascending=True)
+        # prefix the directory to the image filename
+        images["file_name"] = images["file_name"].apply(lambda x: "{}/{}".format(image_dir_path, x))
+        return images
+
+    def get_dataframe_annotations(self, data):
+        annotations = pd.DataFrame(data=data['annotations'])
+        annotations = annotations.set_index('id')
+        annotations = annotations.sort_index(ascending=True)
+        return annotations
+
+
+# -----------------------------------------------------------
+# Metadata fields
+# -----------------------------------------------------------
+
+class IdField(BaseField):
+    """Id field metadata process/save class."""
+
+    @display_message_processing('id')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='id',
+            data=self.data['full_data']['id'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class CategoryIdField(BaseField):
+    """Category id field metadata process/save class."""
+
+    @display_message_processing('category_id')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='category_id',
+            data=self.data['full_data']['category_id'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class ImageIdField(BaseField):
+    """Image id field metadata process/save class."""
+
+    @display_message_processing('image_id')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='image_id',
+            data=self.data['full_data']['image_id'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class AreaField(BaseField):
+    """Area field metadata process/save class."""
+
+    @display_message_processing('area')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='area',
+            data=self.data['full_data']['area'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class BboxField(BaseField):
+    """Bbox field metadata process/save class."""
+
+    @display_message_processing('bbox')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='bbox',
+            data=np.vstack(self.data['full_data']['bbox'].values).astype(np.int32),
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class IsCrowdField(BaseField):
+    """Is crowd field metadata process/save class."""
+
+    @display_message_processing('iscrowd')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='iscrowd',
+            data=self.data['full_data']['iscrowd'].values,
+            dtype=np.uint8
+        )
+
+
+class SegmentationField(BaseField):
+    """Segmentation field metadata process/save class."""
+
+    @display_message_processing('segmentation')
+    def process(self):
+        segmentation = self.convert_numpy_array_to_list_of_lists(self.data['full_data']['segmentation'].values)
+        segmentation_hdf5_handler = self.set_segmentation_dataset_h5(segmentation)
+        for i, segment in tqdm(enumerate(segmentation)):
+            segmentation_hdf5_handler[i, :len(segment)] = np.array(segment, dtype=np.float)
+
+    def convert_numpy_array_to_list_of_lists(self, segmentation):
+        output = []
+        for segmentation_mask in segmentation:
+            if isinstance(segmentation_mask, list):
+                segmentation_ = squeeze_list(segmentation_mask, -1)  # squeeze list
+            elif isinstance(segmentation_mask, dict):
+                if isinstance(segmentation_mask["counts"], list):
+                    segmentation_ = segmentation_mask["counts"]
+                else:
+                    raise Exception("Undefined segmentation mask: {}".format(segmentation_mask))
             else:
-                boxes_per_image = []
+                segmentation_ = segmentation_mask
+            output.append(segmentation_)
+        return output
 
-                if "object" in annotation:
-                    for j, obj_idx in enumerate(annotation["object"]):
-                        obj = annotation["object"][obj_idx]
-                        area.append(obj["area"])
-                        bbox.append(obj["bbox"])
-                        annotation_id.append(obj["id"])
-                        segmentation.append(obj["segmentation"])
-                        keypoints_list.append(obj["keypoints"])
+    def set_segmentation_dataset_h5(self, segmentation):
+        nrows = len(segmentation)
+        ncols = max([len(l) for l in segmentation])
+        segmentation_hdf5_handler = self.hdf5_manager.file.create_dataset(
+            'segmentation',
+            (nrows, ncols),
+            dtype=np.float,
+            chunks=True,
+            compression="gzip",
+            compression_opts=4,
+            fillvalue=-1
+        )
+        return segmentation_hdf5_handler
 
-                        # *** object_id ***
-                        # [filename, coco_url, width, height,
-                        # category, supercategory,
-                        # bbox, area, iscrowd, segmentation,
-                        # "image_id", "category_id", "annotation_id"
-                        # "num_keypoints", "keypoints"]
-                        object_id.append([i, i, i, i,
-                                          category.index(obj["category"]), supercategory.index(
-                                              obj["supercategory"]),
-                                          counter, counter, obj["iscrowd"], counter,
-                                          i, category.index(obj["category"]), counter,
-                                          obj["num_keypoints"], counter])
 
-                        boxes_per_image.append(counter)
+class KeypointsField(BaseField):
+    """Keypoints coordinates field metadata process/save class."""
 
-                        # temporary var
-                        tmp_coco_annotations_ids[obj["id"]] = counter
+    @display_message_processing('keypoints')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='keypoints',
+            data=np.array(list(self.data['full_data']['keypoints'].values), dtype=np.int32),
+            dtype=np.int32,
+            fillvalue=0
+        )
 
-                        # update counter
-                        counter += 1
 
-                list_boxes_per_image.append(boxes_per_image)
-                list_keypoints_per_image.append(boxes_per_image)
-                list_object_ids_per_image.append(boxes_per_image)
+class NumberKeypointsField(BaseField):
+    """Number of keypoints field metadata process/save class."""
 
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
+    @display_message_processing('number of keypoints')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='num_keypoints',
+            data=self.data['full_data']['num_keypoints'].values,
+            dtype=np.uint8,
+            fillvalue=-1
+        )
 
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
 
-        if self.verbose:
-            print('> Processing coco lists:')
-            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
+class KeypointNamesField(BaseField):
+    """Keypoint names field metadata process/save class."""
 
-        # set coco id lists
-        for i, annot in enumerate(annotations['images']):
-            fname_id = image_filenames.index(os.path.join(image_dir, annot['file_name']))
-            coco_images_ids.append(fname_id)
+    @display_message_processing('keypoint names')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='keypoint_names',
+            data=str2ascii(list(self.data['full_data']['keypoints_names'].values)),
+            dtype=np.uint8,
+            fillvalue=0
+        )
 
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
 
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
+class SkeletonField(BaseField):
+    """Skeleton field metadata process/save class."""
 
-        coco_categories_ids = list(range(len(category)))
+    @display_message_processing('skeleton')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='skeleton',
+            data=np.array(list(self.data['full_data']['skeleton'].values), dtype=np.uint8),
+            dtype=np.uint8,
+            fillvalue=-1
+        )
 
-        if not is_test:
-            if self.verbose:
-                prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
-            for i, annot in enumerate(annotations['annotations']):
-                annot_id = tmp_coco_annotations_ids[annot['id']]
-                coco_annotations_ids.append(annot_id)
 
-                # update progressbar
-                if self.verbose:
-                    prgbar.update(i)
+class CategoryField(BaseField):
+    """Category name field metadata process/save class."""
 
-            # update progressbar
-            if self.verbose:
-                prgbar.finish()
+    @display_message_processing('category')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='category',
+            data=str2ascii(list(self.data['full_data']['name'].values)),
+            dtype=np.uint8,
+            fillvalue=0
+        )
 
-        # process lists
-        if not is_test:
-            if self.verbose:
-                print('> Processing lists...')
 
-            for i in range(len(keypoints)):
-                imgs_per_num = [val[0] for _, val in enumerate(object_id) if val[8] == i]
-                imgs_per_num = list(set(imgs_per_num))  # get unique values
-                imgs_per_num.sort()
-                list_image_filenames_per_num_keypoints.append(imgs_per_num)
+class SuperCategoryField(BaseField):
+    """Super category name field metadata process/save class."""
 
-            for i in range(len(keypoints)):
-                objs_per_keypoint = [j for j, val in enumerate(
-                    keypoints_list) if val[i * 3] > 0 or val[i * 3 + 1] > 0]
-                objs_per_keypoint = list(set(objs_per_keypoint))  # get unique values
-                objs_per_keypoint.sort()
-                list_object_ids_per_keypoint.append(objs_per_keypoint)
+    @display_message_processing('supercategory')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='supercategory',
+            data=str2ascii(list(self.data['full_data']['supercategory'].values)),
+            dtype=np.uint8,
+            fillvalue=0
+        )
 
-        hdf5_write_data(hdf5_handler, 'image_filenames',
-                        str2ascii(image_filenames), dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_urls',
-                        str2ascii(coco_urls), dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'width',
-                        np.array(width, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'height',
-                        np.array(height, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'category',
-                        category_, dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'supercategory',
-                        supercategory_, dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'image_id',
-                        np.array(image_id, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'category_id',
-                        np.array(category_id, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids',
-                        np.array(object_id, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields',
-                        str2ascii(object_fields), dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_images_ids',
-                        np.array(coco_images_ids, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'coco_categories_ids',
-                        np.array(coco_categories_ids, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
-                        np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32),
-                        fillvalue=-1)
 
-        if not is_test:
-            hdf5_write_data(hdf5_handler, 'annotation_id',
-                            np.array(annotation_id, dtype=np.int32),
-                            fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'keypoint_names',
-                            keypoints_, dtype=np.uint8,
-                            fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'skeleton',
-                            skeleton_, dtype=np.uint8,
-                            fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'boxes',
-                            np.array(bbox, dtype=np.float),
-                            fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'iscrowd',
-                            np.array(iscrowd, dtype=np.uint8),
-                            fillvalue=-1)
+class CocoURLField(BaseField):
+    """Coco URL link field metadata process/save class."""
 
-            nrows = len(segmentation)
-            ncols = max([len(l) for l in segmentation])
-            dset = hdf5_handler.create_dataset('segmentation',
-                                               (nrows, ncols),
-                                               dtype=np.float,
-                                               chunks=True,
-                                               compression="gzip",
-                                               compression_opts=4,
-                                               fillvalue=-1)
+    @display_message_processing('coco_url')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='coco_url',
+            data=str2ascii(list(self.data['full_data']['coco_url'].values)),
+            dtype=np.uint8,
+            fillvalue=0
+        )
 
-            if self.verbose:
-                print('   -- Saving segmentation masks to disk (this will take some time)')
-                prgbar = progressbar.ProgressBar(max_value=nrows)
-            for i in range(nrows):
-                dset[i, :len(segmentation[i])] = np.array(segmentation[i], dtype=np.float)
-                if self.verbose:
-                    prgbar.update(i)
 
-            if self.verbose:
-                prgbar.finish()
+class ImageFilenameField(BaseField):
+    """Image file name field metadata process/save class."""
 
-            hdf5_write_data(hdf5_handler, 'area',
-                            np.array(area, dtype=np.int32),
-                            fillvalue=-1)
-            hdf5_write_data(hdf5_handler, 'num_keypoints',
-                            np.array(num_keypoints, dtype=np.uint8),
-                            fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'keypoints',
-                            np.array(keypoints_list, dtype=np.int32),
-                            fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'coco_annotations_ids',
-                            np.array(coco_annotations_ids, dtype=np.int32),
-                            fillvalue=-1)
+    @display_message_processing('image_filename')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='image_filename',
+            data=str2ascii(list(self.data['full_data']['file_name'].values)),
+            dtype=np.uint8,
+            fillvalue=0
+        )
 
-            pad_value = -1
-            hdf5_write_data(hdf5_handler, 'list_boxes_per_image',
-                            np.array(pad_list(list_boxes_per_image, pad_value), dtype=np.int32),
-                            fillvalue=pad_value)
-            hdf5_write_data(hdf5_handler, 'list_keypoints_per_image',
-                            np.array(pad_list(list_keypoints_per_image, pad_value), dtype=np.int32),
-                            fillvalue=pad_value)
-            hdf5_write_data(hdf5_handler, 'list_image_filenames_per_num_keypoints',
-                            np.array(pad_list(list_image_filenames_per_num_keypoints,
-                                              pad_value), dtype=np.int32),
-                            fillvalue=pad_value)
-            hdf5_write_data(hdf5_handler, 'list_object_ids_per_keypoint',
-                            np.array(pad_list(list_object_ids_per_keypoint,
-                                              pad_value), dtype=np.int32),
-                            fillvalue=pad_value)
+
+class ImageHeightField(BaseField):
+    """Image height field metadata process/save class."""
+
+    @display_message_processing('height')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='height',
+            data=self.data['full_data']['height'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class ImageWidthField(BaseField):
+    """Image width field metadata process/save class."""
+
+    @display_message_processing('width')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='width',
+            data=self.data['full_data']['width'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class MetadataField(BaseMetadataField):
+    """Metadata field class."""
+
+    fields = [
+        {"name": 'id', "type": 'number'},
+        {"name": 'category_id', "type": 'number'},
+        {"name": 'image_id', "type": 'number'},
+        {"name": 'area', "type": 'number'},
+        {"name": 'bbox', "type": 'list'},
+        {"name": 'iscrowd', "type": 'number'},
+        {"name": 'segmentation', "type": 'list[list]'},
+        {"name": 'keypoints', "type": 'list'},
+        {"name": 'num_keypoints', "type": 'number'},
+        {"name": 'keypoint_names', "type": 'list[string]'},
+        {"name": 'skeleton', "type": 'list[list]'},
+        {"name": 'category', "type": 'string'},
+        {"name": 'supercategory', "type": 'string'},
+        {"name": 'coco_url', "type": 'string'},
+        {"name": 'image_filename', "type": 'string'},
+        {"name": 'height', "type": 'number'},
+        {"name": 'width', "type": 'number'},
+        {"name": 'list_images_per_category', "type": 'list'},
+        {"name": 'list_images_per_supercategory', "type": 'list'},
+        {"name": 'list_images_per_category', "type": 'list'},
+        {"name": 'list_ids_per_image', "type": 'list'},
+        {"name": 'list_ids_per_category', "type": 'list'},
+        {"name": 'list_ids_per_supercategory', "type": 'list'}
+    ]
+
+
+# -----------------------------------------------------------
+# Metadata lists
+# -----------------------------------------------------------
+
+class CustomListBaseField(BaseField):
+    """Custom base class for list fields."""
+
+    def convert_list_to_array(self, list_ids, dtype=np.int32):
+        """Pads a list of listsand converts it into a numpy.ndarray."""
+        padded_list = pad_list(list_ids, val=-1)
+        return np.array(padded_list, dtype=dtype)
+
+
+class ImagesPerCategoryIdList(CustomListBaseField):
+    """Image ids per category list metadata process/save class."""
+
+    @display_message_processing('image ids per category list')
+    def process(self):
+        image_ids_per_category = self.get_image_ids_per_category_id()
+        image_ids_per_category_array = self.convert_list_to_array(image_ids_per_category)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_images_per_category',
+            data=image_ids_per_category_array,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_image_ids_per_category_id(self):
+        image_ids_per_category = self.data['full_data'].groupby('category_id')['image_id'].apply(list)
+        return list(image_ids_per_category)
+
+
+class ImagesPerSuperCategoryList(CustomListBaseField):
+    """Image ids per super category list metadata process/save class."""
+
+    @display_message_processing('image ids per supercategory list')
+    def process(self):
+        image_ids_per_supercategory = self.get_image_ids_per_supercategory()
+        image_ids_per_supercategory_array = self.convert_list_to_array(image_ids_per_supercategory)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_images_per_supercategory',
+            data=image_ids_per_supercategory_array,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_image_ids_per_supercategory(self):
+        image_ids_per_supercategory = self.data['full_data'].groupby('supercategory')['image_id'].apply(list)
+        return list(image_ids_per_supercategory)
+
+
+class BboxesPerImageList(CustomListBaseField):
+    """Boxes per image list metadata process/save class."""
+
+    @display_message_processing('boxes per image list')
+    def process(self):
+        bbox_per_image_id = self.get_bbox_per_image_ids()
+        bbox_per_image_id_array = self.convert_list_to_array(bbox_per_image_id)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_bboxes_per_image',
+            data=bbox_per_image_id_array,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_bbox_per_image_ids(self):
+        bbox_per_image_id = self.data['full_data'].groupby('image_id')['id'].apply(list)
+        return list(bbox_per_image_id)
+
+
+class IdsPerImageList(CustomListBaseField):
+    """Ids per image list metadata process/save class."""
+
+    @display_message_processing('ids per image list')
+    def process(self):
+        ids_per_image_id = self.get_ids_per_image_ids()
+        ids_per_image_id_array = self.convert_list_to_array(ids_per_image_id)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_ids_per_image',
+            data=ids_per_image_id_array,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_ids_per_image_ids(self):
+        ids_per_image_id = self.data['full_data'].groupby('image_id')['id'].apply(list)
+        return list(ids_per_image_id)
+
+
+class IdsPerCategoryList(CustomListBaseField):
+    """Ids per category list metadata process/save class."""
+
+    @display_message_processing('ids per category list')
+    def process(self):
+        ids_per_category_id = self.get_ids_per_category_ids()
+        ids_per_category_id_array = self.convert_list_to_array(ids_per_category_id)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_ids_per_category',
+            data=ids_per_category_id_array,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_ids_per_category_ids(self):
+        ids_per_category_id = self.data['full_data'].groupby('category_id')['id'].apply(list)
+        return list(ids_per_category_id)
+
+
+class IdsPerSuperCategoryList(CustomListBaseField):
+    """Ids per super category list metadata process/save class."""
+
+    @display_message_processing('ids per supercategory list')
+    def process(self):
+        ids_per_supercategory = self.get_ids_per_supercategory()
+        ids_per_supercategory_array = self.convert_list_to_array(ids_per_supercategory)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_ids_per_supercategory',
+            data=ids_per_supercategory_array,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_ids_per_supercategory(self):
+        ids_per_category_id = self.data['full_data'].groupby('supercategory')['id'].apply(list)
+        return list(ids_per_category_id)

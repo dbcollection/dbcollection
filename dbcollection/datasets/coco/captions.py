@@ -4,266 +4,296 @@ COCO Captions 2015/2016 process functions.
 
 
 from __future__ import print_function, division
-import os
-from collections import OrderedDict
-import numpy as np
-import progressbar
 
-from dbcollection.datasets import BaseTask
+import os
+import numpy as np
+import pandas as pd
+
+from dbcollection.datasets import BaseField, BaseMetadataField, BaseTask
+from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
 from dbcollection.utils.pad import pad_list
 from dbcollection.utils.file_load import load_json
-from dbcollection.utils.hdf5 import hdf5_write_data
 
-from .load_data_test import load_data_test
+from .process_test import process_save_test_metadata_to_hdf5
 
 
 class Caption2015(BaseTask):
     """COCO Captions (2015) preprocessing functions."""
 
+    version = '1.0.0'
+
     # metadata filename
     filename_h5 = 'caption_2015'
 
-    image_dir_path = {
-        "train": 'train2014',
-        "val": 'val2014',
-        "test": 'test2014'
+    annotations = {
+        "train": {
+            "images_dir": 'train2014',
+            "file_name": 'captions_train2014.json',
+        },
+        "val": {
+            "images_dir": 'val2014',
+            "file_name": 'captions_val2014.json'
+        },
+        "test": {
+            "images_dir": 'test2014',
+            "file_name": 'image_info_test2014.json'
+        }
     }
-
-    annotation_path = {
-        "train": os.path.join('annotations', 'captions_train2014.json'),
-        "val": os.path.join('annotations', 'captions_val2014.json'),
-        "test": os.path.join('annotations', 'image_info_test2014.json')
-    }
-
-    def load_data_trainval(self, set_name, image_dir, annotation_path):
-        """
-        Load train+val data
-        """
-        data = {}
-
-        # load annotations file
-        if self.verbose:
-            print('  > Loading annotation file: ' + annotation_path)
-        annotations = load_json(annotation_path)
-
-        # progressbar
-        if self.verbose:
-            prgbar = progressbar.ProgressBar(max_value=len(annotations['annotations']))
-
-        # parse annotations
-        # images
-        if self.verbose:
-            print('  > Processing image annotations... ')
-        images = {}
-        for i, annot in enumerate(annotations['images']):
-            images[annot['id']] = {
-                "file_name": os.path.join(image_dir, annot['file_name']),
-                "width": annot['width'],
-                "height": annot['height'],
-                "id": annot['id'],
-                "coco_url": annot['coco_url']
-            }
-
-        if self.verbose:
-            print('  > Processing data annotations... ')
-        for i, annot in enumerate(annotations['annotations']):
-            img_id = annot['image_id']
-            img_annotation = images[img_id]
-
-            caption = annot["caption"]
-
-            if img_id in data.keys():
-                data[img_id]['captions'].append(caption)
-            else:
-                img_annotation = images[img_id]
-                data[img_id] = {
-                    "file_name": img_annotation['file_name'],
-                    "width": img_annotation['width'],
-                    "height": img_annotation['height'],
-                    "id": img_annotation['id'],
-                    "coco_url": img_annotation['coco_url'],
-                    "captions": [caption]
-                }
-
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
-
-        # reset progressbar
-        if self.verbose:
-            prgbar.finish()
-
-        return {set_name: [OrderedDict(sorted(data.items())),
-                           annotations]}
 
     def load_data(self):
         """
-        Load data of the dataset (create a generator).
+        Fetches the train/test data.
         """
-        for set_name in self.image_dir_path:
-            if self.verbose:
-                print('\n> Loading data files for the set: ' + set_name)
-
-            # image dir
-            image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
-
-            # annotation file path
-            annot_filepath = os.path.join(self.data_path, self.annotation_path[set_name])
-
-            if 'test' in set_name:
-                yield load_data_test(set_name, image_dir, annot_filepath, self.verbose)
-            else:
-                yield self.load_data_trainval(set_name, image_dir, annot_filepath)
+        loader = DatasetAnnotationLoader(
+            annotations=self.annotations,
+            data_path=self.data_path,
+            cache_path=self.cache_path,
+            verbose=self.verbose
+        )
+        yield {"train": loader.load_data_set('train')}
+        yield {"val": loader.load_data_set('val')}
+        yield {"test": loader.load_data_set('test')}
 
     def process_set_metadata(self, data, set_name):
         """
         Saves the metadata of a set.
         """
-        hdf5_handler = self.hdf5_manager.get_group(set_name)
-        image_dir = os.path.join(self.data_path, self.image_dir_path[set_name])
-        if "test" in set_name:
-            is_test = True
-            data_ = data[0]
-            filename_ids = data[1]
-            annotations = data[2]
-            category = data[3]
-            supercategory = data[4]
-            category_id = data[5]
+        if set_name in ['test', 'test_dev']:
+            self.process_set_metadata_test(data, set_name)
         else:
-            is_test = False
-            data_ = data[0]
-            annotations = data[1]
+            self.process_set_metadata_train_val(data, set_name)
 
-        image_filenames = []
-        width = []
-        height = []
-        coco_urls = []
-        image_id = []
-        caption = []
-        object_id = []
+    def process_set_metadata_test(self, data, set_name):
+        """Saves the metadata of the test sets."""
+        process_save_test_metadata_to_hdf5(data, set_name, self.hdf5_manager, self.verbose)
 
-        # coco id lists
-        # These are order by entry like in the annotation files.
-        # I.e., coco_images_ids[0] has the object_id with the file_name, id, height, etc.
-        # as coco_annotation_file[set_name]["images"][0]
-        coco_images_ids = []
-        coco_categories_ids = []
+    def process_set_metadata_train_val(self, data, set_name):
+        """Saves the metadata of the train and validation sets."""
+        configs = {
+            "data": data,
+            "set_name": set_name,
+            "hdf5_manager": self.hdf5_manager,
+            "verbose": self.verbose
+        }
 
-        if is_test:
-            object_fields = ["image_filenames", "coco_urls", "width", "height"]
+        # Fields
+        if self.verbose:
+            print('\n==> Setting up the data fields:')
+        # 'id',
+        IdField(**configs).process()
+        ImageIdField(**configs).process()
+        CaptionField(**configs).process()
+        CocoURLField(**configs).process()
+        ImageFilenameField(**configs).process()
+        ImageHeightField(**configs).process()
+        ImageWidthField(**configs).process()
+
+        # Lists
+        if self.verbose:
+            print('\n==> Setting up ordered lists:')
+        CaptionsPerImageList(**configs).process()
+
+        # Fields' metadata info
+        MetadataField(**configs).process()
+
+
+class DatasetAnnotationLoader:
+    """Annotation's data loader for the coco captions dataset (train/test)."""
+
+    def __init__(self, annotations, data_path, cache_path, verbose):
+        self.annotations = annotations
+        self.data_path = data_path
+        self.cache_path = cache_path
+        self.verbose = verbose
+
+    def load_data_set(self, set_name):
+        """Loads the data from disk."""
+        assert set_name
+        filename = os.path.join(self.data_path, 'annotations', self.annotations[set_name]['file_name'])
+        image_dir_path = self.annotations[set_name]['images_dir']
+        if self.verbose:
+            print("\n[Set: {}] Loading file from disk: {}".format(set_name, filename))
+        data = load_json(filename)
+        images = self.get_dataframe_images(data, image_dir_path)
+        if set_name in ['test', 'test_dev']:
+            categories = self.get_dataframe_categories(data)
+            return {
+                "images": images.reset_index(),
+                "categories": categories.reset_index()
+            }
         else:
-            object_fields = ["image_filenames", "coco_urls", "width", "height", "captions"]
+            annotations = self.get_dataframe_annotations(data)
+            df = annotations.join(images, on='image_id')
+            return {
+                "full_data": df.reset_index()
+            }
 
-        list_captions_per_image = []
-        list_object_ids_per_image = []
+    def get_dataframe_categories(self, data):
+        categories = pd.DataFrame(data=data['categories'])
+        categories = categories.set_index('id')
+        categories = categories.sort_index(ascending=True)
+        return categories
 
-        if self.verbose:
-            print('> Adding data to default group:')
-            prgbar = progressbar.ProgressBar(max_value=len(data_))
+    def get_dataframe_images(self, data, image_dir_path):
+        images = pd.DataFrame(data=data["images"])
+        images = images.set_index('id')
+        images = images.sort_index(ascending=True)
+        # prefix the directory to the image filename
+        images["file_name"] = images["file_name"].apply(lambda x: "{}/{}".format(image_dir_path, x))
+        return images
 
-        counter = 0
-        for i, key in enumerate(data_):
-            annotation = data_[key]
-            image_filenames.append(annotation["file_name"])
-            width.append(annotation["width"])
-            height.append(annotation["height"])
-            coco_urls.append(annotation["coco_url"])
-            image_id.append(annotation["id"])
+    def get_dataframe_annotations(self, data):
+        annotations = pd.DataFrame(data=data['annotations'])
+        annotations = annotations.set_index('id')
+        annotations = annotations.sort_index(ascending=True)
+        return annotations
 
-            if is_test:
-                object_id.append([i, i, i, i])
-                list_object_ids_per_image.append([i])
-            else:
-                captions_per_image = []
-                for cap in annotation["captions"]:
-                    caption.append(cap)
 
-                    # object_id
-                    # [filename, caption, width, height]
-                    object_id.append([i, i, i, i, counter])
+# -----------------------------------------------------------
+# Metadata fields
+# -----------------------------------------------------------
 
-                    captions_per_image.append(counter)
+class IdField(BaseField):
+    """Id field metadata process/save class."""
 
-                    # update counter
-                    counter += 1
+    @display_message_processing('id')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='id',
+            data=self.data['full_data']['id'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
 
-                list_captions_per_image.append(captions_per_image)
-                list_object_ids_per_image.append(captions_per_image)
 
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
+class ImageIdField(BaseField):
+    """Image id field metadata process/save class."""
 
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
+    @display_message_processing('image_id')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='image_id',
+            data=self.data['full_data']['image_id'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
 
-        # set coco id lists
-        if self.verbose:
-            print('> Processing coco lists:')
-            prgbar = progressbar.ProgressBar(max_value=len(annotations['images']))
 
-        for i, annot in enumerate(annotations['images']):
-            fname_id = image_filenames.index(os.path.join(image_dir, annot['file_name']))
-            coco_images_ids.append(fname_id)
+class CaptionField(BaseField):
+    """Captions field metadata process/save class."""
 
-            # update progressbar
-            if self.verbose:
-                prgbar.update(i)
+    @display_message_processing('caption')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='caption',
+            data=str2ascii(list(self.data['full_data']['caption'].values)),
+            dtype=np.int32,
+            fillvalue=-1
+        )
 
-        # update progressbar
-        if self.verbose:
-            prgbar.finish()
 
-        if is_test:
-            coco_categories_ids = list(range(len(category)))
+class CocoURLField(BaseField):
+    """Coco URL link field metadata process/save class."""
 
-        hdf5_write_data(hdf5_handler, 'image_filenames',
-                        str2ascii(image_filenames), dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'coco_urls',
-                        str2ascii(coco_urls), dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'width',
-                        np.array(width, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'height',
-                        np.array(height, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'image_id',
-                        np.array(image_id, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'coco_images_ids',
-                        np.array(coco_images_ids, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_ids',
-                        np.array(object_id, dtype=np.int32),
-                        fillvalue=-1)
-        hdf5_write_data(hdf5_handler, 'object_fields',
-                        str2ascii(object_fields), dtype=np.uint8,
-                        fillvalue=0)
-        hdf5_write_data(hdf5_handler, 'list_object_ids_per_image',
-                        np.array(pad_list(list_object_ids_per_image, -1), dtype=np.int32),
-                        fillvalue=-1)
+    @display_message_processing('coco_url')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='coco_url',
+            data=str2ascii(list(self.data['full_data']['coco_url'].values)),
+            dtype=np.uint8,
+            fillvalue=0
+        )
 
-        if not is_test:
-            hdf5_write_data(hdf5_handler, 'captions',
-                            str2ascii(caption), dtype=np.uint8,
-                            fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'list_captions_per_image',
-                            np.array(pad_list(list_captions_per_image, -1), dtype=np.int32),
-                            fillvalue=-1)
-        else:
-            hdf5_write_data(hdf5_handler, 'category',
-                            str2ascii(category), dtype=np.uint8,
-                            fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'supercategory',
-                            str2ascii(supercategory), dtype=np.uint8,
-                            fillvalue=0)
-            hdf5_write_data(hdf5_handler, 'coco_categories_ids',
-                            np.array(coco_categories_ids, dtype=np.int32),
-                            fillvalue=-1)
+
+class ImageFilenameField(BaseField):
+    """Image file name field metadata process/save class."""
+
+    @display_message_processing('image_filename')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='image_filename',
+            data=str2ascii(list(self.data['full_data']['file_name'].values)),
+            dtype=np.uint8,
+            fillvalue=0
+        )
+
+
+class ImageHeightField(BaseField):
+    """Image height field metadata process/save class."""
+
+    @display_message_processing('height')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='height',
+            data=self.data['full_data']['height'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class ImageWidthField(BaseField):
+    """Image width field metadata process/save class."""
+
+    @display_message_processing('width')
+    def process(self):
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='width',
+            data=self.data['full_data']['width'].values,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+
+class MetadataField(BaseMetadataField):
+    """Metadata field class."""
+
+    fields = [
+        {"name": 'id', "type": 'number'},
+        {"name": 'image_id', "type": 'number'},
+        {"name": 'caption', "type": 'string'},
+        {"name": 'coco_url', "type": 'string'},
+        {"name": 'image_filename', "type": 'string'},
+        {"name": 'height', "type": 'number'},
+        {"name": 'width', "type": 'number'},
+        {"name": 'list_captions_per_image', "type": 'list'}
+    ]
+
+
+# -----------------------------------------------------------
+# Metadata lists
+# -----------------------------------------------------------
+
+class CaptionsPerImageList(BaseField):
+    """Captions per image list metadata process/save class."""
+
+    @display_message_processing('captions per image list')
+    def process(self):
+        captions_per_image = self.get_captions_per_image_id()
+        captions_per_image_array = self.convert_list_to_array(captions_per_image_array)
+        self.save_field_to_hdf5(
+            set_name=self.set_name,
+            field='list_captions_per_image',
+            data=captions_per_image_array,
+            dtype=np.int32,
+            fillvalue=-1
+        )
+
+    def get_captions_per_image_id(self):
+        captions_per_image_id = self.data['full_data'].groupby('image_id')['id'].apply(list)
+        return list(captions_per_image_id)
+
+    def convert_list_to_array(self, list_ids, dtype=np.int32):
+        """Pads a list of listsand converts it into a numpy.ndarray."""
+        padded_list = pad_list(list_ids, val=-1)
+        return np.array(padded_list, dtype=dtype)
 
 
 # ---------------------------------------------------------
@@ -273,19 +303,38 @@ class Caption2015(BaseTask):
 class Caption2016(Caption2015):
     """COCO Caption (2016) preprocessing functions."""
 
-    # metadata filename
     filename_h5 = 'caption_2016'
 
-    image_dir_path = {
-        "train": 'train2014',
-        "val": 'val2014',
-        "test": 'test2015',
-        "test_dev": "test2015"
+    annotations = {
+        "train": {
+            "images_dir": 'train2014',
+            "file_name": 'captions_train2014.json',
+        },
+        "val": {
+            "images_dir": 'val2014',
+            "file_name": 'captions_val2014.json'
+        },
+        "test": {
+            "images_dir": 'test2014',
+            "file_name": 'image_info_test2015.json'
+        },
+        "test_dev": {
+            "images_dir": 'train2014',
+            "file_name": 'image_info_test-dev2015.json',
+        }
     }
 
-    annotation_path = {
-        "train": os.path.join('annotations', 'captions_train2014.json'),
-        "val": os.path.join('annotations', 'captions_val2014.json'),
-        "test": os.path.join('annotations', 'image_info_test2015.json'),
-        "test_dev": os.path.join('annotations', 'image_info_test-dev2015.json')
-    }
+    def load_data(self):
+        """
+        Fetches the train/test data.
+        """
+        loader = DatasetAnnotationLoader(
+            annotations=self.annotations,
+            data_path=self.data_path,
+            cache_path=self.cache_path,
+            verbose=self.verbose
+        )
+        yield {"train": loader.load_data_set('train')}
+        yield {"val": loader.load_data_set('val')}
+        yield {"test": loader.load_data_set('test')}
+        yield {"test_dev": loader.load_data_set('test_dev')}

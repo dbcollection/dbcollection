@@ -15,12 +15,11 @@ from dbcollection.datasets.cifar.cifar100.classification import (
     Classification,
     DatasetAnnotationLoader,
     ClassLabelField,
+    ColumnField,
     SuperClassLabelField,
     ImageField,
     LabelIdField,
     SuperLabelIdField,
-    ObjectFieldNamesField,
-    ObjectIdsField,
     ImagesPerClassList,
     ImagesPerSuperClassList
 )
@@ -122,8 +121,7 @@ class TestClassificationTask:
         mock_image_field = mocker.patch.object(ImageField, "process", return_value=dummy_ids)
         mock_label_field = mocker.patch.object(LabelIdField, "process", return_value=dummy_ids)
         mock_superlabel_field = mocker.patch.object(SuperLabelIdField, "process", return_value=dummy_ids)
-        mock_objfields_field = mocker.patch.object(ObjectFieldNamesField, "process")
-        mock_objids_field = mocker.patch.object(ObjectIdsField, "process")
+        mock_column_field = mocker.patch.object(ColumnField, "process")
         mock_images_list = mocker.patch.object(ImagesPerClassList, "process")
         mock_images_super_list = mocker.patch.object(ImagesPerSuperClassList, "process")
 
@@ -136,8 +134,7 @@ class TestClassificationTask:
         mock_image_field.assert_called_once_with()
         mock_label_field.assert_called_once_with()
         mock_superlabel_field.assert_called_once_with()
-        mock_objfields_field.assert_called_once_with()
-        mock_objids_field.assert_called_once_with(dummy_ids, dummy_ids, dummy_ids)
+        mock_column_field.assert_called_once_with()
         mock_images_list.assert_called_once_with()
         mock_images_super_list.assert_called_once_with()
 
@@ -263,14 +260,43 @@ def test_data_loaded():
         'orchids', 'poppies', 'roses', 'sunflowers', 'tulips',
         'bottles', 'bowls', 'cans', 'cups', 'plates',
         'apples', 'mushrooms', 'oranges', 'pears', 'sweet peppers',
-        'clock', 'computer keyboard', 'lamp', 'telephone', 'television'
+        'clock', 'computer keyboard', 'lamp', 'telephone', 'television',
+        'bed', 'chair', 'couch', 'table', 'wardrobe',
+        'bee', 'beetle', 'butterfly', 'caterpillar', 'cockroach',
+        'bear', 'leopard', 'lion', 'tiger', 'wolf',
+        'bridge', 'castle', 'house', 'road', 'skyscraper',
+        'cloud', 'forest', 'mountain', 'plain', 'sea',
+        'camel', 'cattle', 'chimpanzee', 'elephant', 'kangaroo',
+        'fox', 'porcupine', 'possum', 'raccoon', 'skunk',
+        'crab', 'lobster', 'snail', 'spider', 'worm',
+        'baby', 'boy', 'girl', 'man', 'woman',
+        'crocodile', 'dinosaur', 'lizard', 'snake', 'turtle',
+        'hamster', 'mouse', 'rabbit', 'shrew', 'squirrel',
+        'maple', 'oak', 'palm', 'pine', 'willow',
+        'bicycle', 'bus', 'motorcycle', 'pickup truck', 'train',
+        'lawn-mower', 'rocket', 'streetcar', 'tank', 'tractor'
     ]
     coarse_classes = ['aquatic mammals',
+        'aquatic mammals',
         'fish',
         'flowers',
         'food containers',
         'fruit and vegetables',
-        'household electrical devices'
+        'household electrical devices',
+        'household furniture',
+        'insects',
+        'large carnivores',
+        'large man-made outdoor things',
+        'large natural outdoor scenes',
+        'large omnivores and herbivores',
+        'medium-sized mammals',
+        'non-insect invertebrates',
+        'people',
+        'reptiles',
+        'small mammals',
+        'trees',
+        'vehicles 1',
+        'vehicles 2',
     ]
     images = np.random.rand(10,3,32,32)
     labels = np.random.randint(0,100,10)
@@ -322,8 +348,8 @@ class TestClassLabelField:
 
     def test_get_class_names(self, mocker, mock_classlabel_class, test_data_loaded):
         class_names = mock_classlabel_class.get_class_names()
-
-        assert class_names == test_data_loaded['classes']
+        expected_names = [test_data_loaded['classes'][idx] for idx in test_data_loaded['labels']]
+        assert class_names == expected_names
 
 
 class TestSuperClassLabelField:
@@ -353,9 +379,9 @@ class TestSuperClassLabelField:
         # )
 
     def test_get_class_names(self, mocker, mock_coarseclasslabel_class, test_data_loaded):
-        class_names = mock_coarseclasslabel_class.get_class_names()
-
-        assert class_names == test_data_loaded['coarse_classes']
+        coarse_class_names = mock_coarseclasslabel_class.get_class_names()
+        expected_names = [test_data_loaded['coarse_classes'][idx] for idx in test_data_loaded['coarse_labels']]
+        assert coarse_class_names == expected_names
 
 
 class TestImageField:
@@ -368,13 +394,11 @@ class TestImageField:
 
     def test_process(self, mocker, mock_image_class):
         dummy_images = np.random.rand(5,3, 32, 32)
-        dummy_ids = list(range(5))
-        mock_get_images = mocker.patch.object(ImageField, "get_images", return_value=(dummy_images, dummy_ids))
+        mock_get_images = mocker.patch.object(ImageField, "get_images", return_value=dummy_images)
         mock_save_hdf5 = mocker.patch.object(ImageField, "save_field_to_hdf5")
 
-        image_ids = mock_image_class.process()
+        mock_image_class.process()
 
-        assert image_ids == dummy_ids
         mock_get_images.assert_called_once_with()
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -387,10 +411,7 @@ class TestImageField:
         # )
 
     def test_get_images(self, mocker, mock_image_class, test_data_loaded):
-        images, image_ids = mock_image_class.get_images()
-
-        assert_array_equal(images, test_data_loaded['images'])
-        assert image_ids == list(range(len(images)))
+        assert_array_equal(mock_image_class.get_images(), test_data_loaded['images'])
 
 
 class TestLabelIdField:
@@ -403,13 +424,11 @@ class TestLabelIdField:
 
     def test_process(self, mocker, mock_label_class):
         dummy_labels = np.array(range(10))
-        dummy_ids = list(range(10))
-        mock_get_labels = mocker.patch.object(LabelIdField, "get_labels", return_value=(dummy_labels, dummy_ids))
+        mock_get_labels = mocker.patch.object(LabelIdField, "get_labels", return_value=dummy_labels)
         mock_save_hdf5 = mocker.patch.object(LabelIdField, "save_field_to_hdf5")
 
-        label_ids = mock_label_class.process()
+        mock_label_class.process()
 
-        assert label_ids == dummy_ids
         mock_get_labels.assert_called_once_with()
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -422,10 +441,7 @@ class TestLabelIdField:
         # )
 
     def test_get_labels(self, mocker, mock_label_class, test_data_loaded):
-        labels, label_ids = mock_label_class.get_labels()
-
-        assert_array_equal(labels, test_data_loaded['labels'])
-        assert label_ids == list(range(len(labels)))
+        assert_array_equal(mock_label_class.get_labels(), test_data_loaded['labels'])
 
 
 class TestSuperLabelIdField:
@@ -438,13 +454,11 @@ class TestSuperLabelIdField:
 
     def test_process(self, mocker, mock_superlabel_class):
         dummy_labels = np.array(range(10))
-        dummy_ids = list(range(10))
-        mock_get_labels = mocker.patch.object(SuperLabelIdField, "get_super_labels", return_value=(dummy_labels, dummy_ids))
+        mock_get_labels = mocker.patch.object(SuperLabelIdField, "get_super_labels", return_value=dummy_labels)
         mock_save_hdf5 = mocker.patch.object(SuperLabelIdField, "save_field_to_hdf5")
 
-        super_label_ids = mock_superlabel_class.process()
+        mock_superlabel_class.process()
 
-        assert super_label_ids == dummy_ids
         mock_get_labels.assert_called_once_with()
         assert mock_save_hdf5.called
         # **disabled until I find a way to do assert calls with numpy arrays**
@@ -457,65 +471,21 @@ class TestSuperLabelIdField:
         # )
 
     def test_get_super_labels(self, mocker, mock_superlabel_class, test_data_loaded):
-        super_labels, super_label_ids = mock_superlabel_class.get_super_labels()
-
-        assert_array_equal(super_labels, test_data_loaded['coarse_labels'])
-        assert super_label_ids == list(range(len(super_labels)))
+        assert_array_equal(mock_superlabel_class.get_super_labels(), test_data_loaded['coarse_labels'])
 
 
-class TestObjectFieldNamesField:
-    """Unit tests for the ObjectFieldNamesField class."""
+class TestColumnField:
+    """Unit tests for the ColumnField class."""
 
-    @staticmethod
-    @pytest.fixture()
-    def mock_objfields_class(field_kwargs):
-        return ObjectFieldNamesField(**field_kwargs)
-
-    def test_process(self, mocker, mock_objfields_class):
-        mock_save_hdf5 = mocker.patch.object(ObjectFieldNamesField, "save_field_to_hdf5")
-
-        mock_objfields_class.process()
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_fields',
-        #     data=str2ascii(['images', 'labels', 'superlabels']),
-        #     dtype=np.uint8,
-        #     fillvalue=0
-        # )
-
-
-class TestObjectIdsField:
-    """Unit tests for the ObjectIdsField class."""
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_objfids_class(field_kwargs):
-        return ObjectIdsField(**field_kwargs)
-
-    def test_process(self, mocker, mock_objfids_class):
-        mock_save_hdf5 = mocker.patch.object(ObjectIdsField, "save_field_to_hdf5")
-
-        image_ids = [0, 1, 2, 3, 4, 5]
-        label_ids = [11, 35, 29, 8, 33, 45]
-        super_label_ids = [1, 5, 9, 8, 3, 5]
-        object_ids = mock_objfids_class.process(
-            image_ids=image_ids,
-            label_ids=label_ids,
-            super_label_ids=super_label_ids
-        )
-
-        assert mock_save_hdf5.called
-        # **disabled until I find a way to do assert calls with numpy arrays**
-        # mock_save_hdf5.assert_called_once_with(
-        #     set_name='train',
-        #     field='object_ids',
-        #     data=np.array([[0, 11, 1], [1, 35, 5], [2, 29, 9], [3, 8, 8], [4, 33, 3], [5, 45, 5]], dtype=np.int32),
-        #     dtype=np.int32,
-        #     fillvalue=-1
-        # )
+    def test_field_attributes(self):
+        column_fields = ColumnField()
+        assert column_fields.fields == [
+            'images',
+            'labels',
+            'classes',
+            'superlabels'
+            'superclasses',
+        ]
 
 
 class TestImagesPerClassList:

@@ -31,7 +31,7 @@ class Dataset(BaseDataset):
             print('\n***************************************************************************')
             print(' Please download this dataset from the official source: www.image-net.org')
             print('***************************************************************************\n')
-            print('When setting up this dataset for the first time, ' +
+            print('When setting up this dataset for the first time, '
                   'please link the folder containing the downloaded data.')
 
         return self.keywords

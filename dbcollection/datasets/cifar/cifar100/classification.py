@@ -7,7 +7,7 @@ from __future__ import print_function, division
 import os
 import numpy as np
 
-from dbcollection.datasets import BaseTask, BaseField
+from dbcollection.datasets import BaseTask, BaseField, BaseColumnField
 from dbcollection.utils.decorators import display_message_processing
 from dbcollection.utils.file_load import load_pickle
 from dbcollection.utils.string_ascii import convert_str_to_ascii as str2ascii
@@ -105,11 +105,10 @@ class Classification(BaseTask):
             print('\n==> Setting up the data fields:')
         ClassLabelField(**args).process()
         SuperClassLabelField(**args).process()
-        image_ids = ImageField(**args).process()
-        label_ids = LabelIdField(**args).process()
-        super_label_ids = SuperLabelIdField(**args).process()
-        ObjectFieldNamesField(**args).process()
-        ObjectIdsField(**args).process(image_ids, label_ids, super_label_ids)
+        ImageField(**args).process()
+        LabelIdField(**args).process()
+        SuperLabelIdField(**args).process()
+        ColumnField(**args).process()
 
         # Lists
         if self.verbose:
@@ -210,7 +209,10 @@ class ClassLabelField(BaseField):
 
     def get_class_names(self):
         """Returns a list of class names."""
-        return self.data['classes']
+        label_names = self.data['classes']
+        label_ids = self.data['labels']
+        class_names = [label_names[idx] for idx in label_ids]
+        return class_names
 
 
 class SuperClassLabelField(BaseField):
@@ -230,7 +232,10 @@ class SuperClassLabelField(BaseField):
 
     def get_class_names(self):
         """Returns a list of super class names."""
-        return self.data['coarse_classes']
+        coarse_label_names = self.data['coarse_classes']
+        coarse_label_ids = self.data['coarse_labels']
+        coarse_class_names = [coarse_label_names[idx] for idx in coarse_label_ids]
+        return coarse_class_names
 
 
 class ImageField(BaseField):
@@ -239,7 +244,7 @@ class ImageField(BaseField):
     @display_message_processing('images')
     def process(self):
         """Processes and saves the images metadata to hdf5."""
-        images, image_ids = self.get_images()
+        images = self.get_images()
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='images',
@@ -247,14 +252,10 @@ class ImageField(BaseField):
             dtype=np.uint8,
             fillvalue=-1
         )
-        return image_ids
 
     def get_images(self):
-        """Returns a np.ndarray of images and a list
-        of image ids for each row of 'object_ids' field."""
-        images = self.data['images']
-        image_ids = list(range(len(images)))
-        return images, image_ids
+        """Returns a np.ndarray of images."""
+        return self.data['images']
 
 
 class LabelIdField(BaseField):
@@ -263,7 +264,7 @@ class LabelIdField(BaseField):
     @display_message_processing('labels')
     def process(self):
         """Processes and saves the labels metadata to hdf5."""
-        labels, label_ids = self.get_labels()
+        labels = self.get_labels()
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='labels',
@@ -271,14 +272,10 @@ class LabelIdField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
-        return label_ids
 
     def get_labels(self):
-        """Returns a np.ndarray of labels and a list
-        of label ids for each row of 'object_ids' field."""
-        labels = self.data['labels']
-        label_ids = list(range(len(labels)))
-        return labels, label_ids
+        """Returns a np.ndarray of labels."""
+        return self.data['labels']
 
 
 class SuperLabelIdField(BaseField):
@@ -287,7 +284,7 @@ class SuperLabelIdField(BaseField):
     @display_message_processing('super labels')
     def process(self):
         """Processes and saves the super labels metadata to hdf5."""
-        super_labels, super_label_ids = self.get_super_labels()
+        super_labels = self.get_super_labels()
         self.save_field_to_hdf5(
             set_name=self.set_name,
             field='superlabels',
@@ -295,44 +292,22 @@ class SuperLabelIdField(BaseField):
             dtype=np.uint8,
             fillvalue=0
         )
-        return super_label_ids
 
     def get_super_labels(self):
-        """Returns a np.ndarray of super labels and a list
-        of label ids for each row of 'object_ids' field."""
-        super_labels = self.data['coarse_labels']
-        super_label_ids = list(range(len(super_labels)))
-        return super_labels, super_label_ids
+        """Returns a np.ndarray of super labels."""
+        return self.data['coarse_labels']
 
 
-class ObjectFieldNamesField(BaseField):
-    """Object field names metadata process/save class."""
+class ColumnField(BaseColumnField):
+    """Column names' field metadata process/save class."""
 
-    def process(self):
-        """Processes and saves the labels metadata to hdf5."""
-        self.save_field_to_hdf5(
-            set_name=self.set_name,
-            field='object_fields',
-            data=str2ascii(['images', 'labels', 'superlabels']),
-            dtype=np.uint8,
-            fillvalue=0
-        )
-
-
-class ObjectIdsField(BaseField):
-    """Object ids' field metadata process/save class."""
-
-    def process(self, image_ids, label_ids, super_label_ids):
-        """Processes and saves the object ids metadata to hdf5."""
-        # images, labels, superlabels
-        object_ids = [[image_ids[i], label_ids[i], super_label_ids[i]] for i, _ in enumerate(label_ids)]
-        self.save_field_to_hdf5(
-            set_name=self.set_name,
-            field='object_ids',
-            data=np.array(object_ids, dtype=np.int32),
-            dtype=np.int32,
-            fillvalue=-1
-        )
+    fields = [
+        'images',
+        'labels',
+        'classes',
+        'superlabels'
+        'superclasses',
+    ]
 
 
 # -----------------------------------------------------------
