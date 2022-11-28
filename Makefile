@@ -38,11 +38,11 @@ docs-clean:
 
 .PHONY: requirements
 requirements:
-	pipenv lock --requirements > $(REQUIREMENTS_FILE)
+	pipenv lock --requirements | tail -n +2 > $(REQUIREMENTS_FILE)
 
 .PHONY: requirements-dev
 requirements-dev:
-	pipenv lock --requirements --dev > $(REQUIREMENTS_DEV_FILE)
+	pipenv lock --requirements --dev | tail -n +2 > $(REQUIREMENTS_DEV_FILE)
 
 
 #########
