@@ -162,7 +162,7 @@ class Classification(BaseTask):
         for set_name in dir_paths:
             data_dir = dir_paths[set_name]
 
-            if set_name is 'train':
+            if set_name == 'train':
                 data = construct_set_from_dir(data_dir, self.verbose)
             else:
                 _, folders = dir_get_size(data_dir)

@@ -433,7 +433,7 @@ class Detection2015(BaseTask):
                             fillvalue=0)
 
             nrows = len(segmentation)
-            ncols = max([len(l) for l in segmentation])
+            ncols = max([len(elem) for elem in segmentation])
             dset = hdf5_handler.create_dataset('segmentation',
                                                (nrows, ncols),
                                                dtype=np.float,
