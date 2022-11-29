@@ -125,18 +125,18 @@ class TestBaseDB:
         # delete all cache data + dir
         self.delete_cache()
 
-        if mode is 'load':
+        if mode == 'load':
             # download/setup dataset
             loader = self.load()
 
             # print data from the loader
             self.print_info(loader)
 
-        elif mode is 'download':
+        elif mode == 'download':
             # download dataset
             self.download()
 
-        elif mode is 'process':
+        elif mode == 'process':
             # download dataset
             self.download(False)
 

@@ -50,7 +50,7 @@ def pad_list(listA, val=-1, length=None):
         max_size = len(max(listA, key=len))
 
     # pad all lists with the a padding value
-    return [l + [val] * int(max_size - len(l)) for l in listA]
+    return [elem + [val] * int(max_size - len(elem)) for elem in listA]
 
 
 def unpad_list(listA, val=-1):
@@ -84,7 +84,7 @@ def unpad_list(listA, val=-1):
                                     .format(type(listA), type(list))
 
     if isinstance(listA[0], list):
-        return [list(filter(lambda x: x != val, l)) for i, l in enumerate(listA)]
+        return [list(filter(lambda x: x != val, elem)) for i, elem in enumerate(listA)]
     else:
         return list(filter(lambda x: x != val, listA))
 
@@ -118,8 +118,8 @@ def squeeze_list(listA, val=-1):
     [1, 2, -1, 3, -1, 4, 5, 6]
 
     """
-    concatA = [l + [val] for l in listA]
-    out = [li for l in concatA for li in l]
+    concatA = [elem + [val] for elem in listA]
+    out = [li for elem in concatA for li in elem]
     return out[:-1]
 
 

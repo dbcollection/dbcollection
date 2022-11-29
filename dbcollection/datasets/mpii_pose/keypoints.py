@@ -61,7 +61,7 @@ class Keypoints(BaseTask):
         ActivityNamesField(**args).process()
         ActivityIdsField(**args).process()
         SinglePersonField(**args).process()
-        if set_name is not 'test':
+        if set_name != 'test':
             HeadBoundingBoxField(**args).process()
             KeypointsField(**args).process()
         ObjectFieldNamesField(**args).process()
@@ -71,7 +71,7 @@ class Keypoints(BaseTask):
         if self.verbose:
             print('\n==> Setting up ordered lists:')
         SinglePersonPerImageList(**args).process()
-        if set_name is not 'test':
+        if set_name != 'test':
             KeypointsPerImageList(**args).process()
 
 
@@ -834,7 +834,7 @@ class ObjectFieldNamesField(CustomBaseField):
             "single_person",
             "keypoint_labels"
         ]
-        if self.set_name is not 'test':
+        if self.set_name != 'test':
             object_fields += ["head_bbox", "keypoints"]
         return object_fields
 
@@ -876,7 +876,7 @@ class ObjectIdsField(CustomBaseField):
                     counter,  # single_person
                     counter,  # keypoint_labels
                 ]
-                if self.set_name is not 'test':
+                if self.set_name != 'test':
                     obj_ids += [counter, counter]  # [head_bbox, keypoints]
                 object_ids.append(obj_ids)
                 counter += 1

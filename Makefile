@@ -16,16 +16,12 @@ shell-python:
 .PHONY: build
 build: mybuild
 mybuild:
-	pipenv lock --requirements > $(REQUIREMENTS_FILE)
 	python setup.py develop
-	rm $(REQUIREMENTS_FILE)
 
 .PHONY: install
 install: myinstall
 myinstall:
-	pipenv lock --requirements > $(REQUIREMENTS_FILE)
 	python setup.py install
-	rm $(REQUIREMENTS_FILE)
 
 .PHONY: docs
 docs: mydocs
@@ -38,11 +34,11 @@ docs-clean:
 
 .PHONY: requirements
 requirements:
-	pipenv lock --requirements > $(REQUIREMENTS_FILE)
+	pipenv lock --requirements | tail -n +2 > $(REQUIREMENTS_FILE)
 
 .PHONY: requirements-dev
 requirements-dev:
-	pipenv lock --requirements --dev > $(REQUIREMENTS_DEV_FILE)
+	pipenv lock --requirements --dev | tail -n +2 > $(REQUIREMENTS_DEV_FILE)
 
 
 #########
@@ -51,9 +47,7 @@ requirements-dev:
 
 .PHONY: test
 test:
-	pipenv lock --requirements > requirements.txt
 	pipenv run tox
-	rm requirements.txt
 
 .PHONY: test-api
 test-api:
