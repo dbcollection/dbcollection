@@ -214,8 +214,8 @@ class Recognition(BaseTask):
 
         for i in range(1, num_splits + 1):
             if self.verbose:
-                print(' > Generating random dataset splits ({}/{}): '.format(i, num_splits) +
-                      'train percentage={}, num splits={}'.format(train_percent, num_splits))
+                print(' > Generating random dataset splits ({}/{}): '
+                      'train percentage={}, num splits={}'.format(i, num_splits, train_percent, num_splits))
 
             train_set_name = 'train0' + str(i)
             test_set_name = 'test0' + str(i)
